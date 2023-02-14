@@ -33,3 +33,27 @@ class MaskFormerPredictor(tf.keras.layers.Layer):
             mask_prob_prediction = self._get_mask_predictions(per_segment_embeddings, mask_embedding)
 
             return {'class_prob_predictions': class_prob_prediction,'mask_prob_predictions': mask_prob_prediction}
+        
+
+class MLP(tf.keras.layers.Layer):
+    def __init__(self, input_dim, hidden_dim, output_dim, num_layers):
+        super().__init__()
+        self.num_layers = num_layers
+        h = [hidden_dim] * (num_layers - 1)
+        layer_dims = [(input_dim, hidden_dim)]
+        for cnt in range(num_layers - 2):
+            layer_dims.append((hidden_dim, hidden_dim))
+        layer_dims.append((hidden_dim, output_dim))
+        #layer_dims contains the input and output dimension of each layer in the form (input dimension, output dimension)
+        layers = []
+        for i, dim in enumerate(layer_dims):
+            if(i < num_layers - 1):
+                layers.append(tf.keras.layers.Dense(out_dim=dim[1], activation=tf.nn.relu))
+            else:
+                #Final Layer
+                layers.append(tf.keras.layers.Dense(out_dim=dim[1]))
+
+    def __call__(self, x): 
+        for layer in self.layers:
+            x = layer(x)
+        return x
