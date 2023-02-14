@@ -24,11 +24,26 @@ class Fpn(tf.keras.layers.Layer):
       fpn_feat_dims: Feature dimension of the fpn
       channels_last: Determines if shape is (bs, H, W, C)
     """
-  
-    self._conv2d_op = tf.keras.layers.Conv2D
     self._fpn_feat_dims = fpn_feat_dims
-    self._channels_last = channels_last
+    if tf.keras.backend.image_data_format() == 'channels_last':
+        self._channels_last = True
+    else:
+        self._channels_last = False
+    
   def build(self, multilevel_features):
+    self._conv2d_op_lateral = tf.keras.layers.Conv2D(
+          filters=self._fpn_feat_dims,
+          kernel_size=(1, 1),
+          padding='same')
+    self._conv2d_op_down = tf.keras.layers.Conv2D(
+          filters=self._fpn_feat_dims,
+          strides=(1, 1),
+          kernel_size=(3, 3),
+          padding='same')
+    self._conv2d_op_mask = tf.keras.layers.Conv2D(
+          filters=self._fpn_feat_dims,
+          kernel_size=(3, 3),
+          padding='same)
     super(Fpn, self).build(multilevel_features)
 
   def call(self, multilevel_features):
@@ -48,12 +63,10 @@ class Fpn(tf.keras.layers.Layer):
       
       if not self._channels_last:
         feat = tf.keras.layers.Permute((2,3,1))(feats[input_levels[-1]])
+      else:
+        feat = feats[input_levels[-1]]
 
-      down = self._conv2d_op(
-          filters=self._fpn_feat_dims,
-          strides=(1, 1),
-          kernel_size=(3, 3),
-          padding='same')(feat)
+      down = self._conv2d_op_down(feat)
       down = tfa.layers.GroupNormalization()(down)
       down = tf.keras.layers.ReLU()(down)
 
@@ -61,24 +74,17 @@ class Fpn(tf.keras.layers.Layer):
       for level in levels[::-1]:
         if not self._channels_last:
           feat = tf.keras.layers.Permute((2,3,1))(feats[level])
+        else:
+          feat = feats[level]
         
-        lateral = self._conv2d_op(
-          filters=self._fpn_feat_dims,
-          kernel_size=(1, 1),
-          padding='same')(feat)
+        lateral = self._conv2d_op_lateral(feat)
 
         down = nearest_upsampling(down,2) + lateral
-        down = self._conv2d_op(
-          filters=self._fpn_feat_dims,
-          strides=(1, 1),
-          kernel_size=(3, 3),
-          padding='same')(down)
+        
+        down = self._conv2d_op_down(down)
         down = tfa.layers.GroupNormalization()(down)
         down = tf.keras.layers.ReLU()(down)
    
-      mask = self._conv2d_op(
-          filters=self._fpn_feat_dims,
-          kernel_size=(3, 3),
-          padding='same')(down)
+      mask = self._conv2d_op_mask(down)
 
     return mask
