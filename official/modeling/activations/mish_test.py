@@ -12,11 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Activations package definition."""
-from official.modeling.activations.gelu import gelu
-from official.modeling.activations.mish import mish
-from official.modeling.activations.relu import relu6
-from official.modeling.activations.sigmoid import hard_sigmoid
-from official.modeling.activations.swish import hard_swish
-from official.modeling.activations.swish import identity
-from official.modeling.activations.swish import simple_swish
+"""Tests for the customized Mish activation."""
+
+import tensorflow as tf
+
+from official.modeling import activations
+
+
+class MishTest(tf.test.TestCase):
+
+  def test_mish(self):
+    x = tf.constant([1.0, 0.0])
+    self.assertAllClose([0.86509839, 0.0], activations.mish(x))
+
+
+if __name__ == '__main__':
+  tf.test.main()
