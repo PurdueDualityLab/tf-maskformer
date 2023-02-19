@@ -1,9 +1,6 @@
 from absl.testing import parameterized
-import numpy as np
 import tensorflow as tf
 
-from tensorflow.python.distribute import combinations
-from tensorflow.python.distribute import strategy_combinations
 from official.vision.modeling.backbones import resnet
 
 class ResNetTest(parameterized.TestCase, tf.test.TestCase):
