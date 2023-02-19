@@ -7,7 +7,7 @@ from official.vision.modeling.backbones import resnet
 
 class MaskFormerTransformerTest(tf.test.TestCase, parameterized.TestCase):
 
-    @parameterized.named_parameters(('test1', '5', 8, (8, 640, 640, 3), 10, 256, 10,))
+    @parameterized.named_parameters(('test1', '5', 8, (8, 640, 640, 3), 100, 256, 10,))
     def test_pass_through(self,
                         backbone_endpoint_name,
                         batch_size,
