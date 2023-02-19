@@ -22,7 +22,28 @@ import tensorflow as tf
 import factory
 import mode_keys as ModeKeys
 from official.modeling.hyperparams import params_dict
-
+"""
+imp files:
+panoptic_input.py: contains the parser that creates the dataloader
+params_dict.py holds the parameters for the parser
+factory.py: holds the info for how to create the parser
+mode_key.py: holds the run mode for training
+Plan: 
+1. run the input_reader using the directory for the TFRecords
+2. make sure that the params are set and the correct model_arch is selected
+3. pray that we get a dataset
+4. link the dataset to a dataloader
+pan_optic_input:
+https://github.com/tensorflow/models/blob/master/official/projects/panoptic/dataloaders/panoptic_deeplab_input.py
+panoptic hyper params: (checkout for adding params to the param_dict for running)
+https://github.com/tensorflow/models/blob/4fcd44d71eb15c1c17612bf6cefc646caaf671f1/official/projects/panoptic/configs/panoptic_deeplab.py#L37
+input_reader:
+https://github.com/tensorflow/models/blob/4fcd44d71eb15c1c17612bf6cefc646caaf671f1/official/legacy/detection/dataloader/input_reader.py#L55
+param_dict:
+https://github.com/tensorflow/models/blob/4fcd44d71eb15c1c17612bf6cefc646caaf671f1/official/modeling/hyperparams/params_dict.py
+factory:
+https://github.com/tensorflow/models/blob/4fcd44d71eb15c1c17612bf6cefc646caaf671f1/official/legacy/detection/dataloader/factory.py
+"""
 
 class InputFn(object):
     """Input function that creates dataset from files."""
