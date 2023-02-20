@@ -35,10 +35,10 @@ class MaskFormer(tf.keras.Model):
 
         per_segment_embeddings = self._transformer_decoder({"image": inputs, "features": feature_maps })
         print("\ntransformer decoder output: ")
-        for k, v in per_segment_embeddings.items():
-            print(f"{k} - {v.shape}")
+        for i, v in enumerate(per_segment_embeddings):
+            print(f"{i} - {v.shape}")
 
-        per_pixel_embeddings = self._pixel_decoder(feature_maps)
+        per_pixel_embeddings = self._pixel_decoder({int(k): v for k, v in feature_maps.items()})
         print("\npixel decoder output: ")
         for k, v in per_pixel_embeddings.items():
             print(f"{k} - {v.shape}")
