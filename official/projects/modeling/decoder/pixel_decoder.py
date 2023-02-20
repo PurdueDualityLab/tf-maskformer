@@ -35,15 +35,18 @@ class Fpn(tf.keras.layers.Layer):
           filters=self._fpn_feat_dims,
           kernel_size=(1, 1),
           padding='same')
+    
     self._conv2d_op_down = tf.keras.layers.Conv2D(
           filters=self._fpn_feat_dims,
           strides=(1, 1),
           kernel_size=(3, 3),
           padding='same')
+    
     self._conv2d_op_mask = tf.keras.layers.Conv2D(
           filters=self._fpn_feat_dims,
           kernel_size=(3, 3),
-          padding='same)
+          padding='same')
+    
     super(Fpn, self).build(multilevel_features)
 
   def call(self, multilevel_features):
@@ -66,7 +69,11 @@ class Fpn(tf.keras.layers.Layer):
       else:
         feat = feats[input_levels[-1]]
 
-      down = self._conv2d_op_down(feat)
+      down = tf.keras.layers.Conv2D(
+          filters=self._fpn_feat_dims,
+          strides=(1, 1),
+          kernel_size=(3, 3),
+          padding='same')(feat)
       down = tfa.layers.GroupNormalization()(down)
       down = tf.keras.layers.ReLU()(down)
 
@@ -77,11 +84,18 @@ class Fpn(tf.keras.layers.Layer):
         else:
           feat = feats[level]
         
-        lateral = self._conv2d_op_lateral(feat)
+        lateral = tf.keras.layers.Conv2D(
+          filters=self._fpn_feat_dims,
+          kernel_size=(1, 1),
+          padding='same')(feat)
 
         down = nearest_upsampling(down,2) + lateral
         
-        down = self._conv2d_op_down(down)
+        down = tf.keras.layers.Conv2D(
+          filters=self._fpn_feat_dims,
+          strides=(1, 1),
+          kernel_size=(3, 3),
+          padding='same')(down)
         down = tfa.layers.GroupNormalization()(down)
         down = tf.keras.layers.ReLU()(down)
    
