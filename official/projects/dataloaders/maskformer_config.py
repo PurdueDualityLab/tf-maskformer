@@ -47,7 +47,7 @@ MASK_FORMER_CFG.override({
         # One can use 'RESNET_FROZEN_VAR_PREFIX' to speed up ResNet training
         # when loading from the checkpoint.
         'frozen_variable_prefix': '',
-        'train_file_pattern': '/content/coco_tfrecords',  # TODO: fix this sketchiness
+        'train_file_pattern': '/content/gdrive/coco_tfrecords',  # TODO: fix this sketchiness
         'train_dataset_type': 'tfrecord',
         # TODO(b/142174042): Support transpose_input option.
         'transpose_input': False,
@@ -56,7 +56,7 @@ MASK_FORMER_CFG.override({
         'input_sharding': False,
     },
     'eval': {
-        'eval_file_pattern': '/content/coco_tfrecords',  # TODO: fix this sketchiness
+        'eval_file_pattern': '/content/gdrive/coco_tfrecords',  # TODO: fix this sketchiness
         'type': 'box_and_mask',
         'num_images_to_visualize': 0,
     },

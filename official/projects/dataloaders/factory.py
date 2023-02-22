@@ -27,22 +27,19 @@ def parser_generator(params):
         anchor_params = params.anchor
         parser_params = params.mask_former
         parser_fn = mask_former_parser(
-            output_size=parser_params.output_size
+            output_size=parser_params.output_size,
+            resize_eval_groundtruth=True,
+            groundtruth_padded_size=None,
+            ignore_label=0,
+            aug_rand_hflip=parser_params.aug_rand_hflip,
+            aug_scale_min=parser_params.aug_scale_min,
+            aug_scale_max=parser_params.aug_scale_max,
+            aug_type=None,
+            sigma=8.0,
+            small_instance_area_threshold=4096,
+            small_instance_weight=3.0,
+            dtype='float32'
         )
-        # parser_fn = mask_former_parser(
-        #     output_size=parser_params.output_size,
-        #     resize_eval_groundtruth=True,
-        #     groundtruth_padded_size=None,
-        #     ignore_label=0,
-        #     aug_rand_hflip=parser_params.aug_rand_hflip,
-        #     aug_scale_min=parser_params.aug_scale_min,
-        #     aug_scale_max=parser_params.aug_scale_max,
-        #     aug_type=None,
-        #     sigma=8.0,
-        #     small_instance_area_threshold=4096,
-        #     small_instance_weight=3.0,
-        #     dtype='float32'
-        # )
     else:
         raise ValueError('Parser %s is not supported.' % params.architecture.parser)
 
