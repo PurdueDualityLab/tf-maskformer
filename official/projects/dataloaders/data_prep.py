@@ -27,3 +27,7 @@ if eval_file_pattern:
         mode=input_reader.ModeKeys.PREDICT_WITH_GT,
         batch_size=params.eval.batch_size,
         num_examples=params.eval.eval_samples)
+# call it this way to get dataset object
+a = train_input_fn()
+
+print(a)

@@ -35,6 +35,7 @@ class TfExampleDecoder(hyperparams.Config):
 
 
 @dataclasses.dataclass
+@dataclasses.dataclass
 class DataDecoder(hyperparams.OneOfConfig):
   type: Optional[str] = 'simple_decoder'
   simple_decoder: TfExampleDecoder = TfExampleDecoder()

@@ -19,12 +19,14 @@ from typing import List, Optional
 import numpy as np
 import tensorflow as tf
 import sys
-sys.path.append("/Users/abuynits/PycharmProjects/tf-maskformer")
+
+sys.path.append("/content/tf-maskformer")
 from official.vision.configs import common
 from official.vision.dataloaders import parser
 from official.vision.dataloaders import tf_example_decoder
 from official.vision.ops import augment
 from official.vision.ops import preprocess_ops
+import input_reader
 
 
 def _compute_gaussian_from_std(sigma):
@@ -44,7 +46,7 @@ class TfExampleDecoder(tf_example_decoder.TfExampleDecoder):
 
     def __init__(
             self,
-            regenerate_source_id: bool,
+            regenerate_source_id: bool = False,
             panoptic_category_mask_key: str = 'image/panoptic/category_mask',
             panoptic_instance_mask_key: str = 'image/panoptic/instance_mask'):
         super(TfExampleDecoder,
@@ -86,7 +88,7 @@ class mask_former_parser(parser.Parser):
 
     def __init__(
             self,
-            output_size: List[int] = [32,32,3],
+            output_size: List[int] = [32, 32, 3],
             resize_eval_groundtruth: bool = True,
             groundtruth_padded_size: Optional[List[int]] = None,
             ignore_label: int = 0,
@@ -97,7 +99,8 @@ class mask_former_parser(parser.Parser):
             sigma: float = 8.0,
             small_instance_area_threshold: int = 4096,
             small_instance_weight: float = 3.0,
-            dtype: str = 'float32'):
+            dtype: str = 'float32',
+            mode=None):
         """Initializes parameters for parsing annotations in the dataset.
 
         Args:
@@ -136,7 +139,8 @@ class mask_former_parser(parser.Parser):
         self._aug_rand_hflip = aug_rand_hflip
         self._aug_scale_min = aug_scale_min
         self._aug_scale_max = aug_scale_max
-
+        self._mode = mode
+        self._decoder = TfExampleDecoder()
         if aug_type and aug_type.type:
             if aug_type.type == 'autoaug':
                 self._augmenter = augment.AutoAugment(
@@ -259,6 +263,21 @@ class mask_former_parser(parser.Parser):
         }
         return image, labels
 
+    def __call__(self, value):
+        """Parses data to an image and associated training labels.
+        Args:
+          value: a string tensor holding a serialized tf.Example proto.
+        Returns:
+          image, labels: if mode == ModeKeys.TRAIN. see _parse_train_data.
+          {'images': image, 'labels': labels}: if mode == ModeKeys.PREDICT
+            or ModeKeys.PREDICT_WITH_GT.
+        """
+        with tf.name_scope('parser'):
+            data = self._decoder.decode(value)
+            if self._mode == input_reader.ModeKeys.TRAIN:
+                return self._parse_train_data(data)
+            else:
+                return self._parse_eval_data(data)
     def _parse_train_data(self, data):
         """Parses data for training."""
         return self._parse_data(data=data, is_training=True)

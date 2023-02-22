@@ -20,7 +20,7 @@ from __future__ import print_function
 from panoptic_input import mask_former_parser
 
 
-def parser_generator(params):
+def parser_generator(params,mode):
     #TODO: need to specify the param dict
     """Generator function for various dataset parser."""
     if params.architecture.parser == 'mask_former_parser':
@@ -38,7 +38,8 @@ def parser_generator(params):
             sigma=8.0,
             small_instance_area_threshold=4096,
             small_instance_weight=3.0,
-            dtype='float32'
+            dtype='float32',
+            mode=mode
         )
     else:
         raise ValueError('Parser %s is not supported.' % params.architecture.parser)
