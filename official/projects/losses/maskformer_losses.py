@@ -37,13 +37,10 @@ class DiceLoss(tf.keras.losses.Loss):
     def __init__(self):
         pass
 
-# verify concat and fill
-# find out how to set device and if its necessary line 96 of pytorch
-
 class Loss():
-    def __init__():
-        self.num_classes = 
-        self.empty_weight = 
+    def __init__(num_classes, empty_weight):
+        self.num_classes = num_classes
+        self.empty_weight = empty_weight
 
     def _get_pred_permutation_idx(self, indices):
         batch_idx = tf.concat([tf.fill(pred,i) for i, (pred,_) in enumerate(indices)], axis=0)
@@ -81,11 +78,6 @@ class MaskLoss(Loss):
         pred_masks = outputs["pred_masks"]
         pred_masks = pred_masks[pred_idx]
         masks = [t["masks"] for t in y_true]
-        # true_masks, valid = 
-        # true_masks = 
-        # true_masks = 
-
-        
 
         pred_masks = tf.reshape(pred_masks[:, 0], -1)
         true_masks = tf.reshape(true_masks, -1)
