@@ -124,3 +124,14 @@ class InputFn(object):
         dataset = dataset.batch(batch_size, drop_remainder=True)
         dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
         return dataset
+"""    
+<PrefetchDataset element_spec=(TensorSpec(shape=(64, 1024, 1024, 3), dtype=tf.float32, name=None), 
+                               {'category_mask': TensorSpec(shape=(64, 1024, 1024, 1), dtype=tf.float32, name=None), 
+                                'instance_mask': TensorSpec(shape=(64, 1024, 1024, 1), dtype=tf.float32, name=None), 
+                                'instance_centers_heatmap': TensorSpec(shape=(64, 1024, 1024, 1), dtype=tf.float32, name=None), 
+                                'instance_centers_offset': TensorSpec(shape=(64, 1024, 1024, 2), dtype=tf.float32, name=None), 
+                                'semantic_weights': TensorSpec(shape=(64, 1024, 1024), dtype=tf.float32, name=None), 
+                                'valid_mask': TensorSpec(shape=(64, 1024, 1024, 1), dtype=tf.bool, name=None), 
+                                'things_mask': TensorSpec(shape=(64, 1024, 1024, 1), dtype=tf.bool, name=None), 
+                                'image_info': TensorSpec(shape=(64, 4, 2), dtype=tf.float32, name=None)})>
+"""
