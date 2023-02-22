@@ -22,7 +22,7 @@ def config_generator(model):
     """Model function generator."""
     if model == 'mask_former':
         default_config = maskformer_config.MASK_FORMER_CFG
-        restrictions = maskformer_config.MASKRCNN_RESTRICTIONS
+        restrictions = maskformer_config.MASK_FORMER_RESTRICTIONS
     else:
         raise ValueError('Model %s is not supported.' % model)
 

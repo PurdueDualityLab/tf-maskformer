@@ -21,18 +21,53 @@ from official.modeling.hyperparams import params_dict
 MASK_FORMER_CFG = params_dict.ParamsDict(base_config.BASE_CFG)
 MASK_FORMER_CFG.override({
     'type': 'mask_former',
+    'train': {
+        'iterations_per_loop': 100,
+        'batch_size': 64,
+        'total_steps': 22500,
+        'num_cores_per_replica': None,
+        'input_partition_dims': None,
+        'optimizer': {
+            'type': 'momentum',
+            'momentum': 0.9,
+            'nesterov': True,  # `False` is better for TPU v3-128.
+        },
+        'learning_rate': {
+            'type': 'step',
+            'warmup_learning_rate': 0.0067,
+            'warmup_steps': 500,
+            'init_learning_rate': 0.08,
+            'learning_rate_levels': [0.008, 0.0008],
+            'learning_rate_steps': [15000, 20000],
+        },
+        'checkpoint': {
+            'path': '',
+            'prefix': '',
+        },
+        # One can use 'RESNET_FROZEN_VAR_PREFIX' to speed up ResNet training
+        # when loading from the checkpoint.
+        'frozen_variable_prefix': '',
+        'train_file_pattern': '/content/coco_tfrecords',  # TODO: fix this sketchiness
+        'train_dataset_type': 'tfrecord',
+        # TODO(b/142174042): Support transpose_input option.
+        'transpose_input': False,
+        'l2_weight_decay': 0.0001,
+        'gradient_clip_norm': 0.0,
+        'input_sharding': False,
+    },
     'eval': {
+        'eval_file_pattern': '/content/coco_tfrecords',  # TODO: fix this sketchiness
         'type': 'box_and_mask',
         'num_images_to_visualize': 0,
     },
     'architecture': {
-        'parser': 'maskrcnn_parser',
+        'parser': 'mask_former_parser',
         'min_level': 2,
         'max_level': 6,
         'include_mask': True,
         'mask_target_size': 28,
     },
-    'maskrcnn_parser': {
+    'mask_former': {
         'output_size': [1024, 1024],
         'num_channels': 3,
         'rpn_match_threshold': 0.7,
@@ -108,6 +143,5 @@ MASK_FORMER_CFG.override({
     },
 }, is_strict=False)
 
-MASKRCNN_RESTRICTIONS = [
-]
+MASK_FORMER_RESTRICTIONS = []
 # pylint: enable=line-too-long

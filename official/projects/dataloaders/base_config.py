@@ -66,7 +66,7 @@ BASE_CFG = {
         # One can use 'RESNET_FROZEN_VAR_PREFIX' to speed up ResNet training
         # when loading from the checkpoint.
         'frozen_variable_prefix': '',
-        'train_file_pattern': '',
+        'train_file_pattern': '/content/coco_tfrecords',  # TODO: fix this sketchiness
         'train_dataset_type': 'tfrecord',
         # TODO(b/142174042): Support transpose_input option.
         'transpose_input': False,
@@ -85,7 +85,7 @@ BASE_CFG = {
         'type': 'box',
         'use_json_file': True,
         'val_json_file': '',
-        'eval_file_pattern': '',
+        'eval_file_pattern': '/content/coco_tfrecords',  # TODO: fix this sketchiness
         'eval_dataset_type': 'tfrecord',
         # When visualizing images, set evaluation batch size to 40 to avoid
         # potential OOM.
@@ -100,6 +100,7 @@ BASE_CFG = {
         'max_level': 7,
         'multilevel_features': 'fpn',
         'use_bfloat16': True,
+        'parser': 'mask_former_parser', #TODO Fix this to be more specific and not in base config
         # Note that `num_classes` is the total number of classes including
         # one background classes whose index is 0.
         'num_classes': 91,

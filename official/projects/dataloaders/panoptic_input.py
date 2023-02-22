@@ -18,7 +18,8 @@ from typing import List, Optional
 
 import numpy as np
 import tensorflow as tf
-
+import sys
+sys.path.append("/Users/abuynits/PycharmProjects/tf-maskformer")
 from official.vision.configs import common
 from official.vision.dataloaders import parser
 from official.vision.dataloaders import tf_example_decoder
