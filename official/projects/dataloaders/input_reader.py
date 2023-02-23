@@ -73,7 +73,7 @@ class InputFn(object):
         self._is_training = (mode == ModeKeys.TRAIN)
         self._batch_size = batch_size
         self._num_examples = num_examples
-        self._parser_fn = factory.parser_generator(params)
+        self._parser_fn = factory.parser_generator(params,mode)
         self._dataset_fn = tf.data.TFRecordDataset
 
         self._input_sharding = (not self._is_training)
