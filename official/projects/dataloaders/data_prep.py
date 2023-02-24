@@ -1,5 +1,7 @@
 import input_reader
 import factory_config
+from official.common import distribute_utils
+from official.projects.dataloaders.distributed_executor import DistributedExecutor
 
 train_input_fn = None
 eval_input_fn = None
@@ -28,6 +30,17 @@ if eval_file_pattern:
         batch_size=params.eval.batch_size,
         num_examples=params.eval.eval_samples)
 # call it this way to get dataset object
-a = train_input_fn()
+strategy_config = params.strategy_config
+distribute_utils.configure_cluster(strategy_config.worker_hosts,
+                                   strategy_config.task_index)
+strategy = distribute_utils.get_distribution_strategy(
+    distribution_strategy=params.strategy_type,
+    num_gpus=strategy_config.num_gpus,
+    all_reduce_alg=strategy_config.all_reduce_alg,
+    num_packs=strategy_config.num_packs,
+    tpu_address=strategy_config.tpu)
 
-print(a)
+pain_and_suffering = DistributedExecutor(strategy, params)
+
+iterable_ds = pain_and_suffering.get_input_iterator(strategy, params)
+raw_dataset = train_input_fn()

@@ -56,7 +56,7 @@ MASK_FORMER_CFG.override({
         'input_sharding': False,
     },
     'eval': {
-        'eval_file_pattern': '/content/drive/MyDrive/coco_tfrecords',  # TODO: fix this sketchiness
+        'eval_file_pattern': '/content/drive/MyDrive/coco_tfrecords2',  # TODO: fix this sketchiness
         'type': 'box_and_mask',
         'num_images_to_visualize': 0,
     },

@@ -22,6 +22,7 @@ import tensorflow as tf
 import factory
 import mode_keys as ModeKeys
 from official.modeling.hyperparams import params_dict
+
 """
 imp files:
 panoptic_input.py: contains the parser that creates the dataloader
@@ -44,6 +45,7 @@ https://github.com/tensorflow/models/blob/4fcd44d71eb15c1c17612bf6cefc646caaf671
 factory:
 https://github.com/tensorflow/models/blob/4fcd44d71eb15c1c17612bf6cefc646caaf671f1/official/legacy/detection/dataloader/factory.py
 """
+
 
 class InputFn(object):
     """Input function that creates dataset from files."""
@@ -73,7 +75,7 @@ class InputFn(object):
         self._is_training = (mode == ModeKeys.TRAIN)
         self._batch_size = batch_size
         self._num_examples = num_examples
-        self._parser_fn = factory.parser_generator(params,mode)
+        self._parser_fn = factory.parser_generator(params, mode)
         self._dataset_fn = tf.data.TFRecordDataset
 
         self._input_sharding = (not self._is_training)
@@ -124,14 +126,17 @@ class InputFn(object):
         dataset = dataset.batch(batch_size, drop_remainder=True)
         dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
         return dataset
+
+
 """    
-<PrefetchDataset element_spec=(TensorSpec(shape=(64, 1024, 1024, 3), dtype=tf.float32, name=None), 
-                               {'category_mask': TensorSpec(shape=(64, 1024, 1024, 1), dtype=tf.float32, name=None), 
-                                'instance_mask': TensorSpec(shape=(64, 1024, 1024, 1), dtype=tf.float32, name=None), 
-                                'instance_centers_heatmap': TensorSpec(shape=(64, 1024, 1024, 1), dtype=tf.float32, name=None), 
-                                'instance_centers_offset': TensorSpec(shape=(64, 1024, 1024, 2), dtype=tf.float32, name=None), 
-                                'semantic_weights': TensorSpec(shape=(64, 1024, 1024), dtype=tf.float32, name=None), 
-                                'valid_mask': TensorSpec(shape=(64, 1024, 1024, 1), dtype=tf.bool, name=None), 
-                                'things_mask': TensorSpec(shape=(64, 1024, 1024, 1), dtype=tf.bool, name=None), 
-                                'image_info': TensorSpec(shape=(64, 4, 2), dtype=tf.float32, name=None)})>
+<PrefetchDataset element_spec=(
+TensorSpec(shape=(64, 1024, 1024, 3), dtype=tf.float32, name=None), 
+{'category_mask': TensorSpec(shape=(64, 1024, 1024, 1), dtype=tf.float32, name=None), 
+ 'instance_mask': TensorSpec(shape=(64, 1024, 1024, 1), dtype=tf.float32, name=None), 
+ 'instance_centers_heatmap': TensorSpec(shape=(64, 1024, 1024, 1), dtype=tf.float32, name=None), 
+ 'instance_centers_offset': TensorSpec(shape=(64, 1024, 1024, 2), dtype=tf.float32, name=None), 
+ 'semantic_weights': TensorSpec(shape=(64, 1024, 1024), dtype=tf.float32, name=None), 
+ 'valid_mask': TensorSpec(shape=(64, 1024, 1024, 1), dtype=tf.bool, name=None), 
+ 'things_mask': TensorSpec(shape=(64, 1024, 1024, 1), dtype=tf.bool, name=None), 
+ 'image_info': TensorSpec(shape=(64, 4, 2), dtype=tf.float32, name=None)})>
 """
