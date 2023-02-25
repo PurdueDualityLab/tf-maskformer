@@ -20,7 +20,7 @@ from __future__ import print_function
 from typing import Optional, Text
 import tensorflow as tf
 import factory
-import mode_keys as ModeKeys
+from official.projects.configs import mode_keys as ModeKeys
 from official.modeling.hyperparams import params_dict
 
 """
@@ -102,72 +102,34 @@ class InputFn(object):
         assert batch_size is not None
         file_ds = tf.data.Dataset.list_files(
             self._file_pattern, shuffle=self._is_training)
-
         dataset = tf.data.TFRecordDataset(
             filenames=file_ds,
             compression_type=None,
             buffer_size=None,
             num_parallel_reads=None,
         )
+        # split up dataset between workers
         if self._input_sharding and ctx and ctx.num_input_pipelines > 1:
             dataset = dataset.shard(ctx.num_input_pipelines, ctx.input_pipeline_id)
-        dataset = dataset.cache()
+
         if self._is_training:
             dataset = dataset.repeat()
+        if self._is_training:
+            dataset = dataset.shuffle(1000)
         dataset = dataset.interleave(
             map_func=self._dataset_fn,
             cycle_length=32,
             num_parallel_calls=tf.data.experimental.AUTOTUNE)
-        if self._is_training:
-            dataset = dataset.shuffle(1000)
         if self._num_examples > 0:
             dataset = dataset.take(self._num_examples)
+
         # Parses the fetched records to input tensors for model function.
         dataset = dataset.map(
             self._parser_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
         dataset = dataset.batch(batch_size, drop_remainder=True)
+        dataset = dataset.cache() # have to cache after map
         dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
         return dataset
-
-    def get_test_ds(self, ctx=None, batch_size: int = None):
-        if not batch_size:
-            batch_size = self._batch_size
-        assert batch_size is not None
-        dataset = tf.data.TFRecordDataset(
-            filenames=self._file_pattern,
-            compression_type=None,
-            buffer_size=None,
-            num_parallel_reads=None,
-        )
-        print("1:", len(dataset))
-
-        if self._input_sharding and ctx and ctx.num_input_pipelines > 1:
-            dataset = dataset.shard(ctx.num_input_pipelines, ctx.input_pipeline_id)
-        print("2:", len(dataset))
-        dataset = dataset.cache()
-        print("3:", len(dataset))
-        # if self._is_training:
-        #     dataset = dataset.repeat()
-        # dataset = dataset.interleave(
-        #     map_func=self._dataset_fn,
-        #     cycle_length=32,
-        #     num_parallel_calls=tf.data.experimental.AUTOTUNE)
-        if self._is_training:
-            dataset = dataset.shuffle(1000)
-        print("6:", len(dataset))
-        if self._num_examples > 0:
-            dataset = dataset.take(self._num_examples)
-        print("7:", len(dataset))
-        # Parses the fetched records to input tensors for model function.
-        dataset = dataset.map(
-            self._parser_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
-        print("8:", len(dataset))
-        dataset = dataset.batch(batch_size, drop_remainder=True)
-        print("9:", len(dataset))
-        # dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
-        # print("10:", len(dataset))
-        return dataset
-
 
 """    
 <PrefetchDataset element_spec=(

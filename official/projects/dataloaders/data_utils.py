@@ -23,7 +23,7 @@ from PIL import Image
 from PIL import ImageOps
 import tensorflow as tf
 
-import common
+from official.projects.configs import common
 
 _PANOPTIC_LABEL_FORMAT = 'raw'
 
@@ -141,9 +141,7 @@ def create_features(image_data,
         common.KEY_IMAGE_HEIGHT: _int64_list_feature(height),
         common.KEY_IMAGE_WIDTH: _int64_list_feature(width),
         common.KEY_IMAGE_CHANNELS: _int64_list_feature(3),
-        common.KEY_SOURCE_ID: _bytes_list_feature(image_source),
     }
-    print(feature_dict)
 
     if label_data is None:
         return feature_dict

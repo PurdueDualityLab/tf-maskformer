@@ -32,9 +32,8 @@ from absl import logging
 import numpy as np
 import tensorflow as tf
 
-import coco_constants
 import data_utils
-import dataset
+from official.projects.configs import dataset, coco_constants
 
 FLAGS = flags.FLAGS
 

@@ -1,14 +1,14 @@
 import input_reader
-import factory_config
+from official.projects.configs import factory_config
 from official.common import distribute_utils
-from distributed_executor import DistributedExecutor
 from official.modeling.hyperparams import params_dict
 import distributed_executor as executor
-from official.utils.misc import keras_utils
 from absl import flags
 from official.utils import hyperparams_flags
 from official.utils.flags import core as flags_core
 import sys
+from panoptic_input import tf_example_decoder
+
 
 FLAGS = flags.FLAGS
 argv = FLAGS(sys.argv)
@@ -18,7 +18,6 @@ train_input_fn = None
 eval_input_fn = None
 
 params = factory_config.config_generator('mask_former')
-
 
 params.override(
     {
@@ -65,12 +64,38 @@ strategy = distribute_utils.get_distribution_strategy(
     all_reduce_alg=strategy_config.all_reduce_alg,
     num_packs=strategy_config.num_packs,
     tpu_address=strategy_config.tpu)
+import matplotlib as plt
 
-pain_and_suffering = DistributedExecutor(strategy, params)
-iterable_ds = pain_and_suffering.get_input_iterator(train_input_fn,strategy)
+
+def display_im(feat):
+    for key in feat.keys():
+        if key != "image":
+            print(f"{key}: {feat[key]}")
+
+    print(f"Image shape: {feat['image'].shape}")
+    plt.figure(figsize=(7, 7))
+    plt.imshow(feat["image"].numpy())
+    plt.show()
+
 a = train_input_fn()
-ex = next(iterable_ds)
-print(ex)
+#pain_and_suffering = DistributedExecutor(strategy, params)
+#iterator = a.make_one_shot_iterator()
+#ex = next(iterator)
+#print(a)
+#display_im(ex)
+
+
+#iterable_ds = pain_and_suffering.get_input_iterator(train_input_fn, strategy)
+
+#for a in iterable_ds.map(TfExampleDecoder.decode):
+
+
+# ex = next(iterable_ds)
+# display_im(ex)
+for features in a.map(tf_example_decoder):
+    print(features)
+    # display_im(features)
+
 #
 # for x in a:
 #     print(x)

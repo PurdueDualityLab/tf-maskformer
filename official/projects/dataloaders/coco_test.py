@@ -28,7 +28,6 @@ def _gen_fn():
   return {
       'image': np.ones(shape=(h, w, 3), dtype=np.uint8),
       'image/id': np.random.randint(0, 100),
-      'image/source_id':'coco_ds',
       'image/filename': 'test',
       'objects': {
           'is_crowd': np.ones(shape=(num_boxes), dtype=bool),
