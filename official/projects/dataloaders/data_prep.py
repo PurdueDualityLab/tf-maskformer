@@ -1,15 +1,41 @@
 import input_reader
 import factory_config
 from official.common import distribute_utils
-from official.projects.dataloaders.distributed_executor import DistributedExecutor
+from distributed_executor import DistributedExecutor
+from official.modeling.hyperparams import params_dict
+import distributed_executor as executor
+from official.utils.misc import keras_utils
+from absl import flags
+from official.utils import hyperparams_flags
+from official.utils.flags import core as flags_core
+import sys
 
+FLAGS = flags.FLAGS
+argv = FLAGS(sys.argv)
+hyperparams_flags.initialize_common_flags()
+flags_core.define_log_steps()
 train_input_fn = None
 eval_input_fn = None
 
 params = factory_config.config_generator('mask_former')
+
+
+params.override(
+    {
+        'strategy_type': FLAGS.strategy_type,
+        'model_dir': FLAGS.model_dir,
+        'strategy_config': executor.strategy_flags_dict(),
+    },
+    is_strict=False)
+params = params_dict.override_params_dict(
+    params, FLAGS.config_file, is_strict=True)
+params = params_dict.override_params_dict(
+    params, FLAGS.params_override, is_strict=True)
+
 training_file_pattern = params.train.train_file_pattern
 eval_file_pattern = params.eval.eval_file_pattern
-
+print(f"training file pattern:{training_file_pattern}")
+print(f"eval file pattern:{eval_file_pattern}")
 if not training_file_pattern and not eval_file_pattern:
     raise ValueError('Must provide at least one of training_file_pattern and '
                      'eval_file_pattern.')
@@ -41,6 +67,14 @@ strategy = distribute_utils.get_distribution_strategy(
     tpu_address=strategy_config.tpu)
 
 pain_and_suffering = DistributedExecutor(strategy, params)
-
-iterable_ds = pain_and_suffering.get_input_iterator(strategy, params)
-raw_dataset = train_input_fn()
+a = train_input_fn()
+print(a)
+iterable_ds = pain_and_suffering.get_input_iterator(train_input_fn,strategy)
+ds = eval_input_fn()
+for x,y in ds:
+    print(x)
+#
+# for x in ds:
+#     print(x)
+# ex = next(ds)
+# print(ex)
