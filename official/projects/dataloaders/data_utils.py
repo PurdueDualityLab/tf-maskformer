@@ -133,7 +133,7 @@ def create_features(image_data,
         image_data = image_data.getvalue()
 
     height, width = get_image_dims(image_data, check_is_rgb=True)
-
+    image_source = 'coco_ds'
     feature_dict = {
         common.KEY_ENCODED_IMAGE: _bytes_list_feature(image_data),
         common.KEY_IMAGE_FILENAME: _bytes_list_feature(filename),
@@ -141,7 +141,9 @@ def create_features(image_data,
         common.KEY_IMAGE_HEIGHT: _int64_list_feature(height),
         common.KEY_IMAGE_WIDTH: _int64_list_feature(width),
         common.KEY_IMAGE_CHANNELS: _int64_list_feature(3),
+        common.KEY_SOURCE_ID: _bytes_list_feature(image_source),
     }
+    print(feature_dict)
 
     if label_data is None:
         return feature_dict

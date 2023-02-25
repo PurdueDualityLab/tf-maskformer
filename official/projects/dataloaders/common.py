@@ -109,7 +109,7 @@ KEY_SEQUENCE_ID = 'video/sequence_id'
 KEY_FRAME_ID = 'video/frame_id'
 KEY_ENCODED_DEPTH = 'image/depth/encoded'
 KEY_DEPTH_FORMAT = 'image/depth/format'
-
+KEY_SOURCE_ID = 'image/source_id'
 # TfExample keys for the panoramic setting, where individual camera keys are
 # obtained by formatting with the camera name.
 KEY_PER_CAMERA_ENCODED_IMAGE = 'image/encoded/%s'

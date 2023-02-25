@@ -19,8 +19,7 @@ import io
 import numpy as np
 from PIL import Image
 import tensorflow as tf
-
-from deeplab2.data import data_utils
+import data_utils
 
 
 def _encode_png_image(image):
