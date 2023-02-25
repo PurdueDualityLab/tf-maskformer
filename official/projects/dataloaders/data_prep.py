@@ -67,14 +67,12 @@ strategy = distribute_utils.get_distribution_strategy(
     tpu_address=strategy_config.tpu)
 
 pain_and_suffering = DistributedExecutor(strategy, params)
-a = train_input_fn()
-print(a)
 iterable_ds = pain_and_suffering.get_input_iterator(train_input_fn,strategy)
-ds = eval_input_fn()
-for x,y in ds:
-    print(x)
+a = train_input_fn()
+ex = next(iterable_ds)
+print(ex)
 #
-# for x in ds:
+# for x in a:
 #     print(x)
 # ex = next(ds)
 # print(ex)
