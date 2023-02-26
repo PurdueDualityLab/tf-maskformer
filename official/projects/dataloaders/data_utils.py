@@ -22,7 +22,8 @@ import numpy as np
 from PIL import Image
 from PIL import ImageOps
 import tensorflow as tf
-
+import sys
+sys.path.append("/content/tf-maskformer/official")
 from official.projects.configs import common
 
 _PANOPTIC_LABEL_FORMAT = 'raw'

@@ -278,6 +278,7 @@ class mask_former_parser(parser.Parser):
                 return self._parse_train_data(data)
             else:
                 return self._parse_eval_data(data)
+
     def _parse_train_data(self, data):
         """Parses data for training."""
         return self._parse_data(data=data, is_training=True)

@@ -33,7 +33,8 @@ import numpy as np
 import tensorflow as tf
 
 import data_utils
-from official.projects.configs import dataset, coco_constants
+import dataset
+import coco_constants
 
 FLAGS = flags.FLAGS
 

@@ -7,8 +7,7 @@ from absl import flags
 from official.utils import hyperparams_flags
 from official.utils.flags import core as flags_core
 import sys
-from panoptic_input import tf_example_decoder
-
+from panoptic_input import TfExampleDecoder
 
 FLAGS = flags.FLAGS
 argv = FLAGS(sys.argv)
@@ -77,22 +76,32 @@ def display_im(feat):
     plt.imshow(feat["image"].numpy())
     plt.show()
 
+
 a = train_input_fn()
-#pain_and_suffering = DistributedExecutor(strategy, params)
-#iterator = a.make_one_shot_iterator()
-#ex = next(iterator)
-#print(a)
-#display_im(ex)
+# pain_and_suffering = DistributedExecutor(strategy, params)
+# iterator = a.make_one_shot_iterator()
+# ex = next(iterator)
+# print(a)
+# display_im(ex)
 
 
-#iterable_ds = pain_and_suffering.get_input_iterator(train_input_fn, strategy)
+# iterable_ds = pain_and_suffering.get_input_iterator(train_input_fn, strategy)
 
-#for a in iterable_ds.map(TfExampleDecoder.decode):
+# for a in iterable_ds.map(TfExampleDecoder.decode):
 
 
 # ex = next(iterable_ds)
 # display_im(ex)
-for features in a.map(tf_example_decoder):
+decoder = TfExampleDecoder()
+
+
+def decode_fn(serializable_example):
+    return decoder.decode(serializable_example)
+
+
+decoded_ds = a.map(decode_fn)
+
+for features in decoded_ds:
     print(features)
     # display_im(features)
 
