@@ -1,0 +1,8 @@
+tensorflow
+pyyaml
+gin-config==0.1.1
+tensorflow_addons
+tensorflow-addons
+tensorflow_datasets
+pycocotools
+opencv-python
