@@ -20,7 +20,7 @@ import numpy as np
 import tensorflow as tf
 import sys
 
-sys.path.append("/content/tf-maskformer")
+sys.path.append("/home/abuynits/projects/tf-maskformer")
 from official.vision.configs import common
 from official.vision.dataloaders import parser
 from official.vision.dataloaders import tf_example_decoder

@@ -14,7 +14,7 @@
 
 """Factory to provide model configs."""
 
-import maskformer_config
+from official.projects.configs import maskformer_config
 from official.modeling.hyperparams import params_dict
 
 

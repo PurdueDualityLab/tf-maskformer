@@ -14,7 +14,7 @@
 
 """Config template to train Mask R-CNN."""
 
-import base_config
+from official.projects.configs import base_config
 from official.modeling.hyperparams import params_dict
 
 # pylint: disable=line-too-long
