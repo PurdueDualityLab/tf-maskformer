@@ -268,6 +268,7 @@ def _convert_dataset(coco_root: str, dataset_split: str,
                 if dataset_split == 'test':
                     label_data, label_format = None, None
                 else:
+                    # A label is created for the panoptic label segment - does add it
                     label_data, label_format = _create_panoptic_label(
                         coco_root, dataset_split, image_files[i], segments_dict)
 
@@ -278,7 +279,8 @@ def _convert_dataset(coco_root: str, dataset_split: str,
                 file_prefix = os.path.splitext(file_name)[0]
                 example = data_utils.create_tfexample(image_data,
                                                       'jpeg',
-                                                      file_prefix, label_data,
+                                                      file_prefix,
+                                                      label_data,
                                                       label_format)
 
                 tfrecord_writer.write(example.SerializeToString())

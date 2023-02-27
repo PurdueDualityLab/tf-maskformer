@@ -48,7 +48,7 @@ class TfExampleDecoder(tf_example_decoder.TfExampleDecoder):
             self,
             regenerate_source_id: bool = True,
             panoptic_category_mask_key: str = 'groundtruth_instance_masks_png',
-            panoptic_instance_mask_key: str = 'groundtruth_instance_masks_png'):
+            panoptic_instance_mask_key: str = 'groundtruth_instance_masks'):
         super(TfExampleDecoder,
               self).__init__(
             include_mask=True,
@@ -66,25 +66,52 @@ class TfExampleDecoder(tf_example_decoder.TfExampleDecoder):
     def decode(self, serialized_example):
         decoded_tensors = super(TfExampleDecoder,
                                 self).decode(serialized_example)
+        # I can decodethe tesnors, but get empty valyes for the masks
+        # the sparse tensor for the correspondin mask doesnt have dim
+        # it is 0 bc it corresponds to the no-map default in tf_example_decoder
         print("\n\ndecoded tensors:",decoded_tensors)
         parsed_tensors = tf.io.parse_single_example(
             serialized_example, self._panoptic_keys_to_features)
+        """
+        
+         'image/object/mask': 
+         SparseTensor(indices=tf.Tensor([], 
+         shape=(0, 1), 
+         dtype=int64), 
+         values=tf.Tensor([], shape=(0,), 
+         dtype=string), 
+         dense_shape=tf.Tensor([0], 
+         shape=(1,), 
+         dtype=int64)),
+        """
         print("\n\nparsed tensors:",parsed_tensors)
         print("\n\n")
-        print(decoded_tensors[self._panoptic_instance_mask_key])
+        print(parsed_tensors[self._panoptic_instance_mask_key])
         print("\n\n")
-        category_mask = decoded_tensors[self._panoptic_instance_mask_key]
-        instance_mask = decoded_tensors[self._panoptic_instance_mask_key]
+        category_mask = parsed_tensors["groundtruth_instance_masks_png"]
+        cat_dec_mask = decoded_tensors["groundtruth_instance_masks_png"]
+        print("cat mask:",category_mask)
+        print("cat mask:",cat_dec_mask)
+        # the parsed tensors have empty values for these keys
+        instance_mask = parsed_tensors["groundtruth_instance_masks"]
+        instance_dec_mask = decoded_tensors["groundtruth_instance_masks"]
+        print("inst mask:",instance_mask)
+        print("inst mask:",instance_dec_mask)
+        print("\n\n")
+        instance_mask = tf.io.decode_image(
+            instance_mask, channels=1)
+        print("decoded instance mask")
+        category_mask = tf.io.decode_image(
+            category_mask, channels=1)
+        print("\n\n")
         """
         TODO: need to find a way of printing all of hte tensors
         have found that need to have both a panoptics nad an istance based map
         """
-        category_mask = tf.io.decode_image(
-            parsed_tensors[self._panoptic_category_mask_key], dtype=tf.dtypes.uint8, channels=1)
-        instance_mask = tf.io.decode_image(
-            parsed_tensors[self._panoptic_instance_mask_key], dtype=tf.dtypes.uint8, channels=1)
-        category_mask.set_shape([None, None, 1])
-        instance_mask.set_shape([None, None, 1])
+        # print("decoded category mask")
+        # category_mask.set_shape([None, None, 1])
+        # instance_mask.set_shape([None, None, 1])
+        
 
         decoded_tensors.update({
             'groundtruth_instance_masks': category_mask,
@@ -149,7 +176,7 @@ class mask_former_parser(parser.Parser):
         self._aug_rand_hflip = aug_rand_hflip
         self._aug_scale_min = aug_scale_min
         self._aug_scale_max = aug_scale_max
-        self._mode = mode
+        self._mode = input_reader.ModeKeys.TRAIN
         self._decoder = TfExampleDecoder()
         if aug_type and aug_type.type:
             if aug_type.type == 'autoaug':
@@ -203,6 +230,7 @@ class mask_former_parser(parser.Parser):
         return mask
 
     def _parse_data(self, data, is_training):
+        print("\n\nDATA:",data)
         image = data['image']
 
         if self._augmenter is not None and is_training:
@@ -211,10 +239,10 @@ class mask_former_parser(parser.Parser):
         image = preprocess_ops.normalize_image(image)
 
         category_mask = tf.cast(
-            data['groundtruth_panoptic_category_mask'][:, :, 0],
+            data['groundtruth_instance_masks'],
             dtype=tf.float32)
         instance_mask = tf.cast(
-            data['groundtruth_panoptic_instance_mask'][:, :, 0],
+            data['groundtruth_instance_masks_png'],
             dtype=tf.float32)
 
         # Flips image randomly during training.

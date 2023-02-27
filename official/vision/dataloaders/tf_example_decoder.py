@@ -96,6 +96,7 @@ class TfExampleDecoder(decoder.Decoder):
           tf.io.decode_png(png_bytes, channels=1, dtype=tf.uint8), axis=-1)
       mask = tf.cast(mask, dtype=tf.float32)
       mask.set_shape([None, None])
+      print("found a mask")
       return mask
 
     height = parsed_tensors['image/height']
@@ -128,6 +129,20 @@ class TfExampleDecoder(decoder.Decoder):
     """
     parsed_tensors = tf.io.parse_single_example(
         serialized=serialized_example, features=self._keys_to_features)
+    print("tf_example_decoder parsed tensors:",parsed_tensors)
+    """
+    'image/object/mask': 
+    SparseTensor(
+      indices=tf.Tensor([], 
+        shape=(0, 1), 
+        dtype=int64), 
+      values=tf.Tensor([], 
+        shape=(0,), 
+        dtype=string), 
+        dense_shape=tf.Tensor([0], 
+        shape=(1,), 
+        dtype=int64)),
+    """
     for k in parsed_tensors:
       if isinstance(parsed_tensors[k], tf.SparseTensor):
         if parsed_tensors[k].dtype == tf.string:
