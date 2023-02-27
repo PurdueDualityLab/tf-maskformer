@@ -119,6 +119,10 @@ class PerClassIoU(tf.keras.metrics.Metric):
 
     return tf.math.divide_no_nan(true_positives, denominator)
 
+  def get_miou(self):
+    """Compute the mean intersection-over-union for all classes"""
+    return self.result().numpy().mean()
+
   def reset_states(self):
     tf.keras.backend.set_value(
         self.total_cm, np.zeros((self.num_classes, self.num_classes)))
