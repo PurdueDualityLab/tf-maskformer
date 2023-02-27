@@ -46,9 +46,9 @@ class TfExampleDecoder(tf_example_decoder.TfExampleDecoder):
 
     def __init__(
             self,
-            regenerate_source_id: bool = False,
-            panoptic_category_mask_key: str = 'image/panoptic/category_mask',
-            panoptic_instance_mask_key: str = 'image/panoptic/instance_mask'):
+            regenerate_source_id: bool = True,
+            panoptic_category_mask_key: str = 'groundtruth_instance_masks_png',
+            panoptic_instance_mask_key: str = 'groundtruth_instance_masks_png'):
         super(TfExampleDecoder,
               self).__init__(
             include_mask=True,
@@ -66,9 +66,19 @@ class TfExampleDecoder(tf_example_decoder.TfExampleDecoder):
     def decode(self, serialized_example):
         decoded_tensors = super(TfExampleDecoder,
                                 self).decode(serialized_example)
+        print("\n\ndecoded tensors:",decoded_tensors)
         parsed_tensors = tf.io.parse_single_example(
             serialized_example, self._panoptic_keys_to_features)
-        print(parsed_tensors)
+        print("\n\nparsed tensors:",parsed_tensors)
+        print("\n\n")
+        print(decoded_tensors[self._panoptic_instance_mask_key])
+        print("\n\n")
+        category_mask = decoded_tensors[self._panoptic_instance_mask_key]
+        instance_mask = decoded_tensors[self._panoptic_instance_mask_key]
+        """
+        TODO: need to find a way of printing all of hte tensors
+        have found that need to have both a panoptics nad an istance based map
+        """
         category_mask = tf.io.decode_image(
             parsed_tensors[self._panoptic_category_mask_key], dtype=tf.dtypes.uint8, channels=1)
         instance_mask = tf.io.decode_image(
@@ -77,7 +87,7 @@ class TfExampleDecoder(tf_example_decoder.TfExampleDecoder):
         instance_mask.set_shape([None, None, 1])
 
         decoded_tensors.update({
-            'groundtruth_panoptic_category_mask': category_mask,
+            'groundtruth_instance_masks': category_mask,
             'groundtruth_panoptic_instance_mask': instance_mask
         })
         return decoded_tensors
