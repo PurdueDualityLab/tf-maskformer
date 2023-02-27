@@ -100,35 +100,42 @@ class InputFn(object):
         if not batch_size:
             batch_size = self._batch_size
         assert batch_size is not None
-        file_ds = tf.data.Dataset.list_files(
-            self._file_pattern, shuffle=self._is_training)
-        dataset = tf.data.TFRecordDataset(
-            filenames=file_ds,
-            compression_type=None,
-            buffer_size=None,
-            num_parallel_reads=None,
-        )
-        # split up dataset between workers
-        if self._input_sharding and ctx and ctx.num_input_pipelines > 1:
-            dataset = dataset.shard(ctx.num_input_pipelines, ctx.input_pipeline_id)
-
-        if self._is_training:
-            dataset = dataset.repeat()
-        if self._is_training:
-            dataset = dataset.shuffle(1000)
-        dataset = dataset.interleave(
+        #self._file_pattern = '/scratch/gilbreth/abuynits/coco_ds/coco_tfrecords/train-00000-of-01000.tfrecord'
+        files = tf.io.matching_files(self._file_pattern)
+        files = tf.random.shuffle(files)
+        print(files)
+        
+        shards = tf.data.Dataset.from_tensor_slices(files)
+        dataset = shards.interleave(
             map_func=self._dataset_fn,
             cycle_length=32,
             num_parallel_calls=tf.data.experimental.AUTOTUNE)
-        if self._num_examples > 0:
-            dataset = dataset.take(self._num_examples)
-
-        # Parses the fetched records to input tensors for model function.
         dataset = dataset.map(
             self._parser_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
-        dataset = dataset.batch(batch_size, drop_remainder=True)
-        dataset = dataset.cache() # have to cache after map
+        
+        dataset = dataset.batch(batch_size)
+        # dataset = dataset.cache() # have to cache after map
+        
         dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
+        
+        return dataset
+        
+        # file_ds = tf.data.Dataset.list_files(
+        #     self._file_pattern, shuffle=self._is_training)
+        # dataset = tf.data.TFRecordDataset(
+        #     filenames=file_ds,
+        #     compression_type=None,
+        #     buffer_size=None,
+        #     num_parallel_reads=None,
+        # )
+        # if self._is_training:
+        #     dataset = dataset.repeat()
+        # if self._is_training:
+        #     dataset = dataset.shuffle(1000)
+        # if self._num_examples > 0:
+        #     dataset = dataset.take(self._num_examples)
+
+        # Parses the fetched records to input tensors for model function.
         return dataset
 
 """    

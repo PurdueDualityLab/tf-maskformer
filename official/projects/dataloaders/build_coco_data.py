@@ -233,7 +233,7 @@ def _create_panoptic_label(coco_root: str, dataset_split: str, image_path: str,
                                                         annotation_file_name)
 
     panoptic_label = _generate_panoptic_label(panoptic_annotation_file, segments)
-    return panoptic_label.tostring(), _PANOPTIC_LABEL_FORMAT
+    return panoptic_label.tobytes(), _PANOPTIC_LABEL_FORMAT
 
 
 def _convert_dataset(coco_root: str, dataset_split: str,

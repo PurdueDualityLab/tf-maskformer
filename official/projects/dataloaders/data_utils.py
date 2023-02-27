@@ -134,13 +134,13 @@ def create_features(image_data,
         image_data = image_data.getvalue()
 
     height, width = get_image_dims(image_data, check_is_rgb=True)
-    image_source = 'coco_ds'
     feature_dict = {
         common.KEY_ENCODED_IMAGE: _bytes_list_feature(image_data),
         common.KEY_IMAGE_FILENAME: _bytes_list_feature(filename),
         common.KEY_IMAGE_FORMAT: _bytes_list_feature(image_format),
         common.KEY_IMAGE_HEIGHT: _int64_list_feature(height),
         common.KEY_IMAGE_WIDTH: _int64_list_feature(width),
+        common.KEY_IMAGE_SOURCE_ID: _bytes_list_feature('coco_ds'),
         common.KEY_IMAGE_CHANNELS: _int64_list_feature(3),
     }
 
@@ -190,6 +190,7 @@ def create_tfexample(image_data,
     """
     feature_dict = create_features(image_data, image_format, filename, label_data,
                                    label_format)
+    
     return tf.train.Example(features=tf.train.Features(feature=feature_dict))
 
 
@@ -317,6 +318,7 @@ class SegmentationDecoder(object):
             common.KEY_IMAGE_FORMAT: string_feature,
             common.KEY_IMAGE_HEIGHT: int_feature,
             common.KEY_IMAGE_WIDTH: int_feature,
+            common.KEY_IMAGE_SOURCE_ID: string_feature,
             common.KEY_IMAGE_CHANNELS: int_feature,
         }
         if decode_groundtruth_label:
@@ -372,6 +374,8 @@ class SegmentationDecoder(object):
                 self._decode_image(parsed_tensors, common.KEY_ENCODED_IMAGE),
             'image_name':
                 parsed_tensors[common.KEY_IMAGE_FILENAME],
+            'source_id':
+                parsed_tensors[common.KEY_IMAGE_SOURCE_ID],
             'height':
                 tf.cast(parsed_tensors[common.KEY_IMAGE_HEIGHT], dtype=tf.int32),
             'width':

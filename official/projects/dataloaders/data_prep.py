@@ -7,8 +7,8 @@ from absl import flags
 from official.utils import hyperparams_flags
 from official.utils.flags import core as flags_core
 import sys
-from panoptic_input import TfExampleDecoder
-
+from panoptic_input import mask_former_parser
+from official.projects.dataloaders.distributed_executor import DistributedExecutor
 FLAGS = flags.FLAGS
 argv = FLAGS(sys.argv)
 hyperparams_flags.initialize_common_flags()
@@ -78,31 +78,35 @@ def display_im(feat):
 
 
 a = train_input_fn()
-# pain_and_suffering = DistributedExecutor(strategy, params)
+pain_and_suffering = DistributedExecutor(strategy, params)
 # iterator = a.make_one_shot_iterator()
 # ex = next(iterator)
 # print(a)
 # display_im(ex)
+print(a)
+
+iterable_ds = pain_and_suffering.get_input_iterator(train_input_fn, strategy)
+print(a.cardinality().numpy())
+ex = next(iterable_ds)
+for ab in iterable_ds:
+ display_im(ab)
 
 
-# iterable_ds = pain_and_suffering.get_input_iterator(train_input_fn, strategy)
-
-# for a in iterable_ds.map(TfExampleDecoder.decode):
 
 
-# ex = next(iterable_ds)
-# display_im(ex)
-decoder = TfExampleDecoder()
+# decoder = mask_former_parser()
 
 
-def decode_fn(serializable_example):
-    return decoder.decode(serializable_example)
+# def decode_fn(serializable_example):
+#     print(serializable_example)
+
+#     return decoder(serializable_example)
 
 
-decoded_ds = a.map(decode_fn)
+# decoded_ds = a.map(decode_fn)
 
-for features in decoded_ds:
-    print(features)
+# for features in decoded_ds:
+#     print(features)
     # display_im(features)
 
 #

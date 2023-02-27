@@ -206,10 +206,14 @@ class DistributedExecutor(object):
         # across workers. Since Dataset instance cannot be cloned in eager mode,
         # we instead pass callable that returns a dataset.
         if self._is_multi_host:
+            print('is multihost')
             return iter(strategy.distribute_datasets_from_function(input_fn))
         else:
+            print('is general')
             input_data = input_fn()
-            return iter(strategy.experimental_distribute_dataset(input_data))
+            ret = strategy.experimental_distribute_dataset(input_data)
+            final_ret = iter(ret)
+            return final_ret
 
     def _create_replicated_step(self,
                                 strategy,

@@ -68,11 +68,11 @@ class TfExampleDecoder(tf_example_decoder.TfExampleDecoder):
                                 self).decode(serialized_example)
         parsed_tensors = tf.io.parse_single_example(
             serialized_example, self._panoptic_keys_to_features)
-
+        print(parsed_tensors)
         category_mask = tf.io.decode_image(
-            parsed_tensors[self._panoptic_category_mask_key], channels=1)
+            parsed_tensors[self._panoptic_category_mask_key], dtype=tf.dtypes.uint8, channels=1)
         instance_mask = tf.io.decode_image(
-            parsed_tensors[self._panoptic_instance_mask_key], channels=1)
+            parsed_tensors[self._panoptic_instance_mask_key], dtype=tf.dtypes.uint8, channels=1)
         category_mask.set_shape([None, None, 1])
         instance_mask.set_shape([None, None, 1])
 
@@ -222,7 +222,8 @@ class mask_former_parser(parser.Parser):
             self._output_size,
             aug_scale_min=self._aug_scale_min if is_training else 1.0,
             aug_scale_max=self._aug_scale_max if is_training else 1.0)
-
+        print(image)
+        print(image_info)
         category_mask = self._resize_and_crop_mask(
             category_mask,
             image_info,
@@ -272,8 +273,10 @@ class mask_former_parser(parser.Parser):
           {'images': image, 'labels': labels}: if mode == ModeKeys.PREDICT
             or ModeKeys.PREDICT_WITH_GT.
         """
+
         with tf.name_scope('parser'):
             data = self._decoder.decode(value)
+            print(data)
             if self._mode == input_reader.ModeKeys.TRAIN:
                 return self._parse_train_data(data)
             else:
