@@ -36,3 +36,20 @@ class ModelAnalysis:
         """
         return self.model.count_params()
 
+    def get_num_activations(self, model):
+        """
+        Args:
+            model: A reference to a tf.keras model
+        Returns: a number corresponding to the number of activations of the layers within the model
+        """
+        total_activations = 0
+
+        # Iterates through each layer
+        for layer in model.layers:
+            # Checks if the layer is not a flattening or dense layer
+            if len(layer.output_shape) == 4:
+                print(layer.output_shape)
+                total_activations += (layer.output_shape[1] * layer.output_shape[2] * layer.output_shape[3])
+
+        return total_activations
+
