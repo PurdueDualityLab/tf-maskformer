@@ -200,9 +200,7 @@ class mask_former_parser(parser.Parser):
 
         if self._augmenter is not None and is_training:
             image = self._augmenter.distort(image)
-        print("before norm",image)
         image = preprocess_ops.normalize_image(image)
-        print("after nomr",image)
         category_mask = tf.cast(
             data['groundtruth_panoptic_category_mask'][:, :, 0],
             dtype=tf.float32)
