@@ -7,6 +7,9 @@ from panoptic_input import mask_former_parser
 from PIL import Image
 import numpy as np
 import cv2
+from skimage import segmentation
+from skimage import color 
+
 
 parser_fn = mask_former_parser([1024,1024])
 file_path = "/scratch/gilbreth/abuynits/coco_ds/tfrecords/val-00002-of-00008.tfrecord"# specify the filepath to tfrecord
@@ -32,10 +35,16 @@ def display_pil_im(np_data,file_path,greyscale=False):
         im = Image.fromarray(np_data,'L')
     im.save(file_path)
 def get_overlayed_im(im,mask):
-    color = np.array([0,255,0],dtype='uint8')
-    masked_im = np.where(mask[...,None],color,im)
-    out = cv2.addWeighted(im,0.6,masked_im,0.4,0)
-    return out
+    im = im.astype('int32')
+    print(mask)
+    print(mask.shape)
+    mask = (color.label2rgb(mask)*255).astype('int32')
+    print(mask.shape)
+    print("mask:",mask)
+    print(im.shape)
+    out = cv2.addWeighted(im, 0.8, mask, 0.2,0)
+    return mask
+
 raw_dataset = tf.data.TFRecordDataset(file_path)
 for raw_record in raw_dataset.take(1):
     example = tf.train.Example()

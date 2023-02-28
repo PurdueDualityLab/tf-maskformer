@@ -5,3 +5,4 @@ tensorflow_addons
 tensorflow_datasets
 pycocotools
 opencv-python
+scikit-image
