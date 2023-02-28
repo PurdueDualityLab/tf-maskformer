@@ -77,20 +77,18 @@ def display_im(feat):
     plt.show()
 
 
-a = train_input_fn()
-pain_and_suffering = DistributedExecutor(strategy, params)
-# iterator = a.make_one_shot_iterator()
-# ex = next(iterator)
-# print(a)
-# display_im(ex)
-# print(a)
-# display_im(a)
-
-iterable_ds = pain_and_suffering.get_input_iterator(train_input_fn, strategy)
-print(a.cardinality().numpy())
+de = DistributedExecutor(strategy, params)
+print("creating iterable ds")
+iterable_ds = de.get_input_iterator(train_input_fn, strategy)
+print(iterable_ds)
+print("getting next obj")
 ex = next(iterable_ds)
-for ab in iterable_ds:
- display_im(ab)
+print("displaying")
+display_im(ex)
+# iterable_ds = pain_and_suffering.get_input_iterator(train_input_fn, strategy)
+# print(a.cardinality().numpy())
+# ex = next(iterable_ds)
+# display_im(ex)
 
 
 
