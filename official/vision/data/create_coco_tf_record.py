@@ -40,7 +40,7 @@ from pycocotools import mask
 import tensorflow as tf
 
 import multiprocessing as mp
-from official.vision.data import tfrecord_lib
+import tfrecord_lib
 
 
 flags.DEFINE_boolean(
