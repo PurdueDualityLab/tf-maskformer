@@ -39,7 +39,7 @@ def parser_generator(params,mode):
             small_instance_area_threshold=4096,
             small_instance_weight=3.0,
             dtype='float32',
-            mode=mode
+            mode=mode,
         )
     else:
         raise ValueError('Parser %s is not supported.' % params.architecture.parser)

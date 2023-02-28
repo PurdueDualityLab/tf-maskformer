@@ -47,8 +47,8 @@ class TfExampleDecoder(tf_example_decoder.TfExampleDecoder):
     def __init__(
             self,
             regenerate_source_id: bool = True,
-            panoptic_category_mask_key: str = 'groundtruth_instance_masks_png',
-            panoptic_instance_mask_key: str = 'groundtruth_instance_masks'):
+            panoptic_category_mask_key: str = 'image/panoptic/category_mask',
+            panoptic_instance_mask_key: str = 'image/panoptic/instance_mask'):
         super(TfExampleDecoder,
               self).__init__(
             include_mask=True,
@@ -66,55 +66,18 @@ class TfExampleDecoder(tf_example_decoder.TfExampleDecoder):
     def decode(self, serialized_example):
         decoded_tensors = super(TfExampleDecoder,
                                 self).decode(serialized_example)
-        # I can decodethe tesnors, but get empty valyes for the masks
-        # the sparse tensor for the correspondin mask doesnt have dim
-        # it is 0 bc it corresponds to the no-map default in tf_example_decoder
-        print("\n\ndecoded tensors:",decoded_tensors)
         parsed_tensors = tf.io.parse_single_example(
             serialized_example, self._panoptic_keys_to_features)
-        """
-        
-         'image/object/mask': 
-         SparseTensor(indices=tf.Tensor([], 
-         shape=(0, 1), 
-         dtype=int64), 
-         values=tf.Tensor([], shape=(0,), 
-         dtype=string), 
-         dense_shape=tf.Tensor([0], 
-         shape=(1,), 
-         dtype=int64)),
-        """
-        print("\n\nparsed tensors:",parsed_tensors)
-        print("\n\n")
-        print(parsed_tensors[self._panoptic_instance_mask_key])
-        print("\n\n")
-        category_mask = parsed_tensors["groundtruth_instance_masks_png"]
-        cat_dec_mask = decoded_tensors["groundtruth_instance_masks_png"]
-        print("cat mask:",category_mask)
-        print("cat mask:",cat_dec_mask)
-        # the parsed tensors have empty values for these keys
-        instance_mask = parsed_tensors["groundtruth_instance_masks"]
-        instance_dec_mask = decoded_tensors["groundtruth_instance_masks"]
-        print("inst mask:",instance_mask)
-        print("inst mask:",instance_dec_mask)
-        print("\n\n")
-        instance_mask = tf.io.decode_image(
-            instance_mask, channels=1)
-        print("decoded instance mask")
+
         category_mask = tf.io.decode_image(
-            category_mask, channels=1)
-        print("\n\n")
-        """
-        TODO: need to find a way of printing all of hte tensors
-        have found that need to have both a panoptics nad an istance based map
-        """
-        # print("decoded category mask")
-        # category_mask.set_shape([None, None, 1])
-        # instance_mask.set_shape([None, None, 1])
-        
+            parsed_tensors[self._panoptic_category_mask_key], channels=1)
+        instance_mask = tf.io.decode_image(
+            parsed_tensors[self._panoptic_instance_mask_key], channels=1)
+        category_mask.set_shape([None, None, 1])
+        instance_mask.set_shape([None, None, 1])
 
         decoded_tensors.update({
-            'groundtruth_instance_masks': category_mask,
+            'groundtruth_panoptic_category_mask': category_mask,
             'groundtruth_panoptic_instance_mask': instance_mask
         })
         return decoded_tensors
@@ -125,7 +88,7 @@ class mask_former_parser(parser.Parser):
 
     def __init__(
             self,
-            output_size: List[int] = [32, 32, 3],
+            output_size: List[int],
             resize_eval_groundtruth: bool = True,
             groundtruth_padded_size: Optional[List[int]] = None,
             ignore_label: int = 0,
@@ -137,9 +100,9 @@ class mask_former_parser(parser.Parser):
             small_instance_area_threshold: int = 4096,
             small_instance_weight: float = 3.0,
             dtype: str = 'float32',
-            mode=None):
+            mode: input_reader.ModeKeys = None):
         """Initializes parameters for parsing annotations in the dataset.
-
+    
         Args:
           output_size: `Tensor` or `list` for [height, width] of output image. The
             output_size should be divided by the largest feature stride 2^max_level.
@@ -176,8 +139,7 @@ class mask_former_parser(parser.Parser):
         self._aug_rand_hflip = aug_rand_hflip
         self._aug_scale_min = aug_scale_min
         self._aug_scale_max = aug_scale_max
-        self._mode = input_reader.ModeKeys.TRAIN
-        self._decoder = TfExampleDecoder()
+
         if aug_type and aug_type.type:
             if aug_type.type == 'autoaug':
                 self._augmenter = augment.AutoAugment(
@@ -198,6 +160,10 @@ class mask_former_parser(parser.Parser):
         self._gaussian = tf.reshape(self._gaussian, shape=[-1])
         self._small_instance_area_threshold = small_instance_area_threshold
         self._small_instance_weight = small_instance_weight
+        self._decoder = TfExampleDecoder()
+        if mode == None:
+            print("assuming training mode")
+            self._mode = input_reader.ModeKeys.TRAIN
 
     def _resize_and_crop_mask(self, mask, image_info, is_training):
         """Resizes and crops mask using `image_info` dict."""
@@ -208,7 +174,7 @@ class mask_former_parser(parser.Parser):
 
         if is_training or self._resize_eval_groundtruth:
             image_scale = image_info[2, :]
-            offset = image_info[3, :]
+            offset = image_info[3, : ]
             mask = preprocess_ops.resize_and_crop_masks(
                 mask,
                 image_scale,
@@ -230,7 +196,6 @@ class mask_former_parser(parser.Parser):
         return mask
 
     def _parse_data(self, data, is_training):
-        print("\n\nDATA:",data)
         image = data['image']
 
         if self._augmenter is not None and is_training:
@@ -239,10 +204,10 @@ class mask_former_parser(parser.Parser):
         image = preprocess_ops.normalize_image(image)
 
         category_mask = tf.cast(
-            data['groundtruth_panoptic_instance_mask'][:, :, 0],
+            data['groundtruth_panoptic_category_mask'][:, :, 0],
             dtype=tf.float32)
         instance_mask = tf.cast(
-            data['groundtruth_instance_masks'][:, :, 0],
+            data['groundtruth_panoptic_instance_mask'][:, :, 0],
             dtype=tf.float32)
 
         # Flips image randomly during training.
@@ -271,8 +236,8 @@ class mask_former_parser(parser.Parser):
             is_training=is_training)
 
         (instance_centers_heatmap,
-        instance_centers_offset,
-        semantic_weights) = self._encode_centers_and_offets(
+         instance_centers_offset,
+         semantic_weights) = self._encode_centers_and_offets(
             instance_mask=instance_mask[:, :, 0])
 
         # Cast image and labels as self._dtype
@@ -301,24 +266,6 @@ class mask_former_parser(parser.Parser):
         }
         return image, labels
 
-    def __call__(self, value):
-        """Parses data to an image and associated training labels.
-        Args:
-          value: a string tensor holding a serialized tf.Example proto.
-        Returns:
-          image, labels: if mode == ModeKeys.TRAIN. see _parse_train_data.
-          {'images': image, 'labels': labels}: if mode == ModeKeys.PREDICT
-            or ModeKeys.PREDICT_WITH_GT.
-        """
-
-        with tf.name_scope('parser'):
-            data = self._decoder.decode(value)
-            print(data)
-            if self._mode == input_reader.ModeKeys.TRAIN:
-                return self._parse_train_data(data)
-            else:
-                return self._parse_eval_data(data)
-
     def _parse_train_data(self, data):
         """Parses data for training."""
         return self._parse_data(data=data, is_training=True)
@@ -329,7 +276,7 @@ class mask_former_parser(parser.Parser):
 
     def _encode_centers_and_offets(self, instance_mask):
         """Generates center heatmaps and offets from instance id mask.
-
+    
         Args:
           instance_mask: `tf.Tensor` of shape [height, width] representing
             groundtruth instance id mask.
@@ -418,3 +365,20 @@ class mask_former_parser(parser.Parser):
         return (instance_centers_heatmap,
                 instance_centers_offset,
                 semantic_weights)
+    def __call__(self, value):
+        """Parses data to an image and associated training labels.
+        Args:
+          value: a string tensor holding a serialized tf.Example proto.
+        Returns:
+          image, labels: if mode == ModeKeys.TRAIN. see _parse_train_data.
+          {'images': image, 'labels': labels}: if mode == ModeKeys.PREDICT
+            or ModeKeys.PREDICT_WITH_GT.
+        """
+
+        with tf.name_scope('parser'):
+            data = self._decoder.decode(value)
+            print(data)
+            if self._mode == input_reader.ModeKeys.TRAIN:
+                return self._parse_train_data(data)
+            else:
+                return self._parse_eval_data(data)
