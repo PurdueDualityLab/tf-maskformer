@@ -1,12 +1,9 @@
-#!/bin/bash
-
-DATA_DIR=$1
- aria2c -j 8 -Z \
-   wget http://images.cocodataset.org/annotations/annotations_trainval2017.zip \
-   wget http://images.cocodataset.org/annotations/panoptic_annotations_trainval2017.zip \
-   wget http://images.cocodataset.org/zips/train2017.zip \
-   wget http://images.cocodataset.org/zips/val2017.zip \
-   --dir=$DATA_DIR;
+aria2c -j 8 -Z \
+  http://images.cocodataset.org/annotations/annotations_trainval2017.zip \
+  http://images.cocodataset.org/annotations/panoptic_annotations_trainval2017.zip \
+  http://images.cocodataset.org/zips/train2017.zip \
+  http://images.cocodataset.org/zips/val2017.zip \
+  --dir=$DATA_DIR;
 
 unzip $DATA_DIR/"*".zip -d $DATA_DIR;
 mkdir $DATA_DIR/zips && mv $DATA_DIR/*.zip $DATA_DIR/zips;
@@ -35,3 +32,5 @@ python3 official/vision/data/create_coco_tf_record.py \
   --num_shards=32 \
   --include_masks \
   --include_panoptic_masks
+
+
