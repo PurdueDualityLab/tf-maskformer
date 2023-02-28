@@ -239,10 +239,10 @@ class mask_former_parser(parser.Parser):
         image = preprocess_ops.normalize_image(image)
 
         category_mask = tf.cast(
-            data['groundtruth_instance_masks'],
+            data['groundtruth_panoptic_instance_mask'][:, :, 0],
             dtype=tf.float32)
         instance_mask = tf.cast(
-            data['groundtruth_instance_masks_png'],
+            data['groundtruth_instance_masks'][:, :, 0],
             dtype=tf.float32)
 
         # Flips image randomly during training.
@@ -260,8 +260,7 @@ class mask_former_parser(parser.Parser):
             self._output_size,
             aug_scale_min=self._aug_scale_min if is_training else 1.0,
             aug_scale_max=self._aug_scale_max if is_training else 1.0)
-        print(image)
-        print(image_info)
+
         category_mask = self._resize_and_crop_mask(
             category_mask,
             image_info,
@@ -272,8 +271,8 @@ class mask_former_parser(parser.Parser):
             is_training=is_training)
 
         (instance_centers_heatmap,
-         instance_centers_offset,
-         semantic_weights) = self._encode_centers_and_offets(
+        instance_centers_offset,
+        semantic_weights) = self._encode_centers_and_offets(
             instance_mask=instance_mask[:, :, 0])
 
         # Cast image and labels as self._dtype
