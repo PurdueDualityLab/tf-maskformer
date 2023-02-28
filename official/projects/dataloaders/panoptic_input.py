@@ -377,7 +377,9 @@ class mask_former_parser(parser.Parser):
 
         with tf.name_scope('parser'):
             data = self._decoder.decode(value)
-            print(data)
+            print("DATA PRINT:",data)
+            print("HEIGHT:",np.array(data["height"]),"width:",np.array(data["width"]))
+            self._output_size = [np.array(data["height"]),np.array(data["width"])]
             if self._mode == input_reader.ModeKeys.TRAIN:
                 return self._parse_train_data(data)
             else:
