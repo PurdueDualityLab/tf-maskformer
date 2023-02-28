@@ -53,75 +53,9 @@ if eval_file_pattern:
         mode=input_reader.ModeKeys.PREDICT_WITH_GT,
         batch_size=params.eval.batch_size,
         num_examples=params.eval.eval_samples)
-# call it this way to get dataset object
-strategy_config = params.strategy_config
-distribute_utils.configure_cluster(strategy_config.worker_hosts,
-                                   strategy_config.task_index)
-strategy = distribute_utils.get_distribution_strategy(
-    distribution_strategy=params.strategy_type,
-    num_gpus=strategy_config.num_gpus,
-    all_reduce_alg=strategy_config.all_reduce_alg,
-    num_packs=strategy_config.num_packs,
-    tpu_address=strategy_config.tpu)
-import matplotlib as plt
-
-
-def display_im(feat):
-    for key in feat.keys():
-        if key != "image":
-            print(f"{key}: {feat[key]}")
-
-    print(f"Image shape: {feat['image'].shape}")
-    plt.figure(figsize=(7, 7))
-    plt.imshow(feat["image"].numpy())
-    plt.show()
-
-
-#de = DistributedExecutor(strategy, params)
-ds = train_input_fn()
 print(ds)
 ex = ds.take(1)
 
 print(ex)
 print("displaying")
 display_im(ex)
-# iterable_ds = pain_and_suffering.get_input_iterator(train_input_fn, strategy)
-# print(a.cardinality().numpy())
-# ex = next(iterable_ds)
-# display_im(ex)
-
-
-
-
-# decoder = mask_former_parser()
-
-
-# def decode_fn(serializable_example):
-#     print(serializable_example)
-
-#     return decoder(serializable_example)
-
-
-# decoded_ds = a.map(decode_fn)
-
-# for features in decoded_ds:
-#     print(features)
-    # display_im(features)
-
-#
-# for x in a:
-#     print(x)
-# ex = next(ds)
-# print(ex)
-
-"""
-<PrefetchDataset element_spec=(TensorSpec(shape=(64, 1024, 1024, 3), dtype=tf.float32, name=None), 
-{'category_mask': TensorSpec(shape=(64, 1024, 1024, 1), dtype=tf.float32, name=None), 
-'instance_mask': TensorSpec(shape=(64, 1024, 1024, 1), dtype=tf.float32, name=None), 
-'instance_centers_heatmap': TensorSpec(shape=(64, 1024, 1024, 1), dtype=tf.float32, name=None), 
-'instance_centers_offset': TensorSpec(shape=(64, 1024, 1024, 2), dtype=tf.float32, name=None), 
-'semantic_weights': TensorSpec(shape=(64, 1024, 1024), dtype=tf.float32, name=None), 
-'valid_mask': TensorSpec(shape=(64, 1024, 1024, 1), dtype=tf.bool, name=None), 
-'things_mask': TensorSpec(shape=(64, 1024, 1024, 1), dtype=tf.bool, name=None), 
-'image_info': TensorSpec(shape=(64, 4, 2), dtype=tf.float32, name=None)})>
-"""

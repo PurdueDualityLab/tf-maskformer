@@ -9,8 +9,9 @@ import numpy as np
 import cv2
 
 parser_fn = mask_former_parser([1024,1024])
-file_path = "/scratch/gilbreth/abuynits/coco_ds/tfrecords/val-00000-of-00008.tfrecord" # specify the filepath to tfrecord
+file_path = "/scratch/gilbreth/abuynits/coco_ds/tfrecords/val-00002-of-00008.tfrecord"# specify the filepath to tfrecord
 save_im_path = "/home/abuynits/projects/tf-maskformer/official/projects/dataloaders/img.png" # image save path for displaying image
+im_mask_path = "/home/abuynits/projects/tf-maskformer/official/projects/dataloaders/mask.png" # image save path for displaying image
 # returns de-normalized tensor
 def get_un_normalized_np(im_tensor):
     np_data = im_tensor.numpy()
@@ -22,12 +23,19 @@ def get_un_normalized_np(im_tensor):
     return norm_image
     
 # displays an image
-def display_pil_im(np_data):
+def display_pil_im(np_data,file_path,greyscale=False):
     print(np_data)
     print(np_data.shape)
-    im = Image.fromarray(np_data, 'RGB')
-    im.save(save_im_path)
-
+    if greyscale == False: 
+        im = Image.fromarray(np_data, 'RGB')
+    else:
+        im = Image.fromarray(np_data,'L')
+    im.save(file_path)
+def get_overlayed_im(im,mask):
+    color = np.array([0,255,0],dtype='uint8')
+    masked_im = np.where(mask[...,None],color,im)
+    out = cv2.addWeighted(im,0.6,masked_im,0.4,0)
+    return out
 raw_dataset = tf.data.TFRecordDataset(file_path)
 for raw_record in raw_dataset.take(1):
     example = tf.train.Example()
@@ -35,29 +43,10 @@ for raw_record in raw_dataset.take(1):
     parsed_record = parser_fn(raw_record)
     print("==================\n\n\n")
     print(parsed_record[1]) # prints image dictionary holding all mask info
+    print(parsed_record[1]['category_mask'])
     print(parsed_record[1].keys()) # prints available dictionary info keys
-    display_pil_im(get_un_normalized_np(parsed_record[0])) # displays the pil image
-
-
-
-
-exit(1)
-files = tf.io.matching_files("/scratch/gilbreth/abuynits/coco_ds/tfrecords/val-00000-of-00008.tfrecord")
-print("CARDINALITY:+++++++++++++++",files.cardinality().numpy())
-
-
-
-print("\n\n\n")
-raw_dataset = tf.data.TFRecordDataset(file)
-print(raw_dataset)
-print("\n\n\n")
-print(tf.data.experimental.cardinality(raw_dataset))
-for raw_record in raw_dataset.take(0):
-    print("==================")
-    example = tf.train.Example()
-    example = example.ParseFromString(raw_record.numpy())
-    parsed_ex = train_input_fn(example)
-    print(example)
-    display_im(example)
-    print("==================")
-print("=========DONE===========")
+    combined_im = get_overlayed_im(
+        get_un_normalized_np(parsed_record[0]),
+        tf.squeeze(parsed_record[1]['category_mask']).numpy()
+        )
+    display_pil_im(combined_im,save_im_path) # displays the pil image
