@@ -1,18 +1,31 @@
 runtime:
   distribution_strategy: 'tpu'
+  mixed_precision_dtype: 'float32'
 task:
   model:
     backbone:
       type: 'resnet'
       resnet:
+        depth: 50
         stem_type: 'basic'
-  losses:
+        stem_out_channels: 64
+        stride_in_1x1: False
+        out_features: ['res2', 'res3', 'res4', 'res5']
+        multigrid: [1, 1, 1]
+    pixel_mean: [123.675, 116.280, 103.530]
+    pixel_std: [58.395, 57.120, 57.375]
+    weights: 'detectron2://ImageNetPretrained/torchvision/R-50.pkl'
+    norm_activation:
+      activation: 'syncbn'
   train_data:
     tfds_name: 'coco_2017_train_panoptic'
     tfds_split: 'train'
     is_training: true
+    min_size_train: (480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800)
     crop_size: [384, 600]
-    is_training: true
+    crop_type: 'absolute_range'
+    format: 'rgb'
+    dataset_mapper_name: 'detr_panoptic'
     global_batch_size: 64
   validation_data:
     tfds_name: 'coco_2017_val_panoptic'
@@ -22,13 +35,26 @@ task:
 trainer:
   optimizer_config:
     learning_rate:
-      decay_step:
-        initial_learning_rate: 0.0001
+      base_lr: 0.0001
+      steps: (369600,)
+      max_iter: 554400 
     optimizer:
       adamw:
-        momentum: 
       type: adamw
     warmup:
-      #WARMUP_FACTOR: 1.0
-      #WARMUP_ITERS: 10
-
+      warmup_factor: 1.0
+      warmup_iters: 10
+      warmup_decay: 0.0001
+    clip_gradients:
+      enabled: True
+      clip_type: 'full_model'
+      clip_value: 0.01
+      norm_type: 2.0
+  ims_per_batch: 64
+  backbone_multiplier: 0.1
+test:
+  eval_period: 0
+dataloader:
+  filter_empty_annotation: true
+  num_workers: 4
+version: 2
