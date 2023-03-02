@@ -2,10 +2,6 @@ from official.projects.maskformer.maskformer import MaskFormer
 from absl.testing import parameterized
 import tensorflow as tf
 
-import sys
-sys.path.insert(0, 'C:\\programmingStuff\\tensorflowStuff\\tf-maskformer')
-
-
 class MaskFormerTest(tf.test.TestCase, parameterized.TestCase):
     # TODO(ibrahim): Add more testcases.
     @parameterized.named_parameters(('test1',))
