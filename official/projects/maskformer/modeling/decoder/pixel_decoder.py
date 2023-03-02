@@ -1,52 +1,14 @@
 import tensorflow as tf
 import tensorflow_addons as tfa
 from official.vision.ops.spatial_transform_ops import nearest_upsampling
-<<<<<<< HEAD:official/projects/maskformer/modeling/decoder/pixel_decoder.py
-=======
-
->>>>>>> origin/architecture-pixel_decoder:official/projects/modeling/decoder/pixel_decoder.py
 
 class Fpn(tf.keras.layers.Layer):
     """Feature pyramid networks."""
 
-<<<<<<< HEAD:official/projects/maskformer/modeling/decoder/pixel_decoder.py
-  def __init__(self,
-               fpn_feat_dims=256,
-               channels_last = True,
-               **kwargs):
-    super(Fpn, self).__init__(**kwargs)
-    """FPN initialization function.
-    Args:
-      fpn_feat_dims: Feature dimension of the fpn
-      channels_last: Determines if shape is (bs, H, W, C)
-    """
-    self._fpn_feat_dims = fpn_feat_dims
-    if tf.keras.backend.image_data_format() == 'channels_last':
-        self._channels_last = True
-    else:
-        self._channels_last = False
-    
-  def build(self, multilevel_features):
-    self._conv2d_op_lateral = tf.keras.layers.Conv2D(
-          filters=self._fpn_feat_dims,
-          kernel_size=(1, 1),
-          padding='same')
-    self._conv2d_op_down = tf.keras.layers.Conv2D(
-          filters=self._fpn_feat_dims,
-          strides=(1, 1),
-          kernel_size=(3, 3),
-          padding='same')
-    self._conv2d_op_mask = tf.keras.layers.Conv2D(
-          filters=self._fpn_feat_dims,
-          kernel_size=(3, 3),
-          padding='same')
-    super(Fpn, self).build(multilevel_features)
-=======
     def __init__(self,
                  fpn_feat_dims=256,
                  **kwargs):
         """FPN initialization function.
->>>>>>> origin/architecture-pixel_decoder:official/projects/modeling/decoder/pixel_decoder.py
 
         Args:
         fpn_feat_dims: Feature dimension of the fpn
