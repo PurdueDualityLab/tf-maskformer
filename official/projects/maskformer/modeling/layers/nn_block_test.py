@@ -15,7 +15,7 @@ class MaskFormerTransformerTest(tf.test.TestCase, parameterized.TestCase):
             num_classes=num_classes, hidden_dim=hidden_size, mask_dim=mask_dim)
 
         inputs = {"per_segment_embeddings": tf.ones((6, 8, 100, 256)),
-                 "per_pixel_embeddings": tf.ones((8, 256, 160, 160))}
+                 "per_pixel_embeddings": tf.ones((8, 160, 160, 256))}
 
         expected_class_probs_shape = [8, 100, 172]
         expected_mask_probs_shape = [8, 100, 160, 160]
