@@ -1,14 +1,14 @@
+_base_: tf_R50.yaml
 task:
   model:
     backbone:
-      type: 'resnet'
       resnet:
+        depth: 101
         stem_type: 'basic'
-
-#Yet to translate
-
-#DEPTH: 101
-#STEM_OUT_CHANNELS: 64
-#STRIDE_IN_1X1: False
-#OUT_FEATURES: ["res2", "res3", "res4", "res5"]
-#RES5_MULTI_GRID: [1, 1, 1]
+        stem_out_channels: 64
+        stride_in_1x1: False
+        out_features: ['res2', 'res3', 'res4', 'res5']
+        multigrid: [1, 1, 1]
+    weights: 'R-101.pkl'
+    #norm_activation:
+    #  activation: 'SyncBN'
