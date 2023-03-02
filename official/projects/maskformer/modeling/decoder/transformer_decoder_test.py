@@ -34,8 +34,9 @@ class MaskFormerTransformerTest(tf.test.TestCase, parameterized.TestCase):
         expected_output_shape = [6, 8, 100, 256]
 
         output = transformer({"image": input_image, "features": multilevel_features })
+        output_shape = [len(output)] + output[0].shape.as_list()
 
-        self.assertAllEqual(output.shape.as_list(), expected_output_shape)
+        self.assertAllEqual(output_shape, expected_output_shape)
 
 if __name__ == '__main__':
     tf.test.main()

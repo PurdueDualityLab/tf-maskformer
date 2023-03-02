@@ -13,7 +13,7 @@ import tensorflow_addons as tfa
 from tensorflow.python.distribute import combinations
 from tensorflow.python.distribute import strategy_combinations
 
-from official.projects.modeling.decoder.pixel_decoder import Fpn
+from official.projects.maskformer.modeling.decoder.pixel_decoder import Fpn
 
 
 class FpnTest(parameterized.TestCase, tf.test.TestCase):
@@ -28,10 +28,11 @@ class FpnTest(parameterized.TestCase, tf.test.TestCase):
             "5": tf.ones([1, 20, 20, 2048])
         }
 
-        decoder = Fpn(fpn_feat_dims=dim)    # TODO(Isaac): Add the additional parameters.
+        # TODO(Isaac): Add the additional parameters.
+        decoder = Fpn(fpn_feat_dims=dim)
         output_mask = decoder(multilevel_features)
 
-        expected_output_mask = multilevel_features["2"].shape.as_list();
+        expected_output_mask = multilevel_features["2"].shape.as_list()
 
         self.assertAllEqual(output_mask.shape.as_list(), expected_output_mask)
 
