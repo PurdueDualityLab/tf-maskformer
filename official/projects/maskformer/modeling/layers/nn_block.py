@@ -26,23 +26,13 @@ class MaskFormerPredictor(tf.keras.layers.Layer):
         
         # self.dec_supervision = dec_supervision
             
-    '''
-    def build(self, input_shape):
-        self._linear_classifier = None
-        
-    def get_mask_predictions(self, per_pixel_embeddings, mask_embeddings):
-        if(self.dec_supervision):
-            outputs_seg_masks = tf.einsum("lbqc,bchw->lbqhw", mask_embed, mask_features)
-    '''
-
-    def call(self, inputs):
+def call(self, inputs):
         per_pixel_embeddings = inputs['per_pixel_embeddings']
         per_segment_embeddings = inputs['per_segment_embeddings']
 
         class_prob_prediction = self.linear_classifier(per_segment_embeddings)
-        mask_embedding = self.mlp(per_segment_embeddings)
-        mask_prob_prediction = tf.einsum("lbqc,bchw->lbqhw", per_pixel_embeddings, mask_embedding)
-        # Might need to change first arg in einsum after finding shapes
+        mask_embedding = self.mlp(per_segment_embeddings[-1])
+        mask_prob_prediction = tf.einsum("bqc,bchw->bqhw", mask_embedding, per_pixel_embeddings)
 
         return class_prob_prediction, mask_prob_prediction
         
@@ -60,13 +50,13 @@ class MLP(tf.keras.layers.Layer):
             layer_dims.append((hidden_dim, hidden_dim))
         layer_dims.append((hidden_dim, output_dim))
         #layer_dims contains the input and output dimension of each layer in the form (input dimension, output dimension)
-        layers = []
+        self.layers = []
         for i, dim in enumerate(layer_dims):
             if(i < num_layers - 1):
-                layers.append(tf.keras.layers.Dense(input_shape=(dim[0],), out_dim=dim[1], activation=tf.nn.relu))
+                self.layers.append(tf.keras.layers.Dense(dim[1], activation=tf.nn.relu))
             else:
                 #Final Layer
-                layers.append(tf.keras.layers.Dense(input_shape=(dim[0],), out_dim=dim[1], activation=None))
+                self.layers.append(tf.keras.layers.Dense(dim[1], activation=None))
 
     def call(self, x): 
         for layer in self.layers:
