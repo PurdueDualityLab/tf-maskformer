@@ -1,0 +1,36 @@
+_base_: tf_Base.yaml
+model: 
+  meta_architecture: 'maskformer'
+  sem_seg_head:
+    name: 'maskformerhead'
+    in_features: ['res2', 'res3', 'res4', 'res5']
+    ignore_value: 255
+    num_classes: 133
+    common_stride: 4
+    loss_weight: 1.0
+    convs_dim: 256
+    mask_dim: 256
+    norm: 'gn'
+    # add additional 6 encoder layers
+    pixel_decoder_name: 'TransformerEncoderPixelDecoder'
+    transformer_enc_layers: 6
+  mask_former:
+    transforemer_in_feature: 'transformer_encoder'
+    deep_supervision: True
+    no_object_weight: 0.1
+    dice_weight: 1.0
+    mask_weight: 20.0
+    hidden_dim: 256
+    num_object_queries: 100
+    nheads: 8
+    dropout: 0.1
+    dim_feedforward: 2048
+    enc_layers: 0
+    dec_layers: 6
+    pre_norm: False
+    #coco model should not pab image
+    size_divisibility: 0
+    test:
+      panoptic_on: True
+      overlap_threshold: 0.8
+      object_mask_threshold: 0.8

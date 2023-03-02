@@ -14,13 +14,14 @@ task:
         multigrid: [1, 1, 1]
     pixel_mean: [123.675, 116.280, 103.530]
     pixel_std: [58.395, 57.120, 57.375]
+    #don't know the equivalent in tf
     weights: 'detectron2://ImageNetPretrained/torchvision/R-50.pkl'
-    norm_activation:
-      activation: 'syncbn'
+    #norm_activation:
+    #  activation: 'SyncBN'
   train_data:
     tfds_name: 'coco_2017_train_panoptic'
     tfds_split: 'train'
-    is_training: true
+    is_training: True
     min_size_train: (480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800)
     crop_size: [384, 600]
     crop_type: 'absolute_range'
@@ -30,7 +31,7 @@ task:
   validation_data:
     tfds_name: 'coco_2017_val_panoptic'
     tfds_split: 'validation'
-    is_training: false
+    is_training: False
     global_batch_size: 64
 trainer:
   optimizer_config:
@@ -55,6 +56,6 @@ trainer:
 test:
   eval_period: 0
 dataloader:
-  filter_empty_annotation: true
+  filter_empty_annotation: True
   num_workers: 4
 version: 2
