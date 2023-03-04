@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Config template to train Mask R-CNN."""
+"""Config template to train Maskformer"""
 
 from official.projects.configs import base_config
 from official.modeling.hyperparams import params_dict
@@ -21,6 +21,7 @@ from official.modeling.hyperparams import params_dict
 MASK_FORMER_CFG = params_dict.ParamsDict(base_config.BASE_CFG)
 MASK_FORMER_CFG.override({
     'type': 'mask_former',
+    ''
     'train': {
         'iterations_per_loop': 100,
         'batch_size': 64,
