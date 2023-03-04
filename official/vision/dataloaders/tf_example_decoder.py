@@ -58,6 +58,9 @@ class TfExampleDecoder(decoder.Decoder):
       self._keys_to_features.update({
           'image/source_id': tf.io.FixedLenFeature((), tf.string),
       })
+    self._keys_to_features.update({
+          'image/filename': tf.io.FixedLenFeature((), tf.string),
+      })
 
   def _decode_image(self, parsed_tensors):
     """Decodes the image and set its static shape."""
@@ -172,11 +175,12 @@ class TfExampleDecoder(decoder.Decoder):
 
       if self._mask_binarize_threshold is not None:
         masks = tf.cast(masks > self._mask_binarize_threshold, tf.float32)
-
+    print(parsed_tensors)
     decoded_tensors = {
         'source_id': source_id,
         'image': image,
         'height': parsed_tensors['image/height'],
+        'file_name': parsed_tensors['image/filename'],
         'width': parsed_tensors['image/width'],
         'groundtruth_classes': classes,
         'groundtruth_is_crowd': is_crowds,
