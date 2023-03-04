@@ -32,7 +32,8 @@ from absl import logging
 import numpy as np
 import tensorflow as tf
 
-import data_utils
+# import data_utils
+from official.vision.data import data_utils
 from official.projects.configs import dataset
 from official.projects.configs import coco_constants
 

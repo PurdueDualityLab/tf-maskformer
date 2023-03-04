@@ -19,7 +19,7 @@ import io
 import numpy as np
 from PIL import Image
 import tensorflow as tf
-import data_utils
+from official.vision.data import data_utils
 
 
 def _encode_png_image(image):

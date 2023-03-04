@@ -2,7 +2,6 @@ import tensorflow as tf
 import factory
 from official.projects.configs import factory_config
 from official.projects.configs import mode_keys as ModeKeys
-from official.projects.dataloaders.distributed_executor import DistributedExecutor
 from panoptic_input import mask_former_parser
 from PIL import Image
 import numpy as np
@@ -15,7 +14,7 @@ parser_fn = mask_former_parser([1024,1024])
 file_path = "/scratch/gilbreth/abuynits/coco_ds/tfrecords/val-00002-of-00008.tfrecord"# specify the filepath to tfrecord
 save_im_path = "/home/abuynits/projects/tf-maskformer/official/projects/dataloaders/img.png" # image save path for displaying image
 im_mask_path = "/home/abuynits/projects/tf-maskformer/official/projects/dataloaders/mask.png" # image save path for displaying image
-combined_im_path = "/home/abuynits/projects/tf-maskformer/official/projects/dataloaders/combined_im.png" # image save path for displaying image
+combined_im_path = "/home/abuynits/projects/tf-maskformer/official/projects/dataloaders/combined_im2.png" # image save path for displaying image
 # returns de-normalized tensor
 def get_un_normalized_np(im_tensor):
     np_data = im_tensor.numpy()
