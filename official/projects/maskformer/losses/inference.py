@@ -2,7 +2,7 @@ import tensorflow as tf
 
 class PanopticInference():
     def call(self, mask_true, mask_pred):
-        probs = tf.keras.activations(mask_true, axis=-1)
+        probs = tf.keras.activations.softmax(mask_true, axis=-1)
         scores = tf.reduce_max(probs, axis=-1)
         labels = tf.argmax(probs, axis=-1)
         mask_pred = tf.keras.activations.sigmoid(mask_pred)
