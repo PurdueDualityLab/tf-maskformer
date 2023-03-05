@@ -44,14 +44,15 @@ class DiceLoss(tf.keras.losses.Loss):
         return tf.reduce_sum(loss) / num_masks
 
 class Loss():
-    def __init__(num_classes, matcher, eos_coef, losses):
+    def __init__(self, num_classes, matcher, weight_dict, eos_coef, losses):
         self.num_classes = num_classes
         self.matcher = matcher
+        self.weight_dict = weight_dict
         self.eos_coef = eos_coef
         self.losses = losses
         empty_weight = tf.ones(self.num_classes + 1)
-        empty_weight = tf.tensor_scatter_nd_update(empty_weight_tf, [[self.num_classes]], [self.eos_coef])
-        self.empty_weight = tf.Variable(empty_weight_tf, trainable=False, name='empty_weight')        
+        empty_weight = tf.tensor_scatter_nd_update(empty_weight, [[self.num_classes]], [self.eos_coef])
+        self.empty_weight = tf.Variable(empty_weight, trainable=False, name='empty_weight')        
 
     def _get_pred_permutation_idx(self, indices):
         batch_idx = tf.concat([tf.fill(pred,i) for i, (pred,_) in enumerate(indices)], axis=0)
@@ -156,7 +157,7 @@ class Utils():
         return all_max
 
     class NestedTensor(object):
-        def __init__(self, tensors, mask: Optional[Tensor]):
+        def __init__(self, tensors, mask=None):
             self.tensors = tf.convert_to_tensor(tensors)
             self.mask = tf.convert_to_tensor(mask) if mask is not None else None
 
