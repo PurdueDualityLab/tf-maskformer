@@ -159,6 +159,7 @@ class mask_former_parser(parser.Parser):
         self._small_instance_area_threshold = small_instance_area_threshold
         self._small_instance_weight = small_instance_weight
         self._decoder = TfExampleDecoder()
+        self._mode = mode
         if mode == None:
             print("assuming training mode")
             self._mode = ModeKeys.TRAIN
@@ -373,10 +374,12 @@ class mask_former_parser(parser.Parser):
 
         with tf.name_scope('parser'):
             data = self._decoder.decode(value)
-            print("DATA PRINT:",data)
-            print("HEIGHT:",np.array(data["height"]),"width:",np.array(data["width"]))
             self._output_size = [np.array(data["height"]),np.array(data["width"])]
+            
             if self._mode == ModeKeys.TRAIN:
                 return self._parse_train_data(data)
             else:
+                if self._mode == ModeKeys.TESTING:
+                    print("DATA PRINT:",data)
+                    print("HEIGHT:",np.array(data["height"]),"width:",np.array(data["width"]))
                 return self._parse_eval_data(data)
