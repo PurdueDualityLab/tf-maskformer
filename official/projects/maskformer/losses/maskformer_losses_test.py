@@ -1,11 +1,11 @@
-from official.projects.losses.maskformer_losses import Loss
+from official.projects.maskformer.losses.maskformer_losses import Loss
 from research.object_detection.matchers.hungarian_matcher import HungarianBipartiteMatcher
 from absl.testing import parameterized
 import tensorflow as tf
 
 import pickle
 
-class FocalLossTest(tf.test.TestCase, parameterized.TestCase):
+class LossTest(tf.test.TestCase, parameterized.TestCase):
     @parameterized.named_parameters(('test1',))
     def test_pass_through(self):
         matcher = HungarianBipartiteMatcher()
@@ -15,16 +15,19 @@ class FocalLossTest(tf.test.TestCase, parameterized.TestCase):
         weight_dict = {"loss_ce":1, "loss_mask": mask_weight, "loss_dice": dice_weight}
         losses = ["labels", "masks"]
 
-        loss = Loss(
+        da_loss = Loss(
             num_classes = 171,
             matcher = matcher,
             weight_dict = weight_dict,
             eos_coef = no_object_weight,
-            losses = losses,
+            losses = losses
         )
         
-        params = pickle.load('params.pickle')
-        print(params)
+        with open("params.pickle", "rb") as f:
+            params = pickle.load(f)
+        
+        print(loss.call(params["outputs"], params["targets"]))
+        print(params.keys())
 
         # self.assertAllEqual(
         #     output["class_prob_predictions"].shape.as_list(), expected_class_probs_shape)
