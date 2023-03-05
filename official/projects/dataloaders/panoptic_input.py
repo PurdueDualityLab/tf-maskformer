@@ -18,16 +18,14 @@ from typing import List, Optional
 
 import numpy as np
 import tensorflow as tf
-import sys
 
-sys.path.append("/home/abuynits/projects/tf-maskformer")
 from official.vision.configs import common
 from official.vision.dataloaders import parser
 from official.vision.dataloaders import tf_example_decoder
 from official.vision.ops import augment
 from official.vision.ops import preprocess_ops
-import input_reader
-
+from official.projects.dataloaders import input_reader
+from official.projects.configs import mode_keys as ModeKeys
 
 def _compute_gaussian_from_std(sigma):
     """Computes the Gaussian and its size from a given standard deviation."""
@@ -100,7 +98,7 @@ class mask_former_parser(parser.Parser):
             small_instance_area_threshold: int = 4096,
             small_instance_weight: float = 3.0,
             dtype: str = 'float32',
-            mode: input_reader.ModeKeys = None):
+            mode: ModeKeys = None):
         """Initializes parameters for parsing annotations in the dataset.
     
         Args:
@@ -163,7 +161,7 @@ class mask_former_parser(parser.Parser):
         self._decoder = TfExampleDecoder()
         if mode == None:
             print("assuming training mode")
-            self._mode = input_reader.ModeKeys.TRAIN
+            self._mode = ModeKeys.TRAIN
 
     def _resize_and_crop_mask(self, mask, image_info, is_training):
         """Resizes and crops mask using `image_info` dict."""
@@ -378,7 +376,7 @@ class mask_former_parser(parser.Parser):
             print("DATA PRINT:",data)
             print("HEIGHT:",np.array(data["height"]),"width:",np.array(data["width"]))
             self._output_size = [np.array(data["height"]),np.array(data["width"])]
-            if self._mode == input_reader.ModeKeys.TRAIN:
+            if self._mode == ModeKeys.TRAIN:
                 return self._parse_train_data(data)
             else:
                 return self._parse_eval_data(data)

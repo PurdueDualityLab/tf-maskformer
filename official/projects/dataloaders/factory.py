@@ -25,20 +25,20 @@ def parser_generator(params,mode):
     """Generator function for various dataset parser."""
     if params.architecture.parser == 'mask_former_parser':
         anchor_params = params.anchor
-        parser_params = params.mask_former
+        parser_params = params.input
         parser_fn = mask_former_parser(
-            output_size=parser_params.output_size,
-            resize_eval_groundtruth=True,
-            groundtruth_padded_size=None,
-            ignore_label=0,
+            output_size=parser_params.image_size,
+            resize_eval_groundtruth=parser_params.resize_eval_groundtruth,
+            groundtruth_padded_size=parser_params.groundtruth_padded_size,
+            ignore_label=parser_params.ignore_label,
             aug_rand_hflip=parser_params.aug_rand_hflip,
-            aug_scale_min=parser_params.aug_scale_min,
-            aug_scale_max=parser_params.aug_scale_max,
-            aug_type=None,
-            sigma=8.0,
-            small_instance_area_threshold=4096,
-            small_instance_weight=3.0,
-            dtype='float32',
+            aug_scale_min=parser_params.min_scale,
+            aug_scale_max=parser_params.max_scale,
+            aug_type=parser_params.aug_type,
+            sigma=parser_params.sigma,
+            small_instance_area_threshold=parser_params.small_instance_area_threshold,
+            small_instance_weight=parser_params.small_instance_weight,
+            dtype=parser_params.dtype,
             mode=mode,
         )
     else:

@@ -1,14 +1,16 @@
-import input_reader
+import sys
+sys.path.append("/home/abuynits/projects/tf-maskformer")
+from official.projects.dataloaders import input_reader
+from official.projects.configs import mode_keys as ModeKeys
 from official.projects.configs import factory_config
 from official.common import distribute_utils
 from official.modeling.hyperparams import params_dict
-import distributed_executor as executor
 from absl import flags
 from official.utils import hyperparams_flags
 from official.utils.flags import core as flags_core
 import sys
 from panoptic_input import mask_former_parser
-from official.projects.dataloaders.distributed_executor import DistributedExecutor
+
 FLAGS = flags.FLAGS
 argv = FLAGS(sys.argv)
 hyperparams_flags.initialize_common_flags()
@@ -18,13 +20,6 @@ eval_input_fn = None
 
 params = factory_config.config_generator('mask_former')
 
-params.override(
-    {
-        'strategy_type': FLAGS.strategy_type,
-        'model_dir': FLAGS.model_dir,
-        'strategy_config': executor.strategy_flags_dict(),
-    },
-    is_strict=False)
 params = params_dict.override_params_dict(
     params, FLAGS.config_file, is_strict=True)
 params = params_dict.override_params_dict(
@@ -43,19 +38,16 @@ if training_file_pattern:
     train_input_fn = input_reader.InputFn(
         file_pattern=training_file_pattern,
         params=params,
-        mode=input_reader.ModeKeys.TRAIN,
+        mode=ModeKeys.TRAIN,
         batch_size=params.train.batch_size)
 
 if eval_file_pattern:
     eval_input_fn = input_reader.InputFn(
         file_pattern=eval_file_pattern,
         params=params,
-        mode=input_reader.ModeKeys.PREDICT_WITH_GT,
+        mode=ModeKeys.PREDICT_WITH_GT,
         batch_size=params.eval.batch_size,
         num_examples=params.eval.eval_samples)
-print(ds)
-ex = ds.take(1)
 
-print(ex)
-print("displaying")
-display_im(ex)
+train_ds = train_input_fn()
+print(a)

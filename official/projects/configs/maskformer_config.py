@@ -19,129 +19,156 @@ from official.modeling.hyperparams import params_dict
 
 # pylint: disable=line-too-long
 MASK_FORMER_CFG = params_dict.ParamsDict(base_config.BASE_CFG)
+
 MASK_FORMER_CFG.override({
-    'type': 'mask_former',
-    ''
-    'train': {
-        'iterations_per_loop': 100,
-        'batch_size': 64,
-        'total_steps': 22500,
-        'num_cores_per_replica': None,
-        'input_partition_dims': None,
-        'optimizer': {
-            'type': 'momentum',
-            'momentum': 0.9,
-            'nesterov': True,  # `False` is better for TPU v3-128.
-        },
-        'learning_rate': {
-            'type': 'step',
-            'warmup_learning_rate': 0.0067,
-            'warmup_steps': 500,
-            'init_learning_rate': 0.08,
-            'learning_rate_levels': [0.008, 0.0008],
-            'learning_rate_steps': [15000, 20000],
-        },
-        'checkpoint': {
-            'path': '',
-            'prefix': '',
-        },
-        # One can use 'RESNET_FROZEN_VAR_PREFIX' to speed up ResNet training
-        # when loading from the checkpoint.
-        'frozen_variable_prefix': '',
-        'train_file_pattern': '/scratch/gilbreth/abuynits/coco_ds/tfrecords/train-00001-of-00032.tfrecord',  # TODO: fix this sketchiness
-        'train_dataset_type': 'tfrecord',
-        # TODO(b/142174042): Support transpose_input option.
-        'transpose_input': False,
-        'l2_weight_decay': 0.0001,
-        'gradient_clip_norm': 0.0,
-        'input_sharding': False,
+  "input": {
+    "dataset_mapper_name": "mask_former_semantic",
+    "color_aug_ssd": False,
+    "crop": {
+      "single_category_max_area": 1.0
     },
-    'eval': {
-        'eval_file_pattern': '/scratch/gilbreth/abuynits/coco_ds/tfrecords/train-00001-of-00032.tfrecord',  # TODO: fix this sketchiness
-        'type': 'box_and_mask',
-        'num_images_to_visualize': 0,
+    "size_divisibility": -1,
+    "image_size": 1024,
+    "min_scale": 0.1,
+    "max_scale": 2.0,
+    "resize_eval_groundtruth": True,
+    "groundtruth_padded_size": None,
+    "ignore_label": 0,
+    "aug_rand_hflip": True,
+    "aug_type": None,
+    "sigma": 8.0,
+    "small_instance_area_threshold": 4096,
+    "small_instance_weight": 3.0,
+    "dtype": 'float32',
+  },
+  "train": {
+    "iterations_per_loop": 100,
+    "batch_size": 64,
+    "total_steps": 22500,
+    "num_cores_per_replica": None,
+    "input_partition_dims": None,
+    "optimizer": {
+      "type": [
+        "momentum"
+      ],
+      "momentum": [
+        0.9
+      ],
+      "nesterov": [
+        True
+      ]
     },
-    'architecture': {
-        'parser': 'mask_former_parser',
-        'min_level': 2,
-        'max_level': 6,
-        'include_mask': True,
-        'mask_target_size': 28,
+    "learning_rate": {
+      "type": "step",
+      "warmup_learning_rate": 0.0067,
+      "warmup_steps": 500,
+      "init_learning_rate": 0.08,
+      "learning_rate_levels": [
+        0.008,
+        0.0008
+      ],
+      "learning_rate_steps": [
+        15000,
+        20000
+      ]
     },
-    'mask_former': {
-        'output_size': [1024, 1024],
-        'num_channels': 3,
-        'rpn_match_threshold': 0.7,
-        'rpn_unmatched_threshold': 0.3,
-        'rpn_batch_size_per_im': 256,
-        'rpn_fg_fraction': 0.5,
-        'aug_rand_hflip': True,
-        'aug_scale_min': 1.0,
-        'aug_scale_max': 1.0,
-        'skip_crowd_during_training': True,
-        'max_num_instances': 100,
-        'mask_crop_size': 112,
+    "frozen_variable_prefix": "",
+    "train_file_pattern": "/scratch/gilbreth/abuynits/coco_ds/tfrecords/train*",
+    "train_dataset_type": "tfrecord",
+    "transpose_input": False,
+    "l2_weight_decay": 0.0001,
+    "gradient_clip_norm": 0.0,
+    "input_sharding": False
+  },
+  "eval": {
+    "eval_file_pattern": [
+      "/scratch/gilbreth/abuynits/coco_ds/tfrecords/val*"
+    ],
+    "type": "box_and_mask",
+    "num_images_to_visualize": 0
+  },
+  "solver": {
+    "weight_decay_embed": 0.0,
+    "optimizer": "ADAMW",
+    "backbone_multiplier": 0.1
+  },
+  "model": {
+    "mask_former": {
+      "deep_supervision": True,
+      "no_object_weight": 0.1,
+      "class_weight": 1.0,
+      "dice_weight": 1.0,
+      "mask_weight": 20.0,
+      "nheads": 8,
+      "dropout": 0.1,
+      "dim_feedforward": 2048,
+      "enc_layers": 0,
+      "dec_layers": 6,
+      "pre_norm": False,
+      "hidden_dim": 256,
+      "num_object_queries": 100,
+      "transformer_in_feature": "res5",
+      "enforce_input_proj": False,
+      "test": {
+        "semantic_on": True,
+        "instance_on": False,
+        "panoptic_on": False,
+        "object_mask_threshold": 0.0,
+        "overlap_threshold": 0.0,
+        "sem_seg_postprocessing_before_inference": False
+      },
+      "size_divisibility": 32,
+      "transformer_decoder_name": "MultiScaleMaskedTransformerDecoder",
+      "train_num_points": 12544,
+      "oversample_ratio": 3.0,
+      "importance_sample_ratio": 0.75
     },
-    'anchor': {
-        'num_scales': 1,
-        'anchor_size': 8,
+    "sem_seg_head": {
+      "mask_dim": 256,
+      "transformer_enc_layers": 0,
+      "pixel_decoder_name": "BasePixelDecoder",
+      "deformable_transformer_encoder_in_features": [
+        "res3",
+        "res4",
+        "res5"
+      ],
+      "deformable_transformer_encoder_n_points": 4,
+      "deformable_transformer_encoder_n_heads": 8
     },
-    'rpn_head': {
-        'num_convs': 2,
-        'num_filters': 256,
-        'use_separable_conv': False,
-        'use_batch_norm': False,
-    },
-    'frcnn_head': {
-        'num_convs': 0,
-        'num_filters': 256,
-        'use_separable_conv': False,
-        'num_fcs': 2,
-        'fc_dims': 1024,
-        'use_batch_norm': False,
-    },
-    'mrcnn_head': {
-        'num_convs': 4,
-        'num_filters': 256,
-        'use_separable_conv': False,
-        'use_batch_norm': False,
-    },
-    'rpn_score_loss': {
-        'rpn_batch_size_per_im': 256,
-    },
-    'rpn_box_loss': {
-        'huber_loss_delta': 1.0 / 9.0,
-    },
-    'frcnn_box_loss': {
-        'huber_loss_delta': 1.0,
-    },
-    'roi_proposal': {
-        'rpn_pre_nms_top_k': 2000,
-        'rpn_post_nms_top_k': 1000,
-        'rpn_nms_threshold': 0.7,
-        'rpn_score_threshold': 0.0,
-        'rpn_min_size_threshold': 0.0,
-        'test_rpn_pre_nms_top_k': 1000,
-        'test_rpn_post_nms_top_k': 1000,
-        'test_rpn_nms_threshold': 0.7,
-        'test_rpn_score_threshold': 0.0,
-        'test_rpn_min_size_threshold': 0.0,
-        'use_batched_nms': False,
-    },
-    'roi_sampling': {
-        'num_samples_per_image': 512,
-        'fg_fraction': 0.25,
-        'fg_iou_thresh': 0.5,
-        'bg_iou_thresh_hi': 0.5,
-        'bg_iou_thresh_lo': 0.0,
-        'mix_gt_boxes': True,
-    },
-    'mask_sampling': {
-        'num_mask_samples_per_image': 128,  # Typically = `num_samples_per_image` * `fg_fraction`.
-    },
-    'postprocess': {
-        'pre_nms_num_boxes': 1000,
-    },
+    "swin": {
+      "pretrain_img_size": 224,
+      "patch_size": 4,
+      "embed_dim": 96,
+      "depths": [
+        2,
+        2,
+        6,
+        2
+      ],
+      "num_heads": [
+        3,
+        6,
+        12,
+        24
+      ],
+      "window_size": 7,
+      "mlp_ratio": 4.0,
+      "qkv_bias": True,
+      "qk_scale": None,
+      "drop_rate": 0.0,
+      "attn_drop_rate": 0.0,
+      "drop_path_rate": 0.3,
+      "APE": False,
+      "patch_norm": True,
+      "out_features": [
+        "res2",
+        "res3",
+        "res4",
+        "res5"
+      ],
+      "use_checkpoint": False
+    }
+  }
 }, is_strict=False)
 
 MASK_FORMER_RESTRICTIONS = []
