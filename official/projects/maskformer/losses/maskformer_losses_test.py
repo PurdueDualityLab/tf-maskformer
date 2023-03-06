@@ -2,6 +2,7 @@ from official.projects.maskformer.losses.maskformer_losses import Loss
 from research.object_detection.matchers.hungarian_matcher import HungarianBipartiteMatcher
 from absl.testing import parameterized
 import tensorflow as tf
+import torch
 
 import pickle
 
@@ -27,8 +28,15 @@ class LossTest(tf.test.TestCase, parameterized.TestCase):
             params = pickle.load(f)
         
         print(loss.call(params["outputs"], params["targets"]))
-        print(params.keys())
-
+        # li = ["outputs", "targets"]
+        # # for l in li:
+        # #     for key in params[l]:
+        # #         print(key, torch.tensor(params[l][key]).shape)
+        
+        # for i, dic in enumerate(params["targets"]):
+        #     print(i)
+        #     print("labels", dic["labels"].shape)
+        #     print("targets", dic["masks"].shape)
         # self.assertAllEqual(
         #     output["class_prob_predictions"].shape.as_list(), expected_class_probs_shape)
         # self.assertAllEqual(
