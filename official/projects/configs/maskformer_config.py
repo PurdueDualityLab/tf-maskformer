@@ -29,7 +29,7 @@ MASK_FORMER_CFG.override({
     },
     "size_divisibility": -1,
     "image_size": 1024,
-    "min_scale": 0.1,
+    "min_scale": 0.5,
     "max_scale": 2.0,
     "resize_eval_groundtruth": True,
     "groundtruth_padded_size": None,

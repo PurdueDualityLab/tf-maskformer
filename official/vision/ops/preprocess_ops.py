@@ -116,16 +116,13 @@ def resize_and_crop_image(image,
                           seed=1,
                           method=tf.image.ResizeMethod.BILINEAR):
   """Resizes the input image to output size (RetinaNet style).
-
   Resize and pad images given the desired output size of the image and
   stride size.
-
   Here are the preprocessing steps.
   1. For a given image, keep its aspect ratio and rescale the image to make it
      the largest rectangle to be bounded by the rectangle specified by the
      `desired_size`.
   2. Pad the rescaled image to the padded_size.
-
   Args:
     image: a `Tensor` of shape [height, width, 3] representing an image.
     desired_size: a `Tensor` or `int` list/tuple of two elements representing
@@ -139,7 +136,6 @@ def resize_and_crop_image(image,
       random scale applied to desired_size for training scale jittering.
     seed: seed for random scale jittering.
     method: function to resize input image to scaled image.
-
   Returns:
     output_image: `Tensor` of shape [height, width, 3] where [height, width]
       equals to `output_size`.

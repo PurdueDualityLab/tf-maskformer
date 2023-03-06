@@ -9,6 +9,7 @@ from absl import flags
 from official.utils import hyperparams_flags
 from official.utils.flags import core as flags_core
 import sys
+import tensorflow as tf
 from panoptic_input import mask_former_parser
 
 FLAGS = flags.FLAGS
@@ -50,4 +51,4 @@ if eval_file_pattern:
         num_examples=params.eval.eval_samples)
 
 train_ds = train_input_fn()
-print(a)
+print(train_ds)

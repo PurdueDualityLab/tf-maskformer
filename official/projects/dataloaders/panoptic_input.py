@@ -86,11 +86,11 @@ class mask_former_parser(parser.Parser):
 
     def __init__(
             self,
-            output_size: List[int],
+            output_size: List[int] = None,
             resize_eval_groundtruth: bool = True,
             groundtruth_padded_size: Optional[List[int]] = None,
             ignore_label: int = 0,
-            aug_rand_hflip: bool = False,
+            aug_rand_hflip: bool = True,
             aug_scale_min: float = 1.0,
             aug_scale_max: float = 1.0,
             aug_type: Optional[common.Augmentation] = None,
@@ -134,6 +134,7 @@ class mask_former_parser(parser.Parser):
         self._ignore_label = ignore_label
 
         # Data augmentation.
+        self._crop_rand = True
         self._aug_rand_hflip = aug_rand_hflip
         self._aug_scale_min = aug_scale_min
         self._aug_scale_max = aug_scale_max
@@ -166,8 +167,9 @@ class mask_former_parser(parser.Parser):
 
     def _resize_and_crop_mask(self, mask, image_info, is_training):
         """Resizes and crops mask using `image_info` dict."""
-        height = image_info[0][0]
-        width = image_info[0][1]
+        height = int(image_info[0][0])
+        width = int(image_info[0][1])
+        print(height,width)
         mask = tf.reshape(mask, shape=[1, height, width, 1])
         mask += 1
 
@@ -206,9 +208,9 @@ class mask_former_parser(parser.Parser):
         instance_mask = tf.cast(
             data['groundtruth_panoptic_instance_mask'][:, :, 0],
             dtype=tf.float32)
-
         # Flips image randomly during training.
         if self._aug_rand_hflip and is_training:
+            print("doing random flip")
             masks = tf.stack([category_mask, instance_mask], axis=0)
             image, _, masks = preprocess_ops.random_horizontal_flip(
                 image=image, masks=masks)
@@ -216,6 +218,8 @@ class mask_former_parser(parser.Parser):
             instance_mask = masks[1]
 
         # Resizes and crops image.
+        print(self._output_size)
+    # Resizes and crops image.
         image, image_info = preprocess_ops.resize_and_crop_image(
             image,
             self._output_size,
@@ -231,11 +235,10 @@ class mask_former_parser(parser.Parser):
             instance_mask,
             image_info,
             is_training=is_training)
-
         (instance_centers_heatmap,
-         instance_centers_offset,
-         semantic_weights) = self._encode_centers_and_offets(
-            instance_mask=instance_mask[:, :, 0])
+            instance_centers_offset,
+            semantic_weights) = self._encode_centers_and_offets(
+                instance_mask=instance_mask[:, :, 0])
 
         # Cast image and labels as self._dtype
         image = tf.cast(image, dtype=self._dtype)
@@ -374,12 +377,44 @@ class mask_former_parser(parser.Parser):
 
         with tf.name_scope('parser'):
             data = self._decoder.decode(value)
-            self._output_size = [np.array(data["height"]),np.array(data["width"])]
             
             if self._mode == ModeKeys.TRAIN:
                 return self._parse_train_data(data)
             else:
                 if self._mode == ModeKeys.TESTING:
                     print("DATA PRINT:",data)
-                    print("HEIGHT:",np.array(data["height"]),"width:",np.array(data["width"]))
+                    print("HEIGHT:",data["height"].eval(),"width:",data["width"].eval())
                 return self._parse_eval_data(data)
+            
+            """
+            tf_example_decoder parsed tensors: {
+                'image/object/area': SparseTensor(indices=Tensor("parser/ParseSingleExample/ParseExample/ParseExampleV2:0", shape=(None, 1), dtype=int64), 
+                                                  values=Tensor("parser/ParseSingleExample/ParseExample/ParseExampleV2:8", shape=(None,), dtype=float32), 
+                                                  dense_shape=Tensor("parser/ParseSingleExample/ParseExample/ParseExampleV2:16", shape=(1,), dtype=int64)), 
+                'image/object/bbox/xmax': SparseTensor(indices=Tensor("parser/ParseSingleExample/ParseExample/ParseExampleV2:1", shape=(None, 1), dtype=int64), 
+                                                       values=Tensor("parser/ParseSingleExample/ParseExample/ParseExampleV2:9", shape=(None,), dtype=float32), 
+                                                       dense_shape=Tensor("parser/ParseSingleExample/ParseExample/ParseExampleV2:17", shape=(1,), dtype=int64)), 
+                'image/object/bbox/xmin': SparseTensor(indices=Tensor("parser/ParseSingleExample/ParseExample/ParseExampleV2:2", shape=(None, 1), dtype=int64),
+                                                       values=Tensor("parser/ParseSingleExample/ParseExample/ParseExampleV2:10", shape=(None,), dtype=float32), 
+                                                       dense_shape=Tensor("parser/ParseSingleExample/ParseExample/ParseExampleV2:18", shape=(1,), dtype=int64)), 
+                'image/object/bbox/ymax': SparseTensor(indices=Tensor("parser/ParseSingleExample/ParseExample/ParseExampleV2:3", shape=(None, 1), dtype=int64), 
+                                                       values=Tensor("parser/ParseSingleExample/ParseExample/ParseExampleV2:11", shape=(None,), dtype=float32), 
+                                                       dense_shape=Tensor("parser/ParseSingleExample/ParseExample/ParseExampleV2:19", shape=(1,), dtype=int64)), 
+                'image/object/bbox/ymin': SparseTensor(indices=Tensor("parser/ParseSingleExample/ParseExample/ParseExampleV2:4", shape=(None, 1), dtype=int64), 
+                                                       values=Tensor("parser/ParseSingleExample/ParseExample/ParseExampleV2:12", shape=(None,), dtype=float32), 
+                                                       dense_shape=Tensor("parser/ParseSingleExample/ParseExample/ParseExampleV2:20", shape=(1,), dtype=int64)), 
+                'image/object/class/label': SparseTensor(indices=Tensor("parser/ParseSingleExample/ParseExample/ParseExampleV2:5", shape=(None, 1), dtype=int64), 
+                                                         values=Tensor("parser/ParseSingleExample/ParseExample/ParseExampleV2:13", shape=(None,), dtype=int64), 
+                                                         dense_shape=Tensor("parser/ParseSingleExample/ParseExample/ParseExampleV2:21", shape=(1,), dtype=int64)), 
+                'image/object/is_crowd': SparseTensor(indices=Tensor("parser/ParseSingleExample/ParseExample/ParseExampleV2:6", shape=(None, 1), dtype=int64), 
+                                                      values=Tensor("parser/ParseSingleExample/ParseExample/ParseExampleV2:14", shape=(None,), dtype=int64), 
+                                                      dense_shape=Tensor("parser/ParseSingleExample/ParseExample/ParseExampleV2:22", shape=(1,), dtype=int64)), 
+                'image/object/mask': SparseTensor(indices=Tensor("parser/ParseSingleExample/ParseExample/ParseExampleV2:7", shape=(None, 1), dtype=int64), 
+                                                  values=Tensor("parser/ParseSingleExample/ParseExample/ParseExampleV2:15", shape=(None,), dtype=string), 
+                                                  dense_shape=Tensor("parser/ParseSingleExample/ParseExample/ParseExampleV2:23", shape=(1,), dtype=int64)), 
+                'image/encoded': <tf.Tensor 'parser/ParseSingleExample/ParseExample/ParseExampleV2:24' shape=() dtype=string>, 
+                'image/filename': <tf.Tensor 'parser/ParseSingleExample/ParseExample/ParseExampleV2:25' shape=() dtype=string>, 
+                'image/height': <tf.Tensor 'parser/ParseSingleExample/ParseExample/ParseExampleV2:26' shape=() dtype=int64>, 
+                'image/width': <tf.Tensor 'parser/ParseSingleExample/ParseExample/ParseExampleV2:27' shape=() dtype=int64>}
+                
+                """

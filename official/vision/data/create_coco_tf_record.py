@@ -34,8 +34,6 @@ import os
 
 import sys
 
-sys.path.append("/scratch/gilbreth/abuynits/tf-maskformer")
-
 from absl import app  # pylint:disable=unused-import
 from absl import flags
 import numpy as np
