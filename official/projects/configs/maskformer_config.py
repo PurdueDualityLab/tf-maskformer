@@ -34,6 +34,11 @@ MASK_FORMER_CFG.override({
       "max_scale": 2.0,
     },
     "color_aug_ssd": False,
+    "color_aug": {
+      "brightness": 0.2,
+      "saturation": 0.3,
+      "contrast": 0.5,
+    },
     "resize_eval_groundtruth": True,
     "groundtruth_padded_size": None,
     "ignore_label": 0,

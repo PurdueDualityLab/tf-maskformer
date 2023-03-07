@@ -21,24 +21,28 @@ from panoptic_input import mask_former_parser
 
 
 def parser_generator(params,mode):
-    #TODO: need to specify the param dict
     """Generator function for various dataset parser."""
     if params.architecture.parser == 'mask_former_parser':
         anchor_params = params.anchor
         parser_params = params.input
-        parser_crop_params = params.input.crop
+        crop_params = parser_params.crop
+        color_aug_params = parser_params.color_aug
         parser_fn = mask_former_parser(
             output_size = parser_params.image_size,
-            aspect_ratio_range = parser_crop_params.aspect_ratio_range,
-            min_overlap_params = parser_crop_params.min_overlap_params,
-            max_retry = parser_crop_params.max_retry,
+            aspect_ratio_range = crop_params.aspect_ratio_range,
+            min_overlap_params = crop_params.min_overlap_params,
+            max_retry = crop_params.max_retry,
             pad_output = parser_params.pad_output,
             resize_eval_groundtruth = parser_params.resize_eval_groundtruth,
             groundtruth_padded_size = parser_params.groundtruth_padded_size,
             ignore_label = parser_params.ignore_label,
             aug_rand_hflip = parser_params.aug_rand_hflip,
-            aug_scale_min = parser_crop_params.min_scale,
-            aug_scale_max = parser_crop_params.max_scale,
+            aug_scale_min = crop_params.min_scale,
+            aug_scale_max = crop_params.max_scale,
+            color_aug_ssd = parser_params.color_aug_ssd,
+            brightness = color_aug_params.brightness,
+            saturation = color_aug_params.saturation,
+            contrast = color_aug_params.contrast,
             aug_type = parser_params.aug_type,
             sigma = parser_params.sigma,
             small_instance_area_threshold = parser_params.small_instance_area_threshold,

@@ -98,6 +98,10 @@ class mask_former_parser(parser.Parser):
             aug_rand_hflip: bool = True,
             aug_scale_min: float = 1.0,
             aug_scale_max: float = 1.0,
+            color_aug_ssd: bool = False,
+            brightness: float = 0.2,
+            saturation: float = 0.3,
+            contrast: float = 0.5,
             aug_type: Optional[common.Augmentation] = None,
             sigma: float = 8.0,
             small_instance_area_threshold: int = 4096,
@@ -171,6 +175,14 @@ class mask_former_parser(parser.Parser):
         self._small_instance_area_threshold = small_instance_area_threshold
         self._small_instance_weight = small_instance_weight
         self._decoder = TfExampleDecoder()
+        
+        # color augmentation
+        self._color_aug_ssd = color_aug_ssd
+        self._brightness = brightness
+        self._saturation = saturation
+        self._contrast = contrast
+        
+        # general settings
         self._mode = mode
         self._seed = seed
         self._pad_output = pad_output
@@ -226,6 +238,16 @@ class mask_former_parser(parser.Parser):
         instance_mask = tf.cast(
             data['groundtruth_panoptic_instance_mask'][:, :, 0],
             dtype=tf.float32)
+        
+        # applies by pixel augmentation (saturation, brightness, contrast)
+        if self._color_aug_ssd:
+            image = preprocess_ops.color_jitter(
+                image = image,
+                brightness = self._brightness,
+                contrast = self._contrast,
+                saturation = self._saturation,
+                seed = self._seed,
+            )
         # Flips image randomly during training.
         if self._aug_rand_hflip and is_training:
             print("doing random flip")
@@ -237,6 +259,8 @@ class mask_former_parser(parser.Parser):
 
             category_mask = masks[0]
             instance_mask = masks[1]
+            
+            
 
         # Resizes and crops image.
         print(category_mask.shape)
@@ -247,7 +271,6 @@ class mask_former_parser(parser.Parser):
         print("stacked masks:",masks.shape)
         
         # Resizes and crops image.
-
         cropped_image, masks = preprocess_ops.random_crop_image_masks(
             img = image,
             masks = masks,

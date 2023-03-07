@@ -613,7 +613,7 @@ def horizontal_flip_masks(masks):
   return masks[:, :, ::-1]
 
 
-def random_horizontal_flip(image, normalized_boxes=None, masks=None, seed=1):
+def random_horizontal_flip(image, normalized_boxes=None, masks=None, seed=None):
   """Randomly flips input image and bounding boxes."""
   with tf.name_scope('random_horizontal_flip'):
     do_flip = tf.greater(tf.random.uniform([], seed=seed), 0.5)
