@@ -100,7 +100,7 @@ BASE_CFG = {
         'max_level': 7,
         'multilevel_features': 'fpn',
         'use_bfloat16': True,
-        'parser': 'mask_former_parser', #TODO Fix this to be more specific and not in base config
+        'parser': 'mask_former_parser',  # TODO Fix this to be more specific and not in base config
         # Note that `num_classes` is the total number of classes including
         # one background classes whose index is 0.
         'num_classes': 91,

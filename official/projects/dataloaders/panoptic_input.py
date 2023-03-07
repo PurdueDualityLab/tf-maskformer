@@ -27,6 +27,7 @@ from official.vision.ops import preprocess_ops
 from official.projects.dataloaders import input_reader
 from official.projects.configs import mode_keys as ModeKeys
 
+
 def _compute_gaussian_from_std(sigma):
     """Computes the Gaussian and its size from a given standard deviation."""
     size = int(6 * sigma + 3)
@@ -147,8 +148,8 @@ class mask_former_parser(parser.Parser):
         self._aug_rand_hflip = aug_rand_hflip
         self._aug_scale_min = aug_scale_min
         self._aug_scale_max = aug_scale_max
-        
-        #Cropping:
+
+        # Cropping:
         self._min_scale = min_scale
         self._aspect_ratio_range = aspect_ratio_range
         self._min_overlap_params = min_overlap_params
@@ -175,13 +176,13 @@ class mask_former_parser(parser.Parser):
         self._small_instance_area_threshold = small_instance_area_threshold
         self._small_instance_weight = small_instance_weight
         self._decoder = TfExampleDecoder()
-        
+
         # color augmentation
         self._color_aug_ssd = color_aug_ssd
         self._brightness = brightness
         self._saturation = saturation
         self._contrast = contrast
-        
+
         # general settings
         self._mode = mode
         self._seed = seed
@@ -192,20 +193,20 @@ class mask_former_parser(parser.Parser):
 
     def _resize_and_crop_mask(self, mask, image_info, is_training):
         """Resizes and crops mask using `image_info` dict."""
-        
+
         image_scale = image_info[2, :]
-        offset = image_info[3, : ]
+        offset = image_info[3, :]
         im_height = int(image_info[0][0])
         im_width = int(image_info[0][1])
         print(mask.shape)
         print(im_height, im_width)
-        
+
         mask = tf.reshape(mask, shape=[1, im_height, im_width, 1])
         print(mask.shape)
         mask += 1
 
         if is_training or self._resize_eval_groundtruth:
-            print("using image offset:",offset)
+            print("using image offset:", offset)
             mask = preprocess_ops.resize_and_crop_masks(
                 mask,
                 image_scale,
@@ -238,29 +239,27 @@ class mask_former_parser(parser.Parser):
         instance_mask = tf.cast(
             data['groundtruth_panoptic_instance_mask'][:, :, 0],
             dtype=tf.float32)
-        
+
         # applies by pixel augmentation (saturation, brightness, contrast)
         if self._color_aug_ssd:
             image = preprocess_ops.color_jitter(
-                image = image,
-                brightness = self._brightness,
-                contrast = self._contrast,
-                saturation = self._saturation,
-                seed = self._seed,
+                image=image,
+                brightness=self._brightness,
+                contrast=self._contrast,
+                saturation=self._saturation,
+                seed=self._seed,
             )
         # Flips image randomly during training.
         if self._aug_rand_hflip and is_training:
             print("doing random flip")
             masks = tf.stack([category_mask, instance_mask], axis=0)
             image, _, masks = preprocess_ops.random_horizontal_flip(
-                image=image, 
+                image=image,
                 masks=masks,
-                seed = self._seed)
+                seed=self._seed)
 
             category_mask = masks[0]
             instance_mask = masks[1]
-            
-            
 
         # Resizes and crops image.
         print(category_mask.shape)
@@ -268,41 +267,40 @@ class mask_former_parser(parser.Parser):
         print(self._output_size)
         masks = tf.stack([category_mask, instance_mask], axis=0)
         masks = tf.expand_dims(masks, -1)
-        print("stacked masks:",masks.shape)
-        
+        print("stacked masks:", masks.shape)
+
         # Resizes and crops image.
         cropped_image, masks = preprocess_ops.random_crop_image_masks(
-            img = image,
-            masks = masks,
-            min_scale = self._min_scale,
-            aspect_ratio_range = self._aspect_ratio_range,
-            min_overlap_params = self._min_overlap_params,
-            max_retry = self._max_retry,
-            seed = self._seed,
+            img=image,
+            masks=masks,
+            min_scale=self._min_scale,
+            aspect_ratio_range=self._aspect_ratio_range,
+            min_overlap_params=self._min_overlap_params,
+            max_retry=self._max_retry,
+            seed=self._seed,
         )
-                                                                      
-                                                                      
+
         category_mask = tf.squeeze(masks[0])
         instance_mask = tf.squeeze(masks[1])
-        
-        print("categorical shape:",category_mask.shape)
-        print("instance shape:",instance_mask.shape)
-        print("image shape:",cropped_image.shape)
-        
+
+        print("categorical shape:", category_mask.shape)
+        print("instance shape:", instance_mask.shape)
+        print("image shape:", cropped_image.shape)
+
         crop_im_size = tf.cast(tf.shape(cropped_image)[0:2], tf.int32)
-        
+
         print("using padding:", self._output_size)
         if not self._pad_output:
             self._output_size = crop_im_size
-        
-        print("using padding:", self._output_size)    
+
+        print("using padding:", self._output_size)
         image, image_info = preprocess_ops.resize_and_crop_image(
             cropped_image,
             self._output_size,
             self._output_size,
             aug_scale_min=self._aug_scale_min if self._pad_output or not self._mode == ModeKeys.TRAIN else 1.0,
-            aug_scale_max=self._aug_scale_max  if self._pad_output or not self._mode == ModeKeys.TRAIN else 1.0)
-        
+            aug_scale_max=self._aug_scale_max if self._pad_output or not self._mode == ModeKeys.TRAIN else 1.0)
+
         print("image info:", image_info)
         category_mask = self._resize_and_crop_mask(
             category_mask,
@@ -313,9 +311,9 @@ class mask_former_parser(parser.Parser):
             image_info,
             is_training=is_training)
         (instance_centers_heatmap,
-            instance_centers_offset,
-            semantic_weights) = self._encode_centers_and_offets(
-                instance_mask=instance_mask[:, :, 0])
+         instance_centers_offset,
+         semantic_weights) = self._encode_centers_and_offets(
+            instance_mask=instance_mask[:, :, 0])
 
         # Cast image and labels as self._dtype
         image = tf.cast(image, dtype=self._dtype)
@@ -455,7 +453,7 @@ class mask_former_parser(parser.Parser):
 
         with tf.name_scope('parser'):
             data = self._decoder.decode(value)
-            
+
             if self._mode == ModeKeys.TRAIN:
                 return self._parse_train_data(data)
             else:

@@ -20,7 +20,7 @@ from __future__ import print_function
 from panoptic_input import mask_former_parser
 
 
-def parser_generator(params,mode):
+def parser_generator(params, mode):
     """Generator function for various dataset parser."""
     if params.architecture.parser == 'mask_former_parser':
         anchor_params = params.anchor
@@ -28,28 +28,28 @@ def parser_generator(params,mode):
         crop_params = parser_params.crop
         color_aug_params = parser_params.color_aug
         parser_fn = mask_former_parser(
-            output_size = parser_params.image_size,
-            aspect_ratio_range = crop_params.aspect_ratio_range,
-            min_overlap_params = crop_params.min_overlap_params,
-            max_retry = crop_params.max_retry,
-            pad_output = parser_params.pad_output,
-            resize_eval_groundtruth = parser_params.resize_eval_groundtruth,
-            groundtruth_padded_size = parser_params.groundtruth_padded_size,
-            ignore_label = parser_params.ignore_label,
-            aug_rand_hflip = parser_params.aug_rand_hflip,
-            aug_scale_min = crop_params.min_scale,
-            aug_scale_max = crop_params.max_scale,
-            color_aug_ssd = parser_params.color_aug_ssd,
-            brightness = color_aug_params.brightness,
-            saturation = color_aug_params.saturation,
-            contrast = color_aug_params.contrast,
-            aug_type = parser_params.aug_type,
-            sigma = parser_params.sigma,
-            small_instance_area_threshold = parser_params.small_instance_area_threshold,
-            small_instance_weight = parser_params.small_instance_weight,
-            dtype = parser_params.dtype,
-            seed = parser_params.seed,
-            mode = mode,
+            output_size=parser_params.image_size,
+            aspect_ratio_range=crop_params.aspect_ratio_range,
+            min_overlap_params=crop_params.min_overlap_params,
+            max_retry=crop_params.max_retry,
+            pad_output=parser_params.pad_output,
+            resize_eval_groundtruth=parser_params.resize_eval_groundtruth,
+            groundtruth_padded_size=parser_params.groundtruth_padded_size,
+            ignore_label=parser_params.ignore_label,
+            aug_rand_hflip=parser_params.aug_rand_hflip,
+            aug_scale_min=crop_params.min_scale,
+            aug_scale_max=crop_params.max_scale,
+            color_aug_ssd=parser_params.color_aug_ssd,
+            brightness=color_aug_params.brightness,
+            saturation=color_aug_params.saturation,
+            contrast=color_aug_params.contrast,
+            aug_type=parser_params.aug_type,
+            sigma=parser_params.sigma,
+            small_instance_area_threshold=parser_params.small_instance_area_threshold,
+            small_instance_weight=parser_params.small_instance_weight,
+            dtype=parser_params.dtype,
+            seed=parser_params.seed,
+            mode=mode,
         )
     else:
         raise ValueError('Parser %s is not supported.' % params.architecture.parser)
