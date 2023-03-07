@@ -87,6 +87,7 @@ class mask_former_parser(parser.Parser):
     def __init__(
             self,
             output_size: List[int] = None,
+            image_scale: List[float] = None,
             pad_output: bool = True,
             resize_eval_groundtruth: bool = True,
             groundtruth_padded_size: Optional[List[int]] = None,
@@ -163,6 +164,7 @@ class mask_former_parser(parser.Parser):
         self._decoder = TfExampleDecoder()
         self._mode = mode
         self._pad_output = pad_output
+        self._image_scale = image_scale
         if mode == None:
             print("assuming training mode")
             self._mode = ModeKeys.TRAIN
@@ -186,13 +188,12 @@ size	A Tensor. Has the same type as image_size. 1-D, containing [target_height, 
         mask += 1
 
         if is_training or self._resize_eval_groundtruth:
-            image_scale = [1,1]
+            # TODO: the image scale needs to be savesa as a tesnor
             #offset = [offset_height,offset_width]
-            print("using image scale:",image_scale)
             print("using image offset:",offset)
             mask = preprocess_ops.resize_and_crop_masks(
                 mask,
-                image_scale,
+                self._image_scale,
                 self._output_size,
                 offset)
         else:
