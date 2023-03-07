@@ -87,7 +87,10 @@ class mask_former_parser(parser.Parser):
     def __init__(
             self,
             output_size: List[int] = None,
-            image_scale: List[float] = None,
+            min_scale: float = 0.3,
+            aspect_ratio_range: List[float] = (0.5, 2.0),
+            min_overlap_params: List[float] = (0.0, 1.4, 0.2, 0.1),
+            max_retry: int = 50,
             pad_output: bool = True,
             resize_eval_groundtruth: bool = True,
             groundtruth_padded_size: Optional[List[int]] = None,
@@ -100,6 +103,7 @@ class mask_former_parser(parser.Parser):
             small_instance_area_threshold: int = 4096,
             small_instance_weight: float = 3.0,
             dtype: str = 'float32',
+            seed: int = None,
             mode: ModeKeys = None):
         """Initializes parameters for parsing annotations in the dataset.
     
@@ -136,10 +140,15 @@ class mask_former_parser(parser.Parser):
         self._ignore_label = ignore_label
 
         # Data augmentation.
-        self._crop_rand = True
         self._aug_rand_hflip = aug_rand_hflip
         self._aug_scale_min = aug_scale_min
         self._aug_scale_max = aug_scale_max
+        
+        #Cropping:
+        self._min_scale = min_scale
+        self._aspect_ratio_range = aspect_ratio_range
+        self._min_overlap_params = min_overlap_params
+        self._max_retry = max_retry
 
         if aug_type and aug_type.type:
             if aug_type.type == 'autoaug':
@@ -163,16 +172,12 @@ class mask_former_parser(parser.Parser):
         self._small_instance_weight = small_instance_weight
         self._decoder = TfExampleDecoder()
         self._mode = mode
+        self._seed = seed
         self._pad_output = pad_output
-        self._image_scale = image_scale
         if mode == None:
             print("assuming training mode")
             self._mode = ModeKeys.TRAIN
-    """
-    begin	A Tensor. Has the same type as image_size. 1-D, containing [offset_height, offset_width, 0]. Provide as input to tf.slice.
-size	A Tensor. Has the same type as image_size. 1-D, containing [target_height, target_width, -1]. Provide as input to tf.slice.
-    
-    """
+
     def _resize_and_crop_mask(self, mask, image_info, is_training):
         """Resizes and crops mask using `image_info` dict."""
         
@@ -188,8 +193,6 @@ size	A Tensor. Has the same type as image_size. 1-D, containing [target_height, 
         mask += 1
 
         if is_training or self._resize_eval_groundtruth:
-            # TODO: the image scale needs to be savesa as a tesnor
-            #offset = [offset_height,offset_width]
             print("using image offset:",offset)
             mask = preprocess_ops.resize_and_crop_masks(
                 mask,
@@ -212,7 +215,7 @@ size	A Tensor. Has the same type as image_size. 1-D, containing [target_height, 
         return mask
 
     def _parse_data(self, data, is_training):
-        image = data['image']   
+        image = data['image']
 
         if self._augmenter is not None and is_training:
             image = self._augmenter.distort(image)
@@ -228,7 +231,10 @@ size	A Tensor. Has the same type as image_size. 1-D, containing [target_height, 
             print("doing random flip")
             masks = tf.stack([category_mask, instance_mask], axis=0)
             image, _, masks = preprocess_ops.random_horizontal_flip(
-                image=image, masks=masks)
+                image=image, 
+                masks=masks,
+                seed = self._seed)
+
             category_mask = masks[0]
             instance_mask = masks[1]
 
@@ -239,28 +245,41 @@ size	A Tensor. Has the same type as image_size. 1-D, containing [target_height, 
         masks = tf.stack([category_mask, instance_mask], axis=0)
         masks = tf.expand_dims(masks, -1)
         print("stacked masks:",masks.shape)
-    # Resizes and crops image.
+        
+        # Resizes and crops image.
 
-        cropped_image, masks = preprocess_ops.random_crop_image_masks(img=image,
-                                                                       masks=masks,
-                                                                       seed=1)
+        cropped_image, masks = preprocess_ops.random_crop_image_masks(
+            img = image,
+            masks = masks,
+            min_scale = self._min_scale,
+            aspect_ratio_range = self._aspect_ratio_range,
+            min_overlap_params = self._min_overlap_params,
+            max_retry = self._max_retry,
+            seed = self._seed,
+        )
+                                                                      
+                                                                      
         category_mask = tf.squeeze(masks[0])
         instance_mask = tf.squeeze(masks[1])
+        
         print("categorical shape:",category_mask.shape)
         print("instance shape:",instance_mask.shape)
         print("image shape:",cropped_image.shape)
         
         crop_im_size = tf.cast(tf.shape(cropped_image)[0:2], tf.int32)
+        
         print("using padding:", self._output_size)
         if not self._pad_output:
             self._output_size = crop_im_size
+        
         print("using padding:", self._output_size)    
         image, image_info = preprocess_ops.resize_and_crop_image(
             cropped_image,
             self._output_size,
             self._output_size,
-            aug_scale_min=1.0,
-            aug_scale_max=1.0)
+            aug_scale_min=self._aug_scale_min if self._pad_output or not self._mode == ModeKeys.TRAIN else 1.0,
+            aug_scale_max=self._aug_scale_max  if self._pad_output or not self._mode == ModeKeys.TRAIN else 1.0)
+        
         print("image info:", image_info)
         category_mask = self._resize_and_crop_mask(
             category_mask,
@@ -400,6 +419,7 @@ size	A Tensor. Has the same type as image_size. 1-D, containing [target_height, 
         return (instance_centers_heatmap,
                 instance_centers_offset,
                 semantic_weights)
+
     def __call__(self, value):
         """Parses data to an image and associated training labels.
         Args:
@@ -416,7 +436,4 @@ size	A Tensor. Has the same type as image_size. 1-D, containing [target_height, 
             if self._mode == ModeKeys.TRAIN:
                 return self._parse_train_data(data)
             else:
-                if self._mode == ModeKeys.TESTING:
-                    print("DATA PRINT:",data)
-                    print("HEIGHT:",data["height"].eval(),"width:",data["width"].eval())
                 return self._parse_eval_data(data)

@@ -581,13 +581,11 @@ def resize_and_crop_masks(masks,
     scaled_masks = tf.image.resize(
         masks, scaled_size, method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
     offset = tf.cast(offset, tf.int32)
-    print("done calc")
     scaled_masks = scaled_masks[
         :,
         offset[0]:offset[0] + output_size[0],
         offset[1]:offset[1] + output_size[1],
         :]
-    print("done calc2")
     output_masks = tf.image.pad_to_bounding_box(
         scaled_masks, 0, 0, output_size[0], output_size[1])
     # Remove padding.
