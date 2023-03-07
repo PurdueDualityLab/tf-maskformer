@@ -171,10 +171,6 @@ size	A Tensor. Has the same type as image_size. 1-D, containing [target_height, 
     """
     def _resize_and_crop_mask(self, mask, image_info, is_training):
         """Resizes and crops mask using `image_info` dict."""
-        # im_height = int(crop_size[0])
-        # im_width = int(crop_size[1])
-        # offset_height = int(crop_offset[0])
-        # offset_width = int(crop_offset[1])
         
         image_scale = image_info[2, :]
         offset = image_info[3, : ]
@@ -182,8 +178,7 @@ size	A Tensor. Has the same type as image_size. 1-D, containing [target_height, 
         im_width = int(image_info[0][1])
         print(mask.shape)
         print(im_height, im_width)
-        #mask = tf.expand_dims(mask, 0)
-        #mask = tf.expand_dims(mask, -1)
+        
         mask = tf.reshape(mask, shape=[1, im_height, im_width, 1])
         print(mask.shape)
         mask += 1
@@ -249,7 +244,7 @@ size	A Tensor. Has the same type as image_size. 1-D, containing [target_height, 
         category_mask = tf.squeeze(masks[0])
         instance_mask = tf.squeeze(masks[1])
         print("categorical shape:",category_mask.shape)
-        print("isntance shape:",instance_mask.shape)
+        print("instance shape:",instance_mask.shape)
         print("image shape:",cropped_image.shape)
         image, image_info = preprocess_ops.resize_and_crop_image(
             cropped_image,

@@ -923,7 +923,9 @@ def random_crop_image_masks(img,
 
     img = tf.image.crop_to_bounding_box(img, top, left, bottom - top,right - left)
     masks = tf.image.crop_to_bounding_box(masks,top, left, bottom - top,right - left)
-    return img, masks
+    break
+
+  return img, masks
   
 
 def random_crop(image,
