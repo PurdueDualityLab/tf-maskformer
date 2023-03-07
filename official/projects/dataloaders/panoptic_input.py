@@ -87,6 +87,7 @@ class mask_former_parser(parser.Parser):
     def __init__(
             self,
             output_size: List[int] = None,
+            pad_output: bool = True,
             resize_eval_groundtruth: bool = True,
             groundtruth_padded_size: Optional[List[int]] = None,
             ignore_label: int = 0,
@@ -161,6 +162,7 @@ class mask_former_parser(parser.Parser):
         self._small_instance_weight = small_instance_weight
         self._decoder = TfExampleDecoder()
         self._mode = mode
+        self._pad_output = pad_output
         if mode == None:
             print("assuming training mode")
             self._mode = ModeKeys.TRAIN
@@ -184,7 +186,7 @@ size	A Tensor. Has the same type as image_size. 1-D, containing [target_height, 
         mask += 1
 
         if is_training or self._resize_eval_groundtruth:
-            #image_scale = [im_height,im_width]
+            image_scale = [1,1]
             #offset = [offset_height,offset_width]
             print("using image scale:",image_scale)
             print("using image offset:",offset)
@@ -238,7 +240,7 @@ size	A Tensor. Has the same type as image_size. 1-D, containing [target_height, 
         print("stacked masks:",masks.shape)
     # Resizes and crops image.
 
-        cropped_image, masks, = preprocess_ops.random_crop_image_masks(img=image,
+        cropped_image, masks = preprocess_ops.random_crop_image_masks(img=image,
                                                                        masks=masks,
                                                                        seed=1)
         category_mask = tf.squeeze(masks[0])
@@ -246,12 +248,18 @@ size	A Tensor. Has the same type as image_size. 1-D, containing [target_height, 
         print("categorical shape:",category_mask.shape)
         print("instance shape:",instance_mask.shape)
         print("image shape:",cropped_image.shape)
+        
+        crop_im_size = tf.cast(tf.shape(cropped_image)[0:2], tf.int32)
+        print("using padding:", self._output_size)
+        if not self._pad_output:
+            self._output_size = crop_im_size
+        print("using padding:", self._output_size)    
         image, image_info = preprocess_ops.resize_and_crop_image(
             cropped_image,
             self._output_size,
             self._output_size,
-            aug_scale_min=self._aug_scale_min if is_training else 1.0,
-            aug_scale_max=self._aug_scale_max if is_training else 1.0)
+            aug_scale_min=1.0,
+            aug_scale_max=1.0)
         print("image info:", image_info)
         category_mask = self._resize_and_crop_mask(
             category_mask,

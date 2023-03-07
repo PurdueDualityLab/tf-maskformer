@@ -149,7 +149,7 @@ def resize_and_crop_image(image,
   """
   with tf.name_scope('resize_and_crop_image'):
     image_size = tf.cast(tf.shape(image)[0:2], tf.float32)
-
+    desired_size = tf.cast(desired_size,tf.float32)
     random_jittering = (aug_scale_min != 1.0 or aug_scale_max != 1.0)
 
     if random_jittering:
@@ -181,9 +181,11 @@ def resize_and_crop_image(image,
         image, tf.cast(scaled_size, tf.int32), method=method)
 
     if random_jittering:
+      desired_size = tf.cast(desired_size, tf.int32)
       scaled_image = scaled_image[
           offset[0]:offset[0] + desired_size[0],
           offset[1]:offset[1] + desired_size[1], :]
+      desired_size = tf.cast(desired_size, tf.float32)
 
     output_image = tf.image.pad_to_bounding_box(
         scaled_image, 0, 0, padded_size[0], padded_size[1])
@@ -473,7 +475,7 @@ def random_crop_image(image,
         area_range=area_range,
         max_attempts=max_attempts)
     cropped_image = tf.slice(image, crop_offset, crop_size)
-    return cropped_image, crop_offset, crop_size
+    return cropped_image
 
 
 def random_crop_image_v2(image_bytes,
@@ -896,7 +898,7 @@ def random_crop_image_masks(img,
       tf.random.uniform([], minval=minval, maxval=maxval), step) * step - offset
 
   min_overlap = tf.clip_by_value(min_overlap, 0.0, 1.1)
-
+  
   if min_overlap > 1.0:
     return img, masks
 
@@ -924,7 +926,6 @@ def random_crop_image_masks(img,
     img = tf.image.crop_to_bounding_box(img, top, left, bottom - top,right - left)
     masks = tf.image.crop_to_bounding_box(masks,top, left, bottom - top,right - left)
     break
-
   return img, masks
   
 

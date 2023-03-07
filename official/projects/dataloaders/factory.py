@@ -28,6 +28,7 @@ def parser_generator(params,mode):
         parser_params = params.input
         parser_fn = mask_former_parser(
             output_size=parser_params.image_size,
+            pad_output=parser_params.pad_output,
             resize_eval_groundtruth=parser_params.resize_eval_groundtruth,
             groundtruth_padded_size=parser_params.groundtruth_padded_size,
             ignore_label=parser_params.ignore_label,
