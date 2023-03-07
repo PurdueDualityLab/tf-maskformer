@@ -25,10 +25,13 @@ MASK_FORMER_CFG.override({
     "dataset_mapper_name": "mask_former_semantic",
     "color_aug_ssd": False,
     "crop": {
-      "single_category_max_area": 1.0
+      "single_category_max_area": 1.0,
+      "min_size_train": (480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800),
+      "type": "absolute_range",
+      "size": (384, 600),
     },
     "size_divisibility": -1,
-    "image_size": [400,400],
+    "image_size": [428,640],
     "min_scale": 0.5,
     "max_scale": 2.0,
     "resize_eval_groundtruth": True,

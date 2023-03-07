@@ -473,7 +473,7 @@ def random_crop_image(image,
         area_range=area_range,
         max_attempts=max_attempts)
     cropped_image = tf.slice(image, crop_offset, crop_size)
-    return cropped_image
+    return cropped_image, crop_offset, crop_size
 
 
 def random_crop_image_v2(image_bytes,
@@ -568,20 +568,23 @@ def resize_and_crop_masks(masks,
   """
   with tf.name_scope('resize_and_crop_masks'):
     mask_size = tf.cast(tf.shape(masks)[1:3], tf.float32)
+    print("mask size:",mask_size)
     # Pad masks to avoid empty mask annotations.
-    masks = tf.concat(
-        [tf.zeros([1, mask_size[0], mask_size[1], 1]), masks], axis=0)
-
+    masks = tf.concat([tf.zeros([1, mask_size[0], mask_size[1], 1]), masks], axis=0)
+    print("new masks:",masks.shape)
+    print("image scale:",image_scale)
     scaled_size = tf.cast(image_scale * mask_size, tf.int32)
+    print("getting scaled masks with",scaled_size)
     scaled_masks = tf.image.resize(
         masks, scaled_size, method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
     offset = tf.cast(offset, tf.int32)
+    print("done calc")
     scaled_masks = scaled_masks[
         :,
         offset[0]:offset[0] + output_size[0],
         offset[1]:offset[1] + output_size[1],
         :]
-
+    print("done calc2")
     output_masks = tf.image.pad_to_bounding_box(
         scaled_masks, 0, 0, output_size[0], output_size[1])
     # Remove padding.
@@ -735,9 +738,13 @@ def _saturation(image: tf.Tensor,
       saturation)
 
 
-def random_crop_image_with_boxes_and_labels(img, boxes, labels, min_scale,
+def random_crop_image_with_boxes_and_labels(img, 
+                                            boxes, 
+                                            labels, 
+                                            min_scale,
                                             aspect_ratio_range,
-                                            min_overlap_params, max_retry):
+                                            min_overlap_params,
+                                            max_retry):
   """Crops a random slice from the input image.
 
   The function will correspondingly recompute the bounding boxes and filter out
@@ -871,6 +878,53 @@ def random_crop_image_with_boxes_and_labels(img, boxes, labels, min_scale,
 
   return img, boxes, labels
 
+
+def random_crop_image_masks(img,
+                            masks,
+                            min_scale=0.3,
+                            aspect_ratio_range=(0.5, 2.0),
+                            min_overlap_params=(0.0, 1.4, 0.2, 0.1),
+                            max_retry=50,
+                            seed=None):
+  shape = tf.shape(img)
+  original_h = shape[0]
+  original_w = shape[1]
+
+  minval, maxval, step, offset = min_overlap_params
+
+  min_overlap = tf.math.floordiv(
+      tf.random.uniform([], minval=minval, maxval=maxval), step) * step - offset
+
+  min_overlap = tf.clip_by_value(min_overlap, 0.0, 1.1)
+
+  if min_overlap > 1.0:
+    return img, masks
+
+  aspect_ratio_low = aspect_ratio_range[0]
+  aspect_ratio_high = aspect_ratio_range[1]
+
+  for _ in tf.range(max_retry):
+    scale_h = tf.random.uniform([], min_scale, 1.0)
+    scale_w = tf.random.uniform([], min_scale, 1.0)
+    new_h = tf.cast(
+        scale_h * tf.cast(original_h, dtype=tf.float32), dtype=tf.int32)
+    new_w = tf.cast(
+        scale_w * tf.cast(original_w, dtype=tf.float32), dtype=tf.int32)
+
+    # Aspect ratio has to be in the prespecified range
+    aspect_ratio = new_h / new_w
+    if aspect_ratio_low > aspect_ratio or aspect_ratio > aspect_ratio_high:
+      continue
+
+    left = tf.random.uniform([], 0, original_w - new_w, dtype=tf.int32)
+    right = left + new_w
+    top = tf.random.uniform([], 0, original_h - new_h, dtype=tf.int32)
+    bottom = top + new_h
+
+    img = tf.image.crop_to_bounding_box(img, top, left, bottom - top,right - left)
+    masks = tf.image.crop_to_bounding_box(masks,top, left, bottom - top,right - left)
+    return img, masks
+  
 
 def random_crop(image,
                 boxes,
