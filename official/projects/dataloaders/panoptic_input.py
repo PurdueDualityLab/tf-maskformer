@@ -193,7 +193,7 @@ size	A Tensor. Has the same type as image_size. 1-D, containing [target_height, 
             print("using image offset:",offset)
             mask = preprocess_ops.resize_and_crop_masks(
                 mask,
-                self._image_scale,
+                image_scale,
                 self._output_size,
                 offset)
         else:
