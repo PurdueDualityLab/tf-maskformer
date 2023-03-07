@@ -28,7 +28,7 @@ MASK_FORMER_CFG.override({
       "single_category_max_area": 1.0
     },
     "size_divisibility": -1,
-    "image_size": 1024,
+    "image_size": [400,400],
     "min_scale": 0.5,
     "max_scale": 2.0,
     "resize_eval_groundtruth": True,
@@ -73,7 +73,9 @@ MASK_FORMER_CFG.override({
       ]
     },
     "frozen_variable_prefix": "",
-    "train_file_pattern": "/scratch/gilbreth/abuynits/coco_ds/tfrecords/train*",
+    "train_file_pattern": [
+      "/scratch/gilbreth/abuynits/coco_ds/tfrecords/train*"
+      ],
     "train_dataset_type": "tfrecord",
     "transpose_input": False,
     "l2_weight_decay": 0.0001,

@@ -9,9 +9,35 @@ import numpy as np
 import cv2
 from skimage import segmentation
 from skimage import color 
+from official.projects.dataloaders import input_reader
+from official.projects.configs import mode_keys as ModeKeys
+from official.projects.configs import factory_config
+from official.common import distribute_utils
+from official.modeling.hyperparams import params_dict
+from absl import flags
+from official.utils import hyperparams_flags
+from official.utils.flags import core as flags_core
+import sys
+import tensorflow as tf
+from panoptic_input import mask_former_parser
+
+FLAGS = flags.FLAGS
+argv = FLAGS(sys.argv)
+hyperparams_flags.initialize_common_flags()
+flags_core.define_log_steps()
+
+params = factory_config.config_generator('mask_former')
+
+params = params_dict.override_params_dict(
+    params, FLAGS.config_file, is_strict=True)
+params = params_dict.override_params_dict(
+    params, FLAGS.params_override, is_strict=True)
 
 
-parser_fn = mask_former_parser([400,400])
+parser_fn = factory.parser_generator(params, ModeKeys.TRAIN)
+#parser_fn = mask_former_parser([400,400])
+
+
 file_path = "/scratch/gilbreth/abuynits/coco_ds/tfrecords/val-00002-of-00008.tfrecord"# specify the filepath to tfrecord
 save_im_path = "/home/abuynits/projects/img.png" # image save path for displaying image
 im_mask_path = "/home/abuynits/projects/mask.png" # image save path for displaying image
