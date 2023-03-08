@@ -1,6 +1,3 @@
-import sys
-
-sys.path.append("/home/abuynits/projects/tf-maskformer")
 from official.projects.dataloaders import input_reader
 from official.projects.configs import mode_keys as ModeKeys
 from official.projects.configs import factory_config

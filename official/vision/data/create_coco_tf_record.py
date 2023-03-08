@@ -30,9 +30,6 @@ Example usage:
 import collections
 import json
 import logging
-import os
-
-import sys
 
 from absl import app  # pylint:disable=unused-import
 from absl import flags
@@ -41,9 +38,6 @@ import numpy as np
 from pycocotools import mask
 import tensorflow as tf
 
-
-import sys
-sys.path.append("/home/abuynits/projects/tf-maskformer")
 import multiprocessing as mp
 from official.vision.data import tfrecord_lib
 

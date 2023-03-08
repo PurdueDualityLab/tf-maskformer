@@ -1,6 +1,3 @@
-import sys
-
-sys.path.append("/home/abuynits/projects/tf-maskformer")
 import tensorflow as tf
 import factory
 from official.projects.configs import factory_config
