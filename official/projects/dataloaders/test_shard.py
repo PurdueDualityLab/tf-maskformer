@@ -68,8 +68,8 @@ def display_pil_im(np_data, file_path, greyscale=False):
 def get_overlayed_im(im, mask):
     im = im.astype(np.uint8)
     mask = (color.label2rgb(mask) * 255).astype(np.uint8)
-    print(im.shape)
-    print(mask.shape)
+    print("image shape", im.shape)
+    print("mask shape", mask.shape)
     out = cv2.addWeighted(im, 0.5, mask, 0.5, 0)
     return im, mask, out
 

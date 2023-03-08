@@ -887,6 +887,25 @@ def random_crop_image_masks(img,
                             min_overlap_params=(0.0, 1.4, 0.2, 0.1),
                             max_retry=50,
                             seed=None):
+    """Randomly crop the image and masks
+    Args:
+      image: a 'Tensor' of shape [height, width, 3] representing the input image.
+      masks: a 'Tensor' of shape [N, height, width, C] representing N masks with C channels
+      min_scale: a 'float' in [0.0, 1.0) indicating the lower bound of the random
+        scale variable.
+      aspect_ratio_range: a list of two 'float' that specifies the lower and upper
+        bound of the random aspect ratio.
+      min_overlap_params: a list of four 'float' representing the min value, max
+        value, step size, and offset for the minimum overlap sample.
+      max_retry: an 'int' representing the number of trials for cropping. If it is
+        exhausted, no cropping will be performed.
+      seed: the random number seed of int, but could be None.
+    Returns:
+      image: a Tensor representing the random cropped image. Can be the
+        original image if max_retry is exhausted.
+      masks: a Tensor representing the masks in the cropped image.
+    """
+
     shape = tf.shape(img)
     original_h = shape[0]
     original_w = shape[1]
@@ -925,6 +944,7 @@ def random_crop_image_masks(img,
         img = tf.image.crop_to_bounding_box(img, top, left, bottom - top, right - left)
         masks = tf.image.crop_to_bounding_box(masks, top, left, bottom - top, right - left)
         break
+
     return img, masks
 
 

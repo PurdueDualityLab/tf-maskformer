@@ -23,7 +23,7 @@ MASK_FORMER_CFG = params_dict.ParamsDict(base_config.BASE_CFG)
 MASK_FORMER_CFG.override({
   "input": {
     "image_size": [400,400],
-    "pad_output": True,
+    "pad_output": False,
     "aug_rand_hflip": True,
     "seed": None,
     "crop": {
@@ -33,7 +33,7 @@ MASK_FORMER_CFG.override({
       "max_retry": 50,
       "max_scale": 2.0,
     },
-    "color_aug_ssd": False,
+    "color_aug_ssd": True,
     "color_aug": {
       "brightness": 0.2,
       "saturation": 0.3,
