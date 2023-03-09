@@ -44,8 +44,9 @@ class DiceLoss(tf.keras.losses.Loss):
         return tf.reduce_sum(loss) / num_masks
 
 class Loss():
-    def __init__(self, num_classes, matcher, weight_dict, eos_coef, losses):
+    def __init__(self, num_classes, similarity_calc, matcher, weight_dict, eos_coef, losses):
         self.num_classes = num_classes
+        self.similarity_calc = similarity_calc
         self.matcher = matcher
         self.weight_dict = weight_dict
         self.eos_coef = eos_coef
@@ -78,7 +79,11 @@ class Loss():
         """
         outputs_without_aux = {k: v for k, v in outputs.items() if k != "aux_outputs"}
         # TODO: check matcher doc
-        indices = self.matcher(outputs_without_aux, y_true)
+        match_quality_matrix = self.similarity_calc.compare(outputs_without_aux, y_true)
+        # indices = self.matcher._match(outputs_without_aux, y_true)
+        groundtruth_weights = tf.ones(match_quality_matrix.shape[0], dtype=tf.float32)
+        self.matcher._match(match_quality_matrix, y_true)
+        # 
 
         num_masks = sum(len(t["labels"]) for t in y_true)
         num_masks = tf.convert_to_tensor([num_masks], dtype=tf.float64) # device?
