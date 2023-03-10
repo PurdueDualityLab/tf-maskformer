@@ -47,6 +47,7 @@ class MaskFormerTransformer(tf.keras.layers.Layer):
         
         sqrt_k = math.sqrt(1.0 / self._hidden_size)
 
+        # TODO(ibrahim): NOT USED, remove num classes parameters as well.
         self._class_embed = tf.keras.layers.Dense(
             self._num_classes,
             kernel_initializer=tf.keras.initializers.RandomUniform(-sqrt_k, sqrt_k),
