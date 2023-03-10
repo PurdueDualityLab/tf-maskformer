@@ -17,6 +17,7 @@ class Video_Inference:
       if self._output_size is None:
         self._output_size = video_params.default_size
         print("Assuming default size: {}}".format(self._output_size))
+    # self._output_size = (120, 120) # width, height
 
   def _check_valid_files(self,input_file, output_file):
     """
