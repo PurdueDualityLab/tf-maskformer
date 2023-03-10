@@ -7,12 +7,15 @@ class PanopticInference():
         labels = tf.argmax(probs, axis=-1)
         mask_pred = tf.keras.activations.sigmoid(mask_pred)
 
-        keep = tf.math.logical_and(tf.math.not_equal(labels, self.sem_seg_head.num_classes), scores > self.object_mask_threshold)
+        config_num_classes = 171
+        object_mask_threshold = 0.0
+        keep = tf.math.logical_and(tf.math.not_equal(labels, config_num_classes), scores > object_mask_threshold)
         curr_scores = scores[keep]
         curr_classes = labels[keep]
+
         curr_masks = mask_pred[keep]
-        curr_mask_true = mask_true[keep]
-        cur_mask_cls = tf.slice(cur_mask_cls, [0, 0], [-1, cur_mask_cls.shape[1] - 1])
+        curr_mask_cls = mask_true[keep]
+        curr_mask_cls = tf.slice(curr_mask_cls, [0, 0], [-1, curr_mask_cls.shape[1] - 1])
 
         curr_prob_masks = tf.reshape(curr_scores, [-1, 1, 1]) * curr_masks
 
@@ -32,13 +35,16 @@ class PanopticInference():
 
             for k in range(curr_classes.shape[0]):
                 pred_class = curr_classes[k].numpy()
-                is_thing = pred_class in self.metadata.thing_dataset_id_to_contiguous_id.values()
+                # is_thing = pred_class in self.metadata.thing_dataset_id_to_contiguous_id.values()
+                is_thing = True # TODO(ibrahim): FIX when get configs.
+
                 mask = curr_masks_ids == k
                 mask_area = tf.reduce_sum(mask).numpy()
                 original_area = tf.reduce_sum(curr_masks[k] >= 0.5).numpy()
 
                 if mask_area > 0 and original_area > 0:
-                    if mask_area / original_area < self.overlap_threshold:
+                    config_overlap_threshold = 0.8
+                    if mask_area / original_area < config_overlap_threshold:
                         continue
                     
                     if not is_thing:
