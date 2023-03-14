@@ -28,7 +28,7 @@ class MaskFormerTransformerTest(tf.test.TestCase, parameterized.TestCase):
 
         testcase_input_image = {
             "coco_stuff": tf.ones((1, 640, 640, 3)),
-            "coco_panoptic": tf.ones((1, 736, 975, 3)),
+            "coco_panoptic": tf.ones((1, 608, 911, 3)),
         }
         
         testcase_backbone_inputs = {
@@ -39,8 +39,8 @@ class MaskFormerTransformerTest(tf.test.TestCase, parameterized.TestCase):
                 "5": tf.ones([1, 20, 20, 2048])
             },
             "coco_panoptic": {
-                "2": tf.ones([1, 184, 244, 256]),
-                "3": tf.ones([1, 92, 122, 512]),
+                "2": tf.ones([1, 152, 228, 256]),
+                "3": tf.ones([1, 76, 114, 512]),
                 "4": tf.ones([1, 38, 57, 1024]),
                 "5": tf.ones([1, 19, 29, 2048])
             }

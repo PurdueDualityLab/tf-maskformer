@@ -29,10 +29,10 @@ class FpnTest(parameterized.TestCase, tf.test.TestCase):
                 "5": tf.ones([1, 20, 20, 2048])
             },
             "coco_panoptic": {
-                "2": tf.ones([1, 184, 244, 256]),
-                "3": tf.ones([1, 92, 122, 512]),
-                "4": tf.ones([1, 46, 61, 1024]),
-                "5": tf.ones([1, 23, 31, 2048])
+                "2": tf.ones([1, 152, 228, 256]),
+                "3": tf.ones([1, 76, 114, 512]),
+                "4": tf.ones([1, 38, 57, 1024]),
+                "5": tf.ones([1, 19, 29, 2048])
             }
         }
 

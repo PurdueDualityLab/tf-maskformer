@@ -18,17 +18,24 @@ class ResNetTest(parameterized.TestCase, tf.test.TestCase):
         inputs = tf.keras.Input(shape=(width, height, 3), batch_size=1)
         endpoints = network(inputs)
 
+        for x in endpoints.values():
+           print(x.shape)
+
+        self.assertAllEqual(
+           [batch_size, int(math.ceil(width / 2**2)), int(math.ceil(height / 2**2)), 256]
+           , endpoints['2'].shape.as_list(), "failure on 2")
+        
         self.assertAllEqual(
            [batch_size, int(math.ceil(width / 2**3)), int(math.ceil(height / 2**3)), 512]
            , endpoints['3'].shape.as_list(), "failure on 3")
         
         self.assertAllEqual(
            [batch_size, int(math.ceil(width / 2**4)), int(math.ceil(height / 2**4)), 1024]
-           , endpoints['4'].shape.as_list(), "failure on 3")
+           , endpoints['4'].shape.as_list(), "failure on 4")
         
         self.assertAllEqual(
            [batch_size, int(math.ceil(width / 2**5)), int(math.ceil(height / 2**5)), 2048]
-           , endpoints['5'].shape.as_list(), "failure on 3")
+           , endpoints['5'].shape.as_list(), "failure on 5")
 
 if __name__ == '__main__':
   tf.test.main()
