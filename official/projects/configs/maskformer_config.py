@@ -48,6 +48,13 @@ MASK_FORMER_CFG.override({
     "small_instance_weight": 3.0,
     "dtype": 'float32',
   },
+  "inference": {
+    "video": {
+      "input_path": "/home/abuynits/projects/test.MOV",
+       "output_path": "/home/abuynits/projects/output_test.mp4",
+       "default_size": (224,244),
+    }
+  },
   "train": {
     "iterations_per_loop": 100,
     "batch_size": 64,
