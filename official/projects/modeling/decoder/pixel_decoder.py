@@ -12,7 +12,7 @@ class Fpn(tf.keras.layers.Layer):
                  dilation_rate=(1, 1),
                  groups=1,
                  activation='relu',
-                 use_bias=True,
+                 use_bias=False,
                  kernel_initializer="glorot_uniform",
                  bias_initializer="zeros",
                  kernel_regularizer=None,
@@ -79,19 +79,27 @@ class Fpn(tf.keras.layers.Layer):
         levels = input_levels[:-1]
 
         self._conv2d_op_lateral = []
+        self._lateral_groupnorm = []
         for _ in levels[::-1]:
             lateral = tf.keras.layers.Conv2D(filters=self._fpn_feat_dims,
                                              kernel_size=(1, 1),
                                              padding='same',
+                                             name = f"lateral_{level}",
                                              **conv_args)
+            lateral_norm = tf.keras.layers.GroupNormalization(name = f"lateral_norm_{level}")
             self._conv2d_op_lateral.append(lateral)
+            self._lateral_groupnorm.append(lateral_norm)
 
         self._conv2d_op_down = []
+        self._down_groupnorm = []
         down = tf.keras.layers.Conv2D(filters=self._fpn_feat_dims,
                                       strides=(1, 1),
                                       kernel_size=(3, 3),
                                       padding='same',
+                                      name = "down_initial_conv",
                                       **conv_args)
+        down_norm = tf.keras.layers.GroupNormalization(name = "down_initial_norm")
+        self._down_groupnorm.append(down_norm)
         self._conv2d_op_down.append(down)
         
         for _ in levels[::-1]:
@@ -99,17 +107,18 @@ class Fpn(tf.keras.layers.Layer):
                                           strides=(1, 1),
                                           kernel_size=(3, 3),
                                           padding='same',
+                                          name = f"down_{level}",
                                           **conv_args)
+            down_norm = tf.keras.layers.GroupNormalization(name = f"down_norm_{level}")
             self._conv2d_op_down.append(down)
+            self._down_groupnorm.append(down_norm)
 
         self._conv2d_op_mask = tf.keras.layers.Conv2D(
             filters=self._fpn_feat_dims,
             kernel_size=(3, 3),
             padding='same',
+            name = "mask_proj",
             **conv_args)
-
-        self._group_norm1 = tfa.layers.GroupNormalization()
-        self._group_norm2 = tfa.layers.GroupNormalization()
         
         self._relu1 = tf.keras.layers.ReLU()
         self._relu2 = tf.keras.layers.ReLU()
@@ -137,7 +146,7 @@ class Fpn(tf.keras.layers.Layer):
             feat = self._permute_1(feat)
 
         down = self._conv2d_op_down[0](feat)
-        down = self._group_norm1(down)
+        down = self._down_groupnorm[0](down)
         down = self._relu1(down)
 
         levels = input_levels[:-1]
@@ -148,11 +157,12 @@ class Fpn(tf.keras.layers.Layer):
                 feat = self._permute_2(multilevel_features[level])
 
             lateral = self._conv2d_op_lateral[i](feat)
+            lateral = self._lateral_groupnorm[i](lateral)
 
             down = nearest_upsampling(down, 2) + lateral
 
             down = self._conv2d_op_down[i + 1](down)
-            down = self._group_norm2(down)
+            down = self._down_groupnorm[i+1](down)
             down = self._relu2(down)
 
         mask = self._conv2d_op_mask(down)
