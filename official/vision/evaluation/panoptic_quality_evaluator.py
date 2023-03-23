@@ -98,6 +98,24 @@ class PanopticQualityEvaluator:
     self.reset_states()
     return results
 
+  def overall_pq(self):
+      """Evaluates overall_pq"""
+      results = self._pq_metric_module.result(self._is_thing)
+      self.reset_states()
+      return results["All_pq"]
+
+  def overall_sq(self):
+      """Evaluates overall_sq"""
+      results = self._pq_metric_module.result(self._is_thing)
+      self.reset_states()
+      return results["All_sq"]
+
+  def overall_rq(self):
+      """Evaluates overall_rq"""
+      results = self._pq_metric_module.result(self._is_thing)
+      self.reset_states()
+      return results["All_rq"]
+
   def _convert_to_numpy(self, groundtruths, predictions):
     """Converts tesnors to numpy arrays."""
     if groundtruths:
