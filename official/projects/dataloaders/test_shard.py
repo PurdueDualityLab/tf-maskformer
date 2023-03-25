@@ -1,7 +1,6 @@
 import tensorflow as tf
 import factory
 from official.projects.configs import factory_config
-from panoptic_input import mask_former_parser
 from PIL import Image
 import numpy as np
 import cv2
@@ -17,7 +16,6 @@ from official.utils import hyperparams_flags
 from official.utils.flags import core as flags_core
 import sys
 import tensorflow as tf
-from panoptic_input import mask_former_parser
 
 FLAGS = flags.FLAGS
 argv = FLAGS(sys.argv)

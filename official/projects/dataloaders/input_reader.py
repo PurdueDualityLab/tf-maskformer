@@ -14,24 +14,18 @@
 
 """Data loader and input processing."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from official.core import config_definitions as cfg
 from typing import Optional, Text
 import tensorflow as tf
-import factory
-from official.projects.configs import mode_keys as ModeKeys
-from official.modeling.hyperparams import params_dict
 
 
 class InputFn(object):
     """Input function that creates dataset from files."""
 
     def __init__(self,
-                 file_pattern: Text,
-                 params: params_dict.ParamsDict,
-                 mode: Text,
-                 batch_size: int,
+                 params: cfg.DataConfig,
+                 dataset_fn,
+                 parser_fn,
                  num_examples: Optional[int] = -1):
         """Initialize.
 
@@ -44,16 +38,16 @@ class InputFn(object):
             tf.errors.OutOfRangeError after that. If non-positive, it will be
             ignored.
         """
-        assert file_pattern is not None
-        assert mode is not None
-        assert batch_size is not None
-        self._file_pattern = file_pattern
-        self._mode = mode
-        self._is_training = (mode == ModeKeys.TRAIN)
-        self._batch_size = batch_size
+        self._is_training = params.is_training
+        self._file_pattern = params.input_path
+        self._batch_size = params.global_batch_size
         self._num_examples = num_examples
-        self._parser_fn = factory.parser_generator(params, mode)
-        self._dataset_fn = tf.data.TFRecordDataset
+        self._parser_fn = parser_fn
+        
+        self._dataset_fn = dataset_fn
+        if dataset_fn is None:
+            print("assuming default dataset function")
+            self._dataset_fn = tf.data.TFRecordDataset
 
         self._input_sharding = (not self._is_training)
         try:
@@ -93,7 +87,7 @@ class InputFn(object):
             num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
         if self._is_training:
-            dataset = dataset.shuffle(1000)
+            dataset = dataset.shuffle(params.shuffle_buffer_size)
         if self._num_examples > 0:
             dataset = dataset.take(self._num_examples)
 

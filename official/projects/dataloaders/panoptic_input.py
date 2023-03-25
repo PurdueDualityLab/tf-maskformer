@@ -19,13 +19,11 @@ from typing import List, Optional
 import numpy as np
 import tensorflow as tf
 
-from official.vision.configs import common
 from official.vision.dataloaders import parser
 from official.vision.dataloaders import tf_example_decoder
 from official.vision.ops import augment
 from official.vision.ops import preprocess_ops
-from official.projects.dataloaders import input_reader
-from official.projects.configs import mode_keys as ModeKeys
+from official.core import config_definitions as cfg
 
 def _compute_gaussian_from_std(sigma):
     """Computes the Gaussian and its size from a given standard deviation."""
@@ -86,29 +84,10 @@ class mask_former_parser(parser.Parser):
 
     def __init__(
             self,
-            output_size: List[int] = None,
-            min_scale: float = 0.3,
-            aspect_ratio_range: List[float] = (0.5, 2.0),
-            min_overlap_params: List[float] = (0.0, 1.4, 0.2, 0.1),
-            max_retry: int = 50,
-            pad_output: bool = True,
-            resize_eval_groundtruth: bool = True,
-            groundtruth_padded_size: Optional[List[int]] = None,
-            ignore_label: int = 0,
-            aug_rand_hflip: bool = True,
-            aug_scale_min: float = 1.0,
-            aug_scale_max: float = 1.0,
-            color_aug_ssd: bool = False,
-            brightness: float = 0.2,
-            saturation: float = 0.3,
-            contrast: float = 0.5,
-            aug_type: Optional[common.Augmentation] = None,
-            sigma: float = 8.0,
-            small_instance_area_threshold: int = 4096,
-            small_instance_weight: float = 3.0,
-            dtype: str = 'float32',
-            seed: int = None,
-            mode: ModeKeys = None):
+            params: cfg.DataConfig,
+            decoder_fn = None,
+            is_training = False,
+            ):
         """Initializes parameters for parsing annotations in the dataset.
     
         Args:
@@ -136,35 +115,38 @@ class mask_former_parser(parser.Parser):
         """
         
         # general settings
+        self._output_size = params.output_size
+        self._dtype = params.dtype
+        self._pad_output = params.pad_output
+        self._seed = params.seed
         
-        self._output_size = output_size
-        self._dtype = dtype
-        self._pad_output = pad_output
-        self._seed = seed
+        self._decoder = decoder_fn
         
-        self._decoder = TfExampleDecoder()
+        if self._decoder == None:
+            print("assuming default decoder")
+            self._decoder = TfExampleDecoder()
         
-        self._mode = mode
-        if mode == None:
+        self._is_training = is_training
+        if is_training == None:
             print("assuming training mode")
-            self._mode = ModeKeys.TRAIN
+            self._is_training = True
         
         # Boxes:
-        self._resize_eval_groundtruth = resize_eval_groundtruth
-        if (not resize_eval_groundtruth) and (groundtruth_padded_size is None):
+        self._resize_eval_groundtruth = params.resize_eval_groundtruth
+        if (not params.resize_eval_groundtruth) and (params.groundtruth_padded_size is None):
             raise ValueError(
                 'groundtruth_padded_size ([height, width]) needs to be'
                 'specified when resize_eval_groundtruth is False.')
-        self._groundtruth_padded_size = groundtruth_padded_size
-        self._ignore_label = ignore_label
+        self._groundtruth_padded_size = params.groundtruth_padded_size
+        self._ignore_label = params.ignore_label
 
         # Data augmentation
-        self._aug_rand_hflip = aug_rand_hflip
-        self._aug_scale_min = aug_scale_min
-        self._aug_scale_max = aug_scale_max
+        self._aug_rand_hflip = params.aug_rand_hflip
+        self._aug_scale_min = params.aug_scale_min
+        self._aug_scale_max = params.aug_scale_max
         
         # Auto Augment
-        if aug_type and aug_type.type:
+        if params.aug_type and aug_type.type:
             if aug_type.type == 'autoaug':
                 self._augmenter = augment.AutoAugment(
                     augmentation_name=aug_type.autoaug.augmentation_name,
@@ -177,25 +159,25 @@ class mask_former_parser(parser.Parser):
             self._augmenter = None
         
         #Cropping:
-        self._min_scale = min_scale
-        self._aspect_ratio_range = aspect_ratio_range
-        self._min_overlap_params = min_overlap_params
-        self._max_retry = max_retry
+        self._min_scale = params.min_scale
+        self._aspect_ratio_range = params.aspect_ratio_range
+        self._min_overlap_params = params.min_overlap_params
+        self._max_retry = params.max_retry
 
 
         
         # color augmentation
-        self._color_aug_ssd = color_aug_ssd
-        self._brightness = brightness
-        self._saturation = saturation
-        self._contrast = contrast
+        self._color_aug_ssd = params.color_aug_ssd
+        self._brightness = params.brightness
+        self._saturation = params.saturation
+        self._contrast = params.contrast
         
-        self._sigma = sigma
+        self._sigma = params.sigma
         self._gaussian, self._gaussian_size = _compute_gaussian_from_std(
             self._sigma)
         self._gaussian = tf.reshape(self._gaussian, shape=[-1])
-        self._small_instance_area_threshold = small_instance_area_threshold
-        self._small_instance_weight = small_instance_weight
+        self._small_instance_area_threshold = params.small_instance_area_threshold
+        self._small_instance_weight = params.small_instance_weight
 
 
     def _resize_and_crop_mask(self, mask, image_info, crop_dims, is_training):
@@ -308,8 +290,8 @@ class mask_former_parser(parser.Parser):
             cropped_image,
             self._output_size if self._pad_output else crop_im_size,
             self._output_size if self._pad_output else crop_im_size,
-            aug_scale_min=self._aug_scale_min if self._pad_output or not self._mode == ModeKeys.TRAIN else 1.0,
-            aug_scale_max=self._aug_scale_max  if self._pad_output or not self._mode == ModeKeys.TRAIN else 1.0)
+            aug_scale_min=self._aug_scale_min if self._pad_output or not self._is_training else 1.0,
+            aug_scale_max=self._aug_scale_max  if self._pad_output or not self._is_training else 1.0)
         
         print("image info:", image_info)
         # resize masks according to image
@@ -459,15 +441,14 @@ class mask_former_parser(parser.Parser):
         Args:
           value: a string tensor holding a serialized tf.Example proto.
         Returns:
-          image, labels: if mode == ModeKeys.TRAIN. see _parse_train_data.
-          {'images': image, 'labels': labels}: if mode == ModeKeys.PREDICT
-            or ModeKeys.PREDICT_WITH_GT.
+          image, labels: if is_training, see _parse_train_data.
+          {'images': image, 'labels': labels}: if is_training
         """
 
         with tf.name_scope('parser'):
             data = self._decoder.decode(value)
             
-            if self._mode == ModeKeys.TRAIN:
+            if self._is_training:
                 return self._parse_train_data(data)
             else:
                 return self._parse_eval_data(data)
