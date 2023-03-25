@@ -446,7 +446,7 @@ class mask_former_parser(parser.Parser):
         """
 
         with tf.name_scope('parser'):
-            data = self._decoder.decode(value)
+            data = self._decoder(value)
             
             if self._is_training:
                 return self._parse_train_data(data)

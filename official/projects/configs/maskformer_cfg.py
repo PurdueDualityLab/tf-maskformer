@@ -25,35 +25,22 @@ from official.modeling import hyperparams
 from official.vision.configs import backbones
 from official.vision.configs import common
 
-COCO_INPUT_PATH_BASE = 'coco'
+COCO_INPUT_PATH_BASE = '/scratch/gilbreth/abuynits/coco_ds/'
 COCO_TRAIN_EXAMPLES = 118287
 COCO_VAL_EXAMPLES = 5000
 
 
-@dataclasses.dataclass
-class DataConfig(cfg.DataConfig):
-    """Input config for training."""
-    input_path: str = ''
-    tfds_name: str = ''
-    tfds_split: str = 'train'
-    global_batch_size: int = 64
-    is_training: bool = False
-    dtype: str = 'bfloat16'
-    decoder: common.DataDecoder = common.DataDecoder()
-    shuffle_buffer_size: int = 10000
-    file_type: str = 'tfrecord'
-    drop_remainder: bool = True
 
 
 @dataclasses.dataclass
-class ParserParams(hyperparams.Config):
+class Parser(hyperparams.Config):
     """Config definitions for parser"""
     output_size: List[int] = None
     min_scale: float = 0.3
     aspect_ratio_range: List[float] = (0.5, 2.0)
     min_overlap_params: List[float] = (0.0, 1.4, 0.2, 0.1)
     max_retry: int = 50
-    pad_output: bool = True
+    pad_output: bool = False
     resize_eval_groundtruth: bool = True
     groundtruth_padded_size: Optional[List[int]] = None
     ignore_label: int = 0
@@ -71,6 +58,21 @@ class ParserParams(hyperparams.Config):
     dtype: str = 'float32'
     seed: int = None
 
+@dataclasses.dataclass
+class DataConfig(cfg.DataConfig):
+    """Input config for training."""
+    input_path: str = ''
+    tfds_name: str = ''
+    tfds_split: str = 'train'
+    global_batch_size: int = 0
+    is_training: bool = False
+    regenerate_source_id: bool = False
+    dtype: str = 'bfloat16'
+    decoder: common.DataDecoder = common.DataDecoder()
+    shuffle_buffer_size: int = 10000
+    file_type: str = 'tfrecord'
+    drop_remainder: bool = True
+    parser: Parser = Parser()
 
 @dataclasses.dataclass
 class Losses(hyperparams.Config):
@@ -128,18 +130,65 @@ def detr_coco_tfrecord() -> cfg.ExperimentConfig:
                 # norm_activation=common.NormActivation()),
             losses=Losses(),
             train_data=DataConfig(
-                input_path=os.path.join(COCO_INPUT_PATH_BASE, 'train*'),
+                input_path=os.path.join(COCO_INPUT_PATH_BASE, 'tfrecords/val*'),
                 is_training=True,
                 global_batch_size=train_batch_size,
                 shuffle_buffer_size=1000,
+                parser = Parser(
+                    output_size = [400,400],
+                    min_scale = 0.3,
+                    aspect_ratio_range = (0.5, 2.0),
+                    min_overlap_params = (0.0, 1.4, 0.2, 0.1),
+                    max_retry = 50,
+                    pad_output = True,
+                    resize_eval_groundtruth = True,
+                    groundtruth_padded_size = None,
+                    ignore_label = 0,
+                    aug_rand_hflip = True,
+                    aug_scale_min = 1.0,
+                    aug_scale_max = 1.0,
+                    color_aug_ssd = False,
+                    brightness = 0.2,
+                    saturation = 0.3,
+                    contrast = 0.5,
+                    aug_type = None,
+                    sigma = 8.0,
+                    small_instance_area_threshold = 4096,
+                    small_instance_weight = 3.0,
+                    dtype = 'float32',
+                    seed = 4096,
+                )
             ),
             validation_data=DataConfig(
-                input_path=os.path.join(COCO_INPUT_PATH_BASE, 'val*'),
+                input_path=os.path.join(COCO_INPUT_PATH_BASE, 'tfrecords/val*'),
                 is_training=False,
                 global_batch_size=eval_batch_size,
                 drop_remainder=False,
+                parser = Parser(
+                    output_size = [400,400],
+                    min_scale = 0.3,
+                    aspect_ratio_range = (0.5, 2.0),
+                    min_overlap_params = (0.0, 1.4, 0.2, 0.1),
+                    max_retry = 50,
+                    pad_output = True,
+                    resize_eval_groundtruth = True,
+                    groundtruth_padded_size = None,
+                    ignore_label = 0,
+                    aug_rand_hflip = True,
+                    aug_scale_min = 1.0,
+                    aug_scale_max = 1.0,
+                    color_aug_ssd = False,
+                    brightness = 0.2,
+                    saturation = 0.3,
+                    contrast = 0.5,
+                    aug_type = None,
+                    sigma = 8.0,
+                    small_instance_area_threshold = 4096,
+                    small_instance_weight = 3.0,
+                    dtype = 'float32',
+                    seed = 4096,
+                )
             )),
-        parser_params = cfg.ParserParams(),
         trainer=cfg.TrainerConfig(
             train_steps=train_steps,
             validation_steps=COCO_VAL_EXAMPLES // eval_batch_size,

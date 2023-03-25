@@ -41,6 +41,7 @@ class InputFn(object):
         self._is_training = params.is_training
         self._file_pattern = params.input_path
         self._batch_size = params.global_batch_size
+        self._shuffle_buffer_size = params.shuffle_buffer_size
         self._num_examples = num_examples
         self._parser_fn = parser_fn
         
@@ -87,7 +88,7 @@ class InputFn(object):
             num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
         if self._is_training:
-            dataset = dataset.shuffle(params.shuffle_buffer_size)
+            dataset = dataset.shuffle(self._shuffle_buffer_size)
         if self._num_examples > 0:
             dataset = dataset.take(self._num_examples)
 
