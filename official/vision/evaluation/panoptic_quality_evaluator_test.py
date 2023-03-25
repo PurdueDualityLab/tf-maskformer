@@ -89,6 +89,9 @@ class PanopticQualityEvaluatorTest(tf.test.TestCase):
     self.assertAlmostEqual(results['All_pq'], 0.63177083)
     self.assertAlmostEqual(results['All_rq'], 0.75)
     self.assertAlmostEqual(results['All_sq'], 0.84236111)
+    self.assertAlmostEqual(pq_evaluator.overall_pq(), 0.63177083)
+    self.assertAlmostEqual(pq_evaluator.overall_rq(), 0.75)
+    self.assertAlmostEqual(pq_evaluator.overall_sq(), 0.84236111)
     self.assertEqual(results['All_num_categories'], 1)
 
 
