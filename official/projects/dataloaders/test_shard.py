@@ -8,7 +8,6 @@ from skimage import color
 from official.projects.dataloaders import input_reader
 from official.projects.dataloaders import panoptic_input
 from official.common import dataset_fn
-import sys
 import tensorflow as tf
 from official.core import exp_factory as factory
 from official.projects.configs import maskformer_cfg
@@ -30,7 +29,6 @@ reader = input_reader.InputFn(
     parser_fn = parser_fn)
 
 cfg_test = factory.get_exp_config("detr_coco_tfrecord")
-# parser_fn = mask_former_parser([400,400])
 
 
 file_path = "/scratch/gilbreth/abuynits/coco_ds/tfrecords/val-00002-of-00008.tfrecord"  # specify the filepath to tfrecord

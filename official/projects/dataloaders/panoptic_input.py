@@ -121,7 +121,8 @@ class mask_former_parser(parser.Parser):
         self._seed = params.seed
         
         self._decoder = decoder_fn
-        
+        if self._pad_output == True and self._output_size is None:
+            raise Exception("Error: no output pad provided")
         if self._decoder == None:
             print("assuming default decoder")
             self._decoder = TfExampleDecoder()
