@@ -55,21 +55,17 @@ class MaskFormerTransformer(tf.keras.layers.Layer):
         self._input_proj = tf.keras.layers.Conv2D(
             self._hidden_size, 1, name="detr/conv2d")
 
-    def _generate_image_mask(self, inputs: tf.Tensor,
-                            target_shape: tf.Tensor) -> tf.Tensor:
+    def _generate_image_mask(self, features: tf.Tensor) -> tf.Tensor:
         """Generates image mask from input image."""
-        mask = tf.expand_dims(
-            tf.cast(tf.not_equal(tf.reduce_sum(inputs, axis=-1), 0), inputs.dtype),
-            axis=-1)
-        mask = tf.image.resize(
-            mask, target_shape, method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
+        mask = tf.zeros([features.shape[0],features.shape[1],features.shape[2]])
+        mask = tf.cast(mask, dtype = bool)
         return mask
     
     def call(self, inputs):
         input_image = inputs['image']
         features = inputs['features'][self._backbone_endpoint_name]
 
-        mask = self._generate_image_mask(input_image, tf.shape(features)[1: 3])
+        mask = self._generate_image_mask(features)
 
         pos_embed = position_embedding_sine(
             mask[:, :, :, 0], num_pos_features=self._hidden_size)
@@ -77,7 +73,6 @@ class MaskFormerTransformer(tf.keras.layers.Layer):
 
         features = tf.reshape(
             self._input_proj(features), [self._batch_size, -1, self._hidden_size])
-        mask = tf.reshape(mask, [self._batch_size, -1])
 
         decoded_list = self._transformer({
             "inputs":
@@ -87,7 +82,7 @@ class MaskFormerTransformer(tf.keras.layers.Layer):
                     tf.expand_dims(self._query_embeddings, axis=0),
                     (self._batch_size, 1, 1)),
             "pos_embed": pos_embed,
-            "mask": mask,
+            "mask": None,
         })
 
         return decoded_list
