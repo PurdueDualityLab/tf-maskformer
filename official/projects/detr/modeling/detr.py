@@ -62,6 +62,7 @@ def position_embedding_sine(attention_mask,
 
   # Produce row and column embeddings based on total size of the image
   # <tf.float>[batch_size, height, width]
+  attention_mask = ~attention_mask
   attention_mask = tf.cast(attention_mask, tf.float32)
   row_embedding = tf.cumsum(attention_mask, 1)
   col_embedding = tf.cumsum(attention_mask, 2)
@@ -304,8 +305,11 @@ class DETRTransformer(tf.keras.layers.Layer):
     pos_embed = inputs["pos_embed"]
     mask = inputs["mask"]
     input_shape = tf_utils.get_shape_list(sources)
-    source_attention_mask = tf.tile(
-        tf.expand_dims(mask, axis=1), [1, input_shape[1], 1])
+    if mask is not None:
+      source_attention_mask = tf.tile(
+          tf.expand_dims(mask, axis=1), [1, input_shape[1], 1])
+    else:
+      source_attention_mask = None
     if self._encoder is not None:
       memory = self._encoder(
           sources, attention_mask=source_attention_mask, pos_embed=pos_embed)
@@ -313,18 +317,25 @@ class DETRTransformer(tf.keras.layers.Layer):
       memory = sources
 
     target_shape = tf_utils.get_shape_list(targets)
-    cross_attention_mask = tf.tile(
-        tf.expand_dims(mask, axis=1), [1, target_shape[1], 1])
     target_shape = tf.shape(targets)
+    
+    if mask is not None:
+      cross_attention_mask = tf.tile(
+          tf.expand_dims(mask, axis=1), [1, target_shape[1], 1])
+      self_attention_mask=tf.ones(
+            (target_shape[0], target_shape[1], target_shape[1]))
+    else:
+      cross_attention_mask = None
+      self_attention_mask = None
+      
     decoded = self._decoder(
         tf.zeros_like(targets),
         memory,
         # TODO(b/199545430): self_attention_mask could be set to None when this
         # bug is resolved. Passing ones for now.
-        self_attention_mask=tf.ones(
-            (target_shape[0], target_shape[1], target_shape[1])),
+        self_attention_mask=self_attention_mask,
         cross_attention_mask=cross_attention_mask,
-        return_all_decoder_outputs=True,
+        return_all_decoder_outputs=False,
         input_pos_embed=targets,
         memory_pos_embed=pos_embed)
     return decoded
