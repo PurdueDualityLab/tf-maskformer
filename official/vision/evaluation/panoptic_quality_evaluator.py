@@ -93,13 +93,27 @@ class PanopticQualityEvaluator:
     self._pq_metric_module.reset()
 
   def result(self):
-    """Evaluates detection results, and reset_states."""
+    """Evaluates detection results"""
     results = self._pq_metric_module.result(self._is_thing)
-    self.reset_states()
     return results
 
+  def overall_pq(self):
+      """Evaluates overall_pq"""
+      results = self._pq_metric_module.result(self._is_thing)
+      return results["All_pq"]
+
+  def overall_sq(self):
+      """Evaluates overall_sq"""
+      results = self._pq_metric_module.result(self._is_thing)
+      return results["All_sq"]
+
+  def overall_rq(self):
+      """Evaluates overall_rq"""
+      results = self._pq_metric_module.result(self._is_thing)
+      return results["All_rq"]
+
   def _convert_to_numpy(self, groundtruths, predictions):
-    """Converts tesnors to numpy arrays."""
+    """Converts tensors to numpy arrays."""
     if groundtruths:
       labels = tf.nest.map_structure(lambda x: x.numpy(), groundtruths)
       numpy_groundtruths = {}
