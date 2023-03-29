@@ -161,4 +161,4 @@ class Fpn(tf.keras.layers.Layer):
 
         mask = self._conv2d_op_mask(down)
 
-        return 
+        return mask
