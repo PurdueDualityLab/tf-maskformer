@@ -74,7 +74,7 @@ class Fpn(tf.keras.layers.Layer):
 
         self._conv2d_op_lateral = []
         self._lateral_groupnorm = []
-        for _ in levels[::-1]:
+        for level in levels[::-1]:
             lateral = tf.keras.layers.Conv2D(filters=self._fpn_feat_dims,
                                              kernel_size=(1, 1),
                                              padding='same',
@@ -96,7 +96,7 @@ class Fpn(tf.keras.layers.Layer):
         self._down_groupnorm.append(down_norm)
         self._conv2d_op_down.append(down)
         
-        for _ in levels[::-1]:
+        for level in levels[::-1]:
             down = tf.keras.layers.Conv2D(filters=self._fpn_feat_dims,
                                           strides=(1, 1),
                                           kernel_size=(3, 3),
