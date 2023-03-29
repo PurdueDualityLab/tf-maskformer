@@ -62,13 +62,12 @@ class MaskFormerTransformer(tf.keras.layers.Layer):
         return mask
     
     def call(self, inputs):
-        input_image = inputs['image']
         features = inputs['features'][self._backbone_endpoint_name]
 
         mask = self._generate_image_mask(features)
 
         pos_embed = position_embedding_sine(
-            mask[:, :, :, 0], num_pos_features=self._hidden_size)
+            mask, num_pos_features=self._hidden_size)
         pos_embed = tf.reshape(pos_embed, [self._batch_size, -1, self._hidden_size])
 
         features = tf.reshape(
