@@ -4,10 +4,26 @@ import tensorflow as tf
 
 class MaskFormerTest(tf.test.TestCase, parameterized.TestCase):
     # TODO(ibrahim): Add more testcases.
-    @parameterized.named_parameters(('test1',))
-    def test_pass_through(self):
-
-        model = MaskFormer()
+    @parameterized.named_parameters(('test1', 256, 100, 256, "5", 0, 6, 171, 1))
+    def test_pass_through(self,
+                        fpn_feat_dims,
+                        num_queries,
+                        hidden_size,
+                        backbone_endpopint_name,
+                        num_encoder_layers,
+                        num_decoder_layers,
+                        num_classes,
+                        batch_size):    
+            
+        maskformer = Maskformer(fpn_feat_dims=fpn_feat_dims,
+                                 num_queries=num_queries,
+                                 hiddne_dim=num_queries,
+                                 hidden_size=hidden_size,
+                                 backbone_endpopint_name=backbone_endpopint_name,
+                                 num_encoder_layers=num_encoder_layers,
+                                 num_decoder_layers=num_decoder_layers,
+                                 num_classes=num_classes,
+                                 batch_size=batch_size)
 
         input_image = tf.ones((1, 640, 640, 3))
 
