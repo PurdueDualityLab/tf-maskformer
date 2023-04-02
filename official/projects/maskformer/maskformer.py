@@ -85,11 +85,11 @@ class Maskformer(tf.keras.Model):
                                             num_decoder_layers=self._num_decoder_layers,
                                             dropout_rate=self._dropout_rate)
     #Heads
-    self.pixel_predictor = tf.keras.layers.Conv2D(filters=self.num_classes,
+    self.pixel_predictor = tf.keras.layers.Conv2D(filters=self._num_classes,
                                                   strides=(1, 1),
                                                   kernel_size=(1, 1),
                                                   padding='valid')
-    self.head = MLPHead(num_classes=self.num_classes, 
+    self.head = MLPHead(num_classes=self._num_classes, 
                         hidden_dim=self._hidden_size, 
                         mask_dim=self._fpn_feat_dims)
    
