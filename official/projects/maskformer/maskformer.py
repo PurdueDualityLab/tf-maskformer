@@ -81,7 +81,6 @@ class Maskformer(tf.keras.Model):
                                             batch_size=self._batch_size,
                                             num_queries=self._num_queries,
                                             hidden_size=self._hidden_size,
-                                            num_classes=self.num_classes,
                                             num_encoder_layers=self.num_encoder_layers,
                                             num_decoder_layers=self._num_decoder_layers,
                                             dropout_rate=self._dropout_rate)
