@@ -9,7 +9,6 @@ class MaskFormerTransformer(tf.keras.layers.Layer):
                batch_size,
                num_queries,
                hidden_size,
-               num_classes,
                num_encoder_layers=6,
                num_decoder_layers=6,
                dropout_rate=0.1,
@@ -25,7 +24,6 @@ class MaskFormerTransformer(tf.keras.layers.Layer):
         if hidden_size % 2 != 0:
             raise ValueError("hidden_size must be a multiple of 2.")
 
-        self._num_classes = num_classes
 
         # DETRTransformer parameters.
         self._num_encoder_layers = num_encoder_layers
@@ -46,11 +44,6 @@ class MaskFormerTransformer(tf.keras.layers.Layer):
             dtype=tf.float32)
         
         sqrt_k = math.sqrt(1.0 / self._hidden_size)
-
-        self._class_embed = tf.keras.layers.Dense(
-            self._num_classes,
-            kernel_initializer=tf.keras.initializers.RandomUniform(-sqrt_k, sqrt_k),
-            name="detr/cls_dense")
         
         self._input_proj = tf.keras.layers.Conv2D(
             self._hidden_size, 1, name="detr/conv2d")
@@ -91,7 +84,6 @@ class MaskFormerTransformer(tf.keras.layers.Layer):
             "backbone_endpoint_name": self._backbone_endpoint_name,
             "num_queries": self._num_queries,
             "hidden_size": self._hidden_size,
-            "num_classes": self._num_classes,
             "num_encoder_layers": self._num_encoder_layers,
             "num_decoder_layers": self._num_decoder_layers,
             "dropout_rate": self._dropout_rate,
