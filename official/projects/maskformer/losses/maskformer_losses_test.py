@@ -1,17 +1,14 @@
 from official.projects.maskformer.losses.maskformer_losses import Loss
-from research.object_detection.matchers.hungarian_matcher import HungarianBipartiteMatcher
-from research.object_detection.core.region_similarity_calculator import DETRSimilarity
+from official.projects.detr.ops.matchers import hungarian_matching
 from absl.testing import parameterized
 import tensorflow as tf
-import torch
 
-import pickle
+import numpy as np
 
 class LossTest(tf.test.TestCase, parameterized.TestCase):
     @parameterized.named_parameters(('test1',))
     def test_pass_through(self):
-        similarity_calc = DETRSimilarity()
-        matcher = HungarianBipartiteMatcher()
+        matcher = hungarian_matching
         mask_weight = 20.0
         dice_weight = 1.0
         no_object_weight = 0.1
@@ -19,18 +16,20 @@ class LossTest(tf.test.TestCase, parameterized.TestCase):
         losses = ["labels", "masks"]
 
         loss = Loss(
-            num_classes = 171,
-            similarity_calc = similarity_calc,
+            num_classes = 133,
             matcher = matcher,
             weight_dict = weight_dict,
             eos_coef = no_object_weight,
             losses = losses
         )
         
-        with open("losses_test.pkl", "rb") as f:
-            params = pickle.load(f)
-        
-        print(loss.call(params["outputs"], params["targets"]))
+        outputs = {"pred_logits":tf.convert_to_tensor(np.load("output_pred_logits.npy")), "pred_masks":tf.convert_to_tensor(np.load("output_pred_masks.npy"))}
+        targets_labels = tf.convert_to_tensor(np.load("targets_labels.npy"))
+        targets_masks = tf.convert_to_tensor(np.load("targets_masks.npy"))
+        targets = list()
+        for i in range(tf.shape(targets_labels)[0]):
+            targets.append({"labels":tf.expand_dims(targets_labels[i], axis=0), "masks":tf.expand_dims(targets_masks[i], axis=0)})
+        print(loss(outputs, targets))
 
 if __name__ == '__main__':
     tf.test.main()
