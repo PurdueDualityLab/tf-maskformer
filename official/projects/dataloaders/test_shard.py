@@ -1,38 +1,34 @@
 import tensorflow as tf
-import factory
-from official.projects.configs import factory_config
-from panoptic_input import mask_former_parser
 from PIL import Image
 import numpy as np
 import cv2
 from skimage import segmentation
 from skimage import color
+
 from official.projects.dataloaders import input_reader
-from official.projects.configs import mode_keys as ModeKeys
-from official.projects.configs import factory_config
-from official.common import distribute_utils
-from official.modeling.hyperparams import params_dict
-from absl import flags
-from official.utils import hyperparams_flags
-from official.utils.flags import core as flags_core
-import sys
+from official.projects.dataloaders import panoptic_input
+from official.common import dataset_fn
 import tensorflow as tf
-from panoptic_input import mask_former_parser
+from official.core import exp_factory as factory
+from official.projects.configs import maskformer_cfg
 
-FLAGS = flags.FLAGS
-argv = FLAGS(sys.argv)
-hyperparams_flags.initialize_common_flags()
-flags_core.define_log_steps()
+params = factory.get_exp_config("detr_coco_tfrecord").task.train_data
+decoder_cfg = params.decoder
+if decoder_cfg.type == 'simple_decoder':
+    decoder = panoptic_input.TfExampleDecoder(
+        regenerate_source_id = params.regenerate_source_id)
+else:
+    raise ValueError('Unknown decoder type: {}!'.format(
+        params.decoder.type))
 
-params = factory_config.config_generator('mask_former')
+parser_fn = panoptic_input.mask_former_parser(params.parser,
+                            decoder.decode)
+reader = input_reader.InputFn(
+    params,
+    dataset_fn = dataset_fn.pick_dataset_fn(params.file_type),
+    parser_fn = parser_fn)
 
-params = params_dict.override_params_dict(
-    params, FLAGS.config_file, is_strict=True)
-params = params_dict.override_params_dict(
-    params, FLAGS.params_override, is_strict=True)
-
-parser_fn = factory.parser_generator(params, ModeKeys.TRAIN)
-# parser_fn = mask_former_parser([400,400])
+cfg_test = factory.get_exp_config("detr_coco_tfrecord")
 
 
 file_path = "/scratch/gilbreth/abuynits/coco_ds/tfrecords/val-00002-of-00008.tfrecord"  # specify the filepath to tfrecord
