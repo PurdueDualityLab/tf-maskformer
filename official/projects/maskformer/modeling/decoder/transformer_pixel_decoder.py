@@ -30,7 +30,7 @@ class TransformerFPN(tf.keras.layers.Layer):
           TODO: fill in new args
           
         """
-        super(Fpn, self).__init__(**kwargs)
+        super(TransformerFPN, self).__init__(**kwargs)
 
         self._batch_size = batch_size
 
@@ -133,7 +133,7 @@ class TransformerFPN(tf.keras.layers.Layer):
             self._permute1 = tf.keras.layers.Permute((2, 3, 1))
             self._permute2 = tf.keras.layers.Permute((2, 3, 1))
 
-        super(Fpn, self).build(multilevel_features)
+        super(TransformerFPN, self).build(multilevel_features)
     
     def _generate_image_mask(self, features: tf.Tensor) -> tf.Tensor:
         """Generates image mask from input image."""
