@@ -3,6 +3,7 @@ import tensorflow as tf
 from official.vision.modeling.backbones import resnet
 from official.projects.maskformer.modeling.decoder.transformer_decoder import MaskFormerTransformer
 from official.projects.maskformer.modeling.decoder.pixel_decoder import Fpn
+from official.projects.maskformer.modeling.decoder.transformer_pixel_decoder import TransformerFPN
 from official.projects.maskformer.modeling.layers.nn_block import MLPHead
 
 # TODO(ibrahim): Add all parameters model parameters and remove hardcoding.
@@ -29,7 +30,7 @@ class Maskformer(tf.keras.Model):
                dropout_rate=0.1,
                backbone_endpoint_name='5',
                num_classes=171,
-               batch_size=1,
+               batch_size=16,
                **kwargs):
     self._batch_size = batch_size
     self._num_classes = num_classes
@@ -64,7 +65,8 @@ class Maskformer(tf.keras.Model):
     #backbone
     self.backbone = resnet.ResNet(50, bn_trainable=False)
     #decoders
-    self.pixel_decoder = Fpn(fpn_feat_dims=self._fpn_feat_dims,
+    self.pixel_decoder = TransformerFPN(batch_size = self._batch_size,
+                            fpn_feat_dims=self._fpn_feat_dims,
                             data_format=self._data_format,
                             dilation_rate=self._dilation_rate,
                             groups=self._groups,
@@ -85,10 +87,10 @@ class Maskformer(tf.keras.Model):
                                             num_decoder_layers=self._num_decoder_layers,
                                             dropout_rate=self._dropout_rate)
     #Heads
-    self.pixel_predictor = tf.keras.layers.Conv2D(filters=self._num_classes,
-                                                  strides=(1, 1),
-                                                  kernel_size=(1, 1),
-                                                  padding='valid')
+    #self.pixel_predictor = tf.keras.layers.Conv2D(filters=self._num_classes,
+    #                                              strides=(1, 1),
+    #                                              kernel_size=(1, 1),
+    #                                              padding='valid')
     self.head = MLPHead(num_classes=self._num_classes, 
                         hidden_dim=self._hidden_size, 
                         mask_dim=self._fpn_feat_dims)
@@ -104,10 +106,10 @@ class Maskformer(tf.keras.Model):
   def call(self, image):
     backbone_feature_maps = self.backbone(image)
     
-    mask_features = self.pixel_decoder(self.process_feature_maps(backbone_feature_maps))
-    per_pixel_pred = self.pixel_predictor(mask_features)
+    mask_features, transformer_encoder = self.pixel_decoder(self.process_feature_maps(backbone_feature_maps))
+    #per_pixel_pred = self.pixel_predictor(mask_features)
     
-    transformer_features = self.transformer({"features": backbone_feature_maps})
+    transformer_features = self.transformer({"features": transformer_encoder})
     
     seg_pred = self.head({"per_pixel_embeddings" : mask_features,
                           "per_segment_embeddings": transformer_features})
