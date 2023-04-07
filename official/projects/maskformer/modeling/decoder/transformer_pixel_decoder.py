@@ -164,7 +164,6 @@ class TransformerFPN(tf.keras.layers.Layer):
         features = self._input_proj(feat)
         
         transformer = self._transformer_encoder(features, None, pos_embed)
-        print(transformer.shape)
         
 
         down = self._conv2d_op_down[0](transformer)
