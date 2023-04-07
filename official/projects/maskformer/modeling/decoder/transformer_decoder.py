@@ -55,7 +55,7 @@ class MaskFormerTransformer(tf.keras.layers.Layer):
         return mask
     
     def call(self, inputs):
-        features = inputs['features'][self._backbone_endpoint_name]
+        features = inputs['features']
 
         mask = self._generate_image_mask(features)
 
