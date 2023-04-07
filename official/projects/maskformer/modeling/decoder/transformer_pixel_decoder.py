@@ -84,6 +84,7 @@ class TransformerFPN(tf.keras.layers.Layer):
         self._transformer_encoder = TransformerEncoder(norm_first=False,
                                                        dropout_rate = .1,
                                                        num_layers=6)
+        self._interpolations = []                                               
         self._conv2d_op_lateral = []
         self._lateral_groupnorm = []
         for level in levels[::-1]:
@@ -93,8 +94,12 @@ class TransformerFPN(tf.keras.layers.Layer):
                                              name = f"lateral_{level}",
                                              **conv_args)
             lateral_norm = tf.keras.layers.GroupNormalization(name = f"lateral_norm_{level}")
+            interpolate = tf.keras.layers.Resizing(
+              multilevel_features[level][1], multilevel_features[level][2], interpolation = "nearest")
+
             self._conv2d_op_lateral.append(lateral)
             self._lateral_groupnorm.append(lateral_norm)
+            self._interpolations.append(interpolate)
 
         self._conv2d_op_down = []
         self._down_groupnorm = []
@@ -180,7 +185,7 @@ class TransformerFPN(tf.keras.layers.Layer):
             lateral = self._conv2d_op_lateral[i](feat)
             lateral = self._lateral_groupnorm[i](lateral)
 
-            down = nearest_upsampling(down, 2) + lateral
+            down = self._interpolations[i](down) + lateral
 
             down = self._conv2d_op_down[i + 1](down)
             down = self._down_groupnorm[i+1](down)
