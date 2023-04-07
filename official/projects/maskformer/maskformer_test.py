@@ -9,7 +9,7 @@ class MaskFormerTest(tf.test.TestCase, parameterized.TestCase):
                         fpn_feat_dims,
                         num_queries,
                         hidden_size,
-                        backbone_endpopint_name,
+                        backbone_endpoint_name,
                         num_encoder_layers,
                         num_decoder_layers,
                         num_classes,
@@ -19,7 +19,7 @@ class MaskFormerTest(tf.test.TestCase, parameterized.TestCase):
                                  num_queries=num_queries,
                                  hidden_dim=num_queries,
                                  hidden_size=hidden_size,
-                                 backbone_endpopint_name=backbone_endpopint_name,
+                                 backbone_endpoint_name=backbone_endpoint_name,
                                  num_encoder_layers=num_encoder_layers,
                                  num_decoder_layers=num_decoder_layers,
                                  num_classes=num_classes,
@@ -30,7 +30,7 @@ class MaskFormerTest(tf.test.TestCase, parameterized.TestCase):
         expected_class_probs_shape = [1, 100, 172]
         expected_mask_probs_shape = [1, 160, 160, 100]
 
-        output = model(input_image)
+        output = maskformer(input_image)
 
         self.assertAllEqual(
             output["class_prob_predictions"].shape.as_list(), expected_class_probs_shape)
