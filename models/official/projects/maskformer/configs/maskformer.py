@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""DETR configurations."""
+"""MaskFormer configurations."""
 
 import dataclasses
 import os
@@ -25,7 +25,7 @@ from official.modeling import hyperparams
 # from official.projects.detr.dataloaders import coco
 from official.vision.configs import backbones
 from official.vision.configs import common
-
+from official.projects.maskformer import optimization
 
 @dataclasses.dataclass
 class Parser(hyperparams.Config):
@@ -62,7 +62,8 @@ class DataConfig(cfg.DataConfig):
   global_batch_size: int = 0
   is_training: bool = False
   regenerate_source_id: bool = False
-  dtype: str = 'bfloat16'
+  # TODO : Change the dtype to bloat16 for TPU training
+  dtype: str = 'float32'
   decoder: common.DataDecoder = common.DataDecoder()
   shuffle_buffer_size: int = 10000
   file_type: str = 'tfrecord'
@@ -108,7 +109,8 @@ class MaskFormerTask(cfg.TaskConfig):
   annotation_file: Optional[str] = None
   per_category_metrics: bool = False
 
-COCO_INPUT_PATH_BASE = '/depot/davisjam/data/vishal/datasets/coco'
+# COCO_INPUT_PATH_BASE = '/depot/davisjam/data/vishal/datasets/coco/'
+COCO_INPUT_PATH_BASE = '/depot/davisjam/data/vishal/datasets/coco/'
 COCO_TRAIN_EXAMPLES = 118287
 COCO_VAL_EXAMPLES = 5000
 
@@ -125,23 +127,53 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
       task=MaskFormerTask(
           init_checkpoint='',
           init_checkpoint_modules='backbone',
-          annotation_file=os.path.join(COCO_INPUT_PATH_BASE,
-                                       'instances_val2017.json'),
-          model=MaskFormer(
-              input_size=[1333, 1333, 3],
-              norm_activation=common.NormActivation()),
+          annotation_file=os.path.join(COCO_INPUT_PATH_BASE,'annotations'
+                                       'instances_train2017.json'),
+        #   model=MaskFormer(
+        #       input_size=[1333, 1333, 3],
+        #       norm_activation=common.NormActivation()),
           losses=Losses(),
           train_data=DataConfig(
-              input_path=os.path.join(COCO_INPUT_PATH_BASE, 'train*'),
+              input_path=os.path.join(COCO_INPUT_PATH_BASE, 'tfrecords/train*'),
               is_training=True,
               global_batch_size=train_batch_size,
               shuffle_buffer_size=1000,
+              parser = Parser(
+                    output_size = [400,400],
+                    min_scale = 0.3,
+                    aspect_ratio_range = (0.5, 2.0),
+                    min_overlap_params = (0.0, 1.4, 0.2, 0.1),
+                    max_retry = 50,
+                    pad_output = False,
+                    resize_eval_groundtruth = True,
+                    groundtruth_padded_size = None,
+                    ignore_label = 0,
+                    aug_rand_hflip = True,
+                    aug_scale_min = 1.0,
+                    aug_scale_max = 1.0,
+                    color_aug_ssd = False,
+                    brightness = 0.2,
+                    saturation = 0.3,
+                    contrast = 0.5,
+                    aug_type = None,
+                    sigma = 8.0,
+                    small_instance_area_threshold = 4096,
+                    small_instance_weight = 3.0,
+                    dtype = 'float32',
+                    seed = 2045,
+                )
           ),
           validation_data=DataConfig(
-              input_path=os.path.join(COCO_INPUT_PATH_BASE, 'val*'),
+              input_path=os.path.join(COCO_INPUT_PATH_BASE, 'tfrecords/val*'),
               is_training=False,
               global_batch_size=eval_batch_size,
               drop_remainder=False,
+              parser = Parser(
+                    output_size = [400,400],
+                    pad_output = True,
+                    seed = 4096,
+                )
+              
           )),
       trainer=cfg.TrainerConfig(
           train_steps=train_steps,
@@ -152,7 +184,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
           validation_interval=5 * steps_per_epoch,
           max_to_keep=1,
           best_checkpoint_export_subdir='best_ckpt',
-          best_checkpoint_eval_metric='AP',
+          # TODO: Not defined the metric
           optimizer_config=optimization.OptimizationConfig({
               'optimizer': {
                   'type': 'detr_adamw',

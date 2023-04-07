@@ -190,7 +190,7 @@ class CombinationDatasetInputReader(input_reader.InputReader):
     labeled_batch_size, pl_batch_size = calculate_batch_sizes(
         self._global_batch_size, self._pseudo_label_data_ratio,
         self._pseudo_label_batch_size)
-
+    
     if not labeled_batch_size and pl_batch_size:
       raise ValueError(
           'Invalid batch_size: {} and pseudo_label_data_ratio: {}, '

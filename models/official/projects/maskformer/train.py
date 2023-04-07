@@ -12,7 +12,7 @@ from official.core import train_utils
 from official.modeling import performance
 from official.projects.maskformer.configs import maskformer
 from official.projects.maskformer.tasks import panoptic_maskformer
-
+FLAGS = flags.FLAGS
 def main(_):
 	gin.parse_config_files_and_bindings(FLAGS.gin_file, FLAGS.gin_params)
 	params = train_utils.parse_configuration(FLAGS)
@@ -26,13 +26,26 @@ def main(_):
 	# can have significant impact on model speeds by utilizing float16 in case of
 	# GPUs, and bfloat16 in the case of TPUs. loss_scale takes effect only when
 	# dtype is float16
+
+
+	# Uncomment to test on TPU
+	# if params.runtime.mixed_precision_dtype:
+	# 	performance.set_mixed_precision_policy(params.runtime.mixed_precision_dtype)
+	# distribution_strategy = distribute_utils.get_distribution_strategy(
+	# 		distribution_strategy=params.runtime.distribution_strategy,
+	# 		all_reduce_alg=params.runtime.all_reduce_alg,
+	# 		num_gpus=params.runtime.num_gpus,
+	# 		tpu_address=params.runtime.tpu)
+	
+	# Comment if running on TPU
 	if params.runtime.mixed_precision_dtype:
 		performance.set_mixed_precision_policy(params.runtime.mixed_precision_dtype)
 	distribution_strategy = distribute_utils.get_distribution_strategy(
 			distribution_strategy=params.runtime.distribution_strategy,
 			all_reduce_alg=params.runtime.all_reduce_alg,
-			num_gpus=params.runtime.num_gpus,
-			tpu_address=params.runtime.tpu)
+			num_gpus=1)
+	
+	# Below code is independent of compute platform
 	with distribution_strategy.scope():
 		task = task_factory.get_task(params.task, logging_dir=model_dir)
 

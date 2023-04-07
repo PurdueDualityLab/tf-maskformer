@@ -1,7 +1,8 @@
 
-
+```
 module load cuda/11.7.0 cudnn/cuda-11.7_8.6 gcc/6.3.0
-export PYTHONPATH=$PYTHONPATH:<path_to_models>
+export PYTHONPATH=$PYTHONPATH:<path_to_models_folder>
+```
 
 ## Environment creation 
 ```
@@ -15,6 +16,6 @@ pip install tensorflow-text-nightly
 ```
 python3 official/projects/maskformer/train.py \
   --experiment=maskformer_coco_panoptic \
-  --mode=train_and_eval \
+  --mode=train \
   --model_dir=<model_dir> \
 ```

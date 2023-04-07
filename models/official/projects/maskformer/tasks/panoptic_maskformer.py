@@ -1,27 +1,59 @@
 import tensorflow as tf
 
 from official.core import base_task
+from official.core import task_factory
 from typing import Any, Dict, List, Mapping, Optional, Tuple
-from official.projects.maskformer.modeling.maskformer import MaskFormer
-from official.projects.maskformer.losses.maskformer_losses import Loss
-from official.projects.maskformer.dataloaders import panoptic_input
-from official.vision.dataloaders import input_reader
+
+from official.projects.maskformer.dataloaders import input_reader
 from official.vision.dataloaders import input_reader_factory
 from official.common import dataset_fn
 
+from official.projects.maskformer.configs import maskformer as exp_cfg
+from official.projects.maskformer.modeling.maskformer import MaskFormer
+from official.projects.maskformer.losses.maskformer_losses import Loss
+from official.projects.maskformer.dataloaders import panoptic_input
+
+@task_factory.register_task_cls(exp_cfg.MaskFormerTask)
 class PanopticTask(base_task.Task):
 	
 	def build_model(self)-> tf.keras.Model:
 		"""Builds MaskFormer Model."""
 		# TODO(ibrahim): Connect to params in config.
-		model = MaskFormer()
+		model = MaskFormer(171, 100)
 
+		print("[INFO] tested till architecture intialization ")
 		return model
 	
 	def build_inputs(self, params, input_context: Optional[tf.distribute.InputContext] = None) -> tf.data.Dataset:
 		""" 
 		Build panoptic segmentation dataset.
 
+		"""
+		# print(params.parser)
+		# exit()
+		print("[INFO] Inside Build Inputs..........")
+		decoder_cfg = params.decoder.get()
+		
+		if params.decoder.type == 'simple_decoder':
+			decoder = panoptic_input.TfExampleDecoder(regenerate_source_id = params.regenerate_source_id)
+		else:
+			raise ValueError('Unknown decoder type: {}!'.format(params.decoder.type))
+		
+
+		parser = panoptic_input.mask_former_parser(params.parser, is_training = params.is_training, decoder_fn=decoder.decode)
+		reader = input_reader.InputFn(params,dataset_fn = dataset_fn.pick_dataset_fn(params.file_type),parser_fn = parser, num_examples=2)
+		# dataset = reader(ctx=input_context)
+		# reader = input_reader_factory.input_reader_generator(
+		#   params,
+		#   dataset_fn=dataset_fn.pick_dataset_fn(params.file_type),
+		#   decoder_fn=decoder.decode,
+		#   parser_fn=parser.parse_fn(params.is_training))
+		dataset = reader(ctx=input_context)
+		return dataset
+
+	def initialize(self, model: tf.keras.Model) -> None:
+		"""
+		Used to initialize the models with checkpoint
 		"""
 		pass
 
@@ -31,10 +63,16 @@ class PanopticTask(base_task.Task):
 		
 		# _compute_loss = Loss(init loss here...)
 		# return _compute_loss(outputs, targets)
-		raise NotImplementedError
+		pass
 	
 	def build_metrics(self, training=True):
-		raise NotImplementedError
+		metrics = []
+		metric_names = ['cls_loss', 'focal_loss', 'dice_loss']
+		for name in metric_names:
+			metrics.append(tf.keras.metrics.Mean(name, dtype=tf.float32))
+		# TODO : this temporary metrics have a look at DETR code for correct metrics
+		
+		return metrics
 
 	def train_step(self, inputs: Tuple[Any, Any],model: tf.keras.Model, optimizer: tf.keras.optimizers.Optimizer, metrics: Optional[List[Any]] = None) -> Dict[str, Any]:
 		features, labels = inputs
