@@ -15,9 +15,7 @@ class MaskFormerTest(tf.test.TestCase, parameterized.TestCase):
                         num_classes,
                         batch_size):    
             
-        maskformer = Maskformer(fpn_feat_dims=fpn_feat_dims,
-                                 num_queries=num_queries,
-                                 hidden_dim=num_queries,
+        maskformer = MaskFormer(
                                  hidden_size=hidden_size,
                                  backbone_endpoint_name=backbone_endpoint_name,
                                  num_encoder_layers=num_encoder_layers,
