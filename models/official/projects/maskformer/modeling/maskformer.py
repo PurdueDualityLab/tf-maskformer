@@ -2,8 +2,8 @@ import tensorflow as tf
 
 from official.vision.modeling.backbones import resnet
 from official.projects.maskformer.modeling.decoder.transformer_decoder import MaskFormerTransformer
-from official.projects.maskformer.modeling.decoder.pixel_decoder import Fpn
 from official.projects.maskformer.modeling.layers.nn_block import MLPHead
+from official.projects.maskformer.modeling.decoder.transformer_pixel_decoder import TransformerFPN
 
 # TODO(ibrahim): Add all parameters model parameters and remove hardcoding.
 class MaskFormer(tf.keras.Model):
@@ -64,7 +64,8 @@ class MaskFormer(tf.keras.Model):
     #backbone
     self.backbone = resnet.ResNet(50, bn_trainable=False)
     #decoders
-    self.pixel_decoder = Fpn(fpn_feat_dims=self._fpn_feat_dims,
+    self.pixel_decoder = TransformerFPN(batch_size = self._batch_size,
+                            fpn_feat_dims=self._fpn_feat_dims,
                             data_format=self._data_format,
                             dilation_rate=self._dilation_rate,
                             groups=self._groups,
@@ -85,10 +86,10 @@ class MaskFormer(tf.keras.Model):
                                             num_decoder_layers=self._num_decoder_layers,
                                             dropout_rate=self._dropout_rate)
     #Heads
-    self.pixel_predictor = tf.keras.layers.Conv2D(filters=self._num_classes,
-                                                  strides=(1, 1),
-                                                  kernel_size=(1, 1),
-                                                  padding='valid')
+    # self.pixel_predictor = tf.keras.layers.Conv2D(filters=self._num_classes,
+    #                                               strides=(1, 1),
+    #                                               kernel_size=(1, 1),
+    #                                               padding='valid')
     self.head = MLPHead(num_classes=self._num_classes, 
                         hidden_dim=self._hidden_size, 
                         mask_dim=self._fpn_feat_dims)
@@ -109,16 +110,14 @@ class MaskFormer(tf.keras.Model):
     print("[INFO] Backbone Features [res3]:", backbone_feature_maps["3"].shape)
     print("[INFO] Backbone Features [res4]:", backbone_feature_maps["4"].shape)
     print("[INFO] Backbone Features [res5]:", backbone_feature_maps["5"].shape)
-    mask_features = self.pixel_decoder(self.process_feature_maps(backbone_feature_maps))
+    mask_features, transformer_enc_feat = self.pixel_decoder(self.process_feature_maps(backbone_feature_maps))
     print("[INFO] Mask Features :", mask_features.shape)
-    # per_pixel_pred = self.pixel_predictor(mask_features)
-    
-    transformer_features = self.transformer({"features": backbone_feature_maps})
+    print("[INFO] Transformer ENC Features :", transformer_enc_feat.shape)
+
+    transformer_features = self.transformer({"features": transformer_enc_feat})
     print("[INFO] Transformer Features :", transformer_features.shape)
-    exit()
     seg_pred = self.head({"per_pixel_embeddings" : mask_features,
                           "per_segment_embeddings": transformer_features})
-    # print("[INFO] Seg Pred :", seg_pred["class_prob_predictions"])
-    # print("[INFO] Seg Pred :", seg_pred['mask_prob_predictions'])
-    
+    print("[INFO] Seg Pred Class Prob:", seg_pred["class_prob_predictions"].shape)
+    print("[INFO] Seg Pred Mask Prob:", seg_pred['mask_prob_predictions'].shape)
     return seg_pred

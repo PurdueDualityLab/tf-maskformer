@@ -23,7 +23,7 @@ class PanopticTask(base_task.Task):
                                  backbone_endpoint_name="5",
                                  num_encoder_layers=0,
                                  num_decoder_layers=6,
-                                 num_classes=171,
+                                 num_classes=100,
                                  batch_size=1)
 
 		print("[INFO] tested till architecture intialization ")
@@ -86,9 +86,9 @@ class PanopticTask(base_task.Task):
 		features, labels = inputs
 		with tf.GradientTape() as tape:
 			outputs = model(features, training=True)
-			print("[INFO] class_prob_outputs:",outputs["class_prob_predictions"].shape)
-			print("[INFO] mask_prob_outputs:",outputs["mask_prob_predictions"].shape)
-			exit()
+			# print("[INFO] class_prob_outputs:",outputs["class_prob_predictions"].shape)
+			# print("[INFO] mask_prob_outputs:",outputs["mask_prob_predictions"].shape)
+			# exit()
 		# 	#TODO Change to maskformer loss
 		# 	loss = 0.0
 		# 	cls_loss = 0.0
