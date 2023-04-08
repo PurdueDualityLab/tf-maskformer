@@ -1,66 +1,118 @@
+"""Feature Pyramid Networks used in MaskFormer."""
 import tensorflow as tf
 import tensorflow_addons as tfa
 from official.vision.ops.spatial_transform_ops import nearest_upsampling
 
 class Fpn(tf.keras.layers.Layer):
-    """Feature pyramid networks."""
+    """MaskFormer Feature Pyramid Networks."""
 
     def __init__(self,
                  fpn_feat_dims=256,
+                 data_format=None,
+                 dilation_rate=(1, 1),
+                 groups=1,
+                 activation='relu',
+                 use_bias=False,
+                 kernel_initializer="glorot_uniform",
+                 bias_initializer="zeros",
+                 kernel_regularizer=None,
+                 bias_regularizer=None,
+                 activity_regularizer=None,
+                 kernel_constraint=None,
+                 bias_constraint=None,
                  **kwargs):
         """FPN initialization function.
-
         Args:
-        fpn_feat_dims: Feature dimension of the fpn
+          fpn_feat_dims: `int`, Feature dimension of the fpn.
+          
+          TODO: fill in new args
+          
         """
         super(Fpn, self).__init__(**kwargs)
 
+        # conv2d params
         self._fpn_feat_dims = fpn_feat_dims
-        # TODO(Isaac): Add Conv2D parameteres to constructor.
-        # TODO(Isaac): Add GroupNormalization parameters to constructor.
+        self._data_format = data_format
+        self._dilation_rate = dilation_rate
+        self._groups = groups
+        self._activation = activation
+        self._use_bias = use_bias
+        self._kernel_initializer = kernel_initializer
+        self._bias_initializer = bias_initializer
+        self._kernel_regularizer = kernel_regularizer
+        self._bias_regularizer = bias_regularizer
+        self._activity_regularizer = activity_regularizer
+        self._kernel_constraint = kernel_constraint
+        self._bias_constraint = bias_constraint
+        
 
         if tf.keras.backend.image_data_format() == 'channels_last':
+            # format: (batch_size, height, width, channels)
             self._channels_last = True
         else:
+            # format: (batch_size, channels, width, height)
             self._channels_last = False
 
     def build(self, multilevel_features):
-        # TODO(Isaac): Add Conv2D parameters to layers.
-        # TODO(Isaac): Add GroupNormalization parameters to layers.
-
+        conv_args = {
+            "data_format": self._data_format,
+            "dilation_rate": self._dilation_rate,
+            "groups": self._groups,
+            "activation": self._activation,
+            "use_bias": self._use_bias,
+            "kernel_initializer": self._kernel_initializer,
+            "bias_initializer": self._bias_initializer,
+            "kernel_regularizer": self._kernel_regularizer,
+            "bias_regularizer": self._bias_regularizer,
+            "activity_regularizer": self._activity_regularizer,
+            "kernel_constraint": self._kernel_constraint,
+            "bias_constraint": self._bias_constraint
+        }
+        
         input_levels = list(multilevel_features.keys())
         levels = input_levels[:-1]
 
         self._conv2d_op_lateral = []
-        for _ in levels[::-1]:
-            lateral = tf.keras.layers.Conv2D(
-                filters=self._fpn_feat_dims,
-                kernel_size=(1, 1),
-                padding='same')
+        self._lateral_groupnorm = []
+        for level in levels[::-1]:
+            lateral = tf.keras.layers.Conv2D(filters=self._fpn_feat_dims,
+                                             kernel_size=(1, 1),
+                                             padding='same',
+                                             name = f"lateral_{level}",
+                                             **conv_args)
+            lateral_norm = tf.keras.layers.GroupNormalization(name = f"lateral_norm_{level}")
             self._conv2d_op_lateral.append(lateral)
+            self._lateral_groupnorm.append(lateral_norm)
 
         self._conv2d_op_down = []
-        down = tf.keras.layers.Conv2D(
-            filters=self._fpn_feat_dims,
-            strides=(1, 1),
-            kernel_size=(3, 3),
-            padding='same')
+        self._down_groupnorm = []
+        down = tf.keras.layers.Conv2D(filters=self._fpn_feat_dims,
+                                      strides=(1, 1),
+                                      kernel_size=(3, 3),
+                                      padding='same',
+                                      name = "down_initial_conv",
+                                      **conv_args)
+        down_norm = tf.keras.layers.GroupNormalization(name = "down_initial_norm")
+        self._down_groupnorm.append(down_norm)
         self._conv2d_op_down.append(down)
-        for _ in levels[::-1]:
-            down = tf.keras.layers.Conv2D(
-                filters=self._fpn_feat_dims,
-                strides=(1, 1),
-                kernel_size=(3, 3),
-                padding='same')
+        
+        for level in levels[::-1]:
+            down = tf.keras.layers.Conv2D(filters=self._fpn_feat_dims,
+                                          strides=(1, 1),
+                                          kernel_size=(3, 3),
+                                          padding='same',
+                                          name = f"down_{level}",
+                                          **conv_args)
+            down_norm = tf.keras.layers.GroupNormalization(name = f"down_norm_{level}")
             self._conv2d_op_down.append(down)
+            self._down_groupnorm.append(down_norm)
 
         self._conv2d_op_mask = tf.keras.layers.Conv2D(
             filters=self._fpn_feat_dims,
             kernel_size=(3, 3),
-            padding='same')
-
-        self._group_norm1 = tfa.layers.GroupNormalization()
-        self._group_norm2 = tfa.layers.GroupNormalization()
+            padding='same',
+            name = "mask_proj",
+            **conv_args)
         
         self._relu1 = tf.keras.layers.ReLU()
         self._relu2 = tf.keras.layers.ReLU()
@@ -88,7 +140,7 @@ class Fpn(tf.keras.layers.Layer):
             feat = self._permute_1(feat)
 
         down = self._conv2d_op_down[0](feat)
-        down = self._group_norm1(down)
+        down = self._down_groupnorm[0](down)
         down = self._relu1(down)
 
         levels = input_levels[:-1]
@@ -99,17 +151,15 @@ class Fpn(tf.keras.layers.Layer):
                 feat = self._permute_2(multilevel_features[level])
 
             lateral = self._conv2d_op_lateral[i](feat)
-
-            upsample = nearest_upsampling(down, 2)
-            
-            # When width or height is odd there is a shape mismatch with scale=2.
-            if (upsample.shape != lateral.shape):
-                upsample = upsample[:,:lateral.shape[1],:lateral.shape[2],:]
-
-            down = upsample + lateral
+            lateral = self._lateral_groupnorm[i](lateral)
+            print(down.shape)
+            print(nearest_upsampling(down, 2).shape)
+            print(lateral.shape)
+            exit()
+            down = nearest_upsampling(down, 2) + lateral
 
             down = self._conv2d_op_down[i + 1](down)
-            down = self._group_norm2(down)
+            down = self._down_groupnorm[i+1](down)
             down = self._relu2(down)
 
         mask = self._conv2d_op_mask(down)

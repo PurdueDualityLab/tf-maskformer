@@ -38,11 +38,11 @@ class MLPHead(tf.keras.layers.Layer):
         per_segment_embeddings = inputs['per_segment_embeddings']
 
         class_prob_prediction = self._linear_classifier(per_segment_embeddings)
-        mask_embedding = self._mlp(per_segment_embeddings[-1])
+        mask_embedding = self._mlp(per_segment_embeddings)
         mask_prob_prediction = tf.einsum(
             "bqc,bhwc->bhwq", mask_embedding, per_pixel_embeddings)
 
-        return {'class_prob_predictions': class_prob_prediction[-1],'mask_prob_predictions': mask_prob_prediction}
+        return {'class_prob_predictions': class_prob_prediction,'mask_prob_predictions': mask_prob_prediction}
 
 
 class MLP(tf.keras.layers.Layer):

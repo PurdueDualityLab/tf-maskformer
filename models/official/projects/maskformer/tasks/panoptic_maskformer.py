@@ -19,7 +19,12 @@ class PanopticTask(base_task.Task):
 	def build_model(self)-> tf.keras.Model:
 		"""Builds MaskFormer Model."""
 		# TODO(ibrahim): Connect to params in config.
-		model = MaskFormer(171, 100)
+		model = MaskFormer(hidden_size=256,
+                                 backbone_endpoint_name="5",
+                                 num_encoder_layers=0,
+                                 num_decoder_layers=6,
+                                 num_classes=171,
+                                 batch_size=1)
 
 		print("[INFO] tested till architecture intialization ")
 		return model
@@ -61,6 +66,9 @@ class PanopticTask(base_task.Task):
 		outputs = {"pred_logits": class_prob_outputs, "pred_masks": mask_prob_outputs}
 		targets = {"labels": class_targets, "masks": mask_targets}
 		
+		# print("[INFO] class_targets:", class_targets.shape)
+		# print("[INFO] mask_targets:", mask_targets.shape)
+
 		# _compute_loss = Loss(init loss here...)
 		# return _compute_loss(outputs, targets)
 		pass
@@ -78,58 +86,60 @@ class PanopticTask(base_task.Task):
 		features, labels = inputs
 		with tf.GradientTape() as tape:
 			outputs = model(features, training=True)
+			print("[INFO] class_prob_outputs:",outputs["class_prob_predictions"].shape)
+			print("[INFO] mask_prob_outputs:",outputs["mask_prob_predictions"].shape)
+			exit()
+		# 	#TODO Change to maskformer loss
+		# 	loss = 0.0
+		# 	cls_loss = 0.0
+		# 	box_loss = 0.0
+		# 	giou_loss = 0.0
 
-			#TODO Change to maskformer loss
-			loss = 0.0
-			cls_loss = 0.0
-			box_loss = 0.0
-			giou_loss = 0.0
-
-			for output in outputs:
-				# Computes per-replica loss.
-				layer_loss, layer_cls_loss, layer_box_loss, layer_giou_loss = self.build_losses(
-					outputs=output, labels=labels, aux_losses=model.losses)
-				loss += layer_loss
-				cls_loss += layer_cls_loss
-				box_loss += layer_box_loss
-				giou_loss += layer_giou_loss
+		# 	for output in outputs:
+		# 		# Computes per-replica loss.
+		# 		layer_loss, layer_cls_loss, layer_box_loss, layer_giou_loss = self.build_losses(
+		# 			outputs=output, labels=labels, aux_losses=model.losses)
+		# 		loss += layer_loss
+		# 		cls_loss += layer_cls_loss
+		# 		box_loss += layer_box_loss
+		# 		giou_loss += layer_giou_loss
 			
-			scaled_loss = loss
-			# For mixed_precision policy, when LossScaleOptimizer is used, loss is
-			# scaled for numerical stability.
-			if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
-				scaled_loss = optimizer.get_scaled_loss(scaled_loss)
+		# 	scaled_loss = loss
+		# 	# For mixed_precision policy, when LossScaleOptimizer is used, loss is
+		# 	# scaled for numerical stability.
+		# 	if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
+		# 		scaled_loss = optimizer.get_scaled_loss(scaled_loss)
 		
-		tvars = model.trainable_variables
-		grads = tape.gradient(scaled_loss, tvars)
-		# Scales back gradient when LossScaleOptimizer is used.
-		if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
-			grads = optimizer.get_unscaled_gradients(grads)
-		optimizer.apply_gradients(list(zip(grads, tvars)))
+		# tvars = model.trainable_variables
+		# grads = tape.gradient(scaled_loss, tvars)
+		# # Scales back gradient when LossScaleOptimizer is used.
+		# if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
+		# 	grads = optimizer.get_unscaled_gradients(grads)
+		# optimizer.apply_gradients(list(zip(grads, tvars)))
 
-		# Multiply for logging.
-		# Since we expect the gradient replica sum to happen in the optimizer,
-		# the loss is scaled with global num_boxes and weights.
-		# To have it more interpretable/comparable we scale it back when logging.
-		num_replicas_in_sync = tf.distribute.get_strategy().num_replicas_in_sync
-		loss *= num_replicas_in_sync
-		cls_loss *= num_replicas_in_sync
-		box_loss *= num_replicas_in_sync
-		giou_loss *= num_replicas_in_sync
+		# # Multiply for logging.
+		# # Since we expect the gradient replica sum to happen in the optimizer,
+		# # the loss is scaled with global num_boxes and weights.
+		# # To have it more interpretable/comparable we scale it back when logging.
+		# num_replicas_in_sync = tf.distribute.get_strategy().num_replicas_in_sync
+		# loss *= num_replicas_in_sync
+		# cls_loss *= num_replicas_in_sync
+		# box_loss *= num_replicas_in_sync
+		# giou_loss *= num_replicas_in_sync
 
-		# Trainer class handles loss metric for you.
-		logs = {self.loss: loss}
+		# # Trainer class handles loss metric for you.
+		# logs = {self.loss: loss}
 
-		all_losses = {
-			'cls_loss': cls_loss,
-			'box_loss': box_loss,
-		   'giou_loss': giou_loss,
-		}
-		# Metric results will be added to logs for you.
-		if metrics:
-			for m in metrics:
-				m.update_state(all_losses[m.name])
-		return logs
+		# all_losses = {
+		# 	'cls_loss': cls_loss,
+		# 	'box_loss': box_loss,
+		#    'giou_loss': giou_loss,
+		# }
+		# # Metric results will be added to logs for you.
+		# if metrics:
+		# 	for m in metrics:
+		# 		m.update_state(all_losses[m.name])
+		# return logs
 
 	def validation_step(self, inputs, model, optimizer, metrics=None):
 		raise NotImplementedError
