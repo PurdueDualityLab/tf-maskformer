@@ -50,10 +50,11 @@ class FocalLoss(focal_loss.FocalLoss):
 
 
 class DiceLoss(tf.keras.losses.Loss):
-    # TODO: figure out dice loss stuff
     def call(self, y_true, y_pred, num_masks):
-        y_pred = tf.reshape(tf.keras.activations.sigmoid(y_pred), -1)
-        y_true = tf.reshape(y_true, -1)
+        y_pred = tf.reshape(tf.keras.activations.sigmoid(y_pred), [tf.shape(y_pred)[0], -1])
+        y_true = tf.reshape(y_true, [tf.shape(y_true)[0], -1])
+        y_pred = tf.cast(y_pred, tf.float64)
+        y_true = tf.cast(y_true, tf.float64)
         numerator = 2 * tf.reduce_sum(y_pred * y_true, axis=-1)
         denominator = tf.reduce_sum(y_pred, axis=-1) + tf.reduce_sum(y_true, axis=-1)
         loss = 1 - (numerator + 1) / (denominator + 1)
@@ -67,7 +68,7 @@ class DiceLoss(tf.keras.losses.Loss):
         return loss
 
 class Loss(tf.keras.losses.Loss):
-    def __init__(self, num_classes, matcher, weight_dict, eos_coef, losses, cost_class = 1, cost_focal = 1, cost_dice = 1):
+    def __init__(self, num_classes, matcher, weight_dict, eos_coef, losses, cost_class=1, cost_focal=1, cost_dice=1):
         super().__init__()
         self.num_classes = num_classes
         self.matcher = matcher
@@ -82,14 +83,16 @@ class Loss(tf.keras.losses.Loss):
         self.cost_dice = cost_dice
 
     def _get_pred_permutation_idx(self, indices):
-        batch_idx = tf.concat([tf.fill(tf.shape(pred),i) for i, (pred,_) in enumerate(indices)], axis=0)
-        pred_idx = tf.concat([pred for (pred,_) in indices], axis=0)
-        return batch_idx, pred_idx
+        idx = tf.TensorArray(tf.int64, size=0, dynamic_size=True)
+        for i, (pred,_) in enumerate(indices):
+            idx = idx.write(i, [i, pred.numpy()[0]])
+        return idx.stack()
     
     def _get_true_permutation_idx(self, indices):
-        batch_idx = tf.concat([tf.fill(true,i) for i, (_,true) in enumerate(indices)], axis=0)
-        true_idx = tf.concat([true for (_,true) in indices], axis=0)
-        return batch_idx, true_idx
+        idx = tf.TensorArray(tf.int64, size=0, dynamic_size=True)
+        for i, (_,true) in enumerate(indices):
+            idx = idx.write(i, [i, true.numpy()[0]])
+        return idx.stack()
     
     def get_classification_loss(self, outputs, y_true, indices, num_masks):
         assert "pred_logits" in outputs
@@ -97,13 +100,12 @@ class Loss(tf.keras.losses.Loss):
         pred_logits = outputs["pred_logits"]
         idx = self._get_pred_permutation_idx(indices)
         true_classes_o = tf.concat([t["labels"][int(J)] for t, (_, J) in zip(y_true, indices)], axis=0)
-
         with tf.device(pred_logits.device):
             true_classes = tf.cast(tf.fill(pred_logits.shape[:2], self.num_classes), dtype=tf.int64) # device?
-        
         true_classes = tf.tensor_scatter_nd_update(true_classes, idx, [true_classes_o])
 
-        loss_ce = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=true_classes, logits=pred_logits)
+        #TODO: unsure which TensorFlow function matches the PyTorch counterpart
+        loss_ce = tf.nn.softmax_cross_entropy_with_logits(labels=true_classes, logits=tf.transpose(pred_logits, perm=[0,2,1]))
         weighted_loss_ce = tf.reduce_mean(tf.multiply(loss_ce, self.empty_weight))
         losses = {"loss_ce": weighted_loss_ce}
         return losses
@@ -114,21 +116,35 @@ class Loss(tf.keras.losses.Loss):
         pred_idx = self._get_pred_permutation_idx(indices)
         true_idx = self._get_true_permutation_idx(indices)
         pred_masks = outputs["pred_masks"]
-        pred_masks = tf.gather(pred_masks, pred_idx)
+
+        temp = tf.TensorArray(tf.float64, size=0, dynamic_size=True)
+        for i, (batch, idx) in enumerate(pred_idx):
+            temp = temp.write(i, [tf.gather(tf.gather(pred_masks, batch), idx)])
+        pred_masks = tf.squeeze(temp.stack(), [1])
         masks = [t["masks"] for t in y_true]
 
         true_masks, valid = Utils.nested_tensor_from_tensor_list(masks).decompose()
-        true_masks = true_masks.to(pred_masks)
-        true_masks = true_masks[true_idx]
+        with tf.device(pred_masks.device):
+            true_masks = tf.cast(true_masks, pred_masks.dtype)
 
-        pred_masks = tf.image.resize(pred_masks[:, tf.newaxis], true_masks.shape[-2:], method='bilinear', align_corners=False)[:, 0]
-        pred_masks = tf.reshape(pred_masks[:, 0], -1)
+        temp = tf.TensorArray(tf.float64, size=0, dynamic_size=True)
+        for i, (batch, idx) in enumerate(true_idx):
+            temp = temp.write(i, [tf.gather(tf.gather(true_masks, batch), idx)])
+        true_masks = tf.squeeze(temp.stack(), [1])
+        
+        #TODO: the following function doesn't match the PyTorch counterpart
+        pred_masks = tf.image.resize(pred_masks[:, None], tf.shape(true_masks)[-2:], method='bilinear')
+        
+        # uncomment to run the rest of the computations without resize
+        # pred_masks = tf.random.uniform([1, 1, 750, 1333])
 
-        true_masks = tf.reshape(true_masks, -1)
+        pred_masks = tf.reshape(pred_masks[:, 0], [tf.shape(pred_masks)[0],-1])
+
+        true_masks = tf.reshape(true_masks, [tf.shape(true_masks)[0],-1])
         true_masks = tf.reshape(true_masks, pred_masks.shape)
         losses = {
-            "loss_mask": FocalLoss()(pred_masks, true_masks, num_masks),
-            "loss_dice": DiceLoss()(pred_masks, true_masks, num_masks)
+            "loss_mask": FocalLoss().call(pred_masks, true_masks, num_masks),
+            "loss_dice": DiceLoss().call(pred_masks, true_masks, num_masks)
         }
         return losses
 
@@ -139,64 +155,39 @@ class Loss(tf.keras.losses.Loss):
     
     def compute_indices(self, outputs, y_true):
         batch_size, num_queries = outputs["pred_logits"].shape[:2]
-        # print(batch_size, num_queries)
 
         masks = [v["masks"] for v in y_true]
         h_max = max([m.shape[1] for m in masks])
         w_max = max([m.shape[2] for m in masks])
 
-        # print(masks, h_max, w_max)
-
         indices = list()
-        # print("bs", batch_size)
         for b in range(batch_size):
             out_prob = tf.nn.softmax(outputs["pred_logits"][b], axis=-1)
             out_mask = outputs["pred_masks"][b]
-            # print(tf.shape(out_prob), tf.shape(out_mask))
             tgt_ids = y_true[b]["labels"]
 
             with tf.device(out_mask.device):
                 tgt_mask = y_true[b]["masks"]
 
             cost_class = -tf.gather(out_prob, tgt_ids, axis=1)
-            # print(cost_class)
 
             tgt_mask = tf.cast(tgt_mask, dtype=tf.float32)
-            # print(out_mask.shape)
             tgt_mask = tf.image.resize(tgt_mask[..., tf.newaxis], out_mask.shape[-2:], method='nearest')[..., 0]
-            # print(tf.shape(tgt_mask))
             out_mask = tf.reshape(out_mask, [tf.shape(out_mask)[0], -1])
             tgt_mask = tf.reshape(tgt_mask, [tf.shape(tgt_mask)[0], -1])
-            # print("outmask after flatten", tf.shape(out_mask))
-            # print("tgtmask after flatten", tf.shape(tgt_mask))
+
             cost_focal = FocalLoss().batch(tgt_mask, out_mask)
             cost_dice = DiceLoss().batch(tgt_mask, out_mask)
-            # print(cost_focal)
             cost = (
                 self.cost_focal * cost_focal
                 + self.cost_class * cost_class
                 + self.cost_dice * cost_dice
             )
 
-            # print(cost)
-
-            # cost = tf.reshape(cost, [num_queries, -1])
-            # print(tf.reshape(cost, [1, num_queries, -1]))
-
             _, idx = self.matcher(tf.reshape(cost, [1, num_queries, -1]))
             idx = tf.stop_gradient(idx)
-            # row = tf.
             idx = tf.math.argmax(idx, axis=1)
-            # print("row\n", row)
-            # print("col\n", col)
-            # print("lsa\n", linear_sum_assignment(cost))
-            # idx = linear_sum_assignment(cost)
-            # print("idx shape", tf.shape(idx))
-            # indices.append(linear_sum_assignment(cost))
-            # print(idx)
-            # indices.append((list(range(len(idx))), idx))
             indices.append(linear_sum_assignment(cost))
-        # print(indices)
         return [
             (tf.convert_to_tensor(i, dtype=tf.int32), tf.convert_to_tensor(j, dtype=tf.int32))
             for i, j in indices
@@ -216,7 +207,7 @@ class Loss(tf.keras.losses.Loss):
         
         if Utils.is_dist_avail_and_initialized():
             num_masks = tf.distribute.get_strategy().reduce(tf.distribute.ReduceOp.SUM, num_masks, axis=None)
-        num_masks = tf.maximum(num_masks / tf.distribute.get_strategy().num_replicas_in_sync, 1.0)
+        num_masks = tf.maximum(num_masks / tf.distribute.get_strategy().num_replicas_in_sync, 1.0).numpy()[0]
 
         losses = {}
         for loss in self.losses:
@@ -230,53 +221,6 @@ class Loss(tf.keras.losses.Loss):
                     l_dict = {k + f"_{i}": v for k, v in l_dict.items()}
                     losses.update(l_dict)
         
-        return losses
-
-
-class ClassificationLoss():
-    def call(self, outputs, y_true, indices, num_masks):
-        assert "pred_logits" in outputs
-
-        pred_logits = outputs["pred_logits"]
-
-        idx = Loss._get_pred_permutation_idx(indices)
-        true_classes_o = tf.concat([t["labels"][J] for t, (_, J) in zip(y_true, indices)], axis=0)
-
-        with tf.device(pred_logits.device):
-            true_classes = tf.cast(tf.fill(pred_logits.shape[:2], super().num_classes), dtype=tf.int64) # device?
-        true_classes = tf.tensor_scatter_nd_update(true_classes, tf.expand_dims(idx, axis=1), true_classes_o)
-
-        # loss_ce = tf.nn.softmax_cross_entropy_with_logits(y_true, tf.transpose(pred_logits,(1,2)))
-        # loss_ce = tf.nn.weighted_cross_entropy_with_logits(y_true, tf.transpose(pred_logits,(1,2)), super().empty_weight)
-        loss_ce = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=true_classes, logits=tf.transpose(pred_logits, [0, 2, 1]))
-        weighted_loss_ce = tf.reduce_mean(tf.multiply(loss_ce, super().empty_weight))
-        losses = {"loss_ce": weighted_loss_ce}
-        return losses
-
-class MaskLoss():
-    def call(self, outputs, y_true, indices, num_masks):
-        assert "pred_masks" in outputs
-
-        pred_idx = Loss._get_pred_permutation_idx(indices)
-        true_idx = Loss._get_true_permutation_idx(indices)
-        pred_masks = outputs["pred_masks"]
-        pred_masks = pred_masks[pred_idx]
-        masks = [t["masks"] for t in y_true]
-
-        true_masks, valid = Utils.nested_tensor_from_tensor_list(masks).decompose()
-        # true_masks = tf.cast(true_masks, pred_masks.dtype) # device?
-        true_masks = true_masks.to(pred_masks)
-        true_masks = true_masks[true_idx]
-
-        pred_masks = tf.image.resize(pred_masks[:, tf.newaxis], true_masks.shape[-2:], method='bilinear', align_corners=False)[:, 0]
-        pred_masks = tf.reshape(pred_masks[:, 0], -1)
-
-        true_masks = tf.reshape(true_masks, -1)
-        true_masks = tf.reshape(true_masks, pred_masks.shape)
-        losses = {
-            "loss_mask": FocalLoss()(pred_masks, true_masks, num_masks),
-            "loss_dice": DiceLoss()(pred_masks, true_masks, num_masks)
-        }
         return losses
 
 class Utils():
@@ -306,23 +250,26 @@ class Utils():
             return str(self.tensors)
     
     def nested_tensor_from_tensor_list(tensor_list):
-        if tf.rank(tensor_list[0]).numpy() == 3:
-            # TODO: figure out ONNX stuff
-            # if tf.executing_eagerly():
-            #     return _onnx_nested_tensor_from_tensor_list(tensor_list)
-            
+        if tf.rank(tensor_list[0]).numpy() == 3:            
             max_size = tf.reduce_max([tf.shape(img) for img in tensor_list], axis=0)
-            batch_shape = tf.concat([[len(tensor_list)], max_size], axis=0)
-            batch_size, num_channels, height, width = batch_shape
-            with tf.device(tensor_list[0].device):
-                tensor = tf.zeros(batch_shape, dtype=tensor_list[0].dtype)
-                mask = tf.ones((batch_size, height, width), dtype=tf.bool)
-            for img, pad_img, m in zip(tensor_list, tensor, mask):
-                pad_img[:img.shape[0], :img.shape[1], :img.shape[2]].assign(img)
-                m[:img.shape[1], :img.shape[2]].assign(False)
+            padded_imgs = []
+            padded_masks = []
+
+            for img in tensor_list:
+                padding = [(s1 - s2) for s1, s2 in zip(max_size, tuple(img.shape))]
+                padded_img = tf.pad(img, [[0, padding[2]], [0, padding[1]], [0, padding[0]]], mode="CONSTANT")
+                padded_imgs.append(padded_img)
+                
+                with tf.device(img.device): 
+                    m = tf.zeros_like(img[0], dtype=tf.int32)
+                padded_mask = tf.pad(m, [[0, padding[2]], [0, padding[1]]], mode="CONSTANT", constant_values=1)
+                padded_masks.append(tf.cast(padded_mask, tf.bool))
+            
+            tensor = tf.stack(padded_imgs)
+            mask = tf.stack(padded_masks)
         else:
             raise ValueError("not supported")
-        return NestedTensor(tensor, mask)
+        return Utils.NestedTensor(tensor, mask)
     
     def is_dist_avail_and_initialized():
         if not tf.distribute.has_strategy():

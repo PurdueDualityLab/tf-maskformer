@@ -20,7 +20,10 @@ class LossTest(tf.test.TestCase, parameterized.TestCase):
             matcher = matcher,
             weight_dict = weight_dict,
             eos_coef = no_object_weight,
-            losses = losses
+            losses = losses,
+            cost_class=1,
+            cost_focal=mask_weight,
+            cost_dice=dice_weight
         )
         
         outputs = {"pred_logits":tf.convert_to_tensor(np.load("output_pred_logits.npy")), "pred_masks":tf.convert_to_tensor(np.load("output_pred_masks.npy"))}
@@ -29,7 +32,7 @@ class LossTest(tf.test.TestCase, parameterized.TestCase):
         targets = list()
         for i in range(tf.shape(targets_labels)[0]):
             targets.append({"labels":tf.expand_dims(targets_labels[i], axis=0), "masks":tf.expand_dims(targets_masks[i], axis=0)})
-        print(loss(outputs, targets))
+        print(loss.call(outputs, targets))
 
 if __name__ == '__main__':
     tf.test.main()
