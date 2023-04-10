@@ -18,9 +18,8 @@ import numpy as np
 from scipy import optimize
 import tensorflow as tf
 
-from official.projects.detr.ops import matchers
-
-
+# from official.projects.detr.ops import matchers
+import matchers
 class MatchersOpsTest(tf.test.TestCase):
 
   def testLinearSumAssignment(self):

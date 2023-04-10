@@ -4,7 +4,7 @@ from absl.testing import parameterized
 import tensorflow as tf
 
 import numpy as np
-from loguru import logger
+
 import pickle
 
 class LossTest(tf.test.TestCase, parameterized.TestCase):
@@ -28,34 +28,46 @@ class LossTest(tf.test.TestCase, parameterized.TestCase):
         # outputs = {"pred_logits":tf.convert_to_tensor(np.load("output_pred_logits.npy")), "pred_masks":tf.convert_to_tensor(np.load("output_pred_masks.npy"))}
         # print(f"outputs['pred_logits'] shape is {outputs['pred_logits'].shape}")
         # print(f"outputs['pred_masks'] shape is {outputs['pred_masks'].shape}")
-        loaded_outputs = np.load("outputs.npy", allow_pickle=True).item()
 
+        main_pth = "/depot/qqiu/data/vishal/projects/tf-maskformer/models/official/projects/maskformer/losses"
+        aux_out_0 = {"pred_logits" : tf.convert_to_tensor(np.load(main_pth+"/tensors/aux_outputs_pred_logits0.npy")), "pred_masks": tf.convert_to_tensor(np.load(main_pth+"/tensors/aux_outputs_pred_masks0.npy"))}
+        aux_out_1 = {"pred_logits" : tf.convert_to_tensor(np.load(main_pth+"/tensors/aux_outputs_pred_logits1.npy")), "pred_masks": tf.convert_to_tensor(np.load(main_pth+"/tensors/aux_outputs_pred_masks1.npy"))}
+        aux_out_2 = {"pred_logits" : tf.convert_to_tensor(np.load(main_pth+"/tensors/aux_outputs_pred_logits2.npy")), "pred_masks": tf.convert_to_tensor(np.load(main_pth+"/tensors/aux_outputs_pred_masks2.npy"))}
+        aux_out_3 = {"pred_logits" : tf.convert_to_tensor(np.load(main_pth+"/tensors/aux_outputs_pred_logits3.npy")), "pred_masks": tf.convert_to_tensor(np.load(main_pth+"/tensors/aux_outputs_pred_masks3.npy"))}
+        aux_out_4 = {"pred_logits" : tf.convert_to_tensor(np.load(main_pth+"/tensors/aux_outputs_pred_logits4.npy")), "pred_masks": tf.convert_to_tensor(np.load(main_pth+"/tensors/aux_outputs_pred_masks4.npy"))}
+        aux_outputs = [aux_out_0, aux_out_1, aux_out_2, aux_out_3, aux_out_4]
+        pred_logits_load = tf.convert_to_tensor(np.load(main_pth+"/tensors/output_pred_logits.npy")) 
+        pred_masks_load = tf.convert_to_tensor(np.load(main_pth+"/tensors/output_pred_masks.npy"))
         outputs = {
-            "pred_logits": tf.convert_to_tensor(loaded_outputs["pred_logits"]),
-            "pred_masks": tf.convert_to_tensor(loaded_outputs["pred_masks"]),
-            "aux_outputs": [
-                {key: tf.convert_to_tensor(value) for key, value in aux_output.items()}
-                for aux_output in loaded_outputs["aux_outputs"]
-            ]
+            "pred_logits": pred_logits_load,
+            "pred_masks": pred_masks_load,
+            "aux_outputs": aux_outputs 
         }
 
         # Load the new_targets_dict NumPy array
-        loaded_targets_dict = np.load("new_targets_dict.npy", allow_pickle=True).item()
+        targets = []
+        # TODO :  Caution the below loop is for each image in the batch
+        for i in range(2): # Here 2 is for batch size 
+            targets.append(
+                {
+                    "labels": tf.convert_to_tensor(np.load(main_pth+'/tensors/targets_labels_'+str(i)+'.npy')),
+                    "masks": tf.convert_to_tensor(np.load(main_pth+'/tensors/targets_masks_'+str(i)+'.npy')),
+                }
+            )
 
-        # Convert the NumPy arrays to TensorFlow tensors and recreate the new_targets list
-        targets = [
-            {
-                "labels": tf.convert_to_tensor(loaded_targets_dict[idx]["labels"]),
-                "masks": tf.convert_to_tensor(loaded_targets_dict[idx]["masks"]),
-            }
-            for idx in loaded_targets_dict
-        ]
+        print("[LOSS INFO] Outputs pred_logits :",outputs['pred_logits'].shape)
+        print("[LOSS INFO] Outputs pred_masks :",outputs['pred_masks'].shape)
+        # print("[LOSS INFO] Outputs pred_logits num :",outputs['pred_logits'][:10])
+        # print("[LOSS INFO] Outputs pred_masks num:",outputs['pred_masks'][:10])
+        print("[LOSS INFO] Outputs aux_outputs :",len(outputs['aux_outputs']))
+        print("[LOSS INFO] Targets :", targets[0].keys())
+        print("[LOSS INFO] Targets [0] :", targets[0]['labels'].shape)
+        print("[LOSS INFO] Targets [0] :", targets[0]['masks'].shape)
 
-        # logger.debug(f"LOADED TARGET LABELS: {targets[0]['labels'].shape}")
-        # logger.debug(f"LOADED TARGET MASKS: {targets[0]['masks'].shape}")
-        # logger.debug(f"outputs is {outputs}")
+        
         losses = loss(outputs, targets)
-        logger.critical(losses)
+       
+
         
         for k in list(losses.keys()):
             if k in self.criterion.weight_dict:

@@ -27,8 +27,8 @@ Matching Algorithm (https://www.cse.ust.hk/~golin/COMP572/Notes/Matching.pdf).
 Based on the original implementation by Jiquan Ngiam <jngiam@google.com>.
 """
 import tensorflow as tf
+# from official.modeling import tf_utils
 from official.modeling import tf_utils
-
 
 def _prepare(weights):
   """Prepare the cost matrix.
@@ -73,6 +73,7 @@ def _greedy_assignment(adj_matrix):
     Each row and column can have at most one true element. Some of the rows
     and columns may not be matched.
   """
+  
   _, num_elems, _ = tf_utils.get_shape_list(adj_matrix, expected_rank=3)
   adj_matrix = tf.transpose(adj_matrix, [1, 0, 2])
 

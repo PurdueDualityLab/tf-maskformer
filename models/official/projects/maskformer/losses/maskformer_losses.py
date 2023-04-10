@@ -1,9 +1,7 @@
 import tensorflow as tf
-
 from official.vision.losses import focal_loss
-from scipy.optimize import linear_sum_assignment
-from loguru import logger
 import numpy as np
+from official.projects.detr.ops import matchers
 
 class FocalLoss(focal_loss.FocalLoss):
     """Implements a Focal loss for segmentation problems.
@@ -34,7 +32,7 @@ class FocalLoss(focal_loss.FocalLoss):
         """
         weighted_loss = super().call(y_true, y_pred)
         loss = tf.math.reduce_sum(tf.math.reduce_mean(weighted_loss,axis=1)) / num_masks
-        logger.error(f"Focal loss: {loss}")
+        
         return loss
 
     def batch(self, y_true, y_pred):
@@ -107,14 +105,51 @@ class Loss(tf.keras.losses.Loss):
         self.cost_focal = cost_focal
         self.cost_dice = cost_dice
 
+    def call(self, outputs, y_true):
+        """
+        This performs the loss computation.
+        Parameters:
+             outputs: dict of tensors, see the output specification of the model for the format
+             y_true: list of dicts, such that len(targets) == batch_size.
+                     The expected keys in each dict depends on the losses applied, see each loss' doc
+        """
+        outputs_without_aux = {k: v for k, v in outputs.items() if k != "aux_outputs"}
+        print("[INFO INSIDE CRITERION] ouputs_without_aux shape:", outputs_without_aux.keys())
+        # outputs_without_aux = {"pred_logits" : <some_tensor>, "pred_masks" : <some_tensor>}
+        indices = self.memory_efficient_matcher(outputs_without_aux, y_true) 
+        print("[INFO INSIDE CRITERION] indices shape:", len(indices))
+        print("[INFO INSIDE CRITERION] indices:", indices)
+        exit()
+        # logger.critical(f"matcher output indices: {indices}")
+        num_masks = sum(len(t["labels"]) for t in y_true)
+        num_masks = tf.convert_to_tensor([num_masks], dtype=tf.float64) # device?
+        
+        if Utils.is_dist_avail_and_initialized():
+            num_masks = tf.distribute.get_strategy().reduce(tf.distribute.ReduceOp.SUM, num_masks, axis=None)
+        num_masks = tf.maximum(num_masks / tf.distribute.get_strategy().num_replicas_in_sync, 1.0)
+        # logger.debug(f"num_masks is {num_masks}")
+        losses = {}
+        for loss in self.losses:
+            losses.update(self.get_loss(loss, outputs, y_true, indices, num_masks))
+        # losses.update({loss: self.get_loss(loss, outputs, y_true, indices, num_masks) for loss in self.losses})
+
+        if "aux_outputs" in outputs:
+            for i, aux_outputs in enumerate(outputs["aux_outputs"]):
+                indices = self.memory_efficient_matcher(aux_outputs, y_true)
+                for loss in self.losses:
+                    l_dict = self.get_loss(loss, aux_outputs, y_true, indices, num_masks)
+                    l_dict = {k + f"_{i}": v for k, v in l_dict.items()}
+                    losses.update(l_dict)
+        
+        return losses
+    
     def _get_pred_permutation_idx(self, indices):
         # TODO: high priority, fix this!!!
-        logger.debug(f"indices is {indices}")
+       
         batch_idx = tf.concat([tf.fill(tf.shape(pred),i) for i, (pred,_) in enumerate(indices)], axis=0)
         batch_idx = tf.cast(batch_idx, tf.int64)
         pred_idx = tf.concat([pred for (pred,_) in indices], axis=0)
-        logger.debug(f"batch_idx is {batch_idx} dtype is {batch_idx.dtype}")
-        logger.debug(f"pred_idx is {pred_idx} dtype is {pred_idx.dtype}")
+        
         return batch_idx, pred_idx
 
 
@@ -145,7 +180,7 @@ class Loss(tf.keras.losses.Loss):
         # logger.critical(true_classes_o)
         # logger.critical(idx[1][:, tf.newaxis])
         # logger.critical(tf.squeeze(true_classes_o))
-        logger.critical(idx[1][:, tf.newaxis])
+        
         true_classes = tf.tensor_scatter_nd_update(true_classes[0], idx[1][:, tf.newaxis], tf.squeeze(true_classes_o))
         true_classes = tf.reshape(true_classes, (1, -1))
 
@@ -161,9 +196,9 @@ class Loss(tf.keras.losses.Loss):
         # true_classes_repeat = tf.repeat(true_classes_tiled, repeats=pred_logits_t.shape[0], axis=1)
         # logger.critical(true_classes_repeat.shape)
         loss_ce = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=true_classes, logits=pred_logits)
-        logger.critical(loss_ce.shape) # (1, 100)
+        
         # logger.critical(f"tf loss_ce: {loss_ce}") # (1, 100)
-        logger.critical(self.empty_weight.shape) # (134, )
+        
         # logger.critical(self.empty_weight) # (134, )
 
         true_classes_torch = tf.convert_to_tensor(np.load("target_classes.npy")) 
@@ -171,19 +206,66 @@ class Loss(tf.keras.losses.Loss):
         empty_weight_torch = tf.convert_to_tensor(np.load("empty_weight.npy"))
         
         
-        logger.critical(true_classes)
-        logger.critical(true_classes_torch)
-
-        logger.critical(pred_logits)
-        logger.critical(pred_logits_torch)
+        
         
         loss_ce = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=true_classes_torch, logits=pred_logits_torch)
         # logger.critical(f"torch loss_ce: {loss_ce}")
 
         weighted_loss_ce = tf.reduce_mean(loss_ce * self.empty_weight)
         losses = {"loss_ce": weighted_loss_ce}
-        logger.critical(weighted_loss_ce)
+        
         return losses
+
+    def memory_efficient_matcher(self, outputs, y_true):
+       
+
+        batch_size, num_queries = outputs["pred_logits"].shape[:2] # Bsize, num_queries, num_preds
+        
+        masks = [v["masks"] for v in y_true]
+        h_max = max([m.shape[1] for m in masks])
+        w_max = max([m.shape[2] for m in masks])
+
+        indices = list()
+        for b in range(batch_size):
+            out_prob = tf.nn.softmax(outputs["pred_logits"][b], axis=-1)
+            out_mask = outputs["pred_masks"][b]
+            tgt_ids = y_true[b]["labels"]
+            
+            with tf.device(out_mask.device):
+                tgt_mask = y_true[b]["masks"]
+            
+            cost_class = -tf.gather(out_prob, tgt_ids, axis=1)
+        
+            tgt_mask = tf.cast(tgt_mask, dtype=tf.float32)
+            
+            tgt_mask = tf.image.resize(tgt_mask[..., tf.newaxis], out_mask.shape[-2:], method='nearest')[..., 0]
+            
+            out_mask = tf.reshape(out_mask, [tf.shape(out_mask)[0], -1])
+            tgt_mask = tf.reshape(tgt_mask, [tf.shape(tgt_mask)[0], -1])
+            
+            cost_focal = FocalLoss().batch(tgt_mask, out_mask)
+            
+            cost_dice = DiceLoss().batch(tgt_mask, out_mask)
+            
+            C = (
+                self.cost_focal * cost_focal
+                + self.cost_class * cost_class
+                + self.cost_dice * cost_dice
+            )
+
+            
+            C = tf.reshape(C, (num_queries, -1))
+            C = tf.expand_dims(C, axis=0)
+            print("[INFO] Shape of C : ", C.shape)
+            
+            # This code is taken from  - Reuse matcher from DETR
+            weights, assignment = matchers.hungarian_matching(C) 
+            indices.append(assignment)
+            
+        return [
+            (tf.convert_to_tensor(i, dtype=tf.int64), tf.convert_to_tensor(j, dtype=tf.int64))
+            for i, j in indices
+        ]
 
     def get_mask_loss(self, outputs, y_true, indices, num_masks):
         assert "pred_masks" in outputs
@@ -191,8 +273,8 @@ class Loss(tf.keras.losses.Loss):
         pred_idx = self._get_pred_permutation_idx(indices)
         true_idx = self._get_true_permutation_idx(indices)
         pred_masks = outputs["pred_masks"]
-        logger.critical(f"pred_masks.shape is {pred_masks.shape}")
-        logger.critical(f"pred_idx is {pred_idx}") #TODO: Doesn't match!!
+        # logger.critical(f"pred_masks.shape is {pred_masks.shape}")
+        # logger.critical(f"pred_idx is {pred_idx}") #TODO: Doesn't match!!
 
         pred_masks = tf.gather(pred_masks, pred_idx[1], axis=1)[0]
         # logger.critical(f"pred_masks is {pred_masks}")
@@ -212,138 +294,15 @@ class Loss(tf.keras.losses.Loss):
             "loss_mask": FocalLoss()(pred_masks, true_masks, num_masks),
             "loss_dice": DiceLoss()(pred_masks, true_masks, num_masks)
         }
-        logger.critical(f"losses is {losses}")
+        # logger.critical(f"losses is {losses}")
         return losses
 
     def get_loss(self, loss, outputs, y_true, indices, num_masks):
         loss_map = {"labels": self.get_classification_loss, "masks": self.get_mask_loss}
         assert loss in loss_map
-        logger.debug(f"loss is {loss}")
+        # logger.debug(f"loss is {loss}")
         return loss_map[loss](outputs, y_true, indices, num_masks)
     
-    def memory_efficient_matcher(self, outputs, y_true):
-        # TODO: High priority!!! Debug facal loss and DiceLoss first!!!
-
-        batch_size, num_queries = outputs["pred_logits"].shape[:2]
-        # print(batch_size, num_queries)
-        logger.debug(f"targets masks shape is {y_true[0]['masks'].shape}")
-        masks = [v["masks"] for v in y_true]
-        h_max = max([m.shape[1] for m in masks])
-        w_max = max([m.shape[2] for m in masks])
-        logger.debug(f"mask is masks: {masks[0].shape}")
-        logger.debug(f"mask padding size: {h_max}, {w_max}")
-        # print(masks, h_max, w_max)
-
-        indices = list()
-        # print("bs", batch_size)
-        for b in range(batch_size):
-            # logger.debug(f"b is {b}")
-            # logger.debug(f"batch_size is {batch_size}")
-            # logger.error(f"out_prob is {outputs['pred_logits'][b]}")
-            out_prob = tf.nn.softmax(outputs["pred_logits"][b], axis=-1)
-            # logger.error(f"out_prob is {out_prob}")
-            out_mask = outputs["pred_masks"][b]
-            # print(tf.shape(out_prob), tf.shape(out_mask))
-            tgt_ids = y_true[b]["labels"]
-            
-            
-            with tf.device(out_mask.device):
-                tgt_mask = y_true[b]["masks"]
-            # logger.error(f"tgt_ids is {tgt_ids}")
-            # logger.error(f"tgt_mask is {tgt_mask}")
-            cost_class = -tf.gather(out_prob, tgt_ids, axis=1)
-            # print(cost_class)
-            # logger.error(f"cost class is {cost_class}") # TODO: DIFF!!!
-            tgt_mask = tf.cast(tgt_mask, dtype=tf.float32)
-            # print(out_mask.shape)
-            tgt_mask = tf.image.resize(tgt_mask[..., tf.newaxis], out_mask.shape[-2:], method='nearest')[..., 0]
-            # print(tf.shape(tgt_mask))
-            out_mask = tf.reshape(out_mask, [tf.shape(out_mask)[0], -1])
-            tgt_mask = tf.reshape(tgt_mask, [tf.shape(tgt_mask)[0], -1])
-            # print("outmask after flatten", tf.shape(out_mask))
-            # print("tgtmask after flatten", tf.shape(tgt_mask))
-            cost_focal = FocalLoss().batch(tgt_mask, out_mask)
-            # focalloss = FocalLoss(0.25, 2)
-            # cost_focal_nonbatch = focalloss(tgt_mask, out_mask)
-            cost_dice = DiceLoss().batch(tgt_mask, out_mask)
-            # print(cost_focal)
-            # logger.debug(f"cost focal  is {cost_focal}") # TESTED!!
-            # logger.debug(f"cost dice  is {cost_dice}") # TODO: A LITTLE DIFF! CONTINUE WORKING
-            # exit(-1)
-            # logger.debug(f"cost_focal_nonbatch is {cost_focal_nonbatch}")
-            # logger.debug(f"cost dice  is {cost_dice}")
-            # logger.debug(f"self.cost_focal is {self.cost_focal}")
-            # logger.debug(f"self.cost_class is {self.cost_class}")
-            C = (
-                self.cost_focal * cost_focal
-                + self.cost_class * cost_class
-                + self.cost_dice * cost_dice
-            )
-            # logger.debug(f"cost shape before reshape is {C.shape}")
-            # print(cost)
-            C = tf.reshape(C, (num_queries, -1))
-            # logger.debug(f"cost shape after reshape is {C.shape}")
-            
-
-
-
-            # _, idx = self.matcher(tf.reshape(cost, [1, num_queries, -1]))
-            # idx = tf.stop_gradient(idx)
-            # # row = tf.
-            # idx = tf.math.argmax(idx, axis=1)
-            # # print("row\n", row)
-            # # print("col\n", col)
-            # # print("lsa\n", linear_sum_assignment(cost))
-            # # idx = linear_sum_assignment(cost)
-            # # print("idx shape", tf.shape(idx))
-            # # indices.append(linear_sum_assignment(cost))
-            # # print(idx)
-            # # indices.append((list(range(len(idx))), idx))
-            indices.append(linear_sum_assignment(C))
-            # logger.debug indices lenth and indices[0].shape
-            logger.debug(f"indices length: {len(indices)}")
-            logger.debug(f"indices[0] shape: {indices[0]}")
-        return [
-            (tf.convert_to_tensor(i, dtype=tf.int64), tf.convert_to_tensor(j, dtype=tf.int64))
-            for i, j in indices
-        ]
-
-    def call(self, outputs, y_true):
-        """
-        This performs the loss computation.
-        Parameters:
-             outputs: dict of tensors, see the output specification of the model for the format
-             y_true: list of dicts, such that len(targets) == batch_size.
-                     The expected keys in each dict depends on the losses applied, see each loss' doc
-        """
-        outputs_without_aux = {k: v for k, v in outputs.items() if k != "aux_outputs"}
-        # logger.debug("outputs_without_aux[pred_logits].shape: {}".format(outputs_without_aux["pred_logits"].shape))
-        # logger.debug("outputs_without_aux[pred_masks].shape: {}".format(outputs_without_aux["pred_masks"].shape))
-        indices = self.memory_efficient_matcher(outputs_without_aux, y_true)
-        
-        # logger.critical(f"matcher output indices: {indices}")
-        num_masks = sum(len(t["labels"]) for t in y_true)
-        num_masks = tf.convert_to_tensor([num_masks], dtype=tf.float64) # device?
-        
-        if Utils.is_dist_avail_and_initialized():
-            num_masks = tf.distribute.get_strategy().reduce(tf.distribute.ReduceOp.SUM, num_masks, axis=None)
-        num_masks = tf.maximum(num_masks / tf.distribute.get_strategy().num_replicas_in_sync, 1.0)
-        # logger.debug(f"num_masks is {num_masks}")
-        losses = {}
-        for loss in self.losses:
-            losses.update(self.get_loss(loss, outputs, y_true, indices, num_masks))
-        # losses.update({loss: self.get_loss(loss, outputs, y_true, indices, num_masks) for loss in self.losses})
-
-        if "aux_outputs" in outputs:
-            for i, aux_outputs in enumerate(outputs["aux_outputs"]):
-                indices = self.memory_efficient_matcher(aux_outputs, y_true)
-                for loss in self.losses:
-                    l_dict = self.get_loss(loss, aux_outputs, y_true, indices, num_masks)
-                    l_dict = {k + f"_{i}": v for k, v in l_dict.items()}
-                    losses.update(l_dict)
-        
-        return losses
-
 
 class ClassificationLoss():
     def call(self, outputs, y_true, indices, num_masks):
@@ -362,7 +321,7 @@ class ClassificationLoss():
         # loss_ce = tf.nn.weighted_cross_entropy_with_logits(y_true, tf.transpose(pred_logits,(1,2)), super().empty_weight)
         loss_ce = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=true_classes, logits=tf.transpose(pred_logits, [0, 2, 1]))
         weighted_loss_ce = tf.reduce_mean(tf.multiply(loss_ce, super().empty_weight))
-        logger.critical(f"weighted_loss_ce is {weighted_loss_ce}")
+        # logger.critical(f"weighted_loss_ce is {weighted_loss_ce}")
         losses = {"loss_ce": weighted_loss_ce}
         return losses
 
@@ -428,11 +387,11 @@ class Utils():
             max_size = tf.reduce_max([tf.shape(img) for img in tensor_list], axis=0)
             batch_shape = tf.concat([[len(tensor_list)], max_size], axis=0)
             batch_size, num_channels, height, width = batch_shape
-            logger.debug(f"batch_shape is {batch_shape}")
-            logger.debug(f"batch_size is {batch_size}")
-            logger.debug(f"num_channels is {num_channels}")
-            logger.debug(f"height is {height}")
-            logger.debug(f"width is {width}")
+            # logger.debug(f"batch_shape is {batch_shape}")
+            # logger.debug(f"batch_size is {batch_size}")
+            # logger.debug(f"num_channels is {num_channels}")
+            # logger.debug(f"height is {height}")
+            # logger.debug(f"width is {width}")
             with tf.device(tensor_list[0].device):
                 tensor = tf.zeros(batch_shape, dtype=tensor_list[0].dtype)
                 mask = tf.ones((batch_size, height, width), dtype=tf.bool)
@@ -441,10 +400,10 @@ class Utils():
             #     m[:img.shape[1], :img.shape[2]].assign(False)
            # Iterate through the input tensors and pad them with zeros
             for img, pad_img, m in zip(tensor_list, tensor, mask):
-                logger.critical(f"img.shape is {img.shape}")
-                logger.critical(f"pad_img.shape is {pad_img.shape}")
-                logger.critical(f"m.shape is {m.shape}")
-                logger.critical(f"max_size is {max_size}")
+                # logger.critical(f"img.shape is {img.shape}")
+                # logger.critical(f"pad_img.shape is {pad_img.shape}")
+                # logger.critical(f"m.shape is {m.shape}")
+                # logger.critical(f"max_size is {max_size}")
                 # pad_shape = tf.pad(max_size - tf.shape(img), [[0, 0], [0, 1]], constant_values=0)
                 pad_img[: img.shape[0], : img.shape[1], : img.shape[2]].assign(img)
                 exit(-1)
