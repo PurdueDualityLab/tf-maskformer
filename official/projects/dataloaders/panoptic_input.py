@@ -44,19 +44,23 @@ class TfExampleDecoder(tf_example_decoder.TfExampleDecoder):
             self,
             regenerate_source_id: bool = True,
             panoptic_category_mask_key: str = 'image/panoptic/category_mask',
-            panoptic_instance_mask_key: str = 'image/panoptic/instance_mask'):
+            panoptic_instance_mask_key: str = 'image/panoptic/instance_mask',
+            ):
+            
+            
         super(TfExampleDecoder,
               self).__init__(
             include_mask=True,
             regenerate_source_id=regenerate_source_id)
         self._panoptic_category_mask_key = panoptic_category_mask_key
         self._panoptic_instance_mask_key = panoptic_instance_mask_key
+        
 
         self._panoptic_keys_to_features = {
             panoptic_category_mask_key:
                 tf.io.FixedLenFeature((), tf.string, default_value=''),
             panoptic_instance_mask_key:
-                tf.io.FixedLenFeature((), tf.string, default_value='')
+                tf.io.FixedLenFeature((), tf.string, default_value=''),
         }
 
     def decode(self, serialized_example):
@@ -65,13 +69,10 @@ class TfExampleDecoder(tf_example_decoder.TfExampleDecoder):
         parsed_tensors = tf.io.parse_single_example(
             serialized_example, self._panoptic_keys_to_features)
 
-        category_mask = tf.io.decode_image(
+        category_mask = tf.io.decode_png(
             parsed_tensors[self._panoptic_category_mask_key], channels=1)
-        instance_mask = tf.io.decode_image(
+        instance_mask = tf.io.decode_png(
             parsed_tensors[self._panoptic_instance_mask_key], channels=1)
-        category_mask.set_shape([None, None, 1])
-        instance_mask.set_shape([None, None, 1])
-
         decoded_tensors.update({
             'groundtruth_panoptic_category_mask': category_mask,
             'groundtruth_panoptic_instance_mask': instance_mask
