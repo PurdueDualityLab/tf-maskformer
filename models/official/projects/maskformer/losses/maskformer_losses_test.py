@@ -11,18 +11,18 @@ class LossTest(tf.test.TestCase, parameterized.TestCase):
     @parameterized.named_parameters(('test1',))
     def test_pass_through(self):
         matcher = hungarian_matching
-        mask_weight = 20.0
-        dice_weight = 1.0
         no_object_weight = 0.1
-        weight_dict = {"loss_ce":1, "loss_mask": mask_weight, "loss_dice": dice_weight}
+       
         losses = ["labels", "masks"]
 
         loss = Loss(
             num_classes = 100,
             matcher = matcher,
-            weight_dict = weight_dict,
             eos_coef = no_object_weight,
-            losses = losses
+            losses = losses,
+            cost_class= 1.0,
+            cost_dice= 1.0,
+            cost_focal=20.0
         )
         
         # outputs = {"pred_logits":tf.convert_to_tensor(np.load("output_pred_logits.npy")), "pred_masks":tf.convert_to_tensor(np.load("output_pred_masks.npy"))}
@@ -64,7 +64,7 @@ class LossTest(tf.test.TestCase, parameterized.TestCase):
         print("[LOSS INFO] Targets [0] :", targets[0]['labels'].shape)
         print("[LOSS INFO] Targets [0] :", targets[0]['masks'].shape)
 
-        
+
         losses = loss(outputs, targets)
        
 

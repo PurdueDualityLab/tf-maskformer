@@ -2,7 +2,7 @@ import tensorflow as tf
 from official.vision.losses import focal_loss
 import numpy as np
 from official.projects.detr.ops import matchers
-
+from scipy.optimize import linear_sum_assignment
 class FocalLoss(focal_loss.FocalLoss):
     """Implements a Focal loss for segmentation problems.
     Reference:
@@ -89,11 +89,11 @@ class DiceLoss(tf.keras.losses.Loss):
         return loss
 
 class Loss(tf.keras.losses.Loss):
-    def __init__(self, num_classes, matcher, weight_dict, eos_coef, losses, cost_class = 1, cost_focal = 1, cost_dice = 1):
+    def __init__(self, num_classes, matcher, eos_coef, losses, cost_class = 1, cost_focal = 1, cost_dice = 1):
         super().__init__()
         self.num_classes = num_classes
         self.matcher = matcher
-        self.weight_dict = weight_dict
+        # self.weight_dict = weight_dict
         self.eos_coef = eos_coef
         self.losses = losses
         empty_weight = tf.ones(self.num_classes + 1)
@@ -117,9 +117,7 @@ class Loss(tf.keras.losses.Loss):
         print("[INFO INSIDE CRITERION] ouputs_without_aux shape:", outputs_without_aux.keys())
         # outputs_without_aux = {"pred_logits" : <some_tensor>, "pred_masks" : <some_tensor>}
         indices = self.memory_efficient_matcher(outputs_without_aux, y_true) 
-        print("[INFO INSIDE CRITERION] indices shape:", len(indices))
-        print("[INFO INSIDE CRITERION] indices:", indices)
-        exit()
+       
         # logger.critical(f"matcher output indices: {indices}")
         num_masks = sum(len(t["labels"]) for t in y_true)
         num_masks = tf.convert_to_tensor([num_masks], dtype=tf.float64) # device?
@@ -144,8 +142,7 @@ class Loss(tf.keras.losses.Loss):
         return losses
     
     def _get_pred_permutation_idx(self, indices):
-        # TODO: high priority, fix this!!!
-       
+        
         batch_idx = tf.concat([tf.fill(tf.shape(pred),i) for i, (pred,_) in enumerate(indices)], axis=0)
         batch_idx = tf.cast(batch_idx, tf.int64)
         pred_idx = tf.concat([pred for (pred,_) in indices], axis=0)
@@ -162,55 +159,24 @@ class Loss(tf.keras.losses.Loss):
     def get_classification_loss(self, outputs, y_true, indices, num_masks):
         assert "pred_logits" in outputs
         pred_logits = outputs["pred_logits"]
+        print(pred_logits.shape)
         idx = self._get_pred_permutation_idx(indices)
-
-        # for t, (_, J) in zip(y_true, indices):
-        #     J = tf.reduce_sum(J)
-        #     logger.critical(J)
-            # logger.critical(t["labels"][J])
-        # true_classes_o = tf.concat([t["labels"][J] for t, (_, J) in zip(y_true, indices)], axis=0)
+        
         true_classes_o = tf.concat([tf.gather(t["labels"], J) for t, (_, J) in zip(y_true, indices)], axis=0)
-
+        print("[INFO] true_classes_o :", true_classes_o.shape)
         # logger.critical(true_classes_o)
         with tf.device(pred_logits.device):
             true_classes = tf.cast(tf.fill(pred_logits.shape[:2], self.num_classes), dtype=tf.int64) # device?
         
-        # logger.critical(true_classes)
-        # logger.critical(idx)
-        # logger.critical(true_classes_o)
-        # logger.critical(idx[1][:, tf.newaxis])
-        # logger.critical(tf.squeeze(true_classes_o))
-        
-        true_classes = tf.tensor_scatter_nd_update(true_classes[0], idx[1][:, tf.newaxis], tf.squeeze(true_classes_o))
-        true_classes = tf.reshape(true_classes, (1, -1))
-
-            # logger.debug(f"pred_logits.shape is {pred_logits.shape}")
-        # pred_logits_t = tf.transpose(pred_logits, perm=[0, 2, 1])
-        
-        # logger.critical(true_classes.shape)
-        # logger.critical(pred_logits.shape)
-        # true_classes_tiled = tf.tile(true_classes, [1, pred_logits_t.shape[1], 1])
-        # true_classes_tiled = tf.tile(true_classes, tf.reshape([pred_logits_t.shape[1], 1], [2]))
-        
-        # logger.critical(true_classes_tiled.shape)
-        # true_classes_repeat = tf.repeat(true_classes_tiled, repeats=pred_logits_t.shape[0], axis=1)
-        # logger.critical(true_classes_repeat.shape)
+        # true_classes[idx] = true_classes_o
+        # true_classes = tf.tensor_scatter_nd_update(true_classes, idx[1][:, tf.newaxis], tf.squeeze(true_classes_o))
+        true_classes = tf.tensor_scatter_nd_update(true_classes, idx, true_classes_o)
+        # true_classes = tf.reshape(true_classes, (1, -1))
+        print(f"[INFO] true_classes {true_classes.shape}")
         loss_ce = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=true_classes, logits=pred_logits)
         
-        # logger.critical(f"tf loss_ce: {loss_ce}") # (1, 100)
         
-        # logger.critical(self.empty_weight) # (134, )
-
-        true_classes_torch = tf.convert_to_tensor(np.load("target_classes.npy")) 
-        pred_logits_torch = tf.convert_to_tensor(np.load("src_logits.npy"))
-        empty_weight_torch = tf.convert_to_tensor(np.load("empty_weight.npy"))
-        
-        
-        
-        
-        loss_ce = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=true_classes_torch, logits=pred_logits_torch)
-        # logger.critical(f"torch loss_ce: {loss_ce}")
-
+        print("[INFO] Loss CE :", loss_ce)
         weighted_loss_ce = tf.reduce_mean(loss_ce * self.empty_weight)
         losses = {"loss_ce": weighted_loss_ce}
         
@@ -255,12 +221,14 @@ class Loss(tf.keras.losses.Loss):
 
             
             C = tf.reshape(C, (num_queries, -1))
-            C = tf.expand_dims(C, axis=0)
-            print("[INFO] Shape of C : ", C.shape)
-            
+           
+        
             # This code is taken from  - Reuse matcher from DETR
-            weights, assignment = matchers.hungarian_matching(C) 
-            indices.append(assignment)
+            # weights, assignment = matchers.hungarian_matching(C) 
+            # indices.append(assignment)
+            # using linear sum assignment from  scipy.optimize
+            indices.append(linear_sum_assignment(C))
+            
             
         return [
             (tf.convert_to_tensor(i, dtype=tf.int64), tf.convert_to_tensor(j, dtype=tf.int64))
