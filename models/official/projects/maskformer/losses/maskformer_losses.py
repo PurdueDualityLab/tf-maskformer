@@ -103,6 +103,7 @@ class Loss(tf.keras.losses.Loss):
 
         self.cost_class = cost_class
         self.cost_focal = cost_focal
+        
         self.cost_dice = cost_dice
 
     def call(self, outputs, y_true):
@@ -196,12 +197,24 @@ class Loss(tf.keras.losses.Loss):
             out_prob = tf.nn.softmax(outputs["pred_logits"][b], axis=-1)
             out_mask = outputs["pred_masks"][b]
             tgt_ids = y_true[b]["labels"]
+            print("[INFO] target masks :",y_true[b]["masks"].shape)
+            print("[INFO] out_mask masks :",out_mask.shape)
+            print("[INFO] out_prob :",out_prob.shape) # (100, 134) (total_num_classes, number of predicted masks)
+            # TODO : Pad masks with zeros to match the number of detected objects and the number of objects in the target 
+            num_extra_masks = out_mask.shape[0] - y_true[b]["masks"].shape[0]
+            print("[INFO] Adding extra masks with zeros:", num_extra_masks)
             
             with tf.device(out_mask.device):
+                zeros_masks = tf.zeros([num_extra_masks, y_true[b]["masks"].shape[1], y_true[b]["masks"].shape[2]], dtype=tf.bool)
                 tgt_mask = y_true[b]["masks"]
+                tgt_mask = tf.concat([tgt_mask, zeros_masks], 0)
+
+            print("[INFO] Padded target masks :",tgt_mask.shape)
             
+            tgt_ids = tf.concat([tgt_ids, tf.zeros([num_extra_masks], dtype=tf.int64)],0) 
+            print("[INFO] New target ids :",tgt_ids.shape)
             cost_class = -tf.gather(out_prob, tgt_ids, axis=1)
-        
+            
             tgt_mask = tf.cast(tgt_mask, dtype=tf.float32)
             
             tgt_mask = tf.image.resize(tgt_mask[..., tf.newaxis], out_mask.shape[-2:], method='nearest')[..., 0]
@@ -212,7 +225,11 @@ class Loss(tf.keras.losses.Loss):
             cost_focal = FocalLoss().batch(tgt_mask, out_mask)
             
             cost_dice = DiceLoss().batch(tgt_mask, out_mask)
-            
+            print("[INFO] Cost Class :", cost_class)
+            print("[INFO] Cost Focal :", cost_focal)
+            print("[INFO] Cost Dice :", cost_dice)
+
+            exit()
             C = (
                 self.cost_focal * cost_focal
                 + self.cost_class * cost_class
@@ -220,15 +237,20 @@ class Loss(tf.keras.losses.Loss):
             )
 
             
-            C = tf.reshape(C, (num_queries, -1))
+            C = tf.reshape(C, (1, num_queries, -1)) # Shape of C should be [batchsize, num_queries, num_queries]
            
         
             # This code is taken from  - Reuse matcher from DETR
             # weights, assignment = matchers.hungarian_matching(C) 
             # indices.append(assignment)
             # using linear sum assignment from  scipy.optimize
-            indices.append(linear_sum_assignment(C))
+            # indices.append(linear_sum_assignment(C))
+            print("[INFO] Indices from scipy :",linear_sum_assignment(C[0])[1])
+            _, inds = matchers.hungarian_matching(C)
             
+            print("[INFO] Indices from TF impelemtation:", np.where(inds.numpy()[0])[1])
+            indices.append(tf.stop_gradient(inds))
+            exit()
             
         return [
             (tf.convert_to_tensor(i, dtype=tf.int64), tf.convert_to_tensor(j, dtype=tf.int64))
