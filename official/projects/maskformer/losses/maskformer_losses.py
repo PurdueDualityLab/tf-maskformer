@@ -417,40 +417,32 @@ class Utils():
             return str(self.tensors)
     
     def nested_tensor_from_tensor_list(tensor_list):
-        # TODO: I AM HERE
         if tf.rank(tensor_list[0]).numpy() == 3:
             # TODO: figure out ONNX stuff
             # if tf.executing_eagerly():
             #     return _onnx_nested_tensor_from_tensor_list(tensor_list)
-            
-            max_size = tf.reduce_max([tf.shape(img) for img in tensor_list], axis=0)
-            batch_shape = tf.concat([[len(tensor_list)], max_size], axis=0)
-            batch_size, num_channels, height, width = batch_shape
-            logger.debug(f"batch_shape is {batch_shape}")
-            logger.debug(f"batch_size is {batch_size}")
-            logger.debug(f"num_channels is {num_channels}")
-            logger.debug(f"height is {height}")
-            logger.debug(f"width is {width}")
-            with tf.device(tensor_list[0].device):
-                tensor = tf.zeros(batch_shape, dtype=tensor_list[0].dtype)
-                mask = tf.ones((batch_size, height, width), dtype=tf.bool)
-            # for img, pad_img, m in zip(tensor_list, tensor, mask):
-            #     pad_img[:img.shape[0], :img.shape[1], :img.shape[2]].assign(img)
-            #     m[:img.shape[1], :img.shape[2]].assign(False)
-           # Iterate through the input tensors and pad them with zeros
-            for img, pad_img, m in zip(tensor_list, tensor, mask):
-                logger.critical(f"img.shape is {img.shape}")
-                logger.critical(f"pad_img.shape is {pad_img.shape}")
-                logger.critical(f"m.shape is {m.shape}")
-                logger.critical(f"max_size is {max_size}")
-                # pad_shape = tf.pad(max_size - tf.shape(img), [[0, 0], [0, 1]], constant_values=0)
-                pad_img[: img.shape[0], : img.shape[1], : img.shape[2]].assign(img)
-                exit(-1)
-            # for idx, img in enumerate(tensor_list):
-            #     pad_shape = tf.pad(max_size - tf.shape(img), [[0, 0], [0, 1]], constant_values=0)
-            #     pad_img[: img.shape[0], : img.shape[1], : img.shape[2]].assign(img)
-            #     mask[idx][:img.shape[0], :img.shape[1]].assign(tf.zeros((img.shape[0], img.shape[1]), dtype=tf.bool))
+            max_size = Utils._max_by_axis([list(img.shape) for img in tensor_list])
 
+        batch_shape = [len(tensor_list)] + max_size
+        b, c, h, w = batch_shape
+
+        dtype = tensor_list[0].dtype
+        device = tensor_list[0].device
+
+        with tf.device(device):
+            tensor = tf.zeros(batch_shape, dtype=dtype)
+            mask = tf.ones((b, h, w), dtype=tf.bool)
+
+
+        for img, pad_img, m in zip(tensor_list, tensor, mask):
+            pad_img = tf.Variable(pad_img)
+            pad_img[:img.shape[0], :img.shape[1], :img.shape[2]].assign(img)
+            pad_img = tf.convert_to_tensor(pad_img)
+
+            m = tf.Variable(m)
+            false_tensor = tf.zeros((img.shape[1], img.shape[2]), dtype=tf.bool)
+            m[:img.shape[1], :img.shape[2]].assign(false_tensor)
+            m = tf.convert_to_tensor(m)
         else:
             raise ValueError("not supported")
         return NestedTensor(tensor, mask)

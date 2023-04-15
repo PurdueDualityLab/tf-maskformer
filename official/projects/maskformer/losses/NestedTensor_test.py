@@ -19,10 +19,14 @@ class TestPad(tf.test.TestCase):
         loaded_img = np.load("img_batch2.npy")
         loaded_pad_img = np.load("pad_img_batch2.npy")
         loaded_pad_img_after_torch = np.load("pad_img_after_batch2.npy")
+        loaded_m_after_torch = np.load("m_after_batch2.npy")
+
         loaded_img = tf.convert_to_tensor(loaded_img)
         loaded_pad_img = tf.convert_to_tensor(loaded_pad_img)
         loaded_pad_img_after_torch = tf.convert_to_tensor(loaded_pad_img_after_torch)
+        loaded_m_after_torch = tf.convert_to_tensor(loaded_m_after_torch)
         
+        # Real implementation
         max_size = _max_by_axis([list(img.shape) for img in tensor_list])
 
         batch_shape = [len(tensor_list)] + max_size
@@ -43,6 +47,16 @@ class TestPad(tf.test.TestCase):
             
             pad_img = tf.Variable(pad_img)
             pad_img[:img.shape[0], :img.shape[1], :img.shape[2]].assign(img)
-
+            pad_img = tf.convert_to_tensor(pad_img)
             self.assertAllEqual(loaded_pad_img_after_torch, pad_img)
+            
+            m = tf.Variable(m)
+            false_tensor = tf.zeros((img.shape[1], img.shape[2]), dtype=tf.bool)
+            m[:img.shape[1], :img.shape[2]].assign(false_tensor)
+            m = tf.convert_to_tensor(m)
+            self.assertAllEqual(loaded_m_after_torch, m)
+
             break
+
+if __name__ == '__main__':
+    tf.test.main()
