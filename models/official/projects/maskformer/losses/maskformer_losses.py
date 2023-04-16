@@ -115,19 +115,21 @@ class Loss(tf.keras.losses.Loss):
                      The expected keys in each dict depends on the losses applied, see each loss' doc
         """
         outputs_without_aux = {k: v for k, v in outputs.items() if k != "aux_outputs"}
-        print("[INFO INSIDE CRITERION] ouputs_without_aux shape:", outputs_without_aux.keys())
-        # outputs_without_aux = {"pred_logits" : <some_tensor>, "pred_masks" : <some_tensor>}
+        
+       
         indices = self.memory_efficient_matcher(outputs_without_aux, y_true) 
        
-        # logger.critical(f"matcher output indices: {indices}")
+      
         num_masks = sum(len(t["labels"]) for t in y_true)
         num_masks = tf.convert_to_tensor([num_masks], dtype=tf.float64) # device?
         
         if Utils.is_dist_avail_and_initialized():
             num_masks = tf.distribute.get_strategy().reduce(tf.distribute.ReduceOp.SUM, num_masks, axis=None)
+
         num_masks = tf.maximum(num_masks / tf.distribute.get_strategy().num_replicas_in_sync, 1.0)
-        # logger.debug(f"num_masks is {num_masks}")
+        
         losses = {}
+
         for loss in self.losses:
             losses.update(self.get_loss(loss, outputs, y_true, indices, num_masks))
         # losses.update({loss: self.get_loss(loss, outputs, y_true, indices, num_masks) for loss in self.losses})
@@ -180,7 +182,7 @@ class Loss(tf.keras.losses.Loss):
         print("[INFO] Loss CE :", loss_ce)
         weighted_loss_ce = tf.reduce_mean(loss_ce * self.empty_weight)
         losses = {"loss_ce": weighted_loss_ce}
-        
+        print("[INFO] Losses CE :", weighted_loss_ce)
         return losses
 
     def memory_efficient_matcher(self, outputs, y_true):
@@ -197,10 +199,6 @@ class Loss(tf.keras.losses.Loss):
             out_prob = tf.nn.softmax(outputs["pred_logits"][b], axis=-1)
             out_mask = outputs["pred_masks"][b]
             tgt_ids = y_true[b]["labels"]
-            # print("[INFO] target masks :",y_true[b]["masks"].shape)
-            # print("[INFO] out_mask masks :",out_mask.shape)
-            # print("[INFO] out_prob :",out_prob.shape) # (100, 134) (total_num_classes, number of predicted masks)
-            # TODO : Pad masks with zeros to match the number of detected objects and the number of objects in the target 
             num_extra_masks = out_mask.shape[0] - y_true[b]["masks"].shape[0]
             
             
@@ -242,18 +240,11 @@ class Loss(tf.keras.losses.Loss):
 
             total_cost = tf.where(tf.logical_or(tf.math.is_nan(total_cost), tf.math.is_inf(total_cost)),max_cost * tf.ones_like(total_cost, dtype=total_cost.dtype),
             total_cost)
-            # This code is taken from  - Reuse matcher from DETR
-            # weights, assignment = matchers.hungarian_matching(C) 
-            # indices.append(assignment)
-            # using linear sum assignment from  scipy.optimize
-            # indices.append(linear_sum_assignment(C))
-            # print("[INFO] Indices from scipy :",linear_sum_assignment(total_cost[0])[1])
             _, inds = matchers.hungarian_matching(total_cost)
             
             # print("[INFO] Indices from TF impelemtation:", np.where(inds.numpy()[0])[1])
             indices.append(tf.stop_gradient(inds))
-            
-            
+        
         return [
             (tf.convert_to_tensor(i, dtype=tf.int64), tf.convert_to_tensor(j, dtype=tf.int64))
             for i, j in indices
@@ -292,7 +283,6 @@ class Loss(tf.keras.losses.Loss):
     def get_loss(self, loss, outputs, y_true, indices, num_masks):
         loss_map = {"labels": self.get_classification_loss, "masks": self.get_mask_loss}
         assert loss in loss_map
-        # logger.debug(f"loss is {loss}")
         return loss_map[loss](outputs, y_true, indices, num_masks)
     
 

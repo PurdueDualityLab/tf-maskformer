@@ -55,15 +55,6 @@ class LossTest(tf.test.TestCase, parameterized.TestCase):
                 }
             )
 
-        # print("[LOSS INFO] Outputs pred_logits :",outputs['pred_logits'].shape)
-        # print("[LOSS INFO] Outputs pred_masks :",outputs['pred_masks'].shape)
-        # print("[LOSS INFO] Outputs pred_logits num :",outputs['pred_logits'][:10])
-        # print("[LOSS INFO] Outputs pred_masks num:",outputs['pred_masks'][:10])
-        # print("[LOSS INFO] Outputs aux_outputs :",len(outputs['aux_outputs']))
-        # print("[LOSS INFO] Targets :", targets[0].keys())
-        # print("[LOSS INFO] Targets [0] :", targets[0]['labels'].shape)
-        # print("[LOSS INFO] Targets [0] :", targets[0]['masks'].shape)
-
 
         losses = loss(outputs, targets)
        
