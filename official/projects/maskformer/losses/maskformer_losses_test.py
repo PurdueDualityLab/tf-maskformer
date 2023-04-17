@@ -20,7 +20,7 @@ class LossTest(tf.test.TestCase, parameterized.TestCase):
         loss = Loss(
             num_classes = 133,
             matcher = matcher,
-            weight_dict = weight_dict,
+            # weight_dict = weight_dict,
             eos_coef = no_object_weight,
             losses = losses
         )
