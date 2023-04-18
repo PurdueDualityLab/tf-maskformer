@@ -176,7 +176,7 @@ class DetectionTask(base_task.Task):
     target_index = tf.math.argmax(indices, axis=1)
     cls_assigned = tf.gather(cls_outputs, target_index, batch_dims=1, axis=1)
     box_assigned = tf.gather(box_outputs, target_index, batch_dims=1, axis=1)
-
+    
     background = tf.equal(cls_targets, 0)
     num_boxes = tf.reduce_sum(
         tf.cast(tf.logical_not(background), tf.float32), axis=-1)

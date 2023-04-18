@@ -16,7 +16,7 @@ class LossTest(tf.test.TestCase, parameterized.TestCase):
         losses = ["labels", "masks"]
 
         loss = Loss(
-            num_classes = 100,
+            num_classes = 133,
             matcher = matcher,
             eos_coef = no_object_weight,
             losses = losses,
