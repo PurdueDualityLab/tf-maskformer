@@ -79,7 +79,7 @@ class MatchersOpsTest(tf.test.TestCase):
   def testAssignmentMatchesScipy(self):
     """Check that the Linear Sum Assignment matches the Scipy implementation."""
     batch_size, num_elems = 2, 25
-    weights = tf.random.uniform((batch_size, num_elems, 10),
+    weights = tf.random.uniform((batch_size, num_elems, num_elems),
                                 minval=0.,
                                 maxval=1.)
     weights, assignment = matchers.hungarian_matching(weights)
