@@ -3,7 +3,7 @@ from official.vision.losses import focal_loss
 import numpy as np
 from official.projects.detr.ops import matchers
 from scipy.optimize import linear_sum_assignment
-
+from loguru import logger
 
 def _max_by_axis(the_list):
     all_max = the_list[0]
@@ -78,6 +78,7 @@ class FocalLossMod(focal_loss.FocalLoss):
         reduction and name?
         """
         super().__init__(alpha, gamma, reduction='none')
+        # self.background_indices = background_indices
 
     def call(self, y_true, y_pred):
         """Invokes the `FocalLoss`.
@@ -91,10 +92,13 @@ class FocalLossMod(focal_loss.FocalLoss):
         Returns:
         Loss float `Tensor`.
         """
+        # background_indices = tf.expand_dims(self.background_indices, axis=0)
         weighted_loss = super().call(y_true, y_pred)
-        print("weighted loss :", weighted_loss.shape) #(100, 442368)
-        # mean over 
-        loss = tf.math.reduce_sum(weighted_loss,axis=-1)
+        print("weighted loss :", weighted_loss.shape) #(1, 100, 442368)
+        # mean over all pixels
+        loss = tf.math.reduce_mean(weighted_loss, axis=-1)
+        logger.debug("loss shape: {}".format(loss.shape))
+        # logger.debug("loss: {}".format(loss))
         return loss
 
     def batch(self, y_true, y_pred):
@@ -109,9 +113,7 @@ class FocalLossMod(focal_loss.FocalLoss):
         loss = tf.einsum("nc,mc->nm", focal_pos, y_true) + tf.einsum(
         "nc,mc->nm", focal_neg, (1 - y_true)
         )
-        
         return loss / hw
-    
     
 
 
@@ -218,32 +220,32 @@ class Loss(tf.keras.losses.Loss):
             indices.append(tf.stop_gradient(inds))
         return tf.concat([each_batch for each_batch in indices], 0)
     
-    def get_mask_loss(self, outputs, y_true, num_masks):
+    # def get_mask_loss(self, outputs, y_true, num_masks):
         
-        pred_masks = outputs
+    #     pred_masks = outputs
 
-        true_masks = y_true
-        print("[INFO GET MASK] predmasks :", pred_masks.shape)
-        print("[INFO GET MASK] true_masks :", true_masks.shape)
-        # true_masks, valid = nested_tensor_from_tensor_list(masks).decompose()
+    #     true_masks = y_true
+    #     print("[INFO GET MASK] predmasks :", pred_masks.shape)
+    #     print("[INFO GET MASK] true_masks :", true_masks.shape)
+    #     # true_masks, valid = nested_tensor_from_tensor_list(masks).decompose()
         
-        # true_masks = true_masks.to(pred_masks)
-        # true_masks = true_masks[true_idx]
+    #     # true_masks = true_masks.to(pred_masks)
+    #     # true_masks = true_masks[true_idx]
 
-        pred_masks = tf.image.resize(pred_masks, true_masks.shape[-2:], method='bilinear')[:, 0]
-        print("[INFO GET MASK] predmasks resize :", pred_masks.shape)
-        pred_masks = tf.reshape(pred_masks[:, 0], -1)
-        print("[INFO GET MASK] predmasks reshape :", pred_masks.shape)
-        true_masks = tf.reshape(true_masks, -1)
-        print("[INFO GET MASK] true_masks reshape :", true_masks.shape)
-        true_masks = tf.reshape(true_masks, pred_masks.shape)
-        print("[INFO GET MASK] true_masks reshape_1:", true_masks.shape)
+    #     pred_masks = tf.image.resize(pred_masks, true_masks.shape[-2:], method='bilinear')[:, 0]
         
-        losses = {
-            "loss_mask": FocalLossMod()(pred_masks, true_masks, num_masks),
-            "loss_dice": DiceLoss()(pred_masks, true_masks, num_masks)
-        }
-        return losses
+    #     pred_masks = tf.reshape(pred_masks[:, 0], -1)
+    #     print("[INFO GET MASK] predmasks reshape :", pred_masks.shape)
+    #     true_masks = tf.reshape(true_masks, -1)
+    #     print("[INFO GET MASK] true_masks reshape :", true_masks.shape)
+    #     true_masks = tf.reshape(true_masks, pred_masks.shape)
+    #     print("[INFO GET MASK] true_masks reshape_1:", true_masks.shape)
+        
+    #     losses = {
+    #         "loss_mask": FocalLossMod()(pred_masks, true_masks, num_masks),
+    #         "loss_dice": DiceLoss()(pred_masks, true_masks, num_masks)
+    #     }
+    #     return losses
     
     def call(self, outputs, y_true):
         """
@@ -291,52 +293,54 @@ class Loss(tf.keras.losses.Loss):
         cls_loss = self.cost_class * tf.where(background, 0.1 * xentropy, xentropy)
         cls_weights = tf.where(background, 0.1 * tf.ones_like(cls_loss), tf.ones_like(cls_loss))
     
-        
+        logger.info("num_masks: {}".format(num_masks))
         num_masks_per_replica = tf.reduce_sum(num_masks)
         cls_weights_per_replica = tf.reduce_sum(cls_weights)
         replica_context = tf.distribute.get_replica_context()
         num_masks_sum, cls_weights_sum = replica_context.all_reduce(tf.distribute.ReduceOp.SUM,[num_masks_per_replica, cls_weights_per_replica])
-
+        logger.info("num_masks_sum: {}".format(num_masks_sum))
         # Final losses
         cls_loss = tf.math.divide_no_nan(tf.reduce_sum(cls_loss), cls_weights_sum)
-        print("Classification loss :", cls_loss)
+        
         losses = {'focal_loss' : [], 'dice_loss': []}
 
         for b in range(batch_size):
             out_mask = mask_assigned[b]
-            print("out_mask :", out_mask.shape)
             with tf.device(out_mask.device):
                 tgt_mask = target_masks[b]
             tgt_mask = tf.cast(tgt_mask, dtype=tf.float32)
-            # upsample the predictions to target size 
-            # tgt_mask = tf.image.resize(tgt_mask[..., tf.newaxis], out_mask.shape[-2:], method='nearest')[..., 0]
-            # out_mask = tf.reshape(out_mask, [tf.shape(out_mask)[0], -1])
-            # tgt_mask = tf.reshape(tgt_mask, [tf.shape(tgt_mask)[0], -1])
             out_mask = tf.image.resize(out_mask[..., tf.newaxis], tgt_mask.shape[1:], method='nearest')
             # Flatten target and predicted masks along h,w dims
             out_mask = tf.reshape(out_mask, [tf.shape(out_mask[:,:,:,0])[0], -1]) # remove channel dimension used for tf.image.resize
             tgt_mask = tf.reshape(tgt_mask, [tf.shape(tgt_mask)[0], -1])
             
-            focal_loss =  FocalLossMod()(out_mask, tgt_mask)
-            # dice_loss =  DiceLoss()(out_mask, tgt_mask)
-            print("focal loss :", focal_loss.shape)
-           
-            losses['focal_loss'].append(tf.expand_dims(tf.reduce_sum(focal_loss,-1),0))
-            # losses['dice_loss'].append(tf.expand_dims(tf.reduce_mean(dice_loss, -1),0))
+            # add batch dimension before calculating the dice loss
+            out_mask = tf.expand_dims(out_mask, 0)
+            tgt_mask = tf.expand_dims(tgt_mask, 0)
+            focal_loss =  FocalLossMod()(tgt_mask, out_mask)
+            dice_loss =  DiceLoss()(out_mask, tgt_mask)
+            losses['focal_loss'].append(tf.squeeze(focal_loss, axis=0))
+            losses['dice_loss'].append(tf.squeeze(dice_loss, axis=0))
         
         batched_focal_loss = tf.concat(losses['focal_loss'], 0)
-        print("[INFO] Batched focal loss shape :", batched_focal_loss.shape)
-        batched_dice_loss = tf.concat(losses['dice_loss'], 0)
-        
-        focal_loss_weighted = self.cost_focal * tf.where(background, tf.zeros_like(batched_focal_loss), batched_focal_loss)
-        dice_loss_weighted = self.cost_dice * tf.where(background, tf.zeros_like(batched_dice_loss), batched_dice_loss)
-        
-        focal_loss_final = tf.math.divide_no_nan(tf.reduce_sum(focal_loss_weighted), num_masks_sum)
-        dice_loss_final = tf.math.divide_no_nan(tf.reduce_sum(dice_loss_weighted), num_masks_sum)
+        logger.debug(f"batched_focal_loss: {batched_focal_loss.shape}")
+        # batched_dice_loss = tf.concat(losses['dice_loss'], 0)
+        background_new = tf.concat([background[i] for i in range(background.shape[0])], 0)
+        logger.debug(f"background_new: {background_new.shape}")
 
-        print(f"[INFO] CE loss : {cls_loss}")
-        print(f"[INFO] Focal loss : {focal_loss_final}")
-        print(f"[INFO] Dice loss : {dice_loss_final}")
+        # For now do not weight the losses
+        # focal_loss_weighted = self.cost_focal * tf.where(background_new, tf.zeros_like(batched_focal_loss), batched_focal_loss)
+        focal_loss_weighted = tf.where(background_new, tf.zeros_like(batched_focal_loss), batched_focal_loss)
+        # dice_loss_weighted = self.cost_dice * tf.where(background, tf.zeros_like(batched_dice_loss), batched_dice_loss)
+        
+        logger.info(f"focal_loss_summed over objects: {tf.math.reduce_sum(focal_loss_weighted)}")
+        
+        focal_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(focal_loss_weighted), num_masks_sum)
+        # dice_loss_final = tf.math.divide_no_nan(tf.reduce_sum(dice_loss_weighted), num_masks_sum)
+
+        logger.critical(f"[INFO] CE loss : {cls_loss}")
+        logger.critical(f"[INFO] Focal loss : {focal_loss_final}")
+        # print(f"[INFO] Dice loss : {dice_loss_final}")
         exit()
         # print(self.get_mask_loss()
 

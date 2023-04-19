@@ -152,7 +152,7 @@ class DetectionTask(base_task.Task):
         tf.cast(tf.not_equal(cls_targets, 0), dtype=total_cost.dtype), axis=1)
     total_cost = (1 - valid) * max_cost + valid * total_cost
 
-    # Set inf of nan to large constant
+    # Set inf or nan to large constant
     total_cost = tf.where(
         tf.logical_or(tf.math.is_nan(total_cost), tf.math.is_inf(total_cost)),
         max_cost * tf.ones_like(total_cost, dtype=total_cost.dtype),
