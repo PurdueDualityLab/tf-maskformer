@@ -123,11 +123,17 @@ class DiceLoss(tf.keras.losses.Loss):
         super().__init__(reduction='none')
 
     def call(self, y_true, y_pred):
-        y_pred = tf.reshape(tf.keras.activations.sigmoid(y_pred), -1)
-        y_true = tf.reshape(y_true, -1)
+        """
+        y_true: (b size, 100, h*w)
+        """
+        y_pred = tf.reshape(tf.keras.activations.sigmoid(y_pred), (y_pred.shape[1],-1))
+        y_true = tf.reshape(y_true, (y_true.shape[1],-1))
+        logger.info("y_pred shape: {}".format(y_pred.shape))
+        logger.info("y_true shape: {}".format(y_true.shape))
         numerator = 2 * tf.reduce_sum(y_pred * y_true, axis=-1)
         denominator = tf.reduce_sum(y_pred, axis=-1) + tf.reduce_sum(y_true, axis=-1)
         loss = 1 - (numerator + 1) / (denominator + 1)
+        
         return loss
     
     def batch(self, y_true, y_pred):
@@ -318,29 +324,30 @@ class Loss(tf.keras.losses.Loss):
             out_mask = tf.expand_dims(out_mask, 0)
             tgt_mask = tf.expand_dims(tgt_mask, 0)
             focal_loss =  FocalLossMod()(tgt_mask, out_mask)
-            dice_loss =  DiceLoss()(out_mask, tgt_mask)
+            dice_loss =  DiceLoss()(tgt_mask, out_mask)
             losses['focal_loss'].append(tf.squeeze(focal_loss, axis=0))
-            losses['dice_loss'].append(tf.squeeze(dice_loss, axis=0))
+            losses['dice_loss'].append(dice_loss)
         
         batched_focal_loss = tf.concat(losses['focal_loss'], 0)
-        logger.debug(f"batched_focal_loss: {batched_focal_loss.shape}")
-        # batched_dice_loss = tf.concat(losses['dice_loss'], 0)
+        # logger.debug(f"batched_focal_loss: {batched_focal_loss.shape}")
+        batched_dice_loss = tf.concat(losses['dice_loss'], 0)
+        logger.debug(f"batched_dice_loss: {batched_dice_loss.shape}")
         background_new = tf.concat([background[i] for i in range(background.shape[0])], 0)
         logger.debug(f"background_new: {background_new.shape}")
 
-        # For now do not weight the losses
+        # For now do not weight the losses TODO : do not forget to weight the losses
         # focal_loss_weighted = self.cost_focal * tf.where(background_new, tf.zeros_like(batched_focal_loss), batched_focal_loss)
         focal_loss_weighted = tf.where(background_new, tf.zeros_like(batched_focal_loss), batched_focal_loss)
         # dice_loss_weighted = self.cost_dice * tf.where(background, tf.zeros_like(batched_dice_loss), batched_dice_loss)
-        
-        logger.info(f"focal_loss_summed over objects: {tf.math.reduce_sum(focal_loss_weighted)}")
-        
+        dice_loss_weighted = tf.where(background_new, tf.zeros_like(batched_dice_loss), batched_dice_loss)
+        # logger.info(f"focal_loss_summed over objects: {tf.math.reduce_sum(focal_loss_weighted)}")
+        logger.info(f"dice_loss_summed over objects: {tf.math.reduce_sum(dice_loss_weighted)}")
         focal_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(focal_loss_weighted), num_masks_sum)
-        # dice_loss_final = tf.math.divide_no_nan(tf.reduce_sum(dice_loss_weighted), num_masks_sum)
+        dice_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(dice_loss_weighted), num_masks_sum)
 
         logger.critical(f"[INFO] CE loss : {cls_loss}")
         logger.critical(f"[INFO] Focal loss : {focal_loss_final}")
-        # print(f"[INFO] Dice loss : {dice_loss_final}")
+        logger.critical(f"[INFO] Dice loss : {dice_loss_final}")
         exit()
         # print(self.get_mask_loss()
 
