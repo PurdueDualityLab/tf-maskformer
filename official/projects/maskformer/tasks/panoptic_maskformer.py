@@ -27,12 +27,18 @@ class PanopticTask(base_task.Task):
         losses = ["labels", "masks"]
         num_classes = 133
         matcher = hungarian_matching
-        weight_dict = {"loss_ce":1, "loss_mask": mask_weight, "loss_dice": dice_weight}
         eos_coef = 0.1
         losses = ["labels", "masks"]
         cost_class = 1
         cost_focal = 1
         cost_dice = 1
+        
+        weight_dict = {"loss_ce": 1, "loss_mask": mask_weight, "loss_dice": dice_weight}
+        if self.deep_supervision:
+            aux_weight_dict = {}
+            for i in range(self.dec_layers - 1):
+                aux_weight_dict.update({k + f"_{i}": v for k, v in losses.items()})
+            losses.update(aux_weight_dict)
 
         _compute_loss = Loss(num_classes, matcher, weight_dict, eos_coef, losses, cost_class, cost_focal, cost_dice)
         return _compute_loss(outputs, targets)
