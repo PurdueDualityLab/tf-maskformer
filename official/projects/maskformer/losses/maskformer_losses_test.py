@@ -20,7 +20,7 @@ class LossTest(tf.test.TestCase, parameterized.TestCase):
         loss = Loss(
             num_classes = 133,
             matcher = matcher,
-            weight_dict = weight_dict,
+            # weight_dict = weight_dict,
             eos_coef = no_object_weight,
             losses = losses
         )
@@ -58,9 +58,9 @@ class LossTest(tf.test.TestCase, parameterized.TestCase):
         logger.critical(losses)
         
         for k in list(losses.keys()):
-            if k in self.criterion.weight_dict:
+            if k in weight_dict:
                 print(f"Loss shapes {k} - {losses[k].shape}, Loss value {k}- {losses[k]}")
-                losses[k] *= self.criterion.weight_dict[k]
+                losses[k] *= weight_dict[k]
             else:
                 # remove this loss if not specified in `weight_dict`
                 losses.pop(k)

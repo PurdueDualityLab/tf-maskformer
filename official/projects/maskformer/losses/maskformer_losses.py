@@ -252,8 +252,8 @@ class Loss(tf.keras.losses.Loss):
     #         "loss_dice": DiceLoss()(pred_masks, true_masks, num_masks)
     #     }
     #     return losses
-    def get_loss(self, batch_size, loss, outputs, y_true, indices):
-        assert loss in ["labels", "mask"], f"do you really want to compute {loss} loss?"
+    def get_loss(self, batch_size, outputs, y_true, indices):
+        # assert loss in ["labels", "masks"], f"do you really want to compute {loss} loss?"
         target_index = tf.math.argmax(indices, axis=1) #[batchsize, 100]
         tgt_labels = [each_batch['labels'] for each_batch in y_true]
         
@@ -360,55 +360,31 @@ class Loss(tf.keras.losses.Loss):
 
         
         losses = {}
-        for loss in self.losses:
-            logger.debug(indices)
-            logger.debug(batch_size)
-            logger.debug(f"loss is {loss}")
-            logger.debug(f"outputs is {outputs}")
-            logger.debug(f"y_true is {y_true}")
-            loss_final = self.get_loss(batch_size, loss, outputs, y_true, indices)
-            losses.update(loss_final)
-            logger.critical(f"Successfully return loss {loss}")
+        # for loss in self.losses:
+            # logger.debug(indices)
+            # logger.debug(batch_size)
+            # logger.debug(f"loss is {loss}")
+            # logger.debug(f"outputs is {outputs}")
+            # logger.debug(f"y_true is {y_true}")
+        cls_loss_final, focal_loss_final, dice_loss_final = self.get_loss(batch_size, outputs, y_true, indices)
+
+        losses.update({"loss_ce": cls_loss_final, "loss_focal": focal_loss_final, "loss_dice": dice_loss_final})
         
         if "aux_outputs" in outputs:
             for i, aux_outputs in enumerate(outputs["aux_outputs"]):
                 indices = self.memory_efficient_matcher(aux_outputs, y_true)
-                for loss in self.losses:
-                    l_dict = self.get_loss(batch_size, loss, aux_outputs, y_true, indices)
-                    l_dict = {k + f"_{i}": v for k, v in l_dict.items()}
-                    losses.update(l_dict)
+                # for loss in self.losses:
+                cls_loss_final, focal_loss_final, dice_loss_final = self.get_loss(batch_size, aux_outputs, y_true, indices)
+                # l_dict = {k + f"_{i}": v for k, v in l_dict.items()}
+                l_dict = {"Loss_ce" + f"_{i}": cls_loss_final, "Loss_focal" + f"_{i}": focal_loss_final, "Loss_dice" + f"_{i}": dice_loss_final}
+                losses.update(l_dict)
         
         
-        
-        exit()
-        # print(self.get_mask_loss()
-
-        # num_masks = sum(len(t["labels"]) for t in y_true)
-        # num_masks = tf.convert_to_tensor([num_masks], dtype=tf.float64)
-        
-        # if Utils.is_dist_avail_and_initialized():
-        #     num_masks = tf.distribute.get_strategy().reduce(tf.distribute.ReduceOp.SUM, num_masks, axis=None)
-
-        # num_masks = tf.maximum(num_masks / tf.distribute.get_strategy().num_replicas_in_sync, 1.0)
-        
-        # losses = {}
-
-        # for loss in self.losses:
-        #     losses.update(self.get_loss(loss, outputs, y_true, indices, num_masks))
-        # # losses.update({loss: self.get_loss(loss, outputs, y_true, indices, num_masks) for loss in self.losses})
-
-        # if "aux_outputs" in outputs:
-        #     for i, aux_outputs in enumerate(outputs["aux_outputs"]):
-        #         indices = self.memory_efficient_matcher(aux_outputs, y_true)
-        #         for loss in self.losses:
-        #             l_dict = self.get_loss(loss, aux_outputs, y_true, indices, num_masks)
-        #             l_dict = {k + f"_{i}": v for k, v in l_dict.items()}
-        #             losses.update(l_dict)
-        
-        # return losses
+        logger.critical(f"Successfully return losses: {losses}")
+        return losses
     
 
-    
+# TODO: Clean this up a bit more
 class Utils():
     def _max_by_axis(the_list):
         all_max = the_list[0]
