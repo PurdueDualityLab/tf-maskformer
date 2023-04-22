@@ -252,7 +252,7 @@ class Loss(tf.keras.losses.Loss):
     #         "loss_dice": DiceLoss()(pred_masks, true_masks, num_masks)
     #     }
     #     return losses
-    def get_loss(batch_size, loss, outputs, y_true, indices):
+    def get_loss(self, batch_size, loss, outputs, y_true, indices):
         assert loss in ["labels", "mask"], f"do you really want to compute {loss} loss?"
         target_index = tf.math.argmax(indices, axis=1) #[batchsize, 100]
         tgt_labels = [each_batch['labels'] for each_batch in y_true]
