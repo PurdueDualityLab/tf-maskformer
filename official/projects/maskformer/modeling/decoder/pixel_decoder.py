@@ -153,7 +153,13 @@ class Fpn(tf.keras.layers.Layer):
             lateral = self._conv2d_op_lateral[i](feat)
             lateral = self._lateral_groupnorm[i](lateral)
 
-            down = nearest_upsampling(down, 2) + lateral
+            upsample = nearest_upsampling(down, 2)
+            
+            # When width or height is odd there is a shape mismatch with scale=2.
+            if (upsample.shape != lateral.shape):
+                upsample = upsample[:,:lateral.shape[1],:lateral.shape[2],:]
+
+            down = upsample + lateral
 
             down = self._conv2d_op_down[i + 1](down)
             down = self._down_groupnorm[i+1](down)

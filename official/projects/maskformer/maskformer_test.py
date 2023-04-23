@@ -4,38 +4,38 @@ import tensorflow as tf
 
 class MaskFormerTest(tf.test.TestCase, parameterized.TestCase):
     # TODO(ibrahim): Add more testcases.
-    @parameterized.named_parameters(('test1', 256, 100, 256, "5", 0, 6, 171, 1))
-    def test_pass_through(self,
-                        fpn_feat_dims,
-                        num_queries,
-                        hidden_size,
-                        backbone_endpopint_name,
-                        num_encoder_layers,
-                        num_decoder_layers,
-                        num_classes,
-                        batch_size):    
-            
-        maskformer = Maskformer(fpn_feat_dims=fpn_feat_dims,
-                                 num_queries=num_queries,
-                                 hiddne_dim=num_queries,
-                                 hidden_size=hidden_size,
-                                 backbone_endpopint_name=backbone_endpopint_name,
-                                 num_encoder_layers=num_encoder_layers,
-                                 num_decoder_layers=num_decoder_layers,
-                                 num_classes=num_classes,
-                                 batch_size=batch_size)
+    @parameterized.named_parameters(('test1', 'coco_stuff', 100, 171), ('test2', 'coco_panoptic', 100, 133))
+    def test_pass_through(self, testcase_input_name, num_queries, num_classes):
 
-        input_image = tf.ones((1, 640, 640, 3))
+        model = MaskFormer(num_queries=num_queries, num_classes=num_classes)
 
-        expected_class_probs_shape = [1, 100, 172]
-        expected_mask_probs_shape = [1, 160, 160, 100]
+        # input_image = tf.ones((1, 640, 640, 3))
+        testcase_input = {
+            "coco_stuff": tf.ones((1, 640, 640, 3)),
+            "coco_panoptic": tf.ones((1, 608, 911, 3))
+        }
+        
+        # TODO(ibrahim): Add num_queries and make expected output shape dynamic after adding parameters.
+        # expected_class_probs_shape = [1, 100, 172]
+        # expected_mask_probs_shape = [1, 160, 160, 100]
 
-        output = model(input_image)
+        testcases_expected_output = {
+            "coco_stuff": {
+                "class_prob_predictions": [1, 100, 172],
+                "mask_prob_predictions": [1, 160, 160, 100]
+            },
+            "coco_panoptic": {
+                "class_prob_predictions": [1, num_queries, 134], 
+                "mask_prob_predictions": [1, 152, 228, num_queries]
+            }
+        }
+
+        output = model(testcase_input[testcase_input_name])
 
         self.assertAllEqual(
-            output["class_prob_predictions"].shape.as_list(), expected_class_probs_shape)
+            output["class_prob_predictions"].shape.as_list(), testcases_expected_output[testcase_input_name]["class_prob_predictions"])
         self.assertAllEqual(
-            output["mask_prob_predictions"].shape.as_list(), expected_mask_probs_shape)
+            output["mask_prob_predictions"].shape.as_list(), testcases_expected_output[testcase_input_name]["mask_prob_predictions"])
 
 
 if __name__ == '__main__':
