@@ -1,11 +1,9 @@
 import tensorflow as tf
-# from official.projects.mask2former.losses.importance_sampling import (
-from importance_sampling import (
+from official.projects.mask2former.losses.importance_sampling import (
     get_uncertain_point_coords_with_randomness,
     calculate_uncertainty,
 )
-# from official.projects.mask2former.losses.importance_sampling_expected_values import (
-from importance_sampling_expected_values import (
+from official.projects.mask2former.losses.importance_sampling_expected_values import (
     oneBatch,
     largeBatch,
     squareSrcMask,

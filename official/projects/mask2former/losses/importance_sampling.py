@@ -1,6 +1,5 @@
 import tensorflow as tf
-# from official.projects.mask2former.losses.point_sample import point_sample
-from point_sample import point_sample
+from official.projects.mask2former.losses.point_sample import point_sample
 
 
 def calculate_uncertainty(logits):
