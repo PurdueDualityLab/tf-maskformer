@@ -14,12 +14,15 @@ class LossTest(tf.test.TestCase, parameterized.TestCase):
         no_object_weight = 0.1
        
         losses = ["labels", "masks"]
-
+        self.weight_dict = {
+            "ce_loss" : 1.0,
+            "focal_loss" : 20.0,
+            "dice_loss" : 1.0,
+        }
         loss = Loss(
             num_classes = 133,
             matcher = matcher,
             eos_coef = no_object_weight,
-            losses = losses,
             cost_class= 1.0,
             cost_dice= 1.0,
             cost_focal=20.0
@@ -59,15 +62,10 @@ class LossTest(tf.test.TestCase, parameterized.TestCase):
         losses = loss(outputs, targets)
        
 
-        
-        for k in list(losses.keys()):
-            if k in self.criterion.weight_dict:
-                print(f"Loss shapes {k} - {losses[k].shape}, Loss value {k}- {losses[k]}")
-                losses[k] *= self.criterion.weight_dict[k]
-            else:
-                # remove this loss if not specified in `weight_dict`
-                losses.pop(k)
-
+        print("Losses are : ", losses)
+        print("Total Loss is :", losses['loss_ce'] + losses['loss_dice'] + losses['loss_focal'])
+        # for i in range(4):
+        #     print(f"Total aux Loss {i} : losses['loss_ce_'+{str(i)}] + losses['loss_dice_'+{str(i)}] + losses['loss_focal_'+{str(i)}]")
         # TODO: Check if this is correct
         # self.assertAllEqual(losses, )
 

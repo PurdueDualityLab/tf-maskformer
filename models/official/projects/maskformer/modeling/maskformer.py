@@ -28,7 +28,7 @@ class MaskFormer(tf.keras.Model):
                num_decoder_layers=6,
                dropout_rate=0.1,
                backbone_endpoint_name='5',
-               num_classes=171,
+               num_classes=133,
                batch_size=1,
                **kwargs):
     self._batch_size = batch_size
@@ -85,11 +85,6 @@ class MaskFormer(tf.keras.Model):
                                             num_encoder_layers=self._num_encoder_layers,
                                             num_decoder_layers=self._num_decoder_layers,
                                             dropout_rate=self._dropout_rate)
-    #Heads
-    # self.pixel_predictor = tf.keras.layers.Conv2D(filters=self._num_classes,
-    #                                               strides=(1, 1),
-    #                                               kernel_size=(1, 1),
-    #                                               padding='valid')
     self.head = MLPHead(num_classes=self._num_classes, 
                         hidden_dim=self._hidden_size, 
                         mask_dim=self._fpn_feat_dims)
@@ -106,18 +101,9 @@ class MaskFormer(tf.keras.Model):
     # image = tf.reshape(image, [1, 800, 1135, 3])
     # image = tf.ones((1, 640, 640, 3))
     backbone_feature_maps = self.backbone(image)
-    print("[INFO] Backbone Features [res2]:", backbone_feature_maps["2"].shape)
-    print("[INFO] Backbone Features [res3]:", backbone_feature_maps["3"].shape)
-    print("[INFO] Backbone Features [res4]:", backbone_feature_maps["4"].shape)
-    print("[INFO] Backbone Features [res5]:", backbone_feature_maps["5"].shape)
     mask_features, transformer_enc_feat = self.pixel_decoder(self.process_feature_maps(backbone_feature_maps))
-    print("[INFO] Mask Features :", mask_features.shape)
-    print("[INFO] Transformer ENC Features :", transformer_enc_feat.shape)
-
     transformer_features = self.transformer({"features": transformer_enc_feat})
-    print("[INFO] Transformer Features :", transformer_features.shape)
     seg_pred = self.head({"per_pixel_embeddings" : mask_features,
                           "per_segment_embeddings": transformer_features})
-    print("[INFO] Seg Pred Class Prob:", seg_pred["class_prob_predictions"].shape)
-    print("[INFO] Seg Pred Mask Prob:", seg_pred['mask_prob_predictions'].shape)
+    
     return seg_pred

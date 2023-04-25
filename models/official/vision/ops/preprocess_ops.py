@@ -877,9 +877,10 @@ def random_crop_image_masks(img,
     """
 
     shape = tf.shape(img)
+    
     original_h = shape[0]
     original_w = shape[1]
-
+    
     minval, maxval, step, offset = min_overlap_params
 
     min_overlap = tf.math.floordiv(

@@ -3,7 +3,7 @@ DATA_DIR=$1
 # wget http://images.cocodataset.org/zips/val2017.zip -P $DATA_DIR
 # wget http://images.cocodataset.org/annotations/panoptic_annotations_trainval2017.zip -P $DATA_DIR
 # wget http://images.cocodataset.org/zips/train2017.zip -P $DATA_DIR
-http://images.cocodataset.org/annotations/panoptic_annotations_trainval2017.zip
+
 # downloaded_panoptic=true
 # run_dir=$(pwd)
 # if ! cd "$DATA_DIR"; then

@@ -51,13 +51,20 @@ class TfExampleDecoder(tf_example_decoder.TfExampleDecoder):
             regenerate_source_id=regenerate_source_id)
         self._panoptic_category_mask_key = panoptic_category_mask_key
         self._panoptic_instance_mask_key = panoptic_instance_mask_key
-
+        self._image_height_key = 'image/height'
+        self._image_width_key = 'image/width'
         self._panoptic_keys_to_features = {
-            panoptic_category_mask_key:
+            self._panoptic_category_mask_key:
                 tf.io.FixedLenFeature((), tf.string, default_value=''),
-            panoptic_instance_mask_key:
+            self._panoptic_instance_mask_key:
+                tf.io.FixedLenFeature((), tf.string, default_value=''),
+            self._image_height_key:
+                tf.io.FixedLenFeature((), tf.string, default_value=''),
+            self._image_width_key:
                 tf.io.FixedLenFeature((), tf.string, default_value='')
+
         }
+
 
     def decode(self, serialized_example):
         decoded_tensors = super(TfExampleDecoder,
@@ -66,14 +73,14 @@ class TfExampleDecoder(tf_example_decoder.TfExampleDecoder):
         parsed_tensors = tf.io.parse_single_example(
             serialized_example, self._panoptic_keys_to_features)
         
-        category_mask = tf.io.decode_image(
+        category_mask = tf.io.decode_png(
             parsed_tensors[self._panoptic_category_mask_key], channels=1)
-        instance_mask = tf.io.decode_image(
+        instance_mask = tf.io.decode_png(
             parsed_tensors[self._panoptic_instance_mask_key], channels=1)
         
-        # print("[INFO] category mask shape :", category_mask.shape)
-        category_mask.set_shape([None, None, 1])
-        instance_mask.set_shape([None, None, 1])
+
+        # category_mask.set_shape([None, None, 1])
+        # instance_mask.set_shape([None, None, 1])
 
         decoded_tensors.update({
             'groundtruth_panoptic_category_mask': category_mask,
@@ -119,11 +126,13 @@ class mask_former_parser(parser.Parser):
         
         # general settings
         self._output_size = params.output_size
+        
         self._dtype = params.dtype
         self._pad_output = params.pad_output
         self._seed = params.seed
         
         self._decoder = decoder_fn
+        
         if self._pad_output == True and self._output_size is None:
             raise Exception("Error: no output pad provided")
         if self._decoder == None:
@@ -135,7 +144,7 @@ class mask_former_parser(parser.Parser):
             print("assuming training mode")
             self._is_training = True
         
-        # Boxes:
+       
         self._resize_eval_groundtruth = params.resize_eval_groundtruth
         if (not params.resize_eval_groundtruth) and (params.groundtruth_padded_size is None):
             raise ValueError(
@@ -191,8 +200,8 @@ class mask_former_parser(parser.Parser):
         offset = image_info[3, : ]
         im_height = int(image_info[0][0])
         im_width = int(image_info[0][1])
+
         # print(mask.shape)
-        # print(im_height, im_width)
         
         mask = tf.reshape(mask, shape=[1, im_height, im_width, 1])
         # print(mask.shape)
@@ -262,9 +271,7 @@ class mask_former_parser(parser.Parser):
             
 
         # Resize and crops image.
-        # print(category_mask.shape)
-        # print(instance_mask.shape)
-        # print(self._output_size)
+        
         masks = tf.stack([category_mask, instance_mask], axis=0)
         masks = tf.expand_dims(masks, -1)
         # print("stacked masks:",masks.shape)
@@ -284,12 +291,10 @@ class mask_former_parser(parser.Parser):
         category_mask = tf.squeeze(masks[0])
         instance_mask = tf.squeeze(masks[1])
         
-        # print("categorical shape:",category_mask.shape)
-        # print("instance shape:",instance_mask.shape)
-        # print("image shape:",cropped_image.shape)
+        
         
         crop_im_size = tf.cast(tf.shape(cropped_image)[0:2], tf.int32)
-
+        
         # print("using padding:", self._output_size)    
         # resize and pad image from random crop
         image, image_info = preprocess_ops.resize_and_crop_image(
@@ -330,8 +335,7 @@ class mask_former_parser(parser.Parser):
         things_mask = tf.not_equal(
             instance_mask, self._ignore_label)
 
-        # print("Category Mask :", image_info)
-        # exit()
+        
         labels = {
             'category_mask': category_mask,
             'instance_mask': instance_mask,
@@ -454,6 +458,7 @@ class mask_former_parser(parser.Parser):
         """
         with tf.name_scope('parser'):
             data = self._decoder(value)
+
             
             if self._is_training:
                 return self._parse_train_data(data)
