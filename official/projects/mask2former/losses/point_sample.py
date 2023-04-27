@@ -41,25 +41,35 @@ def point_sample(input, point_coords, align_corners=False, **kwargs):
     # changing x,y range from [0, 1] to [-1, 1]
     point_coords = 2 * point_coords - 1
 
-    output = tf.zeros([N, P, C])
+    point_coords_flat = tf.reshape(point_coords, [N * P, 2])
+    X = point_coords_flat[:, 0]
+    Y = point_coords_flat[:, 1]
 
+    X = tf.reshape(X, [N, P])
+    Y = tf.reshape(Y, [N, P])
+
+    if align_corners:
+        X = ((X + 1) / 2) * (W - 1)
+        Y = ((Y + 1) / 2) * (H - 1)
+    else:
+        X = ((X + 1) * W - 1) / 2
+        Y = ((Y + 1) * H - 1) / 2
+
+    X_1, Y_1 = tf.floor(X), tf.floor(Y)
+    X_2, Y_2 = X_1 + 1, Y_1 + 1
+
+    output = tf.zeros([N, P, C])
     for n in range(N):
         for p in range(P):
-            x, y = point_coords[n, p, :]
-
-            if align_corners:
-                # Unnormalize coords from [-1, 1] to [0, H - 1] & [0, W - 1]
-                x = ((x + 1) / 2) * (W - 1)
-                y = ((y + 1) / 2) * (H - 1)
-            else:
-                # Unnormalize coords from [-1, 1] to [-0.5, H - 0.5] & [-0.5, W - 0.5]
-                x = ((x + 1) * W - 1) / 2
-                y = ((y + 1) * H - 1) / 2
-
-            x1, y1 = int(tf.floor(x)), int(tf.floor(y))
-            x2, y2 = x1 + 1, y1 + 1
-
             for c in range(C):
+
+                x = X[n, p]
+                y = Y[n, p]
+                x1 = int(X_1[n, p])
+                x2 = int(X_2[n, p])
+                y1 = int(Y_1[n, p])
+                y2 = int(Y_2[n, p])
+
                 nw_val = safe_get(input, n, x1, y1, c)
                 sw_val = safe_get(input, n, x1, y2, c)
                 ne_val = safe_get(input, n, x2, y1, c)
@@ -72,7 +82,7 @@ def point_sample(input, point_coords, align_corners=False, **kwargs):
                 ) * R2
 
                 # might be inefficiently if tensor_scatter_nd_update is creating a new matrix for each index update
-                output = tf.tensor_scatter_nd_update(
+                output = tf.tensor_scatter_nd_add(
                     output, indices=[[n, p, c]], updates=[sampled_point]
                 )
 
