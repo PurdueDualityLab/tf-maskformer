@@ -22,8 +22,9 @@ class PanopticTask(base_task.Task):
 	def build_model(self)-> tf.keras.Model:
 		"""Builds MaskFormer Model."""
 		# TODO : Remove hardcoded values
-		
-		model = MaskFormer(hidden_size=256,
+		input_specs = tf.keras.layers.InputSpec(shape=[None] +
+                                            [400, 400, 3])
+		model = MaskFormer(input_specs, hidden_size=256,
                                  backbone_endpoint_name="5",
                                  num_encoder_layers=0,
                                  num_decoder_layers=6,
@@ -43,8 +44,23 @@ class PanopticTask(base_task.Task):
 			raise ValueError('Unknown decoder type: {}!'.format(params.decoder.type))
 		
 		parser = panoptic_input.mask_former_parser(params.parser, is_training = params.is_training, decoder_fn=decoder.decode)
-		reader = input_reader.InputFn(params,dataset_fn = dataset_fn.pick_dataset_fn(params.file_type),parser_fn = parser, num_examples=2)
+		reader = input_reader.InputFn(params,dataset_fn = dataset_fn.pick_dataset_fn(params.file_type),parser_fn = parser)
 		dataset = reader(ctx=input_context)
+		# dict_keys(['category_mask', 'instance_mask', 'instance_centers_heatmap', 'instance_centers_offset', 
+		# 'semantic_weights', 'valid_mask', 'things_mask', 'image_info'])
+		# TODO : missing labels for each mask
+		# TODO : missing masks for each object
+		# for sample in dataset.take(1):
+		# 	print("image shape :", sample[0].shape)
+		# 	print(sample[1]["category_mask"].shape)
+		# 	print(sample[1]["instance_mask"].shape)
+		# 	print(sample[1]["instance_centers_heatmap"].shape)
+		# 	print(sample[1]["instance_centers_offset"].shape)
+		# 	print(sample[1]["semantic_weights"].shape)
+		# 	print(sample[1]["valid_mask"].shape)
+		# 	print(sample[1]["things_mask"].shape)
+		# 	print(sample[1]["image_info"].shape)
+		# exit()
 		return dataset
 
 	def initialize(self, model: tf.keras.Model) -> None:

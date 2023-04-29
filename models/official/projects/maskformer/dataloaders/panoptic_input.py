@@ -53,15 +53,12 @@ class TfExampleDecoder(tf_example_decoder.TfExampleDecoder):
         self._panoptic_instance_mask_key = panoptic_instance_mask_key
         self._image_height_key = 'image/height'
         self._image_width_key = 'image/width'
+        self._image_key = ""
         self._panoptic_keys_to_features = {
             self._panoptic_category_mask_key:
                 tf.io.FixedLenFeature((), tf.string, default_value=''),
             self._panoptic_instance_mask_key:
                 tf.io.FixedLenFeature((), tf.string, default_value=''),
-            self._image_height_key:
-                tf.io.FixedLenFeature((), tf.string, default_value=''),
-            self._image_width_key:
-                tf.io.FixedLenFeature((), tf.string, default_value='')
 
         }
 
@@ -70,6 +67,7 @@ class TfExampleDecoder(tf_example_decoder.TfExampleDecoder):
         decoded_tensors = super(TfExampleDecoder,
                                 self).decode(serialized_example)
         
+    
         parsed_tensors = tf.io.parse_single_example(
             serialized_example, self._panoptic_keys_to_features)
         
@@ -79,13 +77,14 @@ class TfExampleDecoder(tf_example_decoder.TfExampleDecoder):
             parsed_tensors[self._panoptic_instance_mask_key], channels=1)
         
 
-        # category_mask.set_shape([None, None, 1])
-        # instance_mask.set_shape([None, None, 1])
+        category_mask.set_shape([None, None, 1])
+        instance_mask.set_shape([None, None, 1])
 
         decoded_tensors.update({
             'groundtruth_panoptic_category_mask': category_mask,
             'groundtruth_panoptic_instance_mask': instance_mask
         })
+        
         return decoded_tensors
 
 
@@ -231,9 +230,7 @@ class mask_former_parser(parser.Parser):
 
     def _parse_data(self, data, is_training):
         image = data['image']
-        # print("[INFO] IS training :", is_training)
-        # print("[INFO] Image shape ", image.shape)
-        # exit()
+        
         # Auto-augment (if configured)
         if self._augmenter is not None and is_training:
             image = self._augmenter.distort(image)

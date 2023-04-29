@@ -9,6 +9,7 @@ from official.projects.maskformer.modeling.decoder.transformer_pixel_decoder imp
 class MaskFormer(tf.keras.Model):
   """Maskformer"""
   def __init__(self,
+               input_specs,
                fpn_feat_dims=256,
                data_format=None,
                dilation_rate=(1, 1),
@@ -31,6 +32,7 @@ class MaskFormer(tf.keras.Model):
                num_classes=133,
                batch_size=1,
                **kwargs):
+    self._input_specs = input_specs
     self._batch_size = batch_size
     self._num_classes = num_classes
 
@@ -60,9 +62,11 @@ class MaskFormer(tf.keras.Model):
 
     super(MaskFormer, self).__init__(**kwargs)
 
-  def build(self, image):
+  def build(self, image_shape):
     #backbone
-    self.backbone = resnet.ResNet(50, bn_trainable=False)
+    print("[Build MaskFormer] image shape: ", image_shape)
+    
+    self.backbone = resnet.ResNet(50, input_specs=self._input_specs, bn_trainable=False)
     #decoders
     self.pixel_decoder = TransformerFPN(batch_size = self._batch_size,
                             fpn_feat_dims=self._fpn_feat_dims,
