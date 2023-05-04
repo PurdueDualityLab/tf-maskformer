@@ -138,12 +138,16 @@ def generate_coco_panoptics_masks(segments_info, mask_path,
     segment_id = segment['id']
     category_id = segment['category_id']
     is_crowd = segment['iscrowd']
+
     if FLAGS.panoptic_skip_crowd and is_crowd:
       continue
+
     if is_category_thing[category_id]:
+      # This for thing
       encoded_category_id = _THING_CLASS_ID
       instance_id = idx + 1
     else:
+      # This is for stuff (for stuff no instance id)
       encoded_category_id = category_id - _STUFF_CLASSES_OFFSET
       instance_id = _VOID_INSTANCE_ID
 
@@ -151,7 +155,7 @@ def generate_coco_panoptics_masks(segments_info, mask_path,
     semantic_segmentation_mask[segment_mask] = encoded_category_id
 
     if include_panoptic_masks:
-      category_mask[segment_mask] = category_id
+      category_mask[segment_mask] =  category_id
       instance_mask[segment_mask] = instance_id
 
   outputs = {

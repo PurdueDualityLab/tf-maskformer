@@ -39,7 +39,7 @@ class InputFn(object):
         """
         self._is_training = params.is_training
         self._file_pattern = params.input_path
-        print("[INFO] File pattern :", self._file_pattern)
+        
         self._batch_size = params.global_batch_size
         self._shuffle_buffer_size = params.shuffle_buffer_size
         self._num_examples = num_examples
@@ -47,7 +47,7 @@ class InputFn(object):
         
         self._dataset_fn = dataset_fn
         if dataset_fn is None:
-            print("assuming default dataset function")
+            
             self._dataset_fn = tf.data.TFRecordDataset
 
         self._input_sharding = (not self._is_training)

@@ -139,7 +139,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
               global_batch_size=train_batch_size,
               shuffle_buffer_size=1000,
               parser = Parser(
-                    output_size = [400,400],
+                    output_size = [640,640],
                     min_scale = 0.3,
                     aspect_ratio_range = (0.5, 2.0),
                     min_overlap_params = (0.0, 1.4, 0.2, 0.1),

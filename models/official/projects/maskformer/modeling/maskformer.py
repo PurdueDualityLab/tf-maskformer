@@ -93,7 +93,7 @@ class MaskFormer(tf.keras.Model):
                         hidden_dim=self._hidden_size, 
                         mask_dim=self._fpn_feat_dims)
    
-    super(MaskFormer, self).build(image)
+    super(MaskFormer, self).build(image_shape)
  
   def process_feature_maps(self, maps):
     new_dict = {}

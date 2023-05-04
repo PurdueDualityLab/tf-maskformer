@@ -1,5 +1,5 @@
 DATA_DIR=$1
-# wget http://images.cocodataset.org/annotations/annotations_trainval2017.zip -P $DATA_DIR
+wget http://images.cocodataset.org/annotations/annotations_trainval2017.zip -P $DATA_DIR
 # wget http://images.cocodataset.org/zips/val2017.zip -P $DATA_DIR
 # wget http://images.cocodataset.org/annotations/panoptic_annotations_trainval2017.zip -P $DATA_DIR
 # wget http://images.cocodataset.org/zips/train2017.zip -P $DATA_DIR
@@ -35,11 +35,11 @@ DATA_DIR=$1
 # else
 #   $($GET_TRAIN)
 # fi
-cd /depot/qqiu/data/vishal/projects/tf_maskformer_integration/
+cd /depot/qqiu/data/vishal/projects/tf-maskformer/models
 
-# unzip $DATA_DIR/"*".zip -d $DATA_DIR
-# mkdir $DATA_DIR/zips
-# mv $DATA_DIR/*.zip $DATA_DIR/zips
+unzip $DATA_DIR/"*".zip -d $DATA_DIR
+mkdir $DATA_DIR/zips
+mv $DATA_DIR/*.zip $DATA_DIR/zips
 
 # if $downloaded_panoptic; then
 #   unzip $DATA_DIR/annotations/panoptic_train2017.zip -d $DATA_DIR
@@ -54,7 +54,6 @@ python3 official/vision/data/create_coco_tf_record.py \
   --panoptic_annotations_file="$DATA_DIR/annotations/panoptic_val2017.json" \
   --panoptic_masks_dir="$DATA_DIR/panoptic_val2017" \
   --num_shards=8 \
-  --include_masks \
   --include_panoptic_masks
 
 python3 official/vision/data/create_coco_tf_record.py \
@@ -65,5 +64,4 @@ python3 official/vision/data/create_coco_tf_record.py \
   --panoptic_annotations_file="$DATA_DIR/annotations/panoptic_train2017.json" \
   --panoptic_masks_dir="$DATA_DIR/panoptic_train2017" \
   --num_shards=150 \
-  --include_masks \
   --include_panoptic_masks
