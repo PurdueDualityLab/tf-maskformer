@@ -393,8 +393,12 @@ class mask_former_parser(parser.Parser):
             mask)
         mask = tf.squeeze(mask, axis=0)
         return mask
-
-   
+    
+    # @tf.function
+    # def compare_masks(self, each_id):
+    #     # with tf.name_scope("compare_masks"):
+    #     return tf.equal(instance_mask, each_id)
+        
     def _parse_data(self, data, is_training):
         image = data['image']
         
@@ -411,6 +415,21 @@ class mask_former_parser(parser.Parser):
             data['groundtruth_panoptic_instance_mask'][:, :, 0],
             dtype=tf.float32)
         
+
+        # unique_ids, _ = tf.unique(tf.reshape(instance_mask, [-1]))
+        # individual_masks = []
+
+        
+        # for each_id in unique_ids:
+        #     if each_id == 0:
+        #         continue
+        #     else:
+        #         # mask_ = tf.map_fn(self.compare_masks, unique_ids, dtype=tf.bool)
+        #         #mask_ = self.compare_masks(instance_mask, each_id)
+        #         mask_= tf.where(tf.equal(instance_mask, each_id),1,0)
+        #         individual_masks.append(mask_)
+        
+        # TODO : Prprocess individual masks and lookup ids
         # applies by pixel augmentation (saturation, brightness, contrast)
         if self._color_aug_ssd:
             image = preprocess_ops.color_jitter(
@@ -438,6 +457,7 @@ class mask_former_parser(parser.Parser):
         
         masks = tf.stack([category_mask, instance_mask], axis=0)
         masks = tf.expand_dims(masks, -1)
+        # individual_masks = tf.stack(individual_masks, axis=0) #[number_objects, height, width, 1]
         # print("stacked masks:",masks.shape)
         
         # Resizes and crops image.
@@ -459,17 +479,14 @@ class mask_former_parser(parser.Parser):
         
         crop_im_size = tf.cast(tf.shape(cropped_image)[0:2], tf.int32)
         
-        # print("using padding:", self._output_size)    
-        # resize and pad image from random crop
+     
         image, image_info = preprocess_ops.resize_and_crop_image(
             cropped_image,
             self._output_size if self._pad_output else crop_im_size,
             self._output_size if self._pad_output else crop_im_size,
             aug_scale_min=self._aug_scale_min if self._pad_output or not self._is_training else 1.0,
             aug_scale_max=self._aug_scale_max  if self._pad_output or not self._is_training else 1.0)
-        
-        # print("image info:", image_info)
-        # resize masks according to image
+     
         category_mask = self._resize_and_crop_mask(
             category_mask,
             image_info,
@@ -480,12 +497,11 @@ class mask_former_parser(parser.Parser):
             image_info,
             self._output_size if self._pad_output else crop_im_size,
             is_training=is_training)
-        (instance_centers_heatmap,
-            instance_centers_offset,
-            semantic_weights) = self._encode_centers_and_offets(
+        
+        (unique_ids, individual_masks) = self._get_individual_masks(
                 instance_mask=instance_mask[:, :, 0])
 
-        # Cast image and labels as self._dtype
+       
         image = tf.cast(image, dtype=self._dtype)
         image = tf.image.resize(image, self._output_size, method='nearest')
         category_mask = tf.image.resize(category_mask, self._output_size, method='nearest')
@@ -493,49 +509,21 @@ class mask_former_parser(parser.Parser):
         
         category_mask = tf.cast(category_mask, dtype=self._dtype)
         instance_mask = tf.cast(instance_mask, dtype=self._dtype)
-        instance_centers_heatmap = tf.cast(
-            instance_centers_heatmap, dtype=self._dtype)
-        instance_centers_offset = tf.cast(
-            instance_centers_offset, dtype=self._dtype)
-
+     
         valid_mask = tf.not_equal(
             category_mask, self._ignore_label)
         things_mask = tf.not_equal(
             instance_mask, self._ignore_label)
 
-        # unique_labels, _ = tf.unique(tf.reshape(instance_mask, [-1]))
-        # individual_masks = []
-        # mask_labels = []
-        # for m_label in unique_labels:
-        #     # single_mask = tf.ones_like(category_mask, dtype=tf.int64)
-        #     # mask_locs = tf.where(tf.equal(instance_mask, m_label))
-
-        #     ## where
-        #     # single_mask = single_mask * mask_locs + (1-mask_locs) * 0
-
-        #     # single_mask = tf.convert_to_tensor(single_mask)
-        #     # individual_masks.append(single_mask)
-            
-        #     m_label_new = tf.cast(m_label, dtype=tf.int32)
-        #     # use lookuup table to get the label
-        #     contiguous_id = self._stuff_table.lookup(m_label_new)
-        #     if contiguous_id != -1:
-        #         mask_labels.append(contiguous_id)
-        #     else:
-        #         contiguous_id = self._thing_table.lookup(m_label_new)
-        #         mask_labels.append(contiguous_id)
-            
-
-        # individual_masks_stacked = tf.stack(individual_masks, axis=0)
+        
         labels = {
             'category_mask': category_mask,
             'instance_mask': instance_mask,
-            'instance_centers_heatmap': instance_centers_heatmap,
-            'instance_centers_offset': instance_centers_offset,
-            'semantic_weights': semantic_weights,
             'valid_mask': valid_mask,
             'things_mask': things_mask,
             'image_info': image_info,
+            'unique_ids': unique_ids,
+            "individual_masks": individual_masks,
         }
         return image, labels
 
@@ -547,97 +535,20 @@ class mask_former_parser(parser.Parser):
         """Parses data for evaluation."""
         return self._parse_data(data=data, is_training=False)
 
-    def _encode_centers_and_offets(self, instance_mask):
-        """Generates center heatmaps and offets from instance id mask.
     
-        Args:
-          instance_mask: `tf.Tensor` of shape [height, width] representing
-            groundtruth instance id mask.
-        Returns:
-          instance_centers_heatmap: `tf.Tensor` of shape [height, width, 1]
-          instance_centers_offset: `tf.Tensor` of shape [height, width, 2]
-        """
-        shape = tf.shape(instance_mask)
-        height, width = shape[0], shape[1]
-
-        padding_start = int(3 * self._sigma + 1)
-        padding_end = int(3 * self._sigma + 2)
-
-        # padding should be equal to self._gaussian_size which is calculated
-        # as size = int(6 * sigma + 3)
-        padding = padding_start + padding_end
-
-        instance_centers_heatmap = tf.zeros(
-            shape=[height + padding, width + padding],
-            dtype=tf.float32)
-        centers_offset_y = tf.zeros(
-            shape=[height, width],
-            dtype=tf.float32)
-        centers_offset_x = tf.zeros(
-            shape=[height, width],
-            dtype=tf.float32)
-        semantic_weights = tf.ones(
-            shape=[height, width],
-            dtype=tf.float32)
-
+    def _get_individual_masks(self, instance_mask):
+        
         unique_instance_ids, _ = tf.unique(tf.reshape(instance_mask, [-1]))
+        individual_mask_list = tf.TensorArray(tf.float32, size=0, dynamic_size=True)
 
-        # The following method for encoding center heatmaps and offets is inspired
-        # by the reference implementation available at
-        # https://github.com/google-research/deeplab2/blob/main/data/sample_generator.py  # pylint: disable=line-too-long
         for instance_id in unique_instance_ids:
             if instance_id == self._ignore_label:
                 continue
 
             mask = tf.equal(instance_mask, instance_id)
-            mask_area = tf.reduce_sum(tf.cast(mask, dtype=tf.float32))
-            mask_indices = tf.cast(tf.where(mask), dtype=tf.float32)
-            mask_center = tf.reduce_mean(mask_indices, axis=0)
-            mask_center_y = tf.cast(tf.round(mask_center[0]), dtype=tf.int32)
-            mask_center_x = tf.cast(tf.round(mask_center[1]), dtype=tf.int32)
-
-            if mask_area < self._small_instance_area_threshold:
-                semantic_weights = tf.where(
-                    mask,
-                    self._small_instance_weight,
-                    semantic_weights)
-
-            gaussian_size = self._gaussian_size
-            indices_y = tf.range(mask_center_y, mask_center_y + gaussian_size)
-            indices_x = tf.range(mask_center_x, mask_center_x + gaussian_size)
-
-            indices = tf.stack(tf.meshgrid(indices_y, indices_x))
-            indices = tf.reshape(
-                indices, shape=[2, gaussian_size * gaussian_size])
-            indices = tf.transpose(indices)
-
-            instance_centers_heatmap = tf.tensor_scatter_nd_max(
-                tensor=instance_centers_heatmap,
-                indices=indices,
-                updates=self._gaussian)
-
-            centers_offset_y = tf.tensor_scatter_nd_update(
-                tensor=centers_offset_y,
-                indices=tf.cast(mask_indices, dtype=tf.int32),
-                updates=tf.cast(mask_center_y, dtype=tf.float32) - mask_indices[:, 0])
-
-            centers_offset_x = tf.tensor_scatter_nd_update(
-                tensor=centers_offset_x,
-                indices=tf.cast(mask_indices, dtype=tf.int32),
-                updates=tf.cast(mask_center_x, dtype=tf.float32) - mask_indices[:, 1])
-
-        instance_centers_heatmap = instance_centers_heatmap[
-                                   padding_start:padding_start + height,
-                                   padding_start:padding_start + width]
-        instance_centers_heatmap = tf.expand_dims(instance_centers_heatmap, axis=-1)
-
-        instance_centers_offset = tf.stack(
-            [centers_offset_y, centers_offset_x],
-            axis=-1)
-
-        return (instance_centers_heatmap,
-                instance_centers_offset,
-                semantic_weights)
+            individual_mask_list = individual_mask_list.write(individual_mask_list.size(), tf.expand_dims(tf.cast(mask, tf.float32), axis=2))
+           
+        return (unique_instance_ids, individual_mask_list.stack())
 
     def __call__(self, value):
         """Parses data to an image and associated training labels.
@@ -650,7 +561,6 @@ class mask_former_parser(parser.Parser):
         with tf.name_scope('parser'):
             data = self._decoder(value)
 
-            
             if self._is_training:
                 return self._parse_train_data(data)
             else:

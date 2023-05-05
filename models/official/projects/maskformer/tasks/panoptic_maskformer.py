@@ -190,18 +190,20 @@ class PanopticTask(base_task.Task):
 		# dict_keys(['category_mask', 'instance_mask', 'instance_centers_heatmap', 'instance_centers_offset', 
 		# 'semantic_weights', 'valid_mask', 'things_mask', 'image_info'])
 		
-		# for sample in dataset.take(1):
-		# 	logger.debug(f"image shape : {sample[0].shape}")
-		# 	logger.debug(f"category_mask : {sample[1]['category_mask'].shape}")
-		# 	logger.debug(f"mask_labels :{sample[1]['mask_labels']}")
-		# 	logger.debug(f"instance_mask:{sample[1]['instance_mask'].shape}")
-		# 	# print(sample[1]["instance_centers_heatmap"].shape)
-		# 	# print(sample[1]["instance_centers_offset"].shape)
-		# 	# print(sample[1]["semantic_weights"].shape)
-		# 	# print(sample[1]["valid_mask"].shape)
-		# 	# print(sample[1]["things_mask"].shape)
+		for sample in dataset.take(1):
+			# print(f"image shape : {sample[0]}")
+			# print("individual masks shape :", sample[1]["unique_ids"])
+			print("individual masks :", sample[1]["individual_masks"][0])
+			# logger.debug(f"category_mask : {sample[1]['category_mask'].shape}")
+			# logger.debug(f"mask_labels :{sample[1]['mask_labels']}")
+			# logger.debug(f"instance_mask:{sample[1]['instance_mask'].shape}")
+			# print(sample[1]["instance_centers_heatmap"].shape)
+			# print(sample[1]["instance_centers_offset"].shape)
+			# print(sample[1]["semantic_weights"].shape)
+			# print(sample[1]["valid_mask"].shape)
+			# print(sample[1]["things_mask"].shape)
 			
-		# exit()
+		exit()
 		
 		# for sample in dataset.take(1):
 		# 	print(sample[1].keys())
@@ -251,9 +253,8 @@ class PanopticTask(base_task.Task):
 	def build_losses(self, output, labels, aux_outputs=None):
 		# TODO : Auxilary outputs
 		outputs = {"pred_logits": output["class_prob_predictions"], "pred_masks": output["mask_prob_predictions"]}
-		targets = {"labels": labels["labels"], "masks": labels["masks"]}
-		print("Targets : ", targets["labels"])
-		exit()
+		targets = labels
+		
 		matcher = hungarian_matching
 		no_object_weight = 0.1
 		# TODO : Remove hardcoded values
@@ -294,36 +295,7 @@ class PanopticTask(base_task.Task):
 	
 		return metrics
 	
-	# @tf.function
-	# def preprocess_data(self,inputs):
-	# 	instance_mask = inputs["instance_mask"]
-	# 	print(instance_mask)
-	# 	individual_mask_batch = []
-	# 	mask_labels_batch = []
-	# 	for each_batch in range(instance_mask.shape[0]):
-	# 		individual_mask = []
-	# 		individual_mask_labels = []
-	# 		uniques,_ = tf.unique(tf.reshape(instance_mask[each_batch], [-1]))
-	# 		for each_cat in uniques:
-	# 			if each_cat != 0:
-	# 				mask_ = tf.where(instance_mask[each_batch] == each_cat, 1, 0)
-	# 				individual_mask.append(mask_)
-	# 				all_stuff_ids = list(self._meta["stuff_dataset_id_to_contiguous_id"].keys())
-	# 				if tf.cond(tf.reduce_any(each_cat == all_stuff_ids), lambda: True, lambda: False):
-	# 					# TODO : need to change this to get the contiguous id
-	# 					# individual_mask_labels.append(self._meta["stuff_dataset_id_to_contiguous_id"][each_cat.ref()])
-	# 					individual_mask_labels.append(each_cat)
-	# 				else:
-	# 					# individual_mask_labels.append(self._meta["thing_dataset_id_to_contiguous_id"][each_cat.ref()])
-	# 					individual_mask_labels.append(each_cat)
-
-	# 				individual_mask_labels.append(each_cat)
-	# 			else:
-	# 				continue
-	# 		individual_mask_batch.append(individual_mask)
-	# 		mask_labels_batch.append(individual_mask_labels)
-
-		# return individual_mask_batch, mask_labels_batch
+	
 	
 	def train_step(self, inputs: Tuple[Any, Any],model: tf.keras.Model, optimizer: tf.keras.optimizers.Optimizer, metrics: Optional[List[Any]] = None) -> Dict[str, Any]:
 		"""
@@ -340,45 +312,7 @@ class PanopticTask(base_task.Task):
     	"""
 		
 		features, labels = inputs
-		# Get the instance mask 
-		# convert to binary masks and get mask labels
-		instance_mask = labels["instance_mask"]
-		
-		individual_mask_batch = []
-		mask_labels_batch = []
-		for each_batch in range(instance_mask.shape[0]):
-			individual_mask = []
-			individual_mask_labels = []
-			uniques,_ = tf.unique(tf.reshape(instance_mask[each_batch], [-1]))
-			for each_cat in uniques:
-				if each_cat != 0:
-					mask_ = tf.where(instance_mask[each_batch] == each_cat, 1, 0)
-					individual_mask.append(mask_)
-					all_stuff_ids = list(self._meta["stuff_dataset_id_to_contiguous_id"].keys())
-					if tf.cond(tf.reduce_any(each_cat == all_stuff_ids), lambda: True, lambda: False):
-						# TODO : need to change this to get the contiguous id
-						# individual_mask_labels.append(self._meta["stuff_dataset_id_to_contiguous_id"][each_cat.ref()])
-						individual_mask_labels.append(each_cat)
-					else:
-						# individual_mask_labels.append(self._meta["thing_dataset_id_to_contiguous_id"][each_cat.ref()])
-						individual_mask_labels.append(each_cat)
-
-					individual_mask_labels.append(each_cat)
-				else:
-					continue
-			individual_mask_batch.append(individual_mask)
-			mask_labels_batch.append(individual_mask_labels)
-		
-		labels_preprocessed = {"masks": individual_mask_batch, "labels": mask_labels_batch}
-		
-		
-			
-
-
-		# print("inputs : ", features.shape)
-		# print("labels : ", len(individual_mask_batch))
-		# print("mask labels : ", mask_labels_batch)
-		# exit()
+	
 		with tf.GradientTape() as tape:
 			outputs = model(features, training=True)
 			
@@ -409,7 +343,7 @@ class PanopticTask(base_task.Task):
 		##########################################################################
 			
 			# TODO : Add auxiallary losses
-			total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels_preprocessed)
+			total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels)
 			tvars = model.trainable_variables
 			grads = tape.gradient(loss, tvars)
 
@@ -418,7 +352,7 @@ class PanopticTask(base_task.Task):
 			# # Scales back gradient when LossScaleOptimizer is used.
 			# if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
 			# 	grads = optimizer.get_unscaled_gradients(grads)
-			# optimizer.apply_gradients(list(zip(grads, tvars)))
+			optimizer.apply_gradients(list(zip(grads, tvars)))
 
 			# # Multiply for logging.
 			# # Since we expect the gradient replica sum to happen in the optimizer,

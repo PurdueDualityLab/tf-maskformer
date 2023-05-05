@@ -332,7 +332,6 @@ def generate_coco_panoptics_masks(segments_info, mask_path,
     outputs.update({
         'category_mask': tfrecord_lib.encode_mask_as_png(category_mask),
         'instance_mask': tfrecord_lib.encode_mask_as_png(instance_mask),
-        'category_mask_contiguous': tfrecord_lib.encode_mask_as_png(category_mask_contiguous),
         })
   return outputs
 
@@ -509,6 +508,8 @@ def create_tf_example(image,
 
   if panoptic_annotation:
     segments_info = panoptic_annotation['segments_info']
+    print(segments_info)
+    exit()
     panoptic_mask_filename = os.path.join(
         panoptic_masks_dir,
         panoptic_annotation['file_name'])

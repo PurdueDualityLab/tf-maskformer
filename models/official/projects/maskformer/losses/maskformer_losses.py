@@ -153,16 +153,16 @@ class Loss:
     def memory_efficient_matcher(self, outputs, y_true):
         batch_size, num_queries = outputs["pred_logits"].shape[:2] # Bsize, num_queries, num_preds
         
-        masks = [v["masks"] for v in y_true]
-        h_max = max([m.shape[1] for m in masks])
-        w_max = max([m.shape[2] for m in masks])
+        # masks = [v["masks"] for v in y_true]
+        # h_max = max([m.shape[1] for m in masks])
+        # w_max = max([m.shape[2] for m in masks])
 
         indices = list()
         for b in range(batch_size):
             out_mask = outputs["pred_masks"][b]
             tgt_ids = y_true[b]["labels"]
-            num_gt_objects = y_true[b]["masks"].shape[0]
-            num_extra_classes = outputs["pred_logits"][b].shape[-1] - tgt_ids.shape[0]
+            # num_gt_objects = y_true[b]["masks"].shape[0]
+            # num_extra_classes = outputs["pred_logits"][b].shape[-1] - tgt_ids.shape[0]
            
             
             with tf.device(out_mask.device):
