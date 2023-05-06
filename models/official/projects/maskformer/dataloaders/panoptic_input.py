@@ -24,6 +24,7 @@ from official.vision.dataloaders import tf_example_decoder
 from official.vision.ops import augment
 from official.vision.ops import preprocess_ops
 from official.core import config_definitions as cfg
+tf.compat.v1.enable_eager_execution()
 COCO_CATEGORIES = [
     {"color": [220, 20, 60], "isthing": 1, "id": 1, "name": "person"},
     {"color": [119, 11, 32], "isthing": 1, "id": 2, "name": "bicycle"},
@@ -415,21 +416,6 @@ class mask_former_parser(parser.Parser):
             data['groundtruth_panoptic_instance_mask'][:, :, 0],
             dtype=tf.float32)
         
-
-        # unique_ids, _ = tf.unique(tf.reshape(instance_mask, [-1]))
-        # individual_masks = []
-
-        
-        # for each_id in unique_ids:
-        #     if each_id == 0:
-        #         continue
-        #     else:
-        #         # mask_ = tf.map_fn(self.compare_masks, unique_ids, dtype=tf.bool)
-        #         #mask_ = self.compare_masks(instance_mask, each_id)
-        #         mask_= tf.where(tf.equal(instance_mask, each_id),1,0)
-        #         individual_masks.append(mask_)
-        
-        # TODO : Prprocess individual masks and lookup ids
         # applies by pixel augmentation (saturation, brightness, contrast)
         if self._color_aug_ssd:
             image = preprocess_ops.color_jitter(
@@ -451,15 +437,11 @@ class mask_former_parser(parser.Parser):
             category_mask = masks[0]
             instance_mask = masks[1]
             
-            
-
         # Resize and crops image.
         
         masks = tf.stack([category_mask, instance_mask], axis=0)
         masks = tf.expand_dims(masks, -1)
-        # individual_masks = tf.stack(individual_masks, axis=0) #[number_objects, height, width, 1]
-        # print("stacked masks:",masks.shape)
-        
+       
         # Resizes and crops image.
         cropped_image, masks = preprocess_ops.random_crop_image_masks(
             img = image,
@@ -479,7 +461,7 @@ class mask_former_parser(parser.Parser):
         
         crop_im_size = tf.cast(tf.shape(cropped_image)[0:2], tf.int32)
         
-     
+        # Resize image
         image, image_info = preprocess_ops.resize_and_crop_image(
             cropped_image,
             self._output_size if self._pad_output else crop_im_size,
@@ -502,14 +484,20 @@ class mask_former_parser(parser.Parser):
                 instance_mask=instance_mask[:, :, 0])
 
        
-        image = tf.cast(image, dtype=self._dtype)
+
+        # Resize image and masks to output size.
         image = tf.image.resize(image, self._output_size, method='nearest')
         category_mask = tf.image.resize(category_mask, self._output_size, method='nearest')
         instance_mask = tf.image.resize(instance_mask, self._output_size, method='nearest')
-        
+        individual_masks = tf.image.resize(individual_masks, self._output_size, method='nearest')
+
+        # Cast image to float and set shapes of output.
+        image = tf.cast(image, dtype=self._dtype)
         category_mask = tf.cast(category_mask, dtype=self._dtype)
         instance_mask = tf.cast(instance_mask, dtype=self._dtype)
-     
+        individual_masks = tf.cast(individual_masks, dtype=self._dtype)
+        unique_ids =  tf.cast(unique_ids, dtype=tf.int64)
+
         valid_mask = tf.not_equal(
             category_mask, self._ignore_label)
         things_mask = tf.not_equal(
@@ -523,7 +511,7 @@ class mask_former_parser(parser.Parser):
             'things_mask': things_mask,
             'image_info': image_info,
             'unique_ids': unique_ids,
-            "individual_masks": individual_masks,
+            'individual_masks': individual_masks,
         }
         return image, labels
 
@@ -547,7 +535,8 @@ class mask_former_parser(parser.Parser):
 
             mask = tf.equal(instance_mask, instance_id)
             individual_mask_list = individual_mask_list.write(individual_mask_list.size(), tf.expand_dims(tf.cast(mask, tf.float32), axis=2))
-           
+        # print(tf.shape(unique_instance_ids))
+        # exit()
         return (unique_instance_ids, individual_mask_list.stack())
 
     def __call__(self, value):

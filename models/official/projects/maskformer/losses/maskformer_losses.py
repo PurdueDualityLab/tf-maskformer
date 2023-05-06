@@ -4,6 +4,7 @@ import numpy as np
 from official.projects.detr.ops import matchers
 from scipy.optimize import linear_sum_assignment
 from loguru import logger
+tf.compat.v1.enable_eager_execution()
 
 def _max_by_axis(the_list):
     all_max = the_list[0]
@@ -121,9 +122,10 @@ class DiceLoss(tf.keras.losses.Loss):
         y_true: (b size, 100, h*w)
         """
         y_pred = tf.reshape(tf.keras.activations.sigmoid(y_pred), (y_pred.shape[1],-1))
-        y_true = tf.reshape(y_true, (y_true.shape[1],-1))
-        logger.info("y_pred shape: {}".format(y_pred.shape))
-        logger.info("y_true shape: {}".format(y_true.shape))
+        y_true = tf.reshape(y_true, (tf.shape(y_true)[1],-1))
+
+        # logger.info("y_pred shape: {}".format(y_pred.shape))
+        # logger.info("y_true shape: {}".format(y_true.shape))
         numerator = 2 * tf.reduce_sum(y_pred * y_true, axis=-1)
         denominator = tf.reduce_sum(y_pred, axis=-1) + tf.reduce_sum(y_true, axis=-1)
         loss = 1 - (numerator + 1) / (denominator + 1)
@@ -150,80 +152,106 @@ class Loss:
         self.cost_focal = cost_focal
         self.cost_dice = cost_dice
 
+    
     def memory_efficient_matcher(self, outputs, y_true):
         batch_size, num_queries = outputs["pred_logits"].shape[:2] # Bsize, num_queries, num_preds
-        
+       
         # masks = [v["masks"] for v in y_true]
         # h_max = max([m.shape[1] for m in masks])
         # w_max = max([m.shape[2] for m in masks])
 
-        indices = list()
-        for b in range(batch_size):
-            out_mask = outputs["pred_masks"][b]
-            tgt_ids = y_true[b]["labels"]
-            # num_gt_objects = y_true[b]["masks"].shape[0]
-            # num_extra_classes = outputs["pred_logits"][b].shape[-1] - tgt_ids.shape[0]
-           
+        batched_indices = tf.TensorArray(tf.bool, size=0, dynamic_size=True)
+
+        # Convert y_true to list (len == batchsize) of dict with each dict having "masks" and "labels" keys
+        for b in tf.range(batch_size):
+            out_mask = outputs["pred_masks"][b] # [h, w, num_preds]
+
+            out_mask = tf.transpose(out_mask, perm=[2, 1, 0]) # [num_preds, h, w]
+            
+            tgt_ids = y_true["unique_ids"][b]
             
             with tf.device(out_mask.device):
-                tgt_mask = y_true[b]["masks"]
-                
-            
-            
+                tgt_mask = y_true["individual_masks"][b]
+           
             cost_class = tf.gather(-tf.nn.softmax(outputs["pred_logits"][b]), tgt_ids, axis=-1)
-          
+            
             
             tgt_mask = tf.cast(tgt_mask, dtype=tf.float32)
-            tgt_mask = tf.image.resize(tgt_mask[..., tf.newaxis], out_mask.shape[-2:], method='nearest')[..., 0]
+            tgt_mask = tf.image.resize(tgt_mask, out_mask.shape[-2:], method='nearest')[..., 0]
+
             out_mask = tf.reshape(out_mask, [tf.shape(out_mask)[0], -1])
             tgt_mask = tf.reshape(tgt_mask, [tf.shape(tgt_mask)[0], -1])
             
             cost_focal = FocalLossMod().batch(tgt_mask, out_mask)
             cost_dice = DiceLoss().batch(tgt_mask, out_mask)
-           
+            
             total_cost = (
                 self.cost_focal * cost_focal
                 + self.cost_class * cost_class
                 + self.cost_dice * cost_dice
             )
-            
+           
+            # TODO : Append maximum cost 
             max_cost = (self.cost_class * 0.0 +
                         self.cost_focal * 4. +
                         self.cost_dice * 0.0)
             # Set pads to large constant
-            C = tf.reshape(total_cost, (1, num_queries, -1)) # Shape of C should be [batchsize, num_queries, num_queries]
-            C_padded = tf.concat([C, tf.ones([1, 100, 100 - C.shape[2]], dtype=C.dtype)* max_cost], -1)
+            C = tf.reshape(total_cost, (1, num_queries, -1)) # Shape of C should be [batchsize, num_queries, num_object]
+            
+            C_padded = tf.concat([C, tf.ones([1, 100, 100 - tf.shape(C)[2]], dtype=C.dtype)* max_cost], -1)
             _, inds = matchers.hungarian_matching(C_padded) # ouptut is binary tensor
-           
-            indices.append(tf.stop_gradient(inds))
-        return tf.concat([each_batch for each_batch in indices], 0)
+            
+            batched_indices = batched_indices.write(batched_indices.size(), tf.squeeze(inds,0))
+        
+        return batched_indices.stack()
     
     
     def get_loss(self, batch_size, outputs, y_true, indices):
-        # assert loss in ["labels", "masks"], f"do you really want to compute {loss} loss?"
+        
         target_index = tf.math.argmax(indices, axis=1) #[batchsize, 100]
-        tgt_labels = [each_batch['labels'] for each_batch in y_true]
         
-        cls_outputs = outputs["pred_logits"]
+        target_labels = y_true["unique_ids"] #[batchsize, num_gt_objects]
+
+        # tgt_labels = [each_batch['labels'] for each_batch in y_true]
+        
+        cls_outputs = outputs["pred_logits"] # [batchsize, num_queries, num_classes] [1,100,134]
         cls_masks = outputs["pred_masks"]
+        individual_masks = y_true["individual_masks"] # [batchsize, num_gt_objects, h, w, 1]
+
+        # print("[INFO] cls_outputs shape: ", cls_outputs.shape)
+        # print("[INFO] target labels shape: ", target_labels.shape)
+        # exit()
         # create  batched tensors for loss calculation with padded zeros
-        batched_target_labels = []
-        batched_target_masks = []
-
-        for each_batch in y_true:
-            num_zeros = cls_outputs.shape[1] - each_batch['labels'].shape[0]
-            tgt_ids = tf.expand_dims(tf.concat([each_batch['labels'], tf.ones([num_zeros], dtype=tf.int64)*self.num_classes],0),0)
-            batched_target_labels.append(tgt_ids)
-
-            zeros_masks = tf.zeros([num_zeros, each_batch["masks"].shape[1], each_batch["masks"].shape[2]], dtype=tf.bool)
-            tgt_mask = each_batch["masks"]
-            tgt_mask = tf.expand_dims(tf.concat([tgt_mask, zeros_masks], 0),0)
-            batched_target_masks.append(tgt_mask)
-
-        target_classes = tf.concat(batched_target_labels, 0)
-        target_masks = tf.concat(batched_target_masks, 0)
+        batched_target_labels = tf.TensorArray(tf.int64, size=0, dynamic_size=True)
+        batched_target_masks = tf.TensorArray(tf.bool, size=0, dynamic_size=True)
+        for b in range(batch_size):
+            num_zeros = tf.shape(cls_outputs[b])[0] - tf.shape(target_labels[b])[0]
+            tgt_ids = tf.concat([target_labels[b], tf.ones(num_zeros, dtype=tf.int64)*self.num_classes],0)
+            tgt_ids = tf.cast(tgt_ids, dtype=tf.int64)
+            batched_target_labels = batched_target_labels.write(batched_target_labels.size(), tgt_ids)
+            
+            zeros_masks = tf.zeros([num_zeros, tf.shape(individual_masks[b])[1], tf.shape(individual_masks[b])[2]], dtype=tf.bool)
+            tgt_mask = tf.squeeze(tf.cast(individual_masks[b],  tf.bool), -1)
+            # tgt_mask = tf.expand_dims(tf.concat([tgt_mask, zeros_masks], 0),0)
+            tgt_mask = tf.concat([tgt_mask, zeros_masks], 0)
+            batched_target_masks = batched_target_masks.write(batched_target_masks.size(), tgt_mask)
         
+        # for each_batch in y_true:
+        #     num_zeros = tf.shape(cls_outputs)[1] - each_batch['labels'].shape[0]
+        #     tgt_ids = tf.expand_dims(tf.concat([each_batch['labels'], tf.ones([num_zeros], dtype=tf.int64)*self.num_classes],0),0)
+        #     batched_target_labels.append(tgt_ids)
+
+            # zeros_masks = tf.zeros([num_zeros, each_batch["masks"].shape[1], each_batch["masks"].shape[2]], dtype=tf.bool)
+            # tgt_mask = each_batch["masks"]
+            # tgt_mask = tf.expand_dims(tf.concat([tgt_mask, zeros_masks], 0),0)
+            # batched_target_masks.append(tgt_mask)
+
+        # target_classes = tf.concat(batched_target_labels, 0)
+        target_classes = batched_target_labels.stack()
         cls_assigned = tf.gather(cls_outputs, target_index, batch_dims=1, axis=1)
+        
+        
+        target_masks = batched_target_masks.stack()
         mask_assigned = tf.gather(cls_masks, target_index, batch_dims=1, axis=1)
 
         
@@ -242,15 +270,13 @@ class Loss:
         cls_loss = self.cost_class * tf.where(background, 0.1 * xentropy, xentropy)
         cls_weights = tf.where(background, 0.1 * tf.ones_like(cls_loss), tf.ones_like(cls_loss))
     
-        logger.info("num_masks: {}".format(num_masks))
         num_masks_per_replica = tf.reduce_sum(num_masks)
         cls_weights_per_replica = tf.reduce_sum(cls_weights)
         replica_context = tf.distribute.get_replica_context()
         num_masks_sum, cls_weights_sum = replica_context.all_reduce(tf.distribute.ReduceOp.SUM,[num_masks_per_replica, cls_weights_per_replica])
-        logger.info("num_masks_sum: {}".format(num_masks_sum))
+       
         # Final losses
         cls_loss = tf.math.divide_no_nan(tf.reduce_sum(cls_loss), cls_weights_sum)
-
         losses = {'focal_loss' : [], 'dice_loss': []}
 
         for b in range(batch_size):
@@ -275,8 +301,10 @@ class Loss:
         
         batched_dice_loss = tf.concat(losses['dice_loss'], 0)
         
-        background_new = tf.concat([background[i] for i in range(background.shape[0])], 0)
-        
+        # background_new = tf.concat([background[i] for i in range(tf.shape(background)[0])], 0)
+        # for i in range(tf.shape(background)[0]):
+        background_new = background
+
 
         
         focal_loss_weighted = tf.where(background_new, tf.zeros_like(batched_focal_loss), batched_focal_loss)

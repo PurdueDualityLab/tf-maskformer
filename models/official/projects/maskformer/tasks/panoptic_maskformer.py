@@ -18,7 +18,7 @@ from official.projects.maskformer.losses.maskformer_losses import Loss
 
 import numpy as np
 from loguru import logger
-
+tf.compat.v1.enable_eager_execution()
 # TODO : Need to remove this later
 COCO_CATEGORIES = [
     {"color": [220, 20, 60], "isthing": 1, "id": 1, "name": "person"},
@@ -190,10 +190,13 @@ class PanopticTask(base_task.Task):
 		# dict_keys(['category_mask', 'instance_mask', 'instance_centers_heatmap', 'instance_centers_offset', 
 		# 'semantic_weights', 'valid_mask', 'things_mask', 'image_info'])
 		
-		for sample in dataset.take(1):
-			# print(f"image shape : {sample[0]}")
-			# print("individual masks shape :", sample[1]["unique_ids"])
-			print("individual masks :", sample[1]["individual_masks"][0])
+		# for sample in dataset.take(1):
+		# 	print(f"unique ids : {sample[1]['unique_ids']}")
+		# 	print(f"unique ids shape : {sample[1]['unique_ids'].shape}")
+		# 	print("individual masks :", sample[1]["individual_masks"].shape)
+			# print(f"image shape : {sample[0].shape}")
+		# 	print("individual masks classes :", sample[1]["unique_ids"])
+		# 	print("individual masks :", sample[1]["individual_masks"].shape)
 			# logger.debug(f"category_mask : {sample[1]['category_mask'].shape}")
 			# logger.debug(f"mask_labels :{sample[1]['mask_labels']}")
 			# logger.debug(f"instance_mask:{sample[1]['instance_mask'].shape}")
@@ -203,44 +206,18 @@ class PanopticTask(base_task.Task):
 			# print(sample[1]["valid_mask"].shape)
 			# print(sample[1]["things_mask"].shape)
 			
-		exit()
+		# exit()
 		
 		# for sample in dataset.take(1):
-		# 	print(sample[1].keys())
-		# 	exit()
-		# 	np.save("category_mask.npy", sample[1]["category_mask"].numpy())
-		# 	np.save("instance_mask.npy", sample[1]["instance_mask"].numpy())
-		# 	np.save("instance_mask_contiguous.npy", sample[1]["category_mask_contiguous"].numpy())
-		# 	np.save("img.npy", sample[0].numpy())
-		# 	# print("Category mask : ", sample[1]["category_mask"])
-		# 	# print("Instance mask : ", sample[1]["instance_mask"])
+			# print(sample[1].keys())
+			# exit()
+			# np.save("individual_masks.npy", sample[1]["individual_masks"].numpy())
+			# np.save("img.npy", sample[0].numpy())
+			# print("Category mask : ", sample[1]["category_mask"])
+			# print("Instance mask : ", sample[1]["instance_mask"])
 
 		# exit()
 		
-
-		self._meta = {}
-
-		thing_classes = [k["name"] for k in COCO_CATEGORIES]
-		thing_colors = [k["color"] for k in COCO_CATEGORIES]
-		stuff_classes = [k["name"] for k in COCO_CATEGORIES]
-		stuff_colors = [k["color"] for k in COCO_CATEGORIES]
-
-		self._meta["thing_classes"] = thing_classes
-		self._meta["thing_colors"] = thing_colors
-		self._meta["stuff_classes"] = stuff_classes
-		self._meta["stuff_colors"] = stuff_colors
-
-		thing_dataset_id_to_contiguous_id = {}
-		stuff_dataset_id_to_contiguous_id = {}
-
-		for i, cat in enumerate(COCO_CATEGORIES):
-			if cat["isthing"]:
-				thing_dataset_id_to_contiguous_id[cat["id"]] = i
-			else:
-				stuff_dataset_id_to_contiguous_id[cat["id"]] = i
-
-		self._meta["thing_dataset_id_to_contiguous_id"] = thing_dataset_id_to_contiguous_id
-		self._meta["stuff_dataset_id_to_contiguous_id"] = stuff_dataset_id_to_contiguous_id
 
 		return dataset
 
@@ -313,6 +290,9 @@ class PanopticTask(base_task.Task):
 		
 		features, labels = inputs
 	
+		# Preprocess labels to match the format for loss prediction
+		# mask_labels = 'unique_ids': unique_ids,
+        #     'individual_masks': individual_masks,
 		with tf.GradientTape() as tape:
 			outputs = model(features, training=True)
 			
@@ -345,7 +325,8 @@ class PanopticTask(base_task.Task):
 			# TODO : Add auxiallary losses
 			total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels)
 			tvars = model.trainable_variables
-			grads = tape.gradient(loss, tvars)
+			
+			grads = tape.gradient(total_loss, tvars)
 
 			####################################################################
 			# Do not use mixed precision for now
