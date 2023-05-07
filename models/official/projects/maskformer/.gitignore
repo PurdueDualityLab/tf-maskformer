@@ -1,2 +1,4 @@
 .gitignore
 myreadme.md
+ckpts/
+.npy

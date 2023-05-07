@@ -530,8 +530,8 @@ class mask_former_parser(parser.Parser):
         individual_mask_list = tf.TensorArray(tf.float32, size=0, dynamic_size=True)
 
         for instance_id in unique_instance_ids:
-            if instance_id == self._ignore_label:
-                continue
+            # if instance_id == self._ignore_label:
+            #     continue
 
             mask = tf.equal(instance_mask, instance_id)
             individual_mask_list = individual_mask_list.write(individual_mask_list.size(), tf.expand_dims(tf.cast(mask, tf.float32), axis=2))

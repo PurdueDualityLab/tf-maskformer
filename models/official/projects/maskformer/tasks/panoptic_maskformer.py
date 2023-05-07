@@ -18,7 +18,7 @@ from official.projects.maskformer.losses.maskformer_losses import Loss
 
 import numpy as np
 from loguru import logger
-tf.compat.v1.enable_eager_execution()
+
 # TODO : Need to remove this later
 COCO_CATEGORIES = [
     {"color": [220, 20, 60], "isthing": 1, "id": 1, "name": "person"},
@@ -255,7 +255,7 @@ class PanopticTask(base_task.Task):
 		if aux_outputs is not None:
 			total_aux_loss = 0.0
 			# TODO : Remove hardcoding
-			for i in range(4):
+			for i in range(4): #4 number of auxilary outputs
 				total_aux_loss += calculated_losses['loss_ce_'+str(i)] + calculated_losses['loss_dice_'+str(i)] + calculated_losses['loss_focal_'+str(i)]
 			total_loss = total_loss + total_aux_loss
 		
