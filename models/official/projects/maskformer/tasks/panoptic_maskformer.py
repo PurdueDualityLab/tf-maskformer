@@ -225,6 +225,7 @@ class PanopticTask(base_task.Task):
 		"""
 		Used to initialize the models with checkpoint
 		"""
+		#TODO : R50 checkpoint
 		pass
 
 	def build_losses(self, output, labels, aux_outputs=None):
@@ -269,7 +270,7 @@ class PanopticTask(base_task.Task):
 		for name in metric_names:
 			metrics.append(tf.keras.metrics.Mean(name, dtype=tf.float32))
 		# TODO : Need panoptic quality metric for evaluation
-	
+		
 		return metrics
 	
 	
