@@ -89,10 +89,10 @@ class FocalLossMod(focal_loss.FocalLoss):
         """
         # background_indices = tf.expand_dims(self.background_indices, axis=0)
         weighted_loss = super().call(y_true, y_pred)
-        print("weighted loss :", weighted_loss.shape) #(1, 100, 442368)
+        # print("weighted loss :", weighted_loss.shape) #(1, 100, 442368)
         # mean over all pixels
         loss = tf.math.reduce_mean(weighted_loss, axis=-1)
-        logger.debug("loss shape: {}".format(loss.shape))
+        # logger.debug("loss shape: {}".format(loss.shape))
         # logger.debug("loss: {}".format(loss))
         return loss
 
