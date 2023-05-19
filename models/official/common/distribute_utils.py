@@ -83,7 +83,8 @@ def tpu_initialize(tpu_address):
     A TPUClusterResolver.
   """
   cluster_resolver = tf.distribute.cluster_resolver.TPUClusterResolver(
-      tpu=tpu_address)
+      tpu=tpu_address,
+      zone="europe-west4-a")
   if tpu_address not in ("", "local"):
     tf.config.experimental_connect_to_cluster(cluster_resolver)
   tf.tpu.experimental.initialize_tpu_system(cluster_resolver)
