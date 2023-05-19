@@ -142,7 +142,7 @@ class PanopticTask(base_task.Task):
 			for output in outputs:
 				# Computes per-replica loss.
 				total_loss, cls_loss_, focal_loss_, dice_loss_ = self.build_losses(
-					outputs=output, labels=labels)
+					output=output, labels=labels)
 				loss += total_loss
 				cls_loss += cls_loss_
 				focal_loss += focal_loss_
