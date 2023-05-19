@@ -63,7 +63,7 @@ class DataConfig(cfg.DataConfig):
   is_training: bool = False
   regenerate_source_id: bool = False
   # TODO : Change the dtype to bloat16 for TPU training
-  dtype: str = 'float32'
+  dtype: str = 'bfloat16'
   decoder: common.DataDecoder = common.DataDecoder()
   shuffle_buffer_size: int = 10000
   file_type: str = 'tfrecord'
@@ -88,7 +88,8 @@ class MaskFormer(hyperparams.Config):
   """MaskFormer model definations."""
   num_queries: int = 100
   hidden_size: int = 256
-  num_classes: int = 91  # 0: background
+  # TODO: Actually there are 133 classes for panoptic segmentation
+  num_classes: int = 199  # 0: background
   num_encoder_layers: int = 6
   num_decoder_layers: int = 6
   input_size: List[int] = dataclasses.field(default_factory=list)
@@ -118,10 +119,9 @@ COCO_VAL_EXAMPLES = 5000
 @exp_factory.register_config_factory('maskformer_coco_panoptic')
 def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
   """Config to get results that matches the paper."""
-  train_batch_size = 1
+  train_batch_size = 32
   eval_batch_size = 1
-#   steps_per_epoch = COCO_TRAIN_EXAMPLES // train_batch_size
-  steps_per_epoch = 100
+  steps_per_epoch = COCO_TRAIN_EXAMPLES // train_batch_size
   train_steps = 300 * steps_per_epoch  # 300 epochs
   decay_at = train_steps - 100 * steps_per_epoch  # 200 epochs
   config = cfg.ExperimentConfig(
@@ -140,7 +140,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
               global_batch_size=train_batch_size,
               shuffle_buffer_size=1000,
               parser = Parser(
-                    output_size = [640,640],
+                    output_size = [1333,1333],
                     min_scale = 0.3,
                     aspect_ratio_range = (0.5, 2.0),
                     min_overlap_params = (0.0, 1.4, 0.2, 0.1),
@@ -156,6 +156,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
                     brightness = 0.2,
                     saturation = 0.3,
                     contrast = 0.5,
+                    # TODO choose appropriate augmentation
                     aug_type = None,
                     sigma = 8.0,
                     small_instance_area_threshold = 4096,
@@ -170,7 +171,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
               global_batch_size=eval_batch_size,
               drop_remainder=False,
               parser = Parser(
-                    output_size = [400,400],
+                    output_size = [1333,1333],
                     pad_output = True,
                     seed = 4096,
                 )
