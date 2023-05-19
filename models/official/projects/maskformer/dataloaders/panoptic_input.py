@@ -265,7 +265,8 @@ class mask_former_parser(parser.Parser):
         self._dtype = params.dtype
         self._pad_output = params.pad_output
         self._seed = params.seed
-        
+        # TODO
+        self._max_instances = 100
         self._decoder = decoder_fn
         
         if self._pad_output == True and self._output_size is None:
