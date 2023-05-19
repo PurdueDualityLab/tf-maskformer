@@ -29,21 +29,21 @@ def main(_):
 
 
 	# Uncomment to test on TPU
-	# if params.runtime.mixed_precision_dtype:
-	# 	performance.set_mixed_precision_policy(params.runtime.mixed_precision_dtype)
-	# distribution_strategy = distribute_utils.get_distribution_strategy(
-	# 		distribution_strategy=params.runtime.distribution_strategy,
-	# 		all_reduce_alg=params.runtime.all_reduce_alg,
-	# 		num_gpus=params.runtime.num_gpus,
-	# 		tpu_address=params.runtime.tpu)
-	
-	# Comment if running on TPU
 	if params.runtime.mixed_precision_dtype:
 		performance.set_mixed_precision_policy(params.runtime.mixed_precision_dtype)
 	distribution_strategy = distribute_utils.get_distribution_strategy(
 			distribution_strategy=params.runtime.distribution_strategy,
 			all_reduce_alg=params.runtime.all_reduce_alg,
-			num_gpus=1)
+			num_gpus=params.runtime.num_gpus,
+			tpu_address=params.runtime.tpu)
+	
+	# Comment if running on TPU
+	# if params.runtime.mixed_precision_dtype:
+	# 	performance.set_mixed_precision_policy(params.runtime.mixed_precision_dtype)
+	# distribution_strategy = distribute_utils.get_distribution_strategy(
+	# 		distribution_strategy=params.runtime.distribution_strategy,
+	# 		all_reduce_alg=params.runtime.all_reduce_alg,
+	# 		num_gpus=1)
 	
 	# Below code is independent of compute platform
 	with distribution_strategy.scope():
