@@ -175,10 +175,10 @@ class PanopticTask(base_task.Task):
 			# # the loss is scaled with global num_boxes and weights.
 			# # To have it more interpretable/comparable we scale it back when logging.
 			num_replicas_in_sync = tf.distribute.get_strategy().num_replicas_in_sync
-			loss *= num_replicas_in_sync
+			total_loss *= num_replicas_in_sync
 			cls_loss *= num_replicas_in_sync
-			box_loss *= num_replicas_in_sync
-			giou_loss *= num_replicas_in_sync
+			focal_loss *= num_replicas_in_sync
+			dice_loss *= num_replicas_in_sync
 			#####################################################################
 			# # Trainer class handles loss metric for you.
 			logs = {self.loss: total_loss}
