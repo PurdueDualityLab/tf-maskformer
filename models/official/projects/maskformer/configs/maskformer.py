@@ -109,7 +109,7 @@ class MaskFormerTask(cfg.TaskConfig):
   init_checkpoint_modules: Union[str, List[str]] = 'all'  # all, backbone
   annotation_file: Optional[str] = None
   per_category_metrics: bool = False
-  
+
 # TODO : we should pass this via cmd 
 # COCO_INPUT_PATH_BASE = '/depot/davisjam/data/vishal/datasets/coco/'
 COCO_INPUT_PATH_BASE = 'gs://cam2-datasets/coco_panoptic/'

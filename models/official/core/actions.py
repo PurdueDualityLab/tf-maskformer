@@ -226,11 +226,11 @@ def get_train_actions(
       params.trainer.preemption_on_demand_checkpoint
       and trainer.strategy.cluster_resolver
   ):
-    on_demand_checkpoint_action = orbit.actions.SaveCheckpointIfPreempted(
-        trainer.strategy.cluster_resolver,
-        checkpoint_manager,
-        trainer.global_step,
-        keep_running_after_save=True,
-    )
-    train_actions.append(on_demand_checkpoint_action)
+    # on_demand_checkpoint_action = orbit.actions.SaveCheckpointIfPreempted(
+    #     trainer.strategy.cluster_resolver,
+    #     checkpoint_manager,
+    #     trainer.global_step,
+    #     keep_running_after_save=True,
+    # )
+    # train_actions.append(on_demand_checkpoint_action)
   return train_actions
