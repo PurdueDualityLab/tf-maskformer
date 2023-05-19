@@ -26,7 +26,7 @@ class PanopticTask(base_task.Task):
 		"""Builds MaskFormer Model."""
 		# TODO : Remove hardcoded values, Verify the number of classes 
 		input_specs = tf.keras.layers.InputSpec(shape=[None] +
-                                            [640, 640, 3])
+                                            [1333, 1333, 3])
 		
 		model = MaskFormer(input_specs= input_specs, hidden_size=256,
                                  backbone_endpoint_name="5",
