@@ -483,7 +483,8 @@ class mask_former_parser(parser.Parser):
         (unique_ids, individual_masks) = self._get_individual_masks(
                 instance_mask=instance_mask[:, :, 0])
 
-       
+        
+        
 
         # Resize image and masks to output size.
         image = tf.image.resize(image, self._output_size, method='nearest')
@@ -491,6 +492,9 @@ class mask_former_parser(parser.Parser):
         instance_mask = tf.image.resize(instance_mask, self._output_size, method='nearest')
         individual_masks = tf.image.resize(individual_masks, self._output_size, method='nearest')
 
+        # pad the individual masks to the max number of instances and unique ids
+        individual_masks = tf.pad(individual_masks, [[0, self._max_instances - tf.shape(individual_masks)[0]], [0, 0], [0, 0]], constant_values=self._ignore_label)
+        unique_ids = tf.pad(unique_ids, [[0, self._max_instances - tf.shape(unique_ids)[0]]], constant_values=self._ignore_label)
         # Cast image to float and set shapes of output.
         image = tf.cast(image, dtype=self._dtype)
         category_mask = tf.cast(category_mask, dtype=self._dtype)
