@@ -140,28 +140,28 @@ class PanopticTask(base_task.Task):
 
 			# print(outputs.shape)
 			# exit()
-			# for output in outputs:
-			# 	# Computes per-replica loss.
+			for output in outputs:
+				# Computes per-replica loss.
 				
-			# 	total_loss, cls_loss_, focal_loss_, dice_loss_ = self.build_losses(
-			# 		output=output, labels=labels)
-			# 	loss += total_loss
-			# 	cls_loss += cls_loss_
-			# 	focal_loss += focal_loss_
-			# 	dice_loss += dice_loss_
+				total_loss, cls_loss_, focal_loss_, dice_loss_ = self.build_losses(
+					output=output, labels=labels)
+				loss += total_loss
+				cls_loss += cls_loss_
+				focal_loss += focal_loss_
+				dice_loss += dice_loss_
 			
-			# 	scaled_loss = loss
-			# 	# For mixed_precision policy, when LossScaleOptimizer is used, loss is
-			# 	# scaled for numerical stability.
-			# 	if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
-			# 		scaled_loss = optimizer.get_scaled_loss(scaled_loss)
+				scaled_loss = loss
+				# For mixed_precision policy, when LossScaleOptimizer is used, loss is
+				# scaled for numerical stability.
+				if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
+					scaled_loss = optimizer.get_scaled_loss(scaled_loss)
 		##########################################################################
 			
 			# TODO : Add auxiallary losses
-			total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels)
+			# total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels)
 			tvars = model.trainable_variables
 			
-			grads = tape.gradient(total_loss, tvars)
+			grads = tape.gradient(scaled_loss, tvars)
 
 			####################################################################
 			# Do not use mixed precision for now
