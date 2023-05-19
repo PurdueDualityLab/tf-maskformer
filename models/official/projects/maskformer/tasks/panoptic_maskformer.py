@@ -138,9 +138,11 @@ class PanopticTask(base_task.Task):
 			##########################################################
 			# TODO : Need to use this for TPU training when we use mirrored startegy
 
-
+			print(outputs.shape)
+			exit()
 			for output in outputs:
 				# Computes per-replica loss.
+				
 				total_loss, cls_loss_, focal_loss_, dice_loss_ = self.build_losses(
 					output=output, labels=labels)
 				loss += total_loss
