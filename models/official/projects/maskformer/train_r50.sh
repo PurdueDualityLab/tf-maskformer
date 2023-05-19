@@ -1,17 +1,14 @@
-$ export MODEL_DIR="gs://<path-to-model-directory>"
-$ export TPU_NAME="<tpu-name>"
-$ export ANNOTATION_FILE="gs://<path-to-coco-annotation-json>"
-$ export TRAIN_DATA="gs://<path-to-train-data>"
-$ export EVAL_DATA="gs://<path-to-eval-data>"
-$ export OVERRIDES="task.validation_data.input_path=${EVAL_DATA},\
-task.train_data.input_path=${TRAIN_DATA},\
-task.annotation_file=${ANNOTATION_FILE},\
+$ export MODEL_DIR="gs://cam2-models/maskformer"
+$ export DATA_PTH="gs://cam2-datasets/coco_panoptic"
+$ export TPU_NAME="tf-train-2"
+$ export TPU_PROJECT="red-atlas-305317"
+$ export TPU_ZONE=europe-west4-a
+$ export OVERRIDES="task.validation_data.input_path=${DATA_PTH},\
+task.train_data.input_path=${DATA_PTH},\
 runtime.distribution_strategy=tpu"
 
-
-$ python3 train.py \
-  --experiment panoptic_r50_coco \
-  --config_file configs/experiments/panoptic_coco_r50.yaml \
+$ python3 models/official/projects/maskformer/train.py \
+  --experiment maskformer_coco_panoptic \
   --mode train \
   --model_dir $MODEL_DIR \
   --tpu $TPU_NAME \
