@@ -4,7 +4,7 @@ import tensorflow as tf
 
 class MaskFormerTest(tf.test.TestCase, parameterized.TestCase):
     # TODO(ibrahim): Add more testcases.
-    @parameterized.named_parameters(('test1', 256, 100, 256, "5", 0, 6, 133, 1))
+    @parameterized.named_parameters(('test1', 256, 100, 256, "5", 0, 6, 199, 1))
     def test_pass_through(self,
                         fpn_feat_dims,
                         num_queries,
