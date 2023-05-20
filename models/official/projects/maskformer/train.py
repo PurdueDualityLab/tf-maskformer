@@ -13,8 +13,14 @@ from official.modeling import performance
 from official.projects.maskformer.configs import maskformer
 from official.projects.maskformer.tasks import panoptic_maskformer
 import tensorflow as tf
+from cloud_tpu_client import Client
+import os
+
 FLAGS = flags.FLAGS
 def main(_):
+	c = Client(os.environ['TPU_NAME'])
+	c.configure_tpu_version(os.environ["TPU_SOFTWARE"], restart_type='ifNeeded')
+	c.wait_for_healthy()
 	gin.parse_config_files_and_bindings(FLAGS.gin_file, FLAGS.gin_params)
 	params = train_utils.parse_configuration(FLAGS)
 	model_dir = FLAGS.model_dir
