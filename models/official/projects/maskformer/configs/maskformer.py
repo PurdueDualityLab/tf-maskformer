@@ -23,10 +23,10 @@ from official.core import exp_factory
 from official.modeling import hyperparams
 # from official.projects.detr import optimization
 # from official.projects.detr.dataloaders import coco
-from official.modeling import optimization
+# from official.modeling import optimization
 from official.vision.configs import backbones
 from official.vision.configs import common
-# from official.projects.maskformer import optimization
+from official.projects.maskformer import optimization
 
 @dataclasses.dataclass
 class Parser(hyperparams.Config):
@@ -189,46 +189,25 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
           max_to_keep=1,
           best_checkpoint_export_subdir='best_ckpt',
           # TODO: Not defined the metric
-        #   optimizer_config=optimization.OptimizationConfig({
-        #       'optimizer': {
-        #           'type': 'detr_adamw',
-        #           'detr_adamw': {
-        #               'weight_decay_rate': 1e-4,
-        #               'global_clipnorm': 0.1,
-        #               # Avoid AdamW legacy behavior.
-        #               'gradient_clip_norm': 0.0
-        #           }
-        #       },
-        #       'learning_rate': {
-        #           'type': 'stepwise',
-        #           'stepwise': {
-        #               'boundaries': [decay_at],
-        #               'values': [0.0001, 1.0e-05]
-        #           }
-        #       },
-        #   })),
-        optimizer_config=optimization.OptimizationConfig({
+          optimizer_config=optimization.OptimizationConfig({
               'optimizer': {
-                  'type': 'sgd',
-                  'sgd': {
-                      'momentum': 0.9
+                  'type': 'detr_adamw',
+                  'detr_adamw': {
+                      'weight_decay_rate': 1e-4,
+                      'global_clipnorm': 0.1,
+                      # Avoid AdamW legacy behavior.
+                      'gradient_clip_norm': 0.0
                   }
               },
               'learning_rate': {
                   'type': 'stepwise',
                   'stepwise': {
-                      'boundaries': [15000, 20000],
-                      'values': [0.12, 0.012, 0.0012],
+                      'boundaries': [decay_at],
+                      'values': [0.0001, 1.0e-05]
                   }
               },
-              'warmup': {
-                  'type': 'linear',
-                  'linear': {
-                      'warmup_steps': 500,
-                      'warmup_learning_rate': 0.0067
-                  }
-              }
           })),
+        
       restrictions=[
           'task.train_data.is_training != None',
       ])

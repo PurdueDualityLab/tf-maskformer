@@ -13,10 +13,9 @@ export TPU_ZONE="us-central1-a"
 # export OVERRIDES="task.validation_data.input_path=${DATA_PTH},\
 # task.train_data.input_path=${DATA_PTH},\
 # runtime.distribution_strategy=tpu"
-# trainer.optimizer_config.learning_rate.stepwise.boundaries=[369600]"
 export OVERRIDES="runtime.distribution_strategy=tpu,\
-trainer.train_steps=554400"
-
+trainer.train_steps=554400,\
+trainer.optimizer_config.learning_rate.stepwise.boundaries=[369600]"
 python3 models/official/projects/maskformer/train.py \
   --experiment maskformer_coco_panoptic \
   --mode train \
