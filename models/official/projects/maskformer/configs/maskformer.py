@@ -23,9 +23,10 @@ from official.core import exp_factory
 from official.modeling import hyperparams
 # from official.projects.detr import optimization
 # from official.projects.detr.dataloaders import coco
+from official.modeling import optimization
 from official.vision.configs import backbones
 from official.vision.configs import common
-from official.projects.maskformer import optimization
+# from official.projects.maskformer import optimization
 
 @dataclasses.dataclass
 class Parser(hyperparams.Config):
@@ -131,9 +132,9 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
           init_checkpoint_modules='backbone',
           annotation_file=os.path.join(COCO_INPUT_PATH_BASE,'annotations'
                                        'instances_train2017.json'),
-        #   model=MaskFormer(
-        #       input_size=[1333, 1333, 3],
-        #       norm_activation=common.NormActivation()),
+          model=MaskFormer(
+              input_size=[640, 640, 3],
+              norm_activation=common.NormActivation()),
           losses=Losses(),
           train_data=DataConfig(
               input_path=os.path.join(COCO_INPUT_PATH_BASE, 'tfrecords_old/train*'),
@@ -188,23 +189,45 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
           max_to_keep=1,
           best_checkpoint_export_subdir='best_ckpt',
           # TODO: Not defined the metric
-          optimizer_config=optimization.OptimizationConfig({
+        #   optimizer_config=optimization.OptimizationConfig({
+        #       'optimizer': {
+        #           'type': 'detr_adamw',
+        #           'detr_adamw': {
+        #               'weight_decay_rate': 1e-4,
+        #               'global_clipnorm': 0.1,
+        #               # Avoid AdamW legacy behavior.
+        #               'gradient_clip_norm': 0.0
+        #           }
+        #       },
+        #       'learning_rate': {
+        #           'type': 'stepwise',
+        #           'stepwise': {
+        #               'boundaries': [decay_at],
+        #               'values': [0.0001, 1.0e-05]
+        #           }
+        #       },
+        #   })),
+        optimizer_config=optimization.OptimizationConfig({
               'optimizer': {
-                  'type': 'detr_adamw',
-                  'detr_adamw': {
-                      'weight_decay_rate': 1e-4,
-                      'global_clipnorm': 0.1,
-                      # Avoid AdamW legacy behavior.
-                      'gradient_clip_norm': 0.0
+                  'type': 'sgd',
+                  'sgd': {
+                      'momentum': 0.9
                   }
               },
               'learning_rate': {
                   'type': 'stepwise',
                   'stepwise': {
-                      'boundaries': [decay_at],
-                      'values': [0.0001, 1.0e-05]
+                      'boundaries': [15000, 20000],
+                      'values': [0.12, 0.012, 0.0012],
                   }
               },
+              'warmup': {
+                  'type': 'linear',
+                  'linear': {
+                      'warmup_steps': 500,
+                      'warmup_learning_rate': 0.0067
+                  }
+              }
           })),
       restrictions=[
           'task.train_data.is_training != None',
