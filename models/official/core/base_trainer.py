@@ -335,7 +335,8 @@ class Trainer(_AsyncTrainer):
       # Maybe a self-implemented optimizer does not have `optimizer.iterations`.
       # So just to be safe here.
       if hasattr(self.optimizer, "iterations"):
-        
+        print(self.optimizer)
+        exit()
         logs["learning_rate"] = self.optimizer.learning_rate(
             self.optimizer.iterations)
       else:
