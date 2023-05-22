@@ -481,8 +481,7 @@ class Controller:
         should_record = lambda: (self.global_step % self.summary_interval == 0)
       with tf.summary.record_if(should_record):
         num_steps_tensor = tf.convert_to_tensor(num_steps, dtype=tf.int32)
-        print(num_steps_tensor)
-        exit()
+        
         train_output = self.trainer.train(num_steps_tensor)
 
     # Verify that global_step was updated properly, then update current_step.
