@@ -198,8 +198,8 @@ class Loss:
             # Set pads to large constant
             C = tf.reshape(total_cost, (1, num_queries, -1)) # Shape of C should be [batchsize, num_queries, num_object]
             
-            C_padded = tf.concat([C, tf.ones([1, 100, 100 - tf.shape(C)[2]], dtype=C.dtype)* max_cost], -1)
-            _, inds = matchers.hungarian_matching(C_padded) # ouptut is binary tensor
+#             C_padded = tf.concat([C, tf.ones([1, 100, 100 - tf.shape(C)[2]], dtype=C.dtype)* max_cost], -1)
+            _, inds = matchers.hungarian_matching(C) # ouptut is binary tensor
             
             batched_indices = batched_indices.write(batched_indices.size(), tf.squeeze(inds,0))
         
