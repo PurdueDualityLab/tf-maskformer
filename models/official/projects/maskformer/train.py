@@ -15,7 +15,7 @@ from official.projects.maskformer.tasks import panoptic_maskformer
 import tensorflow as tf
 from cloud_tpu_client import Client
 import os
-tf.config.set_soft_device_placement(True)
+# tf.config.set_soft_device_placement(True)
 FLAGS = flags.FLAGS
 def main(_):
 	c = Client(os.environ['TPU_NAME'])
