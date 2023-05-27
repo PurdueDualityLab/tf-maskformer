@@ -494,7 +494,7 @@ class mask_former_parser(parser.Parser):
         individual_masks = tf.image.resize(individual_masks, self._output_size, method='nearest')
 
         # pad the individual masks to the max number of instances and unique ids
-        individual_masks = tf.pad(individual_masks, [[0, self._max_instances - tf.shape(individual_masks)[0]], [0, 0], [0, 0], [0,0]], constant_values=self._ignore_label)
+#         individual_masks = tf.pad(individual_masks, [[0, self._max_instances - tf.shape(individual_masks)[0]], [0, 0], [0, 0], [0,0]], constant_values=self._ignore_label)
         unique_ids = tf.pad(unique_ids, [[0, self._max_instances - tf.shape(unique_ids)[0]]], constant_values=self._ignore_label)
         # Cast image to float and set shapes of output.
         image = tf.cast(image, dtype=self._dtype)
@@ -532,15 +532,19 @@ class mask_former_parser(parser.Parser):
     def _get_individual_masks(self, instance_mask):
         
         unique_instance_ids, _ = tf.unique(tf.reshape(instance_mask, [-1]))
-        individual_mask_list = tf.TensorArray(tf.float32, size=200) 
+        individual_mask_list = tf.TensorArray(tf.float32, size=101) 
 #                                               dynamic_size=True)
-        # tf.gather
+            
         for instance_id in unique_instance_ids:
             # if instance_id == self._ignore_label:
             #     continue
 
             mask = tf.equal(instance_mask, instance_id)
             individual_mask_list = individual_mask_list.write(individual_mask_list.size(), tf.expand_dims(tf.cast(mask, tf.float32), axis=2))
+        
+        for idx in tf.range(101):
+            new_mask = tf.zeros(tf.shape(instance_mask))
+            individual_mask_list = individual_mask_list.write(individual_mask_list.size(), tf.expand_dims(tf.cast(new_mask, tf.float32), axis=2))
         
         return (unique_instance_ids, individual_mask_list.stack())
 
