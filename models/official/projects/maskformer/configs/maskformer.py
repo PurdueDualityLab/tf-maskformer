@@ -26,7 +26,8 @@ from official.modeling import hyperparams
 # from official.modeling import optimization
 from official.vision.configs import backbones
 from official.vision.configs import common
-from official.projects.maskformer import optimization
+# from official.projects.maskformer import optimization
+from official.projects.yolo import optimization
 
 @dataclasses.dataclass
 class Parser(hyperparams.Config):
