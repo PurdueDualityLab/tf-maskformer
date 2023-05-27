@@ -31,7 +31,7 @@ COCO_CATEGORIES = [
     {"color": [0, 0, 142], "isthing": 1, "id": 3, "name": "car"},
     {"color": [0, 0, 230], "isthing": 1, "id": 4, "name": "motorcycle"},
     {"color": [106, 0, 228], "isthing": 1, "id": 5, "name": "airplane"},
-    {"color": [0, 60, 100], "isthing": 1, "id": 6, "name": "bus"},
+    {"color": [0, 60, -], "isthing": 1, "id": 6, "name": "bus"},
     {"color": [0, 80, 100], "isthing": 1, "id": 7, "name": "train"},
     {"color": [0, 0, 70], "isthing": 1, "id": 8, "name": "truck"},
     {"color": [0, 0, 192], "isthing": 1, "id": 9, "name": "boat"},
@@ -542,7 +542,7 @@ class mask_former_parser(parser.Parser):
             mask = tf.equal(instance_mask, instance_id)
             individual_mask_list = individual_mask_list.write(individual_mask_list.size(), tf.expand_dims(tf.cast(mask, tf.float32), axis=2))
         
-        for idx in tf.range(100-tf.size(unique_instance_ids)[0]):
+        for idx in tf.range(100-tf.size(unique_instance_ids)):
             new_mask = tf.zeros(tf.shape(instance_mask))
             individual_mask_list = individual_mask_list.write(individual_mask_list.size(), tf.expand_dims(tf.cast(new_mask, tf.float32), axis=2))
         
