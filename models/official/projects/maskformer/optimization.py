@@ -57,7 +57,7 @@ class _DETRAdamW(nlp_optimization.AdamWeightDecay):
     apply_state = kwargs['apply_state']
     if 'detr' not in var.name:
       lr_t *= 0.1
-    decay = self._decay_weights_op(_var, lr_t, apply_state)
+    decay = self._decay_weights_op(var, lr_t, apply_state)
     with tf.control_dependencies([decay]):
       var_device, var_dtype = var.device, var.dtype.base_dtype
       coefficients = ((apply_state or {}).get((var_device, var_dtype))
