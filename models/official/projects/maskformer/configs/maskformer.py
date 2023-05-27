@@ -239,7 +239,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
 #                   }
 #               },
 #           })
-      ),
+#       ),
         
       restrictions=[
           'task.train_data.is_training != None',
