@@ -189,6 +189,38 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
           max_to_keep=1,
           best_checkpoint_export_subdir='best_ckpt',
           # TODO: Not defined the metric
+          optimizer_config=optimization.OptimizationConfig({
+              'optimizer': {
+                  'type': 'sgd_torch',
+                  'sgd_torch': {
+                      'momentum': 0.949,
+                      'momentum_start': 0.949,
+                      'nesterov': True,
+                      'warmup_steps': 1000,
+                      'weight_decay': 0.0005,
+                  }
+              },
+              'learning_rate': {
+                  'type': 'stepwise',
+                  'stepwise': {
+                      'boundaries': [
+                          240 * steps_per_epoch
+                      ],
+                      'values': [
+                          0.00131 * train_batch_size / 64.0,
+                          0.000131 * train_batch_size / 64.0,
+                      ]
+                  }
+              },
+              'warmup': {
+                  'type': 'linear',
+                  'linear': {
+                      'warmup_steps': 1000,
+                      'warmup_learning_rate': 0
+                  }
+              }
+          })),
+#           OLD
 #           optimizer_config=optimization.OptimizationConfig({
 #               'optimizer': {
 #                   'type': 'detr_adamw',
