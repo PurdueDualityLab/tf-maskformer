@@ -532,7 +532,7 @@ class mask_former_parser(parser.Parser):
     def _get_individual_masks(self, instance_mask):
         
         unique_instance_ids, _ = tf.unique(tf.reshape(instance_mask, [-1]))
-        individual_mask_list = tf.TensorArray(tf.float32, size=100) 
+        individual_mask_list = tf.TensorArray(tf.float32, size=200) 
 #                                               dynamic_size=True)
         # tf.gather
         for instance_id in unique_instance_ids:
