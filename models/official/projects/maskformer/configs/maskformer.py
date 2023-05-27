@@ -189,24 +189,25 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
           max_to_keep=1,
           best_checkpoint_export_subdir='best_ckpt',
           # TODO: Not defined the metric
-          optimizer_config=optimization.OptimizationConfig({
-              'optimizer': {
-                  'type': 'detr_adamw',
-                  'detr_adamw': {
-                      'weight_decay_rate': 1e-4,
-                      'global_clipnorm': 0.1,
-                      # Avoid AdamW legacy behavior.
-                      'gradient_clip_norm': 0.0
-                  }
-              },
-              'learning_rate': {
-                  'type': 'stepwise',
-                  'stepwise': {
-                      'boundaries': [decay_at],
-                      'values': [0.0001, 1.0e-05]
-                  }
-              },
-          })),
+#           optimizer_config=optimization.OptimizationConfig({
+#               'optimizer': {
+#                   'type': 'detr_adamw',
+#                   'detr_adamw': {
+#                       'weight_decay_rate': 1e-4,
+#                       'global_clipnorm': 0.1,
+#                       # Avoid AdamW legacy behavior.
+#                       'gradient_clip_norm': 0.0
+#                   }
+#               },
+#               'learning_rate': {
+#                   'type': 'stepwise',
+#                   'stepwise': {
+#                       'boundaries': [decay_at],
+#                       'values': [0.0001, 1.0e-05]
+#                   }
+#               },
+#           })
+      ),
         
       restrictions=[
           'task.train_data.is_training != None',
