@@ -31,7 +31,7 @@ COCO_CATEGORIES = [
     {"color": [0, 0, 142], "isthing": 1, "id": 3, "name": "car"},
     {"color": [0, 0, 230], "isthing": 1, "id": 4, "name": "motorcycle"},
     {"color": [106, 0, 228], "isthing": 1, "id": 5, "name": "airplane"},
-    {"color": [0, 60, -], "isthing": 1, "id": 6, "name": "bus"},
+    {"color": [0, 60, 10], "isthing": 1, "id": 6, "name": "bus"},
     {"color": [0, 80, 100], "isthing": 1, "id": 7, "name": "train"},
     {"color": [0, 0, 70], "isthing": 1, "id": 8, "name": "truck"},
     {"color": [0, 0, 192], "isthing": 1, "id": 9, "name": "boat"},
