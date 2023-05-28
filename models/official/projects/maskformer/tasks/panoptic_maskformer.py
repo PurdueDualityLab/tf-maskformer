@@ -54,6 +54,8 @@ class PanopticTask(base_task.Task):
 			logger.info("Image shape: {}".format(images.shape))
 			logger.info("Label shape: {}".format(labels["unique_ids"]))
 			logger.info("Label shape: {}".format(labels["individual_masks"]))
+
+		exit()
 		return dataset
 
 	def initialize(self, model: tf.keras.Model) -> None:
