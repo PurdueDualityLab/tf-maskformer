@@ -224,7 +224,7 @@ class Loss:
         # create  batched tensors for loss calculation with padded zeros
         batched_target_labels = tf.TensorArray(tf.int64, size=batch_size)
         batched_target_masks = tf.TensorArray(tf.bool, size=batch_size)
-        for b in tf.range(batch_size):
+        for b in range(batch_size):
             num_zeros = tf.shape(cls_outputs[b])[0] - tf.shape(target_labels[b])[0]
             tgt_ids = tf.concat([target_labels[b], tf.ones(num_zeros, dtype=tf.int64)*self.num_classes],0)
             tgt_ids = tf.cast(tgt_ids, dtype=tf.int64)
