@@ -279,7 +279,7 @@ class Loss:
         cls_loss = tf.math.divide_no_nan(tf.reduce_sum(cls_loss), cls_weights_sum)
         losses = {'focal_loss' : [], 'dice_loss': []}
 
-        for b in tf.range(batch_size):
+        for b in range(batch_size):
             out_mask = mask_assigned[b]
             with tf.device(out_mask.device):
                 tgt_mask = target_masks[b]
