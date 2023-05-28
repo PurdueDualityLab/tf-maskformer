@@ -160,7 +160,7 @@ class Loss:
         # h_max = max([m.shape[1] for m in masks])
         # w_max = max([m.shape[2] for m in masks])
 
-        batched_indices = tf.TensorArray(tf.bool, size=0, dynamic_size=True)
+        batched_indices = tf.TensorArray(tf.bool, size=batch_size)
 
         # Convert y_true to list (len == batchsize) of dict with each dict having "masks" and "labels" keys
         for b in tf.range(batch_size):
