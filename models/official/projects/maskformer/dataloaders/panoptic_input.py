@@ -542,7 +542,7 @@ class mask_former_parser(parser.Parser):
             mask = tf.equal(instance_mask, instance_id)
             individual_mask_list = individual_mask_list.write(individual_mask_list.size(), tf.expand_dims(tf.cast(mask, tf.float32), axis=2))
     
-        for idx in tf.range(100-tf.size(unique_instance_ids)):
+        for idx in tf.range(100-tf.size(unique_instance_ids)-1):
             new_mask = tf.zeros(tf.shape(instance_mask))
             individual_mask_list = individual_mask_list.write(individual_mask_list.size(), tf.expand_dims(tf.cast(new_mask, tf.float32), axis=2))
         
