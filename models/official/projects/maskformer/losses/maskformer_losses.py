@@ -222,19 +222,19 @@ class Loss:
         # print("[INFO] target labels shape: ", target_labels.shape)
         # exit()
         # create  batched tensors for loss calculation with padded zeros
-        batched_target_labels = tf.TensorArray(tf.int64, size=0, dynamic_size=True)
-        batched_target_masks = tf.TensorArray(tf.bool, size=0, dynamic_size=True)
-        for b in range(batch_size):
+        batched_target_labels = tf.TensorArray(tf.int64, size=batch_size)
+        batched_target_masks = tf.TensorArray(tf.bool, size=batch_size)
+        for b in tf.range(batch_size):
             num_zeros = tf.shape(cls_outputs[b])[0] - tf.shape(target_labels[b])[0]
             tgt_ids = tf.concat([target_labels[b], tf.ones(num_zeros, dtype=tf.int64)*self.num_classes],0)
             tgt_ids = tf.cast(tgt_ids, dtype=tf.int64)
-            batched_target_labels = batched_target_labels.write(batched_target_labels.size(), tgt_ids)
+            batched_target_labels = batched_target_labels.write(b, tgt_ids)
             
             zeros_masks = tf.zeros([num_zeros, tf.shape(individual_masks[b])[1], tf.shape(individual_masks[b])[2]], dtype=tf.bool)
             tgt_mask = tf.squeeze(tf.cast(individual_masks[b],  tf.bool), -1)
             # tgt_mask = tf.expand_dims(tf.concat([tgt_mask, zeros_masks], 0),0)
             tgt_mask = tf.concat([tgt_mask, zeros_masks], 0)
-            batched_target_masks = batched_target_masks.write(batched_target_masks.size(), tgt_mask)
+            batched_target_masks = batched_target_masks.write(b, tgt_mask)
         
         # for each_batch in y_true:
         #     num_zeros = tf.shape(cls_outputs)[1] - each_batch['labels'].shape[0]
@@ -279,7 +279,7 @@ class Loss:
         cls_loss = tf.math.divide_no_nan(tf.reduce_sum(cls_loss), cls_weights_sum)
         losses = {'focal_loss' : [], 'dice_loss': []}
 
-        for b in range(batch_size):
+        for b in tf.range(batch_size):
             out_mask = mask_assigned[b]
             with tf.device(out_mask.device):
                 tgt_mask = target_masks[b]
