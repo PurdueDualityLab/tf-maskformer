@@ -50,7 +50,10 @@ class PanopticTask(base_task.Task):
 		parser = panoptic_input.mask_former_parser(params.parser, is_training = params.is_training, decoder_fn=decoder.decode)
 		reader = input_reader.InputFn(params,dataset_fn = dataset_fn.pick_dataset_fn(params.file_type),parser_fn = parser)
 		dataset = reader(ctx=input_context)
-		
+		for images, labels in dataset.take(1):
+			logger.info("Image shape: {}".format(images.shape))
+			logger.info("Label shape: {}".format(labels["unique_ids"]))
+			logger.info("Label shape: {}".format(labels["individual_masks"]))
 		return dataset
 
 	def initialize(self, model: tf.keras.Model) -> None:
