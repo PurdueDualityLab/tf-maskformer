@@ -163,7 +163,7 @@ class Loss:
         batched_indices = tf.TensorArray(tf.bool, size=batch_size)
 
         # Convert y_true to list (len == batchsize) of dict with each dict having "masks" and "labels" keys
-        for b in tf.range(batch_size):
+        for b in batch_size:
             out_mask = outputs["pred_masks"][b] # [h, w, num_preds]
 
             out_mask = tf.transpose(out_mask, perm=[2, 1, 0]) # [num_preds, h, w]
@@ -192,16 +192,16 @@ class Loss:
             )
            
             # TODO : Append maximum cost 
-            max_cost = (self.cost_class * 0.0 +
-                        self.cost_focal * 4. +
-                        self.cost_dice * 0.0)
+            # max_cost = (self.cost_class * 0.0 +
+            #             self.cost_focal * 4. +
+            #             self.cost_dice * 0.0)
             # Set pads to large constant
             C = tf.reshape(total_cost, (1, num_queries, -1)) # Shape of C should be [batchsize, num_queries, num_object]
             
 #             C_padded = tf.concat([C, tf.ones([1, 100, 100 - tf.shape(C)[2]], dtype=C.dtype)* max_cost], -1)
             _, inds = matchers.hungarian_matching(C) # ouptut is binary tensor
             
-            batched_indices = batched_indices.write(batched_indices.size(), tf.squeeze(inds,0))
+            batched_indices = batched_indices.write(b, tf.squeeze(inds,0))
         
         return batched_indices.stack()
     
