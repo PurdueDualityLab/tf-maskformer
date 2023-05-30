@@ -163,7 +163,7 @@ class Loss:
         batched_indices = tf.TensorArray(tf.bool, size=batch_size)
 
         # Convert y_true to list (len == batchsize) of dict with each dict having "masks" and "labels" keys
-        for b in batch_size:
+        for b in range(batch_size):
             out_mask = outputs["pred_masks"][b] # [h, w, num_preds]
 
             out_mask = tf.transpose(out_mask, perm=[2, 1, 0]) # [num_preds, h, w]
