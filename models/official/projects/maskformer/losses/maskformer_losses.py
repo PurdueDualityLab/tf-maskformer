@@ -237,7 +237,7 @@ class Loss:
         batched_target_masks = individual_masks
         # target_classes = tf.concat(batched_target_labels, 0)
         # target_classes = batched_target_labels.stack()
-        target_classes = batched_target_labels
+        target_classes = tf.cast(batched_target_labels, dtype=tf.int64)
         cls_assigned = tf.gather(cls_outputs, target_index, batch_dims=1, axis=1)
         
         
