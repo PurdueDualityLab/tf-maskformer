@@ -81,7 +81,7 @@ class PanopticTask(base_task.Task):
 		outputs = {"pred_logits": output["class_prob_predictions"], "pred_masks": output["mask_prob_predictions"]}
 		targets = labels
 		print("pred_logits : ", outputs["pred_logits"].shape)
-		print("mask_prob_predictions : ", outputs["mask_prob_predictions"].shape)
+		print("mask_prob_predictions : ", outputs["pred_masks"].shape)
 		exit()
 		matcher = hungarian_matching
 		no_object_weight = 0.1
