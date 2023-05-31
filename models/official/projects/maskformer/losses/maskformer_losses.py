@@ -168,11 +168,11 @@ class Loss:
 
             out_mask = tf.transpose(out_mask, perm=[2, 1, 0]) # [num_preds, h, w]
             
-            tgt_ids = y_true["unique_ids"][b]
+            tgt_ids = tf.cast(y_true["unique_ids"][b], dtype=tf.int64)
             
             with tf.device(out_mask.device):
                 tgt_mask = y_true["individual_masks"][b]
-           
+            
             cost_class = tf.gather(-tf.nn.softmax(outputs["pred_logits"][b]), tgt_ids, axis=-1)
             
             

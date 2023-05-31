@@ -497,6 +497,7 @@ class mask_former_parser(parser.Parser):
 #         individual_masks = tf.pad(individual_masks, [[0, self._max_instances - tf.shape(individual_masks)[0]], [0, 0], [0, 0], [0,0]], constant_values=self._ignore_label)
         unique_ids = tf.pad(unique_ids, [[0, self._max_instances - tf.shape(unique_ids)[0]]], constant_values=self._ignore_label)
         # Cast image to float and set shapes of output.
+        print("Using Data type :", self._dtype)
         image = tf.cast(image, dtype=self._dtype)
         category_mask = tf.cast(category_mask, dtype=self._dtype)
         instance_mask = tf.cast(instance_mask, dtype=self._dtype)
