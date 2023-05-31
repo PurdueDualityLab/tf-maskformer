@@ -65,7 +65,7 @@ class DataConfig(cfg.DataConfig):
   is_training: bool = False
   regenerate_source_id: bool = False
   # TODO : Change the dtype to bloat16 for TPU training
-  dtype: str = 'float32'
+  dtype: str = 'bfloat16'
   decoder: common.DataDecoder = common.DataDecoder()
   shuffle_buffer_size: int = 10000
   file_type: str = 'tfrecord'
