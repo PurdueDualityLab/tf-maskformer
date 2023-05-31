@@ -33,7 +33,7 @@ class PanopticTask(base_task.Task):
                                  num_encoder_layers=0,
                                  num_decoder_layers=6,
                                  num_classes=199,
-                                 batch_size=1)
+                                 batch_size=8)
 
 		return model
 	
