@@ -501,7 +501,7 @@ class mask_former_parser(parser.Parser):
         category_mask = tf.cast(category_mask, dtype=self._dtype)
         instance_mask = tf.cast(instance_mask, dtype=self._dtype)
         individual_masks = tf.cast(individual_masks, dtype=self._dtype)
-        unique_ids =  tf.cast(unique_ids, dtype=tf.int64)
+        unique_ids =  tf.cast(unique_ids, dtype=tf.float32)
 
         valid_mask = tf.not_equal(
             category_mask, self._ignore_label)
