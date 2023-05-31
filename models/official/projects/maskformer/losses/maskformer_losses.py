@@ -257,7 +257,7 @@ class Loss:
         #########################################################################################################
         print("target classes shape", target_classes.shape)
         print("cls assigned shape", cls_assigned.shape)
-        
+
         xentropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=target_classes, logits=cls_assigned)
         cls_loss = self.cost_class * tf.where(background, 0.1 * xentropy, xentropy)
         cls_weights = tf.where(background, 0.1 * tf.ones_like(cls_loss), tf.ones_like(cls_loss))
@@ -276,7 +276,7 @@ class Loss:
             with tf.device(out_mask.device):
                 tgt_mask = target_masks[b]
             tgt_mask = tf.cast(tgt_mask, dtype=tf.float32)
-            out_mask = tf.image.resize(out_mask[..., tf.newaxis], tgt_mask.shape[1:], method='nearest')
+            out_mask = tf.image.resize(out_mask[..., tf.newaxis], tgt_mask.shape[1:3], method='nearest')
             # Flatten target and predicted masks along h,w dims
             out_mask = tf.reshape(out_mask, [tf.shape(out_mask[:,:,:,0])[0], -1]) # remove channel dimension used for tf.image.resize
             tgt_mask = tf.reshape(tgt_mask, [tf.shape(tgt_mask)[0], -1])
