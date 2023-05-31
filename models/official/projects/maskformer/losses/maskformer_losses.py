@@ -212,41 +212,41 @@ class Loss:
         
         target_labels = y_true["unique_ids"] #[batchsize, num_gt_objects]
 
-        # tgt_labels = [each_batch['labels'] for each_batch in y_true]
-        
+    
         cls_outputs = outputs["pred_logits"] # [batchsize, num_queries, num_classes] [1,100,134]
-        cls_masks = outputs["pred_masks"]
+        cls_masks = outputs["pred_masks"]# [batchsize, h, w, num_queries]
         individual_masks = y_true["individual_masks"] # [batchsize, num_gt_objects, h, w, 1]
 
-        # print("[INFO] cls_outputs shape: ", cls_outputs.shape)
-        # print("[INFO] target labels shape: ", target_labels.shape)
-        # exit()
+       
         # create  batched tensors for loss calculation with padded zeros
-        batched_target_labels = tf.TensorArray(tf.int64, size= batch_size)
-        batched_target_masks = tf.TensorArray(tf.bool, size= batch_size)
-        for b in range(batch_size):
-            num_zeros = tf.shape(cls_outputs[b])[0] - tf.shape(target_labels[b])[0]
-            tgt_ids = tf.concat([target_labels[b], tf.ones(num_zeros, dtype=tf.int64)*self.num_classes],0)
-            tgt_ids = tf.cast(tgt_ids, dtype=tf.int64)
-            batched_target_labels = batched_target_labels.write(b, tgt_ids)
+        # batched_target_labels = tf.TensorArray(tf.int64, size= batch_size)
+        # batched_target_masks = tf.TensorArray(tf.bool, size= batch_size)
+        # for b in range(batch_size):
+        #     num_zeros = tf.shape(cls_outputs[b])[0] - tf.shape(target_labels[b])[0]
+        #     tgt_ids = tf.concat([target_labels[b], tf.ones(num_zeros, dtype=tf.int64)*self.num_classes],0)
+        #     tgt_ids = tf.cast(tgt_ids, dtype=tf.int64)
+        #     batched_target_labels = batched_target_labels.write(b, tgt_ids)
             
-            zeros_masks = tf.zeros([num_zeros, tf.shape(individual_masks[b])[1], tf.shape(individual_masks[b])[2]], dtype=tf.bool)
-            tgt_mask = tf.squeeze(tf.cast(individual_masks[b],  tf.bool), -1)
-            # tgt_mask = tf.expand_dims(tf.concat([tgt_mask, zeros_masks], 0),0)
-            tgt_mask = tf.concat([tgt_mask, zeros_masks], 0)
-            batched_target_masks = batched_target_masks.write(b, tgt_mask)
+        #     zeros_masks = tf.zeros([num_zeros, tf.shape(individual_masks[b])[1], tf.shape(individual_masks[b])[2]], dtype=tf.bool)
+        #     tgt_mask = tf.squeeze(tf.cast(individual_masks[b],  tf.bool), -1)
+        #     # tgt_mask = tf.expand_dims(tf.concat([tgt_mask, zeros_masks], 0),0)
+        #     tgt_mask = tf.concat([tgt_mask, zeros_masks], 0)
+        #     batched_target_masks = batched_target_masks.write(b, tgt_mask)
         
-
+        batched_target_labels = target_labels
+        batched_target_masks = individual_masks
         # target_classes = tf.concat(batched_target_labels, 0)
-        target_classes = batched_target_labels.stack()
+        # target_classes = batched_target_labels.stack()
+        target_classes = batched_target_labels
         cls_assigned = tf.gather(cls_outputs, target_index, batch_dims=1, axis=1)
         
         
-        target_masks = batched_target_masks.stack()
+        # target_masks = batched_target_masks.stack()
+        target_masks = batched_target_masks
         mask_assigned = tf.gather(cls_masks, target_index, batch_dims=1, axis=1)
 
         
-        background = tf.equal(target_classes, 133) # Pytorch padds 133 class number where classes are background
+        background = tf.equal(target_classes, 199) # Pytorch padds 133 class number where classes are background
         
         num_masks = tf.reduce_sum(tf.cast(tf.logical_not(background), tf.float32), axis=-1)
         ########################################################################################################  
@@ -255,8 +255,9 @@ class Loss:
         #     num_masks = tf.distribute.get_strategy().reduce(tf.distribute.ReduceOp.SUM, num_masks, axis=None)
         # num_masks = tf.maximum(num_masks / tf.distribute.get_strategy().num_replicas_in_sync, 1.0)
         #########################################################################################################
+        print("target classes shape", target_classes.shape)
+        print("cls assigned shape", cls_assigned.shape)
         
-    
         xentropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=target_classes, logits=cls_assigned)
         cls_loss = self.cost_class * tf.where(background, 0.1 * xentropy, xentropy)
         cls_weights = tf.where(background, 0.1 * tf.ones_like(cls_loss), tf.ones_like(cls_loss))
@@ -315,9 +316,9 @@ class Loss:
         
         
         losses = {}
+        print("[INFO] batch_size: ", batch_size)
         cls_loss_final, focal_loss_final, dice_loss_final = self.get_loss(batch_size, outputs, y_true, indices)
-        tf.print(cls_loss_final, focal_loss_final, dice_loss_final)
-        exit()
+        
         losses.update({"loss_ce": self.cost_class*cls_loss_final,
                     "loss_focal": self.cost_focal*focal_loss_final,
                     "loss_dice": self.cost_dice*dice_loss_final})
