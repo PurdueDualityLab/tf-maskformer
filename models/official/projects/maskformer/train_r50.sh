@@ -9,7 +9,7 @@ export DATA_PTH="gs://cam2-datasets/coco_panoptic"
 export TPU_NAME="tf-train-2"
 export TPU_SOFTWARE="2.11.0"
 export TPU_PROJECT="red-atlas-305317"
-export TPU_ZONE="us-central1-a"
+export TPU_ZONE="europe-west4-a"
 # export OVERRIDES="task.validation_data.input_path=${DATA_PTH},\
 # task.train_data.input_path=${DATA_PTH},\
 # runtime.distribution_strategy=tpu"
