@@ -197,7 +197,7 @@ class Loss:
             #             self.cost_dice * 0.0)
             # Set pads to large constant
             C = tf.reshape(total_cost, (1, num_queries, -1)) # Shape of C should be [batchsize, num_queries, num_object]
-            print("C shape: {}".format(tf.shape(C)))
+            print("C shape: {}".format(C.shape))
             exit()
 #             C_padded = tf.concat([C, tf.ones([1, 100, 100 - tf.shape(C)[2]], dtype=C.dtype)* max_cost], -1)
             _, inds = matchers.hungarian_matching(C) # ouptut is binary tensor
