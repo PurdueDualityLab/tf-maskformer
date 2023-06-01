@@ -155,7 +155,7 @@ class Loss:
         batch_size, num_queries = outputs["pred_logits"].shape[:2]
         out_mask = outputs["pred_masks"]
         out_mask = tf.transpose(out_mask, perm=[0,3,1,2])
-        tgt_mask = tf.transpose(out_mask, perm=[0,3,1,2])
+        tgt_mask = tf.transpose(out_mask, perm=[0,2,3,1,4])
 
         tgt_ids = tf.cast(y_true["unique_ids"], dtype=tf.int64)
         with tf.device(out_mask.device):
