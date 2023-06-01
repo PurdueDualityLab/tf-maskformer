@@ -105,12 +105,12 @@ class PanopticTask(base_task.Task):
 		weighted_dice = calculated_losses['loss_focal']
 
 		# Not implemented auxilary outputs
-		if aux_outputs is not None:
-			total_aux_loss = 0.0
-			# TODO : Remove hardcoding
-			for i in range(4): #4 number of auxilary outputs
-				total_aux_loss += calculated_losses['loss_ce_'+str(i)] + calculated_losses['loss_dice_'+str(i)] + calculated_losses['loss_focal_'+str(i)]
-			total_loss = total_loss + total_aux_loss
+		# if aux_outputs is not None:
+		# 	total_aux_loss = 0.0
+		# 	# TODO : Remove hardcoding
+		# 	for i in range(4): #4 number of auxilary outputs
+		# 		total_aux_loss += calculated_losses['loss_ce_'+str(i)] + calculated_losses['loss_dice_'+str(i)] + calculated_losses['loss_focal_'+str(i)]
+		# 	total_loss = total_loss + total_aux_loss
 		
 
 		return total_loss, weighted_ce, weighted_focal, weighted_dice
