@@ -153,57 +153,106 @@ class Loss:
         self.cost_dice = cost_dice
 
     
-    def memory_efficient_matcher(self, outputs, y_true):
-        batch_size, num_queries = outputs["pred_logits"].shape[:2] # Bsize, num_queries, num_preds
+#     def memory_efficient_matcher(self, outputs, y_true):
+#         batch_size, num_queries = outputs["pred_logits"].shape[:2] # Bsize, num_queries, num_classes
        
-        # masks = [v["masks"] for v in y_true]
-        # h_max = max([m.shape[1] for m in masks])
-        # w_max = max([m.shape[2] for m in masks])
+#         # masks = [v["masks"] for v in y_true]
+#         # h_max = max([m.shape[1] for m in masks])
+#         # w_max = max([m.shape[2] for m in masks])
 
-        batched_indices = tf.TensorArray(tf.bool, size=batch_size)
+#         batched_indices = tf.TensorArray(tf.bool, size=batch_size)
 
-        # Convert y_true to list (len == batchsize) of dict with each dict having "masks" and "labels" keys
-        for b in range(batch_size):
-            out_mask = outputs["pred_masks"][b] # [h, w, num_preds]
+#         # Convert y_true to list (len == batchsize) of dict with each dict having "masks" and "labels" keys
+#         for b in range(batch_size):
+#             out_mask = outputs["pred_masks"][b] # [h, w, num_preds]
 
-            out_mask = tf.transpose(out_mask, perm=[2, 1, 0]) # [num_preds, h, w]
+#             out_mask = tf.transpose(out_mask, perm=[2, 1, 0]) # [num_preds, h, w]
             
-            tgt_ids = tf.cast(y_true["unique_ids"][b], dtype=tf.int64)
+#             tgt_ids = tf.cast(y_true["unique_ids"][b], dtype=tf.int64)
             
-            with tf.device(out_mask.device):
-                tgt_mask = y_true["individual_masks"][b]
+#             with tf.device(out_mask.device):
+#                 tgt_mask = y_true["individual_masks"][b]
             
-            cost_class = tf.gather(-tf.nn.softmax(outputs["pred_logits"][b]), tgt_ids, axis=-1)
+#             cost_class = tf.gather(-tf.nn.softmax(outputs["pred_logits"][b]), tgt_ids, axis=-1)
             
             
-            tgt_mask = tf.cast(tgt_mask, dtype=tf.float32)
-            tgt_mask = tf.image.resize(tgt_mask, out_mask.shape[-2:], method='nearest')[..., 0]
+#             tgt_mask = tf.cast(tgt_mask, dtype=tf.float32)
+#             tgt_mask = tf.image.resize(tgt_mask, out_mask.shape[-2:], method='nearest')[..., 0]
 
-            out_mask = tf.reshape(out_mask, [tf.shape(out_mask)[0], -1])
-            tgt_mask = tf.reshape(tgt_mask, [tf.shape(tgt_mask)[0], -1])
+#             out_mask = tf.reshape(out_mask, [tf.shape(out_mask)[0], -1])
+#             tgt_mask = tf.reshape(tgt_mask, [tf.shape(tgt_mask)[0], -1])
             
-            cost_focal = FocalLossMod().batch(tgt_mask, out_mask)
-            cost_dice = DiceLoss().batch(tgt_mask, out_mask)
+#             cost_focal = FocalLossMod().batch(tgt_mask, out_mask)
+#             cost_dice = DiceLoss().batch(tgt_mask, out_mask)
             
-            total_cost = (
+#             total_cost = (
+#                 self.cost_focal * cost_focal
+#                 + self.cost_class * cost_class
+#                 + self.cost_dice * cost_dice
+#             )
+           
+#             # TODO : Append maximum cost 
+#             # max_cost = (self.cost_class * 0.0 +
+#             #             self.cost_focal * 4. +
+#             #             self.cost_dice * 0.0)
+#             # Set pads to large constant
+#             C = tf.reshape(total_cost, (1, num_queries, -1)) # Shape of C should be [batchsize, num_queries, num_object]
+            
+# #             C_padded = tf.concat([C, tf.ones([1, 100, 100 - tf.shape(C)[2]], dtype=C.dtype)* max_cost], -1)
+#             _, inds = matchers.hungarian_matching(C) # ouptut is binary tensor
+            
+#             batched_indices = batched_indices.write(b, tf.squeeze(inds,0))
+        
+#         return batched_indices.stack()
+# 
+        def memory_efficient_matcher(self, outputs, y_true):
+            batch_size, num_queries = outputs["pred_logits"].shape[:2] # Bsize, num_queries, num_classes
+            # Define a function that takes a single batch element as input and returns the matching indices
+            def match_single_batch(b):
+                out_mask = outputs["pred_masks"][b] # [h, w, num_preds]
+
+                out_mask = tf.transpose(out_mask, perm=[2, 1, 0]) # [num_preds, h, w]
+                
+                tgt_ids = tf.cast(y_true["unique_ids"][b], dtype=tf.int64)
+                
+                with tf.device(out_mask.device):
+                    tgt_mask = y_true["individual_masks"][b]
+                
+                cost_class = tf.gather(-tf.nn.softmax(outputs["pred_logits"][b]), tgt_ids, axis=-1)
+                
+                
+                tgt_mask = tf.cast(tgt_mask, dtype=tf.float32)
+                tgt_mask = tf.image.resize(tgt_mask, out_mask.shape[-2:], method='nearest')[..., 0]
+
+                out_mask = tf.reshape(out_mask, [tf.shape(out_mask)[0], -1])
+                tgt_mask = tf.reshape(tgt_mask, [tf.shape(tgt_mask)[0], -1])
+                
+                cost_focal = FocalLossMod().batch(tgt_mask, out_mask)
+                cost_dice = DiceLoss().batch(tgt_mask, out_mask)
+                
+                total_cost = (
                 self.cost_focal * cost_focal
                 + self.cost_class * cost_class
                 + self.cost_dice * cost_dice
-            )
-           
-            # TODO : Append maximum cost 
-            # max_cost = (self.cost_class * 0.0 +
-            #             self.cost_focal * 4. +
-            #             self.cost_dice * 0.0)
-            # Set pads to large constant
-            C = tf.reshape(total_cost, (1, num_queries, -1)) # Shape of C should be [batchsize, num_queries, num_object]
+                )
+                
+                # TODO : Append maximum cost 
+                # max_cost = (self.cost_class * 0.0 +
+                # self.cost_focal * 4. +
+                # self.cost_dice * 0.0)
+                # Set pads to large constant
+                C = tf.reshape(total_cost, (1, num_queries, -1)) # Shape of C should be [batchsize, num_queries, num_object]
+                
+                # C_padded = tf.concat([C, tf.ones([1, 100, 100 - tf.shape(C)[2]], dtype=C.dtype)* max_cost], -1)
+                _, inds = matchers.hungarian_matching(C) # ouptut is binary tensor
+                
+                return tf.squeeze(inds,0)
+
+            # Use tf.vectorized_map to apply the function to each batch element in parallel
+            batched_indices = tf.vectorized_map(match_single_batch, tf.range(batch_size))
             
-#             C_padded = tf.concat([C, tf.ones([1, 100, 100 - tf.shape(C)[2]], dtype=C.dtype)* max_cost], -1)
-            _, inds = matchers.hungarian_matching(C) # ouptut is binary tensor
-            
-            batched_indices = batched_indices.write(b, tf.squeeze(inds,0))
-        
-        return batched_indices.stack()
+            return batched_indices
+
     
     
     def get_loss(self, batch_size, outputs, y_true, indices):
@@ -313,8 +362,8 @@ class Loss:
         outputs_without_aux = {k: v for k, v in outputs.items() if k != "aux_outputs"}
         batch_size, num_queries = outputs["pred_logits"].shape[:2]
         indices = self.memory_efficient_matcher(outputs_without_aux, y_true) # (batchsize, num_queries, num_queries)
-        
-        
+        print("Indices shape: ", indices.shape)
+        exit()        
         losses = {}
         print("[INFO] batch_size: ", batch_size)
         cls_loss_final, focal_loss_final, dice_loss_final = self.get_loss(batch_size, outputs, y_true, indices)

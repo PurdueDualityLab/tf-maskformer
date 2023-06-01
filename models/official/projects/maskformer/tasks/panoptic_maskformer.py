@@ -80,9 +80,9 @@ class PanopticTask(base_task.Task):
 		# TODO : Auxilary outputs
 		outputs = {"pred_logits": output["class_prob_predictions"], "pred_masks": output["mask_prob_predictions"]}
 		targets = labels
-		print("pred_logits : ", outputs["pred_logits"].shape)
-		print("mask_prob_predictions : ", outputs["pred_masks"].shape)
-		exit()
+		# print("pred_logits : ", outputs["pred_logits"].shape)
+		# print("mask_prob_predictions : ", outputs["pred_masks"].shape)
+		
 		matcher = hungarian_matching
 		no_object_weight = 0.1
 		# TODO : Remove hardcoded values, number of classes
