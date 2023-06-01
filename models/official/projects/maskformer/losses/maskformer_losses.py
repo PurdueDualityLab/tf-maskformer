@@ -230,8 +230,8 @@ class Loss:
         losses = {'focal_loss' : 0.0, 'dice_loss': 0.0}
         
         
-        out_masks = tf.transpose(cls_masks, perm=[0,3,1,2])
-        with tf.device(out_masks.device):
+        out_mask = tf.transpose(cls_masks, perm=[0,3,1,2])
+        with tf.device(out_mask.device):
             tgt_mask = individual_masks
 
         tgt_mask = tf.transpose(tgt_mask, perm=[0,2,3,1,4])
