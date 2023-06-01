@@ -169,13 +169,13 @@ class Loss:
         tgt_mask = tf.squeeze(tf.cast(tgt_mask, dtype=tf.float32),axis=-1)
         print("tgt mask before resize :", tgt_mask.shape)
         print("out mask before resize :", out_mask.shape)
-        tgt_mask = tf.image.resize(tgt_mask, out_mask.shape[-2:], method='bilinear')
+        tgt_mask = tf.image.resize(tgt_mask, out_mask.shape[-2:], method='bilinear') # [b, h, w, 100]
         print("tgt mask after resize :", tgt_mask.shape)
         
-        out_mask = tf.transpose(out_mask, perm=[0,2,3,1])
+        out_mask = tf.transpose(out_mask, perm=[0,2,3,1]) # [b, h, w, 100]
         print("out mask after resize :", out_mask.shape)
-        out_mask = tf.reshape(out_mask, [tf.shape(out_mask)[0], tf.shape(out_mask)[1], -1])
-        tgt_mask = tf.reshape(tgt_mask, [tf.shape(tgt_mask)[0],tf.shape(out_mask)[1], -1])
+        out_mask = tf.reshape(out_mask, [tf.shape(out_mask)[0], tf.shape(out_mask)[-11], -1])
+        tgt_mask = tf.reshape(tgt_mask, [tf.shape(tgt_mask)[0],tf.shape(out_mask)[-1], -1])
         print("out mask shape: ", out_mask.shape)
         print("tgt mask shape: ", tgt_mask.shape)
         
