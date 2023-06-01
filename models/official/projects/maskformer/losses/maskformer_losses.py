@@ -175,6 +175,9 @@ class Loss:
         
         cost_focal = FocalLossMod().batch(tgt_mask, out_mask)
         cost_dice = DiceLoss().batch(tgt_mask, out_mask)
+        print("cost focal shape: ", cost_focal.shape)
+        print("cost dice shape: ", cost_dice.shape)
+        print("cost class shape: ", cost_class.shape)
         total_cost = (
                 self.cost_focal * cost_focal
                 + self.cost_class * cost_class
