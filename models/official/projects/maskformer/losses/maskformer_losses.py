@@ -368,7 +368,10 @@ class Loss:
         losses = {}
         print("[INFO] batch_size: ", batch_size)
         cls_loss_final, focal_loss_final, dice_loss_final = self.get_loss(batch_size, outputs, y_true, indices)
-        
+        print("[INFO] cls_loss_final: ", cls_loss_final)
+        print("[INFO] focal_loss_final: ", focal_loss_final)
+        print("[INFO] dice_loss_final: ", dice_loss_final)
+        exit()
         losses.update({"loss_ce": self.cost_class*cls_loss_final,
                     "loss_focal": self.cost_focal*focal_loss_final,
                     "loss_dice": self.cost_dice*dice_loss_final})
