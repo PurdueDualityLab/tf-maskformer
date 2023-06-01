@@ -160,6 +160,8 @@ class Loss:
             tgt_mask = y_true["individual_masks"]
         cost_class = tf.gather(-tf.nn.softmax(outputs["pred_logits"]), tgt_ids, batch_dims=1, axis=-1)
         tgt_mask = tf.cast(tgt_mask, dtype=tf.float32)
+        print(out_mask.shape, tgt_mask.shape)
+        exit()
         tgt_mask = tf.image.resize(tgt_mask, out_mask.shape[-2:], method='bilinear')[..., 0]
         out_mask = tf.reshape(out_mask, [tf.shape(out_mask)[0], -1])
         tgt_mask = tf.reshape(tgt_mask, [tf.shape(tgt_mask)[0], -1])
