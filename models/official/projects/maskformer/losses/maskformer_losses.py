@@ -338,11 +338,9 @@ class Loss:
             return focal_loss, dice_loss
         
         batched_focal_loss, batched_dice_loss = tf.vectorized_map(compute_losses, tf.range(batch_size))
-        print("batched_focal_loss shape: ", batched_focal_loss.shape)
-        print("batched_dice_loss shape: ", batched_dice_loss.shape)
-        exit()
+        
         batched_focal_loss = tf.squeeze(batched_focal_loss, axis=1)
-        batched_dice_loss = tf.squeeze(batched_dice_loss, axis=1)
+        # batched_dice_loss = tf.squeeze(batched_dice_loss, axis=1)
         losses['focal_loss'] = batched_focal_loss
         losses['dice_loss'] = batched_dice_loss
         background_new = background
