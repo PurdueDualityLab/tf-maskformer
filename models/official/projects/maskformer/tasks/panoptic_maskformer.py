@@ -178,11 +178,7 @@ class PanopticTask(base_task.Task):
 			
 			# TODO : Add auxiallary losses
 			total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels)
-			print("total_loss : ", total_loss.shape)
-			print("cls_loss : ", cls_loss.shape)
-			print("focal_loss : ", focal_loss.shape)
-			print("dice_loss : ", dice_loss.shape)
-			exit()
+			
 			tvars = model.trainable_variables
 			
 			grads = tape.gradient(total_loss, tvars)
