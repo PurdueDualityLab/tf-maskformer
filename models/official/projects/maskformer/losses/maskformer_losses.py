@@ -242,17 +242,14 @@ class Loss:
         tgt_mask = tf.reshape(tgt_mask, [tf.shape(tgt_mask)[0],tf.shape(tgt_mask)[-1], -1])
         focal_loss = FocalLossMod()(tgt_mask, out_mask)
         dice_loss = DiceLoss()(tgt_mask, out_mask)
-        print("Focal loss: ", focal_loss.shape)
-        print("Dice loss: ", dice_loss.shape)
-        exit()
-        batched_focal_loss = tf.squeeze(batched_focal_loss, axis=1)
-        # batched_dice_loss = tf.squeeze(batched_dice_loss, axis=1)
-        # losses['focal_loss'] = batched_focal_loss
-        # losses['dice_loss'] = batched_dice_loss
+        
+    
+        losses['focal_loss'] = focal_loss
+        losses['dice_loss'] = dice_loss
         background_new = background
 
-        focal_loss_weighted = tf.where(background_new, tf.zeros_like(batched_focal_loss), batched_focal_loss)
-        dice_loss_weighted = tf.where(background_new, tf.zeros_like(batched_dice_loss), batched_dice_loss)
+        focal_loss_weighted = tf.where(background_new, tf.zeros_like(focal_loss), focal_loss)
+        dice_loss_weighted = tf.where(background_new, tf.zeros_like(dice_loss), dice_loss)
         focal_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(focal_loss_weighted), num_masks_sum)
         dice_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(dice_loss_weighted), num_masks_sum)
 
