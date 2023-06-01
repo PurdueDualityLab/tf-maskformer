@@ -174,7 +174,7 @@ class Loss:
         
         out_mask = tf.transpose(out_mask, perm=[0,2,3,1]) # [b, h, w, 100]
         print("out mask after resize :", out_mask.shape)
-        out_mask = tf.reshape(out_mask, [tf.shape(out_mask)[0], tf.shape(out_mask)[-11], -1])
+        out_mask = tf.reshape(out_mask, [tf.shape(out_mask)[0], tf.shape(out_mask)[-1], -1])
         tgt_mask = tf.reshape(tgt_mask, [tf.shape(tgt_mask)[0],tf.shape(out_mask)[-1], -1])
         print("out mask shape: ", out_mask.shape)
         print("tgt mask shape: ", tgt_mask.shape)
