@@ -95,6 +95,10 @@ class FocalLossMod(focal_loss.FocalLoss):
         return loss
 
     def batch(self, y_true, y_pred):
+        """
+        y_true: (b_size, 100 (num objects)*h*w)
+        y_pred: (b_size, 100 (num objects)*h*w)
+        """
         hw = tf.cast(tf.shape(y_pred)[1], dtype=tf.float32) #[100, h, w]
         prob = tf.keras.activations.sigmoid(y_pred)
         focal_pos = tf.pow(1 - prob, self._gamma) * tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(y_pred), logits=y_pred)
@@ -168,8 +172,8 @@ class Loss:
         tgt_mask = tf.image.resize(tgt_mask, out_mask.shape[-2:], method='bilinear')
         print("tgt mask after resize :", tgt_mask.shape)
         print("out mask after resize :", out_mask.shape)
-        out_mask = tf.reshape(out_mask, [tf.shape(out_mask)[0], -1])
-        tgt_mask = tf.reshape(tgt_mask, [tf.shape(tgt_mask)[0], -1])
+        out_mask = tf.reshape(out_mask, [tf.shape(out_mask)[0], tf.shape(out_mask)[1], -1])
+        tgt_mask = tf.reshape(tgt_mask, [tf.shape(tgt_mask)[0],tf.shape(out_mask)[1], -1])
         print("out mask shape: ", out_mask.shape)
         print("tgt mask shape: ", tgt_mask.shape)
         
@@ -210,7 +214,7 @@ class Loss:
 #             tgt_mask = tf.cast(tgt_mask, dtype=tf.float32)
 #             tgt_mask = tf.image.resize(tgt_mask, out_mask.shape[-2:], method='nearest')[..., 0]
 
-#             out_mask = tf.reshape(out_mask, [tf.shape(out_mask)[0], -1])
+#             out_mask = tf.reshape(out_mask, [tf.shape(out_mask)[0], -1]) # [num_preds, h*w]
 #             tgt_mask = tf.reshape(tgt_mask, [tf.shape(tgt_mask)[0], -1])
             
 #             cost_focal = FocalLossMod().batch(tgt_mask, out_mask)
