@@ -123,6 +123,8 @@ class DiceLoss(tf.keras.losses.Loss):
         """
         y_true: (b size, 100, h*w)
         """
+        print("y_true shape: ", y_true.shape)
+        print("y_pred shape: ", y_pred.shape)
         y_pred = tf.reshape(tf.keras.activations.sigmoid(y_pred), (y_pred.shape[1],-1))
         y_true = tf.reshape(y_true, (tf.shape(y_true)[1],-1))
 
