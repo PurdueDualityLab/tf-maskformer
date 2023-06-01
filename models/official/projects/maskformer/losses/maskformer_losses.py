@@ -325,7 +325,7 @@ class Loss:
             with tf.device(out_mask.device):
                 tgt_mask = target_masks[b]
             tgt_mask = tf.cast(tgt_mask, dtype=tf.float32)
-            out_mask = tf.image.resize_bilinear(out_mask[..., tf.newaxis], tgt_mask.shape[1:3], align_corners=True)
+            out_mask = tf.image.resize(out_mask[..., tf.newaxis], tgt_mask.shape[1:3], method='bilinear')
             # Flatten target and predicted masks along h,w dims
             out_mask = tf.reshape(out_mask, [tf.shape(out_mask[:,:,:,0])[0], -1]) # remove channel dimension used for tf.image.resize
             tgt_mask = tf.reshape(tgt_mask, [tf.shape(tgt_mask)[0], -1])
