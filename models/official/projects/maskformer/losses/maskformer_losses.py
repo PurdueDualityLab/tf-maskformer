@@ -160,7 +160,7 @@ class Loss:
         tgt_ids = tf.cast(y_true["unique_ids"], dtype=tf.int64)
         with tf.device(out_mask.device):
             tgt_mask = y_true["individual_masks"]
-        tgt_mask = tf.transpose(out_mask, perm=[0,2,3,1,4])
+        tgt_mask = tf.transpose(tgt_mask, perm=[0,2,3,1,4])
         cost_class = tf.gather(-tf.nn.softmax(outputs["pred_logits"]), tgt_ids, batch_dims=1, axis=-1)
         tgt_mask = tf.squeeze(tf.cast(tgt_mask, dtype=tf.float32),axis=-1)
         print("tgt mask before resize :", tgt_mask.shape)
