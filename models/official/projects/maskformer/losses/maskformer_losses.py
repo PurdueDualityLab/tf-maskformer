@@ -138,7 +138,7 @@ class DiceLoss(tf.keras.losses.Loss):
         # y_pred = tf.keras.activations.sigmoid(y_pred)
         y_pred = tf.sigmoid(y_pred)
         y_pred = tf.reshape(y_pred, [-1, y_pred.shape[1]])
-        numerator = 2 * tf.einsum("nc,mc->nm", y_pred, y_true)
+        numerator = 2 * tf.einsum("bnc,bmc->bnm", y_pred, y_true)
         denominator = tf.reduce_sum(y_pred, axis=-1)[:, tf.newaxis] + tf.reduce_sum(y_true, axis=-1)[tf.newaxis, :]
         loss = 1 - (numerator + 1) / (denominator + 1)
         
