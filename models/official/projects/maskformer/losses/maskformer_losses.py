@@ -96,10 +96,10 @@ class FocalLossMod(focal_loss.FocalLoss):
 
     def batch(self, y_true, y_pred):
         """
-        y_true: (b_size, 100 (num objects)*h*w)
-        y_pred: (b_size, 100 (num objects)*h*w)
+        y_true: (b_size, 100 (num objects), h*w)
+        y_pred: (b_size, 100 (num objects), h*w)
         """
-        hw = tf.cast(tf.shape(y_pred)[1], dtype=tf.float32) #[100, h, w]
+        hw = tf.cast(tf.shape(y_pred)[-1], dtype=tf.float32) #[100, h, w]
         prob = tf.keras.activations.sigmoid(y_pred)
         focal_pos = tf.pow(1 - prob, self._gamma) * tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(y_pred), logits=y_pred)
         focal_neg = tf.pow(prob, self._gamma) * tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.zeros_like(y_pred), logits=y_pred)
@@ -107,8 +107,8 @@ class FocalLossMod(focal_loss.FocalLoss):
         if self._alpha >= 0:
             focal_pos = focal_pos * self._alpha
             focal_neg = focal_neg * (1 - self._alpha)
-        loss = tf.einsum("nc,mc->nm", focal_pos, y_true) + tf.einsum(
-        "nc,mc->nm", focal_neg, (1 - y_true)
+        loss = tf.einsum("bnc,bmc->bnm", focal_pos, y_true) + tf.einsum(
+        "bnc,bmc->bnm", focal_neg, (1 - y_true)
         )
         return loss / hw
     
