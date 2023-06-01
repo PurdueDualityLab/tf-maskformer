@@ -269,7 +269,7 @@ class Loss:
         batched_target_labels = target_labels
         batched_target_masks = individual_masks
      
-        target_classes = tf.cast(batched_target_labels, dtype=tf.int64)
+        target_classes = tf.cast(batched_target_labels, dtype=tf.int32)
         cls_assigned = tf.gather(cls_outputs, target_index, batch_dims=1, axis=1)
         
         # target_masks = batched_target_masks.stack()
@@ -338,6 +338,9 @@ class Loss:
             return focal_loss, dice_loss
         
         batched_focal_loss, batched_dice_loss = tf.vectorized_map(compute_losses, tf.range(batch_size))
+        print("batched_focal_loss shape: ", batched_focal_loss.shape)
+        print("batched_dice_loss shape: ", batched_dice_loss.shape)
+        exit()
         batched_focal_loss = tf.squeeze(batched_focal_loss, axis=1)
         batched_dice_loss = tf.squeeze(batched_dice_loss, axis=1)
         losses['focal_loss'] = batched_focal_loss
