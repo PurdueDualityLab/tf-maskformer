@@ -328,36 +328,6 @@ class mask_former_parser(parser.Parser):
         self._small_instance_area_threshold = params.small_instance_area_threshold
         self._small_instance_weight = params.small_instance_weight
 
-        self._thing_dataset_contiguous_id = []
-        self._thing_dataset_id = []
-
-        self._stuff_dataset_contiguous_id = []
-        self._stuff_dataset_id = []
-
-        for i, cat in enumerate(COCO_CATEGORIES):
-            if cat["isthing"]:
-                self._thing_dataset_contiguous_id.append(i)
-                self._thing_dataset_id.append(cat["id"])
-            else:
-                self._stuff_dataset_contiguous_id.append(i)
-                self._stuff_dataset_id.append(cat["id"])
-        
-        self._stuff_table = tf.lookup.StaticHashTable(
-                        initializer=tf.lookup.KeyValueTensorInitializer(
-                            keys=tf.constant(self._stuff_dataset_id),
-                            values=tf.constant(self._stuff_dataset_contiguous_id),
-                        ),
-                        default_value=tf.constant(-1),
-                        
-                    )
-        self._thing_table = tf.lookup.StaticHashTable(
-                        initializer=tf.lookup.KeyValueTensorInitializer(
-                            keys=tf.constant(self._thing_dataset_id),
-                            values=tf.constant(self._thing_dataset_contiguous_id),
-                        ),
-                        default_value=tf.constant(-5),
-                       
-                    )
         
 
     def _resize_and_crop_mask(self, mask, image_info, crop_dims, is_training):
@@ -396,10 +366,6 @@ class mask_former_parser(parser.Parser):
         mask = tf.squeeze(mask, axis=0)
         return mask
     
-    # @tf.function
-    # def compare_masks(self, each_id):
-    #     # with tf.name_scope("compare_masks"):
-    #     return tf.equal(instance_mask, each_id)
         
     def _parse_data(self, data, is_training):
         image = data['image']
@@ -484,6 +450,8 @@ class mask_former_parser(parser.Parser):
         (unique_ids, individual_masks) = self._get_individual_masks(
                 instance_mask=instance_mask[:, :, 0])
 
+        # Dummy unique IDs and dummy Individual masks
+
         
         
 
@@ -534,11 +502,8 @@ class mask_former_parser(parser.Parser):
         
         unique_instance_ids, _ = tf.unique(tf.reshape(instance_mask, [-1]))
         individual_mask_list = tf.TensorArray(tf.float32, size=100) 
-#                                               dynamic_size=True)
         counter = 0
         for instance_id in unique_instance_ids:
-            # if instance_id == self._ignore_label:
-            #     continue
 
             mask = tf.equal(instance_mask, instance_id)
             individual_mask_list = individual_mask_list.write(counter, tf.expand_dims(tf.cast(mask, tf.float32), axis=2))
@@ -546,7 +511,7 @@ class mask_former_parser(parser.Parser):
 
         for idx in tf.range(100-tf.size(unique_instance_ids)):
             new_mask = tf.zeros(tf.shape(instance_mask))
-            individual_mask_list = individual_mask_list.write(idx, tf.expand_dims(tf.cast(new_mask, tf.float32), axis=2))
+            individual_mask_list = individual_mask_list.write(counter, tf.expand_dims(tf.cast(new_mask, tf.float32), axis=2))
         
         return (unique_instance_ids, individual_mask_list.stack())
 
