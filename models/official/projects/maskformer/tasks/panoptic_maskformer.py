@@ -67,7 +67,7 @@ class PanopticTask(base_task.Task):
 		# 	# print(sample[1]["things_mask"].shape)
 			
 		# exit()
-		tf.profiler.experimental.server.start(6000)
+		
 		return dataset
 
 	def initialize(self, model: tf.keras.Model) -> None:
