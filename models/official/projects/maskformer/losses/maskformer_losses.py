@@ -164,6 +164,7 @@ class Loss:
         out_mask = tf.transpose(out_mask, perm=[0,3,1,2])
         
         tgt_ids = tf.cast(y_true["unique_ids"], dtype=tf.int64)
+        print("tgt_ids :", tgt_ids)
         with tf.device(out_mask.device):
             tgt_mask = y_true["individual_masks"]
         tgt_mask = tf.transpose(tgt_mask, perm=[0,2,3,1,4]) # [b, 100, h, w, 1]

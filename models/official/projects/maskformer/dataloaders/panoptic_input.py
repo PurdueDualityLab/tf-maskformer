@@ -517,8 +517,9 @@ class mask_former_parser(parser.Parser):
     
     def _get_individual_masks(self, class_ids, contig_instance_mask):
         
-        individual_mask_list = tf.TensorArray(tf.float32, size=100) 
+        individual_mask_list = tf.TensorArray(tf.float32, size=self._max_instances) 
         counter = 0
+        
         for class_id in class_ids:
             mask = tf.equal(contig_instance_mask, class_id)
             individual_mask_list = individual_mask_list.write(counter, tf.cast(mask, tf.float32))
