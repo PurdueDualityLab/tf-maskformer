@@ -138,7 +138,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
               norm_activation=common.NormActivation()),
           losses=Losses(),
           train_data=DataConfig(
-              input_path=os.path.join(COCO_INPUT_PATH_BASE, 'tfrecords_old/train*'),
+              input_path=os.path.join(COCO_INPUT_PATH_BASE, 'tfrecords/train*'),
               is_training=True,
               global_batch_size=train_batch_size,
               shuffle_buffer_size=1000,
@@ -169,7 +169,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
                 )
           ),
           validation_data=DataConfig(
-              input_path=os.path.join(COCO_INPUT_PATH_BASE, 'tfrecords_old/val*'),
+              input_path=os.path.join(COCO_INPUT_PATH_BASE, 'tfrecords/val*'),
               is_training=False,
               global_batch_size=eval_batch_size,
               drop_remainder=False,
