@@ -480,7 +480,9 @@ class mask_former_parser(parser.Parser):
 
         # pad the individual masks to the max number of instances and unique ids
 #         individual_masks = tf.pad(individual_masks, [[0, self._max_instances - tf.shape(individual_masks)[0]], [0, 0], [0, 0], [0,0]], constant_values=self._ignore_label)
-        unique_ids = tf.pad(class_ids, [[0, self._max_instances - tf.shape(class_ids)[0]]], constant_values=self._ignore_label)
+        # unique_ids = tf.pad(class_ids, [[0, self._max_instances - tf.shape(class_ids)[0]]], constant_values=self._ignore_label)
+        unique_ids = tf.zeros([self._max_instances], dtype=tf.float32)
+        
         # Cast image to float and set shapes of output.
         
         image = tf.cast(image, dtype=self._dtype)
@@ -517,17 +519,17 @@ class mask_former_parser(parser.Parser):
     
     def _get_individual_masks(self, class_ids, contig_instance_mask):
         
-        # individual_mask_list = tf.TensorArray(tf.float32, size=self._max_instances) 
-        # counter = 0
+        individual_mask_list = tf.TensorArray(tf.float32, size=self._max_instances) 
+        counter = 0
         
-        # for class_id in class_ids:
-        #     mask = tf.equal(contig_instance_mask, class_id)
-        #     individual_mask_list = individual_mask_list.write(counter, tf.cast(mask, tf.float32))
-        #     counter += 1
+        for class_id in class_ids:
+            mask = tf.equal(contig_instance_mask, class_id)
+            individual_mask_list = individual_mask_list.write(counter, tf.cast(mask, tf.float32))
+            counter += 1
 
-        # for idx in tf.range(100-tf.size(class_ids)):
-        #     new_mask = tf.zeros(tf.shape(contig_instance_mask))
-        #     individual_mask_list = individual_mask_list.write(counter, tf.cast(new_mask, tf.float32))
+        for idx in tf.range(100-tf.size(class_ids)):
+            new_mask = tf.zeros(tf.shape(contig_instance_mask))
+            individual_mask_list = individual_mask_list.write(counter, tf.cast(new_mask, tf.float32))
         
         # individual_masks = tf.zeros([self._max_instances, self._output_size[0], self._output_size[1], 1], dtype=tf.float32)
         # unique_instance_ids, _ = tf.unique(tf.reshape(instance_mask, [-1]))
@@ -540,8 +542,9 @@ class mask_former_parser(parser.Parser):
         #     counter += 1
 
         # return (unique_instance_ids, individual_mask_list.stack())
-        # individual_mask_list.stack()
-        return tf.zeros([self._max_instances, self._output_size[0], self._output_size[1], 1], dtype=tf.float32)
+        # tf.zeros([self._max_instances, self._output_size[0], self._output_size[1], 1], dtype=tf.float32)
+        
+        return individual_mask_list.stack()
 
     def __call__(self, value):
         """Parses data to an image and associated training labels.
