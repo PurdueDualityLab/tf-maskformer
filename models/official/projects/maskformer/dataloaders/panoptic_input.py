@@ -393,7 +393,7 @@ class mask_former_parser(parser.Parser):
             dtype=tf.float32)
         contigious_mask = tf.cast(data['groundtruth_panoptic_contigious_mask'][:, :, 0],
             dtype=tf.float32)
-        class_ids = tf.cast(data['groundtruth_panoptic_class_ids'], dtype=tf.float32)
+        class_ids = data['groundtruth_panoptic_class_ids']
        
         # applies by pixel augmentation (saturation, brightness, contrast)
         if self._color_aug_ssd:
