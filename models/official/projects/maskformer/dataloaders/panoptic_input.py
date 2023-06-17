@@ -192,6 +192,7 @@ class TfExampleDecoder(tf_example_decoder.TfExampleDecoder):
         self._image_height_key = 'image/height'
         self._image_width_key = 'image/width'
         self._image_key = ""
+        self._max_instances = 100
         self._panoptic_keys_to_features = {
             self._panoptic_category_mask_key:
                 tf.io.FixedLenFeature((), tf.string, default_value=''),
@@ -200,7 +201,7 @@ class TfExampleDecoder(tf_example_decoder.TfExampleDecoder):
             self._panoptic_contigious_mask_key:
                 tf.io.FixedLenFeature((), tf.string, default_value=''),
             self._class_ids_key:
-                tf.io.VarLenFeature(tf.int64),  # default_value=[]),        
+                tf.io.FixedLenSequenceFeature([self._max_instances], dtype=tf.int64, default_value=self._ignore_label),        
         }
 
 
@@ -393,9 +394,9 @@ class mask_former_parser(parser.Parser):
             dtype=tf.float32)
         contigious_mask = tf.cast(data['groundtruth_panoptic_contigious_mask'][:, :, 0],
             dtype=tf.float32)
-        class_ids = tf.sparse.to_dense(data['groundtruth_panoptic_class_ids'], default_value=0)
+        # class_ids = tf.sparse.to_dense(data['groundtruth_panoptic_class_ids'], default_value=0)
         class_ids = tf.cast(class_ids, dtype=tf.float32)
-        print("Class id shape : ", tf.shape(class_ids))
+        
         # applies by pixel augmentation (saturation, brightness, contrast)
         if self._color_aug_ssd:
             image = preprocess_ops.color_jitter(
@@ -482,8 +483,8 @@ class mask_former_parser(parser.Parser):
         # pad the individual masks to the max number of instances and unique ids
 #         individual_masks = tf.pad(individual_masks, [[0, self._max_instances - tf.shape(individual_masks)[0]], [0, 0], [0, 0], [0,0]], constant_values=self._ignore_label)
         # unique_ids = tf.pad(class_ids, [[0, self._max_instances - tf.shape(class_ids)[0]]], constant_values=self._ignore_label)
-        unique_ids = tf.zeros([self._max_instances], dtype=tf.float32)
-        
+        # unique_ids = tf.zeros([self._max_instances], dtype=tf.float32)
+        unique_ids = class_ids
         # Cast image to float and set shapes of output.
         
         image = tf.cast(image, dtype=self._dtype)
