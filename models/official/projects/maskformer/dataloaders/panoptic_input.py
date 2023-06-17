@@ -187,6 +187,8 @@ class TfExampleDecoder(tf_example_decoder.TfExampleDecoder):
             regenerate_source_id=regenerate_source_id)
         self._panoptic_category_mask_key = panoptic_category_mask_key
         self._panoptic_instance_mask_key = panoptic_instance_mask_key
+        self._panoptic_contigious_mask_key = 'image/panoptic/contiguous_mask'
+        self._class_ids_key = 'image/panoptic/class_ids'
         self._image_height_key = 'image/height'
         self._image_width_key = 'image/width'
         self._image_key = ""
@@ -195,7 +197,10 @@ class TfExampleDecoder(tf_example_decoder.TfExampleDecoder):
                 tf.io.FixedLenFeature((), tf.string, default_value=''),
             self._panoptic_instance_mask_key:
                 tf.io.FixedLenFeature((), tf.string, default_value=''),
-
+            self._panoptic_contigious_mask_key:
+                tf.io.FixedLenFeature((), tf.string, default_value=''),
+            self._class_ids_key:
+                tf.io.VarLenFeature(tf.int64),  # default_value=[]),        
         }
 
 
@@ -211,14 +216,18 @@ class TfExampleDecoder(tf_example_decoder.TfExampleDecoder):
             parsed_tensors[self._panoptic_category_mask_key], channels=1)
         instance_mask = tf.io.decode_png(
             parsed_tensors[self._panoptic_instance_mask_key], channels=1)
-        
+        contigious_mask = tf.io.decode_png(
+            parsed_tensors[self._panoptic_contigious_mask_key], channels=1)
+        class_ids = parsed_tensors[self._class_ids_key]
 
         category_mask.set_shape([None, None, 1])
         instance_mask.set_shape([None, None, 1])
-
+        contigious_mask.set_shape([None, None, 1])
         decoded_tensors.update({
             'groundtruth_panoptic_category_mask': category_mask,
-            'groundtruth_panoptic_instance_mask': instance_mask
+            'groundtruth_panoptic_instance_mask': instance_mask,
+            'groundtruth_panoptic_contigious_mask': contigious_mask,
+            'groundtruth_panoptic_class_ids': class_ids,
         })
         
         return decoded_tensors
@@ -382,7 +391,10 @@ class mask_former_parser(parser.Parser):
         instance_mask = tf.cast(
             data['groundtruth_panoptic_instance_mask'][:, :, 0],
             dtype=tf.float32)
-        
+        contigious_mask = tf.cast(data['groundtruth_panoptic_contigious_mask'][:, :, 0],
+            dtype=tf.float32)
+        class_ids = tf.cast(data['groundtruth_panoptic_class_ids'][:, :, 0], dtype=tf.float32)
+       
         # applies by pixel augmentation (saturation, brightness, contrast)
         if self._color_aug_ssd:
             image = preprocess_ops.color_jitter(
@@ -395,7 +407,7 @@ class mask_former_parser(parser.Parser):
         # Flips image randomly during training.
         if self._aug_rand_hflip and is_training:
             # print("doing random flip")
-            masks = tf.stack([category_mask, instance_mask], axis=0)
+            masks = tf.stack([category_mask, instance_mask, contigious_mask], axis=0)
             image, _, masks = preprocess_ops.random_horizontal_flip(
                 image=image, 
                 masks=masks,
@@ -403,10 +415,10 @@ class mask_former_parser(parser.Parser):
 
             category_mask = masks[0]
             instance_mask = masks[1]
-            
+            contigious_mask = masks[2]
         # Resize and crops image.
         
-        masks = tf.stack([category_mask, instance_mask], axis=0)
+        masks = tf.stack([category_mask, instance_mask, contigious_mask], axis=0)
         masks = tf.expand_dims(masks, -1)
        
         # Resizes and crops image.
@@ -423,7 +435,7 @@ class mask_former_parser(parser.Parser):
                                                                       
         category_mask = tf.squeeze(masks[0])
         instance_mask = tf.squeeze(masks[1])
-        
+        contigious_mask = tf.squeeze(masks[2])
         
         
         crop_im_size = tf.cast(tf.shape(cropped_image)[0:2], tf.int32)
@@ -446,9 +458,14 @@ class mask_former_parser(parser.Parser):
             image_info,
             self._output_size if self._pad_output else crop_im_size,
             is_training=is_training)
+        contigious_mask = self._resize_and_crop_mask(
+            contigious_mask,
+            image_info,
+            self._output_size if self._pad_output else crop_im_size,
+            is_training=is_training)
         
-        (unique_ids, individual_masks) = self._get_individual_masks(
-                instance_mask=instance_mask[:, :, 0])
+        individual_masks = self._get_individual_masks(
+                class_ids=class_ids,contig_instance_mask=contigious_mask)
 
         # Dummy unique IDs and dummy Individual masks
 
@@ -463,7 +480,7 @@ class mask_former_parser(parser.Parser):
 
         # pad the individual masks to the max number of instances and unique ids
 #         individual_masks = tf.pad(individual_masks, [[0, self._max_instances - tf.shape(individual_masks)[0]], [0, 0], [0, 0], [0,0]], constant_values=self._ignore_label)
-        unique_ids = tf.pad(unique_ids, [[0, self._max_instances - tf.shape(unique_ids)[0]]], constant_values=self._ignore_label)
+        unique_ids = tf.pad(class_ids, [[0, self._max_instances - tf.shape(class_ids)[0]]], constant_values=self._ignore_label)
         # Cast image to float and set shapes of output.
         
         image = tf.cast(image, dtype=self._dtype)
@@ -498,10 +515,19 @@ class mask_former_parser(parser.Parser):
         return self._parse_data(data=data, is_training=False)
 
     
-    def _get_individual_masks(self, instance_mask):
+    def _get_individual_masks(self, class_ids, contig_instance_mask):
         
-        unique_ids = tf.zeros([self._max_instances], dtype=tf.float32)
-        individual_masks = tf.zeros([self._max_instances, self._output_size[0], self._output_size[1], 1], dtype=tf.float32)
+        individual_mask_list = tf.TensorArray(tf.float32, size=100) 
+        counter = 0
+        for class_id in class_ids:
+            mask = tf.equal(contig_instance_mask, class_id)
+            individual_mask_list = individual_mask_list.write(counter, tf.expand_dims(tf.cast(mask, tf.float32), axis=2))
+            counter += 1
+
+        for idx in tf.range(100-tf.size(class_ids)):
+            new_mask = tf.zeros(tf.shape(contig_instance_mask))
+            individual_mask_list = individual_mask_list.write(counter, tf.expand_dims(tf.cast(new_mask, tf.float32), axis=2))
+        # individual_masks = tf.zeros([self._max_instances, self._output_size[0], self._output_size[1], 1], dtype=tf.float32)
         # unique_instance_ids, _ = tf.unique(tf.reshape(instance_mask, [-1]))
         # individual_mask_list = tf.TensorArray(tf.float32, size=100) 
         # counter = 0
@@ -511,12 +537,8 @@ class mask_former_parser(parser.Parser):
         #     individual_mask_list = individual_mask_list.write(counter, tf.expand_dims(tf.cast(mask, tf.float32), axis=2))
         #     counter += 1
 
-        # for idx in tf.range(100-tf.size(unique_instance_ids)):
-        #     new_mask = tf.zeros(tf.shape(instance_mask))
-        #     individual_mask_list = individual_mask_list.write(counter, tf.expand_dims(tf.cast(new_mask, tf.float32), axis=2))
-        
         # return (unique_instance_ids, individual_mask_list.stack())
-        return unique_ids, individual_masks
+        return individual_mask_list.stack()
 
     def __call__(self, value):
         """Parses data to an image and associated training labels.

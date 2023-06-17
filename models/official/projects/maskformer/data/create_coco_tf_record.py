@@ -26,19 +26,17 @@ Example usage:
       --output_file_prefix="${OUTPUT_DIR/FILE_PREFIX}" \
       --num_shards=100
 """
-
 import collections
 import json
 import logging
 import os
-
 from absl import app  # pylint:disable=unused-import
 from absl import flags
 import numpy as np
 
 from pycocotools import mask
 import tensorflow as tf
-
+from tqdm import tqdm
 import multiprocessing as mp
 from official.vision.data import tfrecord_lib
 
@@ -263,15 +261,7 @@ def generate_coco_panoptics_masks(segments_info, mask_path,
 
   # create contiguous ids for segments
   _meta = {}
-  thing_classes = [k["name"] for k in COCO_CATEGORIES]
-  thing_colors = [k["color"] for k in COCO_CATEGORIES]
-  stuff_classes = [k["name"] for k in COCO_CATEGORIES]
-  stuff_colors = [k["color"] for k in COCO_CATEGORIES]
-
-  _meta["thing_classes"] = thing_classes
-  _meta["thing_colors"] = thing_colors
-  _meta["stuff_classes"] = stuff_classes
-  _meta["stuff_colors"] = stuff_colors
+  
   thing_dataset_id_to_contiguous_id = {}
   stuff_dataset_id_to_contiguous_id = {}
   for i, cat in enumerate(COCO_CATEGORIES):
@@ -283,9 +273,7 @@ def generate_coco_panoptics_masks(segments_info, mask_path,
   _meta["thing_dataset_id_to_contiguous_id"] = thing_dataset_id_to_contiguous_id
   _meta["stuff_dataset_id_to_contiguous_id"] = stuff_dataset_id_to_contiguous_id
 
-  category_mask_contiguous = np.zeros_like(
-      segments_encoded_mask, dtype=np.uint8)* _VOID_LABEL
-  
+  # All required masks
   semantic_segmentation_mask = np.ones_like(
       segments_encoded_mask, dtype=np.uint8) * _VOID_LABEL
   if include_panoptic_masks:
@@ -293,7 +281,11 @@ def generate_coco_panoptics_masks(segments_info, mask_path,
         segments_encoded_mask, dtype=np.uint8) * _VOID_LABEL
     instance_mask = np.ones_like(
         segments_encoded_mask, dtype=np.uint8) * _VOID_INSTANCE_ID
-
+    contiguous_id_mask = np.ones_like(
+        segments_encoded_mask, dtype=np.uint8) * _VOID_INSTANCE_ID
+    
+  class_ids = []
+  
   for idx, segment in enumerate(segments_info):
     segment_id = segment['id']
     category_id = segment['category_id']
@@ -317,21 +309,28 @@ def generate_coco_panoptics_masks(segments_info, mask_path,
       instance_id = _VOID_INSTANCE_ID
 
     segment_mask = (segments_encoded_mask == segment_id)
+
     semantic_segmentation_mask[segment_mask] = encoded_category_id
-    
+    contiguous_id_mask[segment_mask] = contiguous_id
     if include_panoptic_masks:
       category_mask[segment_mask] =  category_id
       instance_mask[segment_mask] = instance_id
-      category_mask_contiguous[segment_mask] = contiguous_id
+      if not is_crowd:
+        class_ids.append(contiguous_id)
+        
+        
+
   outputs = {
       'semantic_segmentation_mask': tfrecord_lib.encode_mask_as_png(
           semantic_segmentation_mask)
       }
-
+  
   if include_panoptic_masks:
     outputs.update({
         'category_mask': tfrecord_lib.encode_mask_as_png(category_mask),
         'instance_mask': tfrecord_lib.encode_mask_as_png(instance_mask),
+        'class_ids': class_ids,
+        'contiguous_id_mask': tfrecord_lib.encode_mask_as_png(contiguous_id_mask),
         })
   return outputs
 
@@ -508,8 +507,7 @@ def create_tf_example(image,
 
   if panoptic_annotation:
     segments_info = panoptic_annotation['segments_info']
-    print(segments_info)
-    exit()
+   
     panoptic_mask_filename = os.path.join(
         panoptic_masks_dir,
         panoptic_annotation['file_name'])
@@ -519,17 +517,19 @@ def create_tf_example(image,
     feature_dict.update(
         {'image/segmentation/class/encoded': tfrecord_lib.convert_to_feature(
             encoded_panoptic_masks['semantic_segmentation_mask'])})
-
+   
     if include_panoptic_masks:
       feature_dict.update({
           'image/panoptic/category_mask': tfrecord_lib.convert_to_feature(
               encoded_panoptic_masks['category_mask']),
           'image/panoptic/instance_mask': tfrecord_lib.convert_to_feature(
               encoded_panoptic_masks['instance_mask']),
-            'image/panoptic/category_contiguous_id': tfrecord_lib.convert_to_feature(
-              encoded_panoptic_masks['category_mask_contiguous'])
+          'image/panoptic/class_ids': tfrecord_lib.convert_to_feature(
+              encoded_panoptic_masks['class_ids'], value_type="int64_list"),
+          'image/panoptic/contiguous_mask': tfrecord_lib.convert_to_feature(
+              encoded_panoptic_masks['contiguous_id_mask'])
             })
-
+  
   example = tf.train.Example(features=tf.train.Features(feature=feature_dict))
   return example, num_annotations_skipped
 
@@ -626,6 +626,7 @@ def generate_annotations(images, image_dirs,
                          include_panoptic_masks=False,
                          include_masks=False):
   """Generator for COCO annotations."""
+  
   for image in images:
     object_annotation = (img_to_obj_annotation.get(image['id'], None) if
                          img_to_obj_annotation else None)

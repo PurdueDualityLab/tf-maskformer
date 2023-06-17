@@ -24,7 +24,7 @@ from PIL import Image
 import tensorflow as tf
 
 import multiprocessing as mp
-
+from tqdm import tqdm
 
 LOG_EVERY = 100
 
@@ -162,8 +162,8 @@ def write_tf_record_dataset(output_path, annotation_iterator,
     else:
       tf_example_iterator = map(process_func, annotation_iterator)
 
-  for idx, (tf_example, num_annotations_skipped) in enumerate(
-      tf_example_iterator):
+  for idx, (tf_example, num_annotations_skipped) in tqdm(enumerate(
+      tf_example_iterator)):
     if idx % LOG_EVERY == 0:
       logging.info('On image %d', idx)
 
