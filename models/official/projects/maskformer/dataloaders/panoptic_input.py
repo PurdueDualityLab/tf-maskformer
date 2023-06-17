@@ -393,7 +393,7 @@ class mask_former_parser(parser.Parser):
             dtype=tf.float32)
         contigious_mask = tf.cast(data['groundtruth_panoptic_contigious_mask'][:, :, 0],
             dtype=tf.float32)
-        class_ids = tf.sparse.to_dense(data['groundtruth_panoptic_class_ids'], default_value=[])
+        class_ids = tf.sparse.to_dense(data['groundtruth_panoptic_class_ids'], default_value=0)
         class_ids = tf.cast(class_ids, dtype=tf.float32)
         print("Class id shape : ", tf.shape(class_ids))
         # applies by pixel augmentation (saturation, brightness, contrast)
