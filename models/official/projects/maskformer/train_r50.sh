@@ -6,7 +6,7 @@ gcsfuse cam2-models ~/models
 export PYTHONPATH=$PYTHONPATH:~/tf-maskformer/models
 export MODEL_DIR="gs://cam2-models/maskformer"
 export DATA_PTH="gs://cam2-datasets/coco_panoptic"
-export TPU_NAME="tf-train-1"
+export TPU_NAME="tf-debug-5"
 export TPU_SOFTWARE="2.11.0"
 export TPU_PROJECT="red-atlas-305317"
 export TPU_ZONE="us-central1-a"
