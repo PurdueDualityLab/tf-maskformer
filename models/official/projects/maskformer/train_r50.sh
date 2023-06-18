@@ -21,6 +21,5 @@ python3 models/official/projects/maskformer/train.py \
   --mode train \
   --model_dir $MODEL_DIR \
   --tpu $TPU_NAME \
-  
   --params_override=$OVERRIDES
 
