@@ -481,7 +481,9 @@ class mask_former_parser(parser.Parser):
 
         # pad the individual masks to the max number of instances and unique ids
 #         individual_masks = tf.pad(individual_masks, [[0, self._max_instances - tf.shape(individual_masks)[0]], [0, 0], [0, 0], [0,0]], constant_values=self._ignore_label)
-        unique_ids = tf.pad(class_ids, [[0, self._max_instances - tf.shape(class_ids)[0]]], constant_values=self._ignore_label)
+        # unique_ids = tf.pad(class_ids, [[0, self._max_instances - tf.shape(class_ids)[0]]], constant_values=self._ignore_label)
+        unique_ids = preprocess_ops.clip_or_pad_to_fixed_size(
+                class_ids, self._max_instances)
         # unique_ids = tf.zeros([self._max_instances], dtype=tf.float32)
        
         # Cast image to float and set shapes of output.
