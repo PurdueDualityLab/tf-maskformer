@@ -18,6 +18,7 @@ import os
 
 FLAGS = flags.FLAGS
 def main(_):
+	# This works only for TPU v3 version
 	# c = Client(os.environ['TPU_NAME'], zone=os.environ['TPU_ZONE'], project=os.environ['TPU_PROJECT'])
 	# c.configure_tpu_version(os.environ["TPU_SOFTWARE"], restart_type='ifNeeded')
 	# c.wait_for_healthy()
