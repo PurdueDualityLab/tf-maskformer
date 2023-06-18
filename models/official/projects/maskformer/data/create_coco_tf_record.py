@@ -324,7 +324,7 @@ def generate_coco_panoptics_masks(segments_info, mask_path,
       'semantic_segmentation_mask': tfrecord_lib.encode_mask_as_png(
           semantic_segmentation_mask)
       }
-  
+  print("class_ids_raw : ", class_ids)
   if include_panoptic_masks:
     outputs.update({
         'category_mask': tfrecord_lib.encode_mask_as_png(category_mask),
@@ -517,7 +517,7 @@ def create_tf_example(image,
     feature_dict.update(
         {'image/segmentation/class/encoded': tfrecord_lib.convert_to_feature(
             encoded_panoptic_masks['semantic_segmentation_mask'])})
-   
+    print("Encoded panoptic class ids :", encoded_panoptic_masks['class_ids'])
     if include_panoptic_masks:
       feature_dict.update({
           'image/panoptic/category_mask': tfrecord_lib.convert_to_feature(

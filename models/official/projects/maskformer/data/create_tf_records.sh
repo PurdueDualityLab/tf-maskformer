@@ -1,4 +1,4 @@
-DATA_DIR=$1
+# DATA_DIR=$1
 # wget http://images.cocodataset.org/annotations/annotations_trainval2017.zip -P $DATA_DIR
 # wget http://images.cocodataset.org/zips/val2017.zip -P $DATA_DIR
 # wget http://images.cocodataset.org/annotations/panoptic_annotations_trainval2017.zip -P $DATA_DIR
@@ -56,13 +56,13 @@ python3 create_coco_tf_record.py \
   --num_shards=8 \
   --include_panoptic_masks
 
-python3 create_coco_tf_record.py \
-  --logtostderr \
-  --image_dir="$DATA_DIR/train2017" \
-  --object_annotations_file="$DATA_DIR/annotations/instances_train2017.json" \
-  --output_file_prefix="$DATA_DIR/tfrecords/train" \
-  --panoptic_annotations_file="$DATA_DIR/annotations/panoptic_train2017.json" \
-  --panoptic_masks_dir="$DATA_DIR/panoptic_train2017" \
-  --num_shards=150 \
-  --include_panoptic_masks\
-  --num_processes 16\
+# python3 create_coco_tf_record.py \
+#   --logtostderr \
+#   --image_dir="$DATA_DIR/train2017" \
+#   --object_annotations_file="$DATA_DIR/annotations/instances_train2017.json" \
+#   --output_file_prefix="$DATA_DIR/tfrecords/train" \
+#   --panoptic_annotations_file="$DATA_DIR/annotations/panoptic_train2017.json" \
+#   --panoptic_masks_dir="$DATA_DIR/panoptic_train2017" \
+#   --num_shards=150 \
+#   --include_panoptic_masks\
+#   --num_processes 16\

@@ -1,0 +1,11 @@
+--2023-06-18 01:02:28--  http://images.cocodataset.org/annotations/annotations_trainval2017.zip
+Resolving images.cocodataset.org (images.cocodataset.org)... 52.216.49.41, 52.217.234.249, 3.5.25.137, ...
+Connecting to images.cocodataset.org (images.cocodataset.org)|52.216.49.41|:80... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 252907541 (241M) [application/zip]
+Saving to: ‘/depot/davisjam/data/vishal/datasets/coco/annotations_trainval2017.zip’
+
+91% [==========================================================================================================================>           ] 232,219,579 34.9MB/s  eta 2s     94% [==============================================================================================================================>       ] 240,023,479 35.0MB/s  eta 2s     97% [==================================================================================================================================>   ] 247,806,679 35.1MB/s  eta 0s     100%[=====================================================================================================================================>] 252,907,541 35.3MB/s   in 8.6s   
+
+2023-06-18 01:02:37 (28.0 MB/s) - ‘/depot/davisjam/data/vishal/datasets/coco/annotations_trainval2017.zip’ saved [252907541/252907541]
+
