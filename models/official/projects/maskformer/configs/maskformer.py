@@ -91,7 +91,7 @@ class MaskFormer(hyperparams.Config):
   num_queries: int = 100
   hidden_size: int = 256
   # TODO: Actually there are 133 classes for panoptic segmentation
-  num_classes: int = 199  # 0: background
+  num_classes: int = 133  # 0: background
   num_encoder_layers: int = 6
   num_decoder_layers: int = 6
   input_size: List[int] = dataclasses.field(default_factory=list)
@@ -122,9 +122,10 @@ COCO_VAL_EXAMPLES = 5000
 @exp_factory.register_config_factory('maskformer_coco_panoptic')
 def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
   """Config to get results that matches the paper."""
-  train_batch_size = 8
+  train_batch_size = 64
   eval_batch_size = 1
-  steps_per_epoch = COCO_TRAIN_EXAMPLES // train_batch_size
+  steps_per_epoch = 100
+#   steps_per_epoch = COCO_TRAIN_EXAMPLES // train_batch_size
   train_steps = 300 * steps_per_epoch  # 300 epochs
   decay_at = train_steps - 100 * steps_per_epoch  # 200 epochs
   config = cfg.ExperimentConfig(

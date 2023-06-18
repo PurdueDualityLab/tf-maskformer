@@ -33,7 +33,7 @@ class PanopticTask(base_task.Task):
                                  num_encoder_layers=0,
                                  num_decoder_layers=6,
                                  num_classes=133,
-                                 batch_size=8)
+                                 batch_size=64)
 
 		return model
 	
@@ -42,6 +42,8 @@ class PanopticTask(base_task.Task):
 		Build panoptic segmentation dataset.
 
 		"""
+		
+
 		if params.decoder.type == 'simple_decoder':
 			decoder = panoptic_input.TfExampleDecoder(regenerate_source_id = params.regenerate_source_id)
 		else:
