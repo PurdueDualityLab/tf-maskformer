@@ -116,7 +116,7 @@ class COCODataLoader():
                 classes, self._params.max_num_boxes),
         'boxes':
             preprocess_ops.clip_or_pad_to_fixed_size(
-                boxes, self._params.max_num_boxes)
+                boxes, self._params.max_num_boxes) # [4, 100]
     }
     if not self._params.is_training:
       labels.update({

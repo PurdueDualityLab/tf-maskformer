@@ -18,9 +18,9 @@ import os
 
 FLAGS = flags.FLAGS
 def main(_):
-	c = Client(os.environ['TPU_NAME'], zone=os.environ['TPU_ZONE'], project=os.environ['TPU_PROJECT'])
-	c.configure_tpu_version(os.environ["TPU_SOFTWARE"], restart_type='ifNeeded')
-	c.wait_for_healthy()
+	# c = Client(os.environ['TPU_NAME'], zone=os.environ['TPU_ZONE'], project=os.environ['TPU_PROJECT'])
+	# c.configure_tpu_version(os.environ["TPU_SOFTWARE"], restart_type='ifNeeded')
+	# c.wait_for_healthy()
 	gin.parse_config_files_and_bindings(FLAGS.gin_file, FLAGS.gin_params)
 	params = train_utils.parse_configuration(FLAGS)
 	model_dir = FLAGS.model_dir
