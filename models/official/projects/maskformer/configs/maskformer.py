@@ -122,7 +122,7 @@ COCO_VAL_EXAMPLES = 5000
 @exp_factory.register_config_factory('maskformer_coco_panoptic')
 def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
   """Config to get results that matches the paper."""
-  train_batch_size = 8
+  train_batch_size = 128
   eval_batch_size = 1
   steps_per_epoch = COCO_TRAIN_EXAMPLES // train_batch_size
   train_steps = 300 * steps_per_epoch  # 300 epochs
@@ -184,7 +184,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
           train_steps=train_steps,
           validation_steps=COCO_VAL_EXAMPLES // eval_batch_size,
           steps_per_loop=steps_per_epoch,
-          summary_interval=steps_per_epoch,
+          summary_interval=100,
           checkpoint_interval=steps_per_epoch,
           validation_interval= 5 * steps_per_epoch,
           max_to_keep=1,
