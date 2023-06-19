@@ -1,4 +1,4 @@
-tensorflow
+tensorflow==2.11.0
 pyyaml
 gin-config==0.1.1
 tensorflow_addons
