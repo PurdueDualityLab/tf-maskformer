@@ -3,7 +3,7 @@ fusermount -u ~/datasets
 fusermount -u ~/models
 gcsfuse --implicit-dirs cam2-datasets ~/datasets
 gcsfuse cam2-models ~/models
-export PYTHONPATH=$PYTHONPATH:~/tf-maskformer/models
+export PYTHONPATH=$PYTHONPATH:~/maskformer/models
 export MODEL_DIR="gs://cam2-models/maskformer"
 export DATA_PTH="gs://cam2-datasets/coco_panoptic"
 export TPU_NAME="tf-debug-eu-1"
