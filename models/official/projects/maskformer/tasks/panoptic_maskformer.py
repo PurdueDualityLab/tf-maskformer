@@ -141,7 +141,7 @@ class PanopticTask(base_task.Task):
 			A dictionary of logs.
     	"""
 		
-
+		tf.profiler.experimental.start("~/models/~/models/maskformer/train/")
 		features, labels = inputs
 	
 		# Preprocess labels to match the format for loss prediction
@@ -190,7 +190,7 @@ class PanopticTask(base_task.Task):
 			# if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
 			# 	grads = optimizer.get_unscaled_gradients(grads)
 			optimizer.apply_gradients(list(zip(grads, tvars)))
-
+			tf.profiler.experimental.stop()
 			# # Multiply for logging.
 			# # Since we expect the gradient replica sum to happen in the optimizer,
 			# # the loss is scaled with global num_boxes and weights.
