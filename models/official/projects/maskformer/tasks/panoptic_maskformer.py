@@ -141,7 +141,7 @@ class PanopticTask(base_task.Task):
 			A dictionary of logs.
     	"""
 		
-		tf.profiler.experimental.start("~/models/~/models/maskformer/train/")
+		tf.profiler.experimental.start("gs://cam2-models/maskformer")
 		features, labels = inputs
 	
 		# Preprocess labels to match the format for loss prediction
