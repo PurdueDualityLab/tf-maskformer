@@ -43,7 +43,7 @@ class PanopticTask(base_task.Task):
 
 		"""
 		
-		tf.profiler.experimental.server.start(6000)
+		# tf.profiler.experimental.server.start(6000)
 		if params.decoder.type == 'simple_decoder':
 			decoder = panoptic_input.TfExampleDecoder(regenerate_source_id = params.regenerate_source_id)
 		else:
