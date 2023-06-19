@@ -57,7 +57,8 @@ def main(_):
 	# Below code is independent of compute platform
 	with distribution_strategy.scope():
 		task = task_factory.get_task(params.task, logging_dir=model_dir)
-
+		
+	tf.profiler.experimental.server.start(6000)
 	train_lib.run_experiment(
 			distribution_strategy=distribution_strategy,
 			task=task,

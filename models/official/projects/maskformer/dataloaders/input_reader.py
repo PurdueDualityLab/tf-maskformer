@@ -76,8 +76,7 @@ class InputFn(object):
         
         if self._input_sharding and ctx and ctx.num_input_pipelines > 1:
             dataset = dataset.shard(ctx.num_input_pipelines, ctx.input_pipeline_id)
-        # dataset = dataset.cache()
-        # dataset = dataset.prefetch(tf.data.AUTOTUNE)
+        dataset = dataset.cache()
         if self._is_training:
             dataset = dataset.repeat()
 
