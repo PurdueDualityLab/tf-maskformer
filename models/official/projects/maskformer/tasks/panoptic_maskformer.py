@@ -140,13 +140,7 @@ class PanopticTask(base_task.Task):
 			Returns:
 			A dictionary of logs.
     	"""
-		
-		tf.profiler.experimental.start("gs://cam2-models/maskformer")
 		features, labels = inputs
-	
-		# Preprocess labels to match the format for loss prediction
-		# mask_labels = 'unique_ids': unique_ids,
-        #     'individual_masks': individual_masks,
 		with tf.GradientTape() as tape:
 			outputs = model(features, training=True)
 			
@@ -173,8 +167,8 @@ class PanopticTask(base_task.Task):
 			# 	scaled_loss = loss
 			# 	# For mixed_precision policy, when LossScaleOptimizer is used, loss is
 			# 	# scaled for numerical stability.
-			# 	if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
-			# 		scaled_loss = optimizer.get_scaled_loss(scaled_loss)
+			if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
+				scaled_loss = optimizer.get_scaled_loss(scaled_loss)
 		##########################################################################
 			
 			# TODO : Add auxiallary losses
@@ -187,10 +181,9 @@ class PanopticTask(base_task.Task):
 			####################################################################
 			# Do not use mixed precision for now
 			# # Scales back gradient when LossScaleOptimizer is used.
-			# if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
-			# 	grads = optimizer.get_unscaled_gradients(grads)
+			
 			optimizer.apply_gradients(list(zip(grads, tvars)))
-			tf.profiler.experimental.stop()
+			
 			# # Multiply for logging.
 			# # Since we expect the gradient replica sum to happen in the optimizer,
 			# # the loss is scaled with global num_boxes and weights.
