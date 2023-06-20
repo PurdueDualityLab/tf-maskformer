@@ -56,16 +56,16 @@ class PanopticTask(base_task.Task):
 		# 	print(f"unique ids : {sample[1]['unique_ids']}")
 		# 	print("individual masks :", sample[1]["individual_masks"].shape)
 		# 	print(f"image shape : {sample[0].shape}")
-		# 	# logger.debug(f"category_mask : {sample[1]['category_mask'].shape}")
-		# 	# logger.debug(f"mask_labels :{sample[1]['mask_labels']}")
-		# 	# logger.debug(f"instance_mask:{sample[1]['instance_mask'].shape}")
-		# 	# print(sample[1]["instance_centers_heatmap"].shape)
-		# 	# print(sample[1]["instance_centers_offset"].shape)
-		# 	# print(sample[1]["semantic_weights"].shape)
-		# 	# print(sample[1]["valid_mask"].shape)
-		# 	# print(sample[1]["things_mask"].shape)
+			# logger.debug(f"category_mask : {sample[1]['category_mask'].shape}")
+			# logger.debug(f"mask_labels :{sample[1]['mask_labels']}")
+			# logger.debug(f"instance_mask:{sample[1]['instance_mask'].shape}")
+			# print(sample[1]["instance_centers_heatmap"].shape)
+			# print(sample[1]["instance_centers_offset"].shape)
+			# print(sample[1]["semantic_weights"].shape)
+			# print(sample[1]["valid_mask"].shape)
+			# print(sample[1]["things_mask"].shape)
 			
-		# # exit()
+		# exit()
 		
 		return dataset
 

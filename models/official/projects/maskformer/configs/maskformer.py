@@ -21,9 +21,6 @@ from typing import List, Optional, Union
 from official.core import config_definitions as cfg
 from official.core import exp_factory
 from official.modeling import hyperparams
-# from official.projects.detr import optimization
-# from official.projects.detr.dataloaders import coco
-# from official.modeling import optimization
 from official.vision.configs import backbones
 from official.vision.configs import common
 from official.projects.maskformer import optimization
@@ -122,8 +119,8 @@ COCO_VAL_EXAMPLES = 5000
 @exp_factory.register_config_factory('maskformer_coco_panoptic')
 def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
   """Config to get results that matches the paper."""
-  train_batch_size = 8
-  eval_batch_size = 1
+  train_batch_size = 64
+  eval_batch_size = 64
   steps_per_epoch = 100
 #   steps_per_epoch = COCO_TRAIN_EXAMPLES // train_batch_size
   train_steps = 300 * steps_per_epoch  # 300 epochs
@@ -165,7 +162,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
                     sigma = 8.0,
                     small_instance_area_threshold = 4096,
                     small_instance_weight = 3.0,
-                    dtype = 'float32',
+                    dtype = 'bfloat16',
                     seed = 2045,
                 )
           ),
