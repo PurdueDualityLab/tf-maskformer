@@ -210,5 +210,6 @@ class PanopticTask(base_task.Task):
 					m.update_state(all_losses[m.name])
 			return logs
 
-	def validation_step(self, inputs, model, optimizer, metrics=None):
+	def validation_step(self, inputs: Tuple[Any, Any],model: tf.keras.Model, metrics: Optional[List[Any]] = None) -> Dict[str, Any]:
+		
 		pass
