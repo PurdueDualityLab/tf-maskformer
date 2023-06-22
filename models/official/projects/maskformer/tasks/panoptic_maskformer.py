@@ -200,7 +200,7 @@ class PanopticTask(base_task.Task):
 			all_losses = {
 				'cls_loss': cls_loss,
 				'focal_loss': focal_loss,
-			   'dice_loss': dice_loss,
+				'dice_loss': dice_loss,
 			}
 
 			
@@ -211,5 +211,83 @@ class PanopticTask(base_task.Task):
 			return logs
 
 	def validation_step(self, inputs: Tuple[Any, Any],model: tf.keras.Model, metrics: Optional[List[Any]] = None) -> Dict[str, Any]:
+		"""Validatation step.
+
+		Args:
+		inputs: a dictionary of input tensors.
+		model: the keras.Model.
+		metrics: a nested structure of metrics objects.
+
+		Returns:
+		A dictionary of logs.
+		"""
+		features, labels = inputs
+		outputs = model(features, training=False)[-1] #TODO: Not sure if we need [-1] here.
+
+		total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(
+			output=outputs, labels=labels)
+
+		num_replicas_in_sync = tf.distribute.get_strategy().num_replicas_in_sync
+		total_loss *= num_replicas_in_sync
+		cls_loss *= num_replicas_in_sync
+		focal_loss *= num_replicas_in_sync
+		dice_loss *= num_replicas_in_sync
+
+		logs = {self.loss: total_loss}
+
+		################################################################################
+		'''
+		if xxx not in outputs:
+			TODO
+		'''
 		
-		pass
+		# TODO: Update the predictions and GT
+		predictions = {
+			'detection_boxes': detection_boxes,
+			'detection_scores': detection_scores,
+			'detection_classes': detection_classes,
+			'num_detections': num_detections,
+			'source_id': labels['id'],
+			'image_info': labels['image_info']
+		}
+
+		ground_truths = {
+			'source_id': labels['id'],
+			'height': labels['image_info'][:, 0:1, 0],
+			'width': labels['image_info'][:, 0:1, 1],
+			'num_detections': tf.reduce_sum(
+				tf.cast(tf.math.greater(labels['classes'], 0), tf.int32), axis=-1),
+			'boxes': labels['gt_boxes'],
+			'classes': labels['classes'],
+			'is_crowds': labels['is_crowd']
+		}
+		logs.update({'predictions': predictions,
+					'ground_truths': ground_truths})
+		################################################################################
+
+		all_losses = {
+			'cls_loss': cls_loss,
+			'focal_loss': focal_loss,
+			'dice_loss': dice_loss,
+		}
+
+		
+
+		# Metric results will be added to logs for you.
+		if metrics:
+			for m in metrics:
+				m.update_state(all_losses[m.name])
+		return logs
+	
+	def aggregate_logs(self, state=None, step_outputs=None):
+		if state is None:
+			self.coco_metric.reset_states()
+			state = self.coco_metric
+
+		state.update_state(
+			step_outputs['ground_truths'],
+			step_outputs['predictions'])
+		return state
+
+	def reduce_aggregated_logs(self, aggregated_logs, global_step=None):
+		return aggregated_logs.result()
