@@ -84,8 +84,11 @@ class InputFn(object):
             map_func=self._dataset_fn,
             cycle_length=32,
             num_parallel_calls=tf.data.experimental.AUTOTUNE)
-        
+        #dataset = dataset.cache()
+        #dataset = dataset.map(self._parser_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+ 
         if self._is_training:
+           #dataset = dataset.repeat()
             dataset = dataset.shuffle(self._shuffle_buffer_size)
         if self._num_examples > 0:
             dataset = dataset.take(self._num_examples)
@@ -94,7 +97,6 @@ class InputFn(object):
         
         dataset = dataset.map(
             self._parser_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
-        
         dataset = dataset.batch(batch_size, drop_remainder=True)
         dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
         return dataset

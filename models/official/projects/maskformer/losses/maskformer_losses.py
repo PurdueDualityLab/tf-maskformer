@@ -105,12 +105,12 @@ class FocalLossMod(focal_loss.FocalLoss):
         focal_neg = tf.pow(prob, self._gamma) * tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.zeros_like(y_pred), logits=y_pred)
         
         if self._alpha >= 0:
-            focal_pos = focal_pos * self._alpha
-            focal_neg = focal_neg * (1 - self._alpha)
-        loss = tf.einsum("bnc,bmc->bnm", focal_pos, y_true) + tf.einsum(
-        "bnc,bmc->bnm", focal_neg, (1 - y_true)
+            focal_pos = tf.cast(focal_pos * self._alpha, tf.float32)
+            focal_neg = tf.cast(focal_neg * (1 - self._alpha), tf.float32)
+        loss = tf.einsum("bnc,bmc->bnm",focal_pos,y_true) + tf.einsum(
+        "bnc,bmc->bnm", focal_neg,(1 - y_true)
         )
-        return loss / hw
+        return tf.cast(loss / hw,tf.bfloat16)
     
 
 
@@ -126,7 +126,7 @@ class DiceLoss(tf.keras.losses.Loss):
        
         y_pred = tf.reshape(tf.keras.activations.sigmoid(y_pred), (y_pred.shape[0],y_pred.shape[1],-1))
         y_true = tf.reshape(y_true, (y_true.shape[0],tf.shape(y_true)[1],-1))
-        
+        y_true=tf.cast(y_true,tf.bfloat16) 
         numerator = 2 * tf.reduce_sum(y_pred * y_true, axis=-1)
         denominator = tf.reduce_sum(y_pred, axis=-1) + tf.reduce_sum(y_true, axis=-1)
         loss = 1 - (numerator + 1) / (denominator + 1)
@@ -138,14 +138,14 @@ class DiceLoss(tf.keras.losses.Loss):
         y_pred = tf.sigmoid(y_pred)
         y_pred = tf.reshape(y_pred, [y_pred.shape[0], -1, y_pred.shape[1]])
         y_pred = tf.transpose(y_pred, [0, 2, 1])
-       
+        y_pred = tf.cast(y_pred, tf.float32)
         numerator = 2 * tf.einsum("bnc,bmc->bnm", y_pred, y_true)
         denominator = tf.reduce_sum(y_pred, axis=-1)[:, tf.newaxis] + tf.expand_dims(tf.reduce_sum(y_true, axis=-1), axis=-1)
        
 
         loss = 1 - (numerator + 1) / (denominator + 1)
         
-        return loss
+        return tf.cast(loss,tf.bfloat16)
 
 class Loss:
     def __init__(self, num_classes, matcher, eos_coef, cost_class = 1, cost_focal = 1, cost_dice = 1):
@@ -252,7 +252,7 @@ class Loss:
         focal_loss_weighted = tf.where(background_new, tf.zeros_like(focal_loss), focal_loss)
         dice_loss_weighted = tf.where(background_new, tf.zeros_like(dice_loss), dice_loss)
         focal_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(focal_loss_weighted), num_masks_sum)
-        dice_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(dice_loss_weighted), num_masks_sum)
+        dice_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(dice_loss_weighted), tf.cast(num_masks_sum,tf.bfloat16))
 
         
         return cls_loss, focal_loss_final, dice_loss_final

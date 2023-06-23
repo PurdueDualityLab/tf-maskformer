@@ -98,7 +98,7 @@ class PanopticTask(base_task.Task):
 		calculated_losses = loss(outputs, targets)
 		
 		# Losses are returned as weighted sum of individual losses
-		total_loss = calculated_losses['loss_ce'] + calculated_losses['loss_dice'] + calculated_losses['loss_focal']
+		total_loss = tf.cast(calculated_losses['loss_ce'], tf.bfloat16) + tf.cast(calculated_losses['loss_dice'], tf.bfloat16) + tf.cast(calculated_losses['loss_focal'],tf.bfloat16)
 
 		weighted_ce = calculated_losses['loss_ce']
 		weighted_focal = calculated_losses['loss_dice']

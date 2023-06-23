@@ -821,7 +821,7 @@ class TransformerDecoderBlock(tf.keras.layers.Layer):
       self_attention_output = self.encdec_attention_layer_norm(
           self_attention_output)
     cross_attn_inputs = dict(
-        query=self_attention_output + input_pos_embed,
+        query=tf.cast(self_attention_output, tf.bfloat16) + input_pos_embed,
         key=memory + memory_pos_embed,
         value=memory,
         attention_mask=attention_mask)
@@ -831,7 +831,7 @@ class TransformerDecoderBlock(tf.keras.layers.Layer):
       attention_output = source_self_attention_output + attention_output
     else:
       attention_output = self.encdec_attention_layer_norm(
-          self_attention_output + attention_output)
+        tf.cast(self_attention_output, tf.bfloat16) + attention_output)
     if self._norm_first:
       source_attention_output = attention_output
       attention_output = self.output_layer_norm(attention_output)
@@ -845,5 +845,5 @@ class TransformerDecoderBlock(tf.keras.layers.Layer):
     if self._norm_first:
       layer_output = source_attention_output + layer_output
     else:
-      layer_output = self.output_layer_norm(layer_output + attention_output)
+      layer_output = self.output_layer_norm(tf.cast(layer_output,tf.bfloat16) + tf.cast(attention_output, tf.bfloat16))
     return layer_output, cache

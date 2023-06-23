@@ -124,8 +124,8 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
   """Config to get results that matches the paper."""
   train_batch_size = 8
   eval_batch_size = 1
-  steps_per_epoch = 100
-#   steps_per_epoch = COCO_TRAIN_EXAMPLES // train_batch_size
+  #steps_per_epoch = 100
+  steps_per_epoch = COCO_TRAIN_EXAMPLES // train_batch_size
   train_steps = 300 * steps_per_epoch  # 300 epochs
   decay_at = train_steps - 100 * steps_per_epoch  # 200 epochs
   config = cfg.ExperimentConfig(
