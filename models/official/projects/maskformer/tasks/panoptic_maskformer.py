@@ -15,6 +15,7 @@ from official.projects.maskformer.dataloaders import panoptic_input
 
 from official.projects.detr.ops.matchers import hungarian_matching
 from official.projects.maskformer.losses.maskformer_losses import Loss
+from official.projects.maskformer.losses.inference import PanopticInference
 
 import numpy as np
 from loguru import logger
@@ -236,16 +237,23 @@ class PanopticTask(base_task.Task):
 		logs = {self.loss: total_loss}
 
 		################################################################################
-		'''
-		if xxx not in outputs:
-			TODO
-		'''
+		if 'class_prob_predictions' not in outputs:
+			# TODO
+			raise ValueError('`class_prob_predictions` must be in outputs.')
+		else:
+			class_prob_predictions = outputs['class_prob_predictions']
+
+		if 'mask_prob_predictions' not in outputs:
+			raise ValueError('`mask_prob_predictions` must be in outputs.')
+		else:
+			mask_prob_predictions = outputs['mask_prob_predictions']
 		
+
 		# TODO: Update the predictions and GT
 		predictions = {
-			'detection_boxes': detection_boxes,
-			'detection_scores': detection_scores,
-			'detection_classes': detection_classes,
+			'class_prob_predictions': class_prob_predictions,
+			'mask_prob_predictions': mask_prob_predictions,
+			
 			'num_detections': num_detections,
 			'source_id': labels['id'],
 			'image_info': labels['image_info']
@@ -257,7 +265,7 @@ class PanopticTask(base_task.Task):
 			'width': labels['image_info'][:, 0:1, 1],
 			'num_detections': tf.reduce_sum(
 				tf.cast(tf.math.greater(labels['classes'], 0), tf.int32), axis=-1),
-			'boxes': labels['gt_boxes'],
+			'masks': labels['masks'],
 			'classes': labels['classes'],
 			'is_crowds': labels['is_crowd']
 		}

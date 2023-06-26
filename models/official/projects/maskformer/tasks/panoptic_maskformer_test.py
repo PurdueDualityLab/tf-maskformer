@@ -17,6 +17,7 @@ from official.projects.maskformer.tasks import panoptic_maskformer
 
 from official.projects.detr.ops.matchers import hungarian_matching
 from official.projects.maskformer.losses.maskformer_losses import Loss
+from official.projects.maskformer.losses.inference import PanopticInference
 
 # TODO: remove unnecessary imports
 
