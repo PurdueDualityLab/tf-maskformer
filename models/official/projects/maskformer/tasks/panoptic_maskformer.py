@@ -248,23 +248,24 @@ class PanopticTask(base_task.Task):
 		else:
 			mask_prob_predictions = outputs['mask_prob_predictions']
 		
+		# TODO: Fix this after inference done
+		panoptic_seg, segments_info = PanopticInference(mask_true=labels[''], mask_prob_predictions)
 
 		# TODO: Update the predictions and GT
 		predictions = {
 			'class_prob_predictions': class_prob_predictions,
 			'mask_prob_predictions': mask_prob_predictions,
-			
-			'num_detections': num_detections,
-			'source_id': labels['id'],
-			'image_info': labels['image_info']
+			'panoptic_seg': panoptic_seg,
+			'id': segments_info['id'],
+			'is_thing': segments_info['is_thing'],
+			'category_id': segments_info['category_id'],
+			# 'image_info': labels['image_info']
 		}
 
 		ground_truths = {
 			'source_id': labels['id'],
 			'height': labels['image_info'][:, 0:1, 0],
 			'width': labels['image_info'][:, 0:1, 1],
-			'num_detections': tf.reduce_sum(
-				tf.cast(tf.math.greater(labels['classes'], 0), tf.int32), axis=-1),
 			'masks': labels['masks'],
 			'classes': labels['classes'],
 			'is_crowds': labels['is_crowd']

@@ -20,6 +20,7 @@ class PanopticInferenceTest(tf.test.TestCase, parameterized.TestCase):
         self.assertAllEqual(
             output["mask_prob_predictions"].shape.as_list(), expected_mask_probs_shape)
         
+        # TODO: We need to fix this!
         out = PanopticInference().call(mask_true=output["class_prob_predictions"], mask_pred=output["mask_prob_predictions"])
         print(out)
 
