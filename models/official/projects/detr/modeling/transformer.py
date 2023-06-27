@@ -845,5 +845,5 @@ class TransformerDecoderBlock(tf.keras.layers.Layer):
     if self._norm_first:
       layer_output = source_attention_output + layer_output
     else:
-      layer_output = self.output_layer_norm(tf.cast(layer_output,tf.bfloat16) + tf.cast(attention_output, tf.bfloat16))
+        layer_output = self.output_layer_norm(tf.cast(layer_output,tf.bfloat16) + tf.cast(attention_output, tf.bfloat16))
     return layer_output, cache
