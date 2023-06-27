@@ -25,7 +25,8 @@ class MaskFormer(tf.keras.Model):
                bias_constraint=None,
                num_queries=100,
                hidden_size=256,
-               num_encoder_layers=0,
+               fpn_encoder_layers=6,
+               detr_encoder_layers=0,
                num_decoder_layers=6,
                dropout_rate=0.1,
                backbone_endpoint_name='5',
@@ -52,7 +53,8 @@ class MaskFormer(tf.keras.Model):
     self._bias_constraint = bias_constraint
 
     # DETRTransformer parameters.
-    self._num_encoder_layers = num_encoder_layers
+    self._fpn_encoder_layers = fpn_encoder_layers
+    self._detr_encoder_layers = detr_encoder_layers
     self._num_decoder_layers = num_decoder_layers
     self._num_queries = num_queries
     self._hidden_size = hidden_size
@@ -80,12 +82,13 @@ class MaskFormer(tf.keras.Model):
                             bias_regularizer=self._bias_regularizer,
                             activity_regularizer=self._activity_regularizer,
                             kernel_constraint=self._kernel_constraint,
-                            bias_constraint=self._bias_constraint)
+                            bias_constraint=self._bias_constraint,
+                            num_encoder_layers = self._fpn_encoder_layers)
     self.transformer = MaskFormerTransformer(backbone_endpoint_name=self._backbone_endpoint,
                                             batch_size=self._batch_size,
                                             num_queries=self._num_queries,
                                             hidden_size=self._hidden_size,
-                                            num_encoder_layers=self._num_encoder_layers,
+                                            num_encoder_layers=self._detr_encoder_layers,
                                             num_decoder_layers=self._num_decoder_layers,
                                             dropout_rate=self._dropout_rate)
     self.head = MLPHead(num_classes=self._num_classes, 

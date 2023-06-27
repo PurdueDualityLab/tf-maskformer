@@ -93,7 +93,8 @@ class MaskFormer(hyperparams.Config):
   hidden_size: int = 256
   # TODO: Actually there are 133 classes for panoptic segmentation
   num_classes: int = 133  # 0: background
-  num_encoder_layers: int = 6
+  fpn_encoder_layers: int = 6
+  detr_encoder_layers: int = 0
   num_decoder_layers: int = 6
   input_size: List[int] = dataclasses.field(default_factory=list)
   backbone: backbones.Backbone = backbones.Backbone(

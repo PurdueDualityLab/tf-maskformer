@@ -32,7 +32,8 @@ class PanopticTask(base_task.Task):
                            num_queries=self._task_config.model.num_queries,
                            hidden_size=self._task_config.model.hidden_size,
                            backbone_endpoint_name=self._task_config.model.backbone_endpoint_name,
-                           num_encoder_layers=self._task_config.model.num_encoder_layers,
+                           fpn_encoder_layers=self._task_config.model.fpn_encoder_layers,
+                           detr_encoder_laters=self._task_config.model.detr_encoder_layers,
                            num_decoder_layers=self._task_config.model.num_decoder_layers,
                            num_classes=self._task_config.model.num_classes,
                            )
@@ -240,7 +241,7 @@ class PanopticTask(base_task.Task):
 		logs = {self.loss: total_loss}
         
         outputs = {"pred_logits": output["class_prob_predictions"], "pred_masks": output["mask_prob_predictions"]}
-        panoptic_seg, segments_info = PanopticInference(output["pred_logits"], output["pred_masks"], self._task_config.model.num_classes)
+        panoptic_seg, segments_info = PanopticInference(output["pred_logits"], output["pred_masks"], features.shape,  self._task_config.model.num_classes)
         
         logs.update({'panoptic_seg': panoptic_seg, 'segments_info': segments_info})
 

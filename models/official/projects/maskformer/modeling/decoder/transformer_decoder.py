@@ -11,7 +11,7 @@ class MaskFormerTransformer(tf.keras.layers.Layer):
                backbone_endpoint_name,
                num_queries,
                hidden_size,
-               num_encoder_layers=6,
+               num_encoder_layers=0,
                num_decoder_layers=6,
                dropout_rate=0.1,
                **kwargs):

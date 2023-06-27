@@ -1,9 +1,16 @@
 import tensorflow as tf
 
 class PanopticInference():
-    def call(self, mask_true, mask_pred, num_classes = 133):
-        mask_pred = tf.keras.layers.Resizing(
-              image_shape[1], image_shape[2], interpolation = "bilinear")(mask_pred)
+    def call(self, mask_true, mask_pred, image_shape, num_classes = 133):
+
+        interpolate = tf.keras.layers.Resizing(
+              image_shape[1], image_shape[2], interpolation = "bilinear")
+        #permute = tf.keras.layers.Permute((3, 1, 2))
+        #mask_pred = permute(mask_pred)
+        #print(mask_pred.shape)
+        mask_pred = interpolate(mask_pred)
+        #permute = tf.keras.layers.Permute((2, 3, 1))
+        #mask_pred = permute(mask_pred)
         
         probs = tf.keras.activations.softmax(mask_true, axis=-1)
         scores = tf.reduce_max(probs, axis=-1)
