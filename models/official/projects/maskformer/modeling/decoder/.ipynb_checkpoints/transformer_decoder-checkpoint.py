@@ -9,9 +9,10 @@ from official.projects.maskformer.modeling.decoder.detr_transformer import DETRT
 class MaskFormerTransformer(tf.keras.layers.Layer):
     def __init__(self,
                backbone_endpoint_name,
+               batch_size,
                num_queries,
                hidden_size,
-               num_encoder_layers=0,
+               num_encoder_layers=6,
                num_decoder_layers=6,
                dropout_rate=0.1,
                **kwargs):
@@ -20,6 +21,7 @@ class MaskFormerTransformer(tf.keras.layers.Layer):
         self._backbone_endpoint_name = backbone_endpoint_name
         
         # Embeddings parameters.
+        self._batch_size = batch_size
         self._num_queries = num_queries
         self._hidden_size = hidden_size
         if hidden_size % 2 != 0:
@@ -57,16 +59,15 @@ class MaskFormerTransformer(tf.keras.layers.Layer):
     
     def call(self, inputs):
         features = inputs['features']
-        batch_size = features.shape[0]
 
         mask = self._generate_image_mask(features)
 
         pos_embed = position_embedding_sine(
             mask, num_pos_features=self._hidden_size)
-        pos_embed = tf.reshape(pos_embed, [batch_size, -1, self._hidden_size])
+        pos_embed = tf.reshape(pos_embed, [self._batch_size, -1, self._hidden_size])
 
         features = tf.reshape(
-            self._input_proj(features), [batch_size, -1, self._hidden_size])
+            self._input_proj(features), [self._batch_size, -1, self._hidden_size])
 
         decoded_list = self._transformer({
             "inputs":
@@ -74,7 +75,7 @@ class MaskFormerTransformer(tf.keras.layers.Layer):
             "targets":
                 tf.tile(
                     tf.expand_dims(self._query_embeddings, axis=0),
-                    (batch_size, 1, 1)),
+                    (self._batch_size, 1, 1)),
             "pos_embed": pos_embed,
             "mask": None,
         })

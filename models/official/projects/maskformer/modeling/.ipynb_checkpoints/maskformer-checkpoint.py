@@ -25,8 +25,7 @@ class MaskFormer(tf.keras.Model):
                bias_constraint=None,
                num_queries=100,
                hidden_size=256,
-               fpn_encoder_layers=6,
-               detr_encoder_layers=0,
+               num_encoder_layers=0,
                num_decoder_layers=6,
                dropout_rate=0.1,
                backbone_endpoint_name='5',
@@ -53,8 +52,7 @@ class MaskFormer(tf.keras.Model):
     self._bias_constraint = bias_constraint
 
     # DETRTransformer parameters.
-    self._fpn_encoder_layers = fpn_encoder_layers
-    self._detr_encoder_layers = detr_encoder_layers
+    self._num_encoder_layers = num_encoder_layers
     self._num_decoder_layers = num_decoder_layers
     self._num_queries = num_queries
     self._hidden_size = hidden_size
@@ -67,6 +65,7 @@ class MaskFormer(tf.keras.Model):
   def build(self, image_shape):
     #backbone
     print("[Build MaskFormer] image shape: ", image_shape)
+    
     self.backbone = resnet.ResNet(50, input_specs=self._input_specs, bn_trainable=False)
     #decoders
     self.pixel_decoder = TransformerFPN(batch_size = self._batch_size,
@@ -82,21 +81,18 @@ class MaskFormer(tf.keras.Model):
                             bias_regularizer=self._bias_regularizer,
                             activity_regularizer=self._activity_regularizer,
                             kernel_constraint=self._kernel_constraint,
-                            bias_constraint=self._bias_constraint,
-                            num_encoder_layers = self._fpn_encoder_layers)
+                            bias_constraint=self._bias_constraint)
     self.transformer = MaskFormerTransformer(backbone_endpoint_name=self._backbone_endpoint,
                                             batch_size=self._batch_size,
                                             num_queries=self._num_queries,
                                             hidden_size=self._hidden_size,
-                                            num_encoder_layers=self._detr_encoder_layers,
+                                            num_encoder_layers=self._num_encoder_layers,
                                             num_decoder_layers=self._num_decoder_layers,
                                             dropout_rate=self._dropout_rate)
     self.head = MLPHead(num_classes=self._num_classes, 
                         hidden_dim=self._hidden_size, 
                         mask_dim=self._fpn_feat_dims)
-    
-    #self.panoptic_interpolate = tf.keras.layers.Resizing(
-    #          image_shape[1], image_shape[2], interpolation = "bilinear")
+   
     super(MaskFormer, self).build(image_shape)
  
   def process_feature_maps(self, maps):
@@ -105,15 +101,13 @@ class MaskFormer(tf.keras.Model):
       new_dict[k[0]] = maps[k]
     return new_dict
 
-  def call(self, image, training = False):
+  def call(self, image):
     # image = tf.reshape(image, [1, 800, 1135, 3])
     # image = tf.ones((1, 640, 640, 3))
     backbone_feature_maps = self.backbone(image)
     mask_features, transformer_enc_feat = self.pixel_decoder(self.process_feature_maps(backbone_feature_maps))
     transformer_features = self.transformer({"features": transformer_enc_feat})
-        
     seg_pred = self.head({"per_pixel_embeddings" : mask_features,
                           "per_segment_embeddings": transformer_features})
-    #if not training:
-    #    seg_pred["pred_masks"] = self.panoptic_interpolate(seg_pred["pred_masks"])
+    
     return seg_pred
