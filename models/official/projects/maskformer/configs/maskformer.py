@@ -49,7 +49,7 @@ class Parser(hyperparams.Config):
     sigma: float = 8.0
     small_instance_area_threshold: int = 4096
     small_instance_weight: float = 3.0
-    dtype: str = 'float32'
+    dtype: str = 'bfloat16'
     seed: int = None
 
 @dataclasses.dataclass
