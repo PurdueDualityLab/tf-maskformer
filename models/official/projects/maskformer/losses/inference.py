@@ -2,9 +2,10 @@ import tensorflow as tf
 
 class PanopticInference():
     def call(self, mask_true, mask_pred, image_shape, num_classes):
-        interpolate = tf.keras.layers.Resizing(
-                    image_shape[1], image_shape[2], interpolation = "bilinear")
-        mask_pred = interpolate(mask_pred)
+        #interpolate = tf.keras.layers.Resizing(
+        #            image_shape[1], image_shape[2], interpolation = "bilinear")
+        #mask_pred = interpolate(mask_pred)
+        mask_pred =  tf.image.resize(mask_pred, (image_shape[1], image_shape[2]), method=tf.image.ResizeMethod.BILINEAR)
         probs = tf.keras.activations.softmax(mask_true, axis=-1)
         scores = tf.reduce_max(probs, axis=-1)
         labels = tf.argmax(probs, axis=-1)
@@ -16,8 +17,15 @@ class PanopticInference():
         curr_scores = scores[keep]
         curr_classes = labels[keep]
 
+        #print(mask_pred.shape)
+        #print(keep.shape)
+        permute = tf.keras.layers.Permute((3,1,2))
+        mask_pred = permute(mask_pred)
         curr_masks = mask_pred[keep]
+        print(f"curr_masks[keep]: {curr_masks.shape}")
+        #curr_masks = tf.boolean_mask(mask_pred, keep)
         curr_mask_cls = mask_true[keep]
+        print(f"mask_true[keep]: {curr_mask_cls.shape}")
         curr_mask_cls = tf.slice(curr_mask_cls, [0, 0], [-1, curr_mask_cls.shape[1] - 1])
 
         curr_prob_masks = tf.reshape(curr_scores, [-1, 1, 1]) * curr_masks
@@ -42,8 +50,9 @@ class PanopticInference():
                 is_thing = True # TODO(ibrahim): FIX when get configs.
 
                 mask = curr_masks_ids == k
-                mask_area = tf.reduce_sum(mask).numpy()
-                original_area = tf.reduce_sum(curr_masks[k] >= 0.5).numpy()
+               # mask_area = tf.reduce_sum(mask).numpy()
+                mask_area = tf.reduce_sum(tf.cast(mask, tf.float32)).numpy()
+                original_area = tf.reduce_sum(tf.cast(curr_masks[k] >= 0.5, tf.float32)).numpy()
 
                 if mask_area > 0 and original_area > 0:
                     config_overlap_threshold = 0.8
@@ -58,8 +67,8 @@ class PanopticInference():
                             stuff_memory[int(pred_class)] = current_segment_id + 1
 
                     current_segment_id += 1
-                    panoptic_seg[mask] = current_segment_id
-
+                   # panoptic_seg[mask] = current_segment_id
+                    panoptic_seg = tf.where(mask, current_segment_id, panoptic_seg)
                     segments_info.append({
                         "id": current_segment_id,
                         "is_thing": bool(is_thing),
