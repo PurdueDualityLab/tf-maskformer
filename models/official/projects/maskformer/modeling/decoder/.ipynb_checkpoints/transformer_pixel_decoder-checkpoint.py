@@ -9,6 +9,7 @@ class TransformerFPN(tf.keras.layers.Layer):
     """MaskFormer Feature Pyramid Networks."""
 
     def __init__(self,
+                 batch_size = 16,
                  fpn_feat_dims=256,
                  data_format=None,
                  dilation_rate=(1, 1),
@@ -31,6 +32,8 @@ class TransformerFPN(tf.keras.layers.Layer):
           
         """
         super(TransformerFPN, self).__init__(**kwargs)
+
+        self._batch_size = batch_size
 
         # conv2d params
         self._fpn_feat_dims = fpn_feat_dims

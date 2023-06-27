@@ -1,7 +1,8 @@
 from absl.testing import parameterized
 import tensorflow as tf
+
 from official.projects.maskformer.losses.inference import PanopticInference
-from official.projects.maskformer.modeling.maskformer import MaskFormer
+from official.projects.maskformer.maskformer import MaskFormer
 
 class PanopticInferenceTest(tf.test.TestCase, parameterized.TestCase):
     @parameterized.named_parameters(('test1',))

@@ -79,10 +79,6 @@ class Losses(hyperparams.Config):
   lambda_giou: float = 2.0
   background_cls_weight: float = 0.1
   l2_weight_decay: float = 1e-4
-  cost_class = 1.0
-  cost_dice = 1.0
-  cost_focal = 20.0
-  no_object_weight = .1
 
 
 @dataclasses.dataclass

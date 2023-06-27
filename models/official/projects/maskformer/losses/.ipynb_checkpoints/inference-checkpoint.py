@@ -1,16 +1,13 @@
 import tensorflow as tf
 
 class PanopticInference():
-    def call(self, mask_true, mask_pred, num_classes = 133):
-        mask_pred = tf.keras.layers.Resizing(
-              image_shape[1], image_shape[2], interpolation = "bilinear")(mask_pred)
-        
+    def call(self, mask_true, mask_pred):
         probs = tf.keras.activations.softmax(mask_true, axis=-1)
         scores = tf.reduce_max(probs, axis=-1)
         labels = tf.argmax(probs, axis=-1)
         mask_pred = tf.keras.activations.sigmoid(mask_pred)
 
-        config_num_classes = num_classes
+        config_num_classes = 171
         object_mask_threshold = 0.0
         keep = tf.math.logical_and(tf.math.not_equal(labels, config_num_classes), scores > object_mask_threshold)
         curr_scores = scores[keep]
@@ -67,5 +64,4 @@ class PanopticInference():
                     })
             
             return panoptic_seg, segments_info
-
 

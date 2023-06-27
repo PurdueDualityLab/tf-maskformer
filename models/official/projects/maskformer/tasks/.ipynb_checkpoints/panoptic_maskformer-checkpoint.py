@@ -11,10 +11,10 @@ from official.common import dataset_fn
 from official.projects.maskformer.configs import maskformer as exp_cfg
 from official.projects.maskformer.modeling.maskformer import MaskFormer
 from official.projects.maskformer.losses.maskformer_losses import Loss
-from official.projects.maskformer.losses.inference import PanopticInference
 from official.projects.maskformer.dataloaders import panoptic_input
 
 from official.projects.detr.ops.matchers import hungarian_matching
+from official.projects.maskformer.losses.maskformer_losses import Loss
 
 import numpy as np
 from loguru import logger
@@ -26,48 +26,21 @@ class PanopticTask(base_task.Task):
 		"""Builds MaskFormer Model."""
 		# TODO : Remove hardcoded values, Verify the number of classes 
 		input_specs = tf.keras.layers.InputSpec(shape=[None] +
-                                            self._task_config.model.input_size)
+                                            [640, 640, 3])
 		
-		model = MaskFormer(input_specs= input_specs,
-                           num_queries=self._task_config.model.num_queries,
-                           hidden_size=self._task_config.model.hidden_size,
-                           backbone_endpoint_name=self._task_config.model.backbone_endpoint_name,
-                           num_encoder_layers=self._task_config.model.num_encoder_layers,
-                           num_decoder_layers=self._task_config.model.num_decoder_layers,
-                           num_classes=self._task_config.model.num_classes,
-                           )
+		model = MaskFormer(input_specs= input_specs, hidden_size=256,
+                                 backbone_endpoint_name="5",
+                                 num_encoder_layers=0,
+                                 num_decoder_layers=6,
+                                 num_classes=133,
+                                 batch_size=8)
 
 		return model
-    
-    def initialize(self, model: tf.keras.Model) -> None:
-		"""
-		Used to initialize the models with checkpoint
-		"""
-		"""Loading pretrained checkpoint."""
-        if not self._task_config.init_checkpoint:
-            return
-
-        ckpt_dir_or_file = self._task_config.init_checkpoint
-
-        # Restoring checkpoint.
-        if tf.io.gfile.isdir(ckpt_dir_or_file):
-            ckpt_dir_or_file = tf.train.latest_checkpoint(ckpt_dir_or_file)
-
-        if self._task_config.init_checkpoint_modules == 'all':
-            ckpt = tf.train.Checkpoint(**model.checkpoint_items)
-            status = ckpt.restore(ckpt_dir_or_file)
-            status.assert_consumed()
-        elif self._task_config.init_checkpoint_modules == 'backbone':
-            ckpt = tf.train.Checkpoint(backbone=model.backbone)
-            status = ckpt.restore(ckpt_dir_or_file)
-            status.expect_partial().assert_existing_objects_matched()
-
-        logging.info('Finished loading pretrained checkpoint from %s',
-                     ckpt_dir_or_file)
 	
 	def build_inputs(self, params, input_context: Optional[tf.distribute.InputContext] = None) -> tf.data.Dataset:
 		""" 
 		Build panoptic segmentation dataset.
+
 		"""
 		
 		# tf.profiler.experimental.server.start(6000)
@@ -79,10 +52,29 @@ class PanopticTask(base_task.Task):
 		parser = panoptic_input.mask_former_parser(params.parser, is_training = params.is_training, decoder_fn=decoder.decode)
 		reader = input_reader.InputFn(params,dataset_fn = dataset_fn.pick_dataset_fn(params.file_type),parser_fn = parser)
 		dataset = reader(ctx=input_context)
+		# for sample in dataset.take(1):
+		# 	print(f"unique ids : {sample[1]['unique_ids']}")
+		# 	print("individual masks :", sample[1]["individual_masks"].shape)
+		# 	print(f"image shape : {sample[0].shape}")
+			# logger.debug(f"category_mask : {sample[1]['category_mask'].shape}")
+			# logger.debug(f"mask_labels :{sample[1]['mask_labels']}")
+			# logger.debug(f"instance_mask:{sample[1]['instance_mask'].shape}")
+			# print(sample[1]["instance_centers_heatmap"].shape)
+			# print(sample[1]["instance_centers_offset"].shape)
+			# print(sample[1]["semantic_weights"].shape)
+			# print(sample[1]["valid_mask"].shape)
+			# print(sample[1]["things_mask"].shape)
+			
+		# exit()
 		
 		return dataset
 
-	
+	def initialize(self, model: tf.keras.Model) -> None:
+		"""
+		Used to initialize the models with checkpoint
+		"""
+		#TODO : R50 checkpoint
+		pass
 
 	def build_losses(self, output, labels, aux_outputs=None):
 		# TODO : Auxilary outputs
@@ -92,15 +84,15 @@ class PanopticTask(base_task.Task):
 		# print("mask_prob_predictions : ", outputs["pred_masks"].shape)
 		
 		matcher = hungarian_matching
-		no_object_weight = self._task_config.losses.no_object_weight
+		no_object_weight = 0.1
 		# TODO : Remove hardcoded values, number of classes
 		loss = Loss(
-			num_classes = self._task_config.model.num_classes,
+			num_classes = 133,
 			matcher = matcher,
 			eos_coef = no_object_weight,
-			cost_class= self._task_config.losses.cost_class,
-			cost_dice= self._task_config.losses.cost_dice,
-			cost_focal= self._task_config.losses.cost_focal
+			cost_class= 1.0,
+			cost_dice= 1.0,
+			cost_focal=20.0
 		)
 
 		calculated_losses = loss(outputs, targets)
@@ -219,39 +211,4 @@ class PanopticTask(base_task.Task):
 			return logs
 
 	def validation_step(self, inputs, model, optimizer, metrics=None):
-		features, labels = inputs
-		outputs = model(features, training=False)
-			
-		loss = 0.0
-		cls_loss = 0.0
-		focal_loss = 0.0
-		dice_loss = 0.0
-
-		total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels)
-
-		num_replicas_in_sync = tf.distribute.get_strategy().num_replicas_in_sync
-		total_loss *= num_replicas_in_sync
-		cls_loss *= num_replicas_in_sync
-		focal_loss *= num_replicas_in_sync
-		dice_loss *= num_replicas_in_sync
-		
-        #####################################################################
-		# # Trainer class handles loss metric for you.
-		logs = {self.loss: total_loss}
-        
-        outputs = {"pred_logits": output["class_prob_predictions"], "pred_masks": output["mask_prob_predictions"]}
-        panoptic_seg, segments_info = PanopticInference(output["pred_logits"], output["pred_masks"], self._task_config.model.num_classes)
-        
-        logs.update({'panoptic_seg': panoptic_seg, 'segments_info': segments_info})
-
-		all_losses = {
-				'cls_loss': cls_loss,
-				'focal_loss': focal_loss,
-			   'dice_loss': dice_loss,
-			}
-
-		# # Metric results will be added to logs for you.
-		if metrics:
-				for m in metrics:
-					m.update_state(all_losses[m.name])
-		return logs
+		pass

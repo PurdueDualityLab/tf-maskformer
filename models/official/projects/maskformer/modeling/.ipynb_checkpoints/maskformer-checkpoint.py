@@ -65,6 +65,7 @@ class MaskFormer(tf.keras.Model):
   def build(self, image_shape):
     #backbone
     print("[Build MaskFormer] image shape: ", image_shape)
+    
     self.backbone = resnet.ResNet(50, input_specs=self._input_specs, bn_trainable=False)
     #decoders
     self.pixel_decoder = TransformerFPN(batch_size = self._batch_size,
@@ -91,9 +92,7 @@ class MaskFormer(tf.keras.Model):
     self.head = MLPHead(num_classes=self._num_classes, 
                         hidden_dim=self._hidden_size, 
                         mask_dim=self._fpn_feat_dims)
-    
-    #self.panoptic_interpolate = tf.keras.layers.Resizing(
-    #          image_shape[1], image_shape[2], interpolation = "bilinear")
+   
     super(MaskFormer, self).build(image_shape)
  
   def process_feature_maps(self, maps):
@@ -102,15 +101,13 @@ class MaskFormer(tf.keras.Model):
       new_dict[k[0]] = maps[k]
     return new_dict
 
-  def call(self, image, training = False):
+  def call(self, image):
     # image = tf.reshape(image, [1, 800, 1135, 3])
     # image = tf.ones((1, 640, 640, 3))
     backbone_feature_maps = self.backbone(image)
     mask_features, transformer_enc_feat = self.pixel_decoder(self.process_feature_maps(backbone_feature_maps))
     transformer_features = self.transformer({"features": transformer_enc_feat})
-        
     seg_pred = self.head({"per_pixel_embeddings" : mask_features,
                           "per_segment_embeddings": transformer_features})
-    #if not training:
-    #    seg_pred["pred_masks"] = self.panoptic_interpolate(seg_pred["pred_masks"])
+    
     return seg_pred
