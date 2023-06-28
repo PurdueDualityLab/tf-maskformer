@@ -109,7 +109,7 @@ class MaskFormerTask(cfg.TaskConfig):
   train_data: cfg.DataConfig = cfg.DataConfig()
   validation_data: cfg.DataConfig = cfg.DataConfig()
   losses: Losses = Losses()
-  init_checkpoint: Optional[str] = None
+  init_checkpoint: Optional[str] = "gs://cam2-models/maskformer_dummy/resnet50_v1/"
   init_checkpoint_modules: Union[str, List[str]] = 'backbone'  # all, backbone
   annotation_file: Optional[str] = None
   per_category_metrics: bool = False
@@ -132,7 +132,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
   decay_at = train_steps - 100 * steps_per_epoch  # 200 epochs
   config = cfg.ExperimentConfig(
       task=MaskFormerTask(
-          init_checkpoint='',
+          init_checkpoint="gs://cam2-models/maskformer_dummy/resnet50_v1/",
           init_checkpoint_modules='backbone',
           annotation_file=os.path.join(COCO_INPUT_PATH_BASE,'annotations'
                                        'instances_train2017.json'),

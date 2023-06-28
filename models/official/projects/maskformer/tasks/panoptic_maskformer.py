@@ -37,8 +37,15 @@ class PanopticTask(base_task.Task):
                            num_decoder_layers=self._task_config.model.num_decoder_layers,
                            num_classes=self._task_config.model.num_classes,
                            )
-
+                
+                #ckpt_dir_or_file = self._task_config.init_checkpoint
+                #ckpt_dir_or_file = tf.train.latest_checkpoint(ckpt_dir_or_file)
+                #ckpt = tf.train.Checkpoint(backbone=model.backbone)
+                #status = ckpt.restore(ckpt_dir_or_file)
+                #status.expect_partial().assert_existing_objects_matched()
+                #print("Loaded checkpoint")
                 return model
+
         def initialize(self, model: tf.keras.Model) -> None:
           """
           Used to initialize the models with checkpoint
@@ -58,13 +65,14 @@ class PanopticTask(base_task.Task):
             status = ckpt.restore(ckpt_dir_or_file)
             status.assert_consumed()
           elif self._task_config.init_checkpoint_modules == 'backbone':
+            print("Loading resnet")
             ckpt = tf.train.Checkpoint(backbone=model.backbone)
             status = ckpt.restore(ckpt_dir_or_file)
-            status.expect_partial().assert_existing_objects_matched()
+            #status.expect_partial().assert_existing_objects_matched()
 
-          logging.info('Finished loading pretrained checkpoint from %s',
-                     ckpt_dir_or_file)
-        
+          #logging.info('Finished loading pretrained checkpoint from %s',
+          #           ckpt_dir_or_file)
+          print(f"==========FINISHED LOADING {self._task_config.init_checkpoint}===========")
         def build_inputs(self, params, input_context: Optional[tf.distribute.InputContext] = None) -> tf.data.Dataset:
                 """ 
                 Build panoptic segmentation dataset.

@@ -33,6 +33,7 @@ class MaskFormer(tf.keras.Model):
                num_classes=133,
                batch_size=1,
                **kwargs):
+    super(MaskFormer, self).__init__(**kwargs)
     self._input_specs = input_specs
     self._batch_size = batch_size
     self._num_classes = num_classes
@@ -61,13 +62,20 @@ class MaskFormer(tf.keras.Model):
     self._dropout_rate = dropout_rate
     self._backbone_endpoint = backbone_endpoint_name
     
-
-    super(MaskFormer, self).__init__(**kwargs)
+    self.backbone = resnet.ResNet(50, input_specs = self._input_specs, bn_trainable=False)
+    #super(MaskFormer, self).__init__(**kwargs)
 
   def build(self, image_shape):
     #backbone
     print("[Build MaskFormer] image shape: ", image_shape)
-    self.backbone = resnet.ResNet(50, input_specs=self._input_specs, bn_trainable=False)
+    #self.backbone = resnet.ResNet(50, input_specs=self._input_specs, bn_trainable=False)
+    #ckpt_dir_or_file = "gs://cam2-models/maskformer_dummy/resnet50_v1"
+    #ckpt_dir_or_file = tf.train.latest_checkpoint(ckpt_dir_or_file)
+    #ckpt = tf.train.Checkpoint(backbone=self.backbone)
+    #status = ckpt.restore(ckpt_dir_or_file)
+    #status.expect_partial().assert_existing_objects_matched()
+    #print("Loaded checkpoint")
+
     #decoders
     self.pixel_decoder = TransformerFPN(batch_size = self._batch_size,
                             fpn_feat_dims=self._fpn_feat_dims,
