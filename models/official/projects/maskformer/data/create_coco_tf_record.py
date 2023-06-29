@@ -286,6 +286,7 @@ def generate_coco_panoptics_masks(segments_info, mask_path,
     
   class_ids = []
   
+  # For all the segments in a single image
   for idx, segment in enumerate(segments_info):
     segment_id = segment['id']
     category_id = segment['category_id']
