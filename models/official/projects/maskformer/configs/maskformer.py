@@ -61,7 +61,7 @@ class DataConfig(cfg.DataConfig):
   global_batch_size: int = 0
   is_training: bool = False
   regenerate_source_id: bool = False
-  # Change the dtype to bloat16 for TPU training
+  # TODO : Change the dtype to bloat16 for TPU training
   dtype: str = 'bfloat16'
   decoder: common.DataDecoder = common.DataDecoder()
   shuffle_buffer_size: int = 10000
@@ -102,18 +102,6 @@ class MaskFormer(hyperparams.Config):
   norm_activation: common.NormActivation = common.NormActivation()
   backbone_endpoint_name: str = '5'
 
-@dataclasses.dataclass
-class PanopticQualityEvaluator(hyperparams.Config):
-  """Panoptic Quality Evaluator config."""
-  num_categories: int = 133
-  ignored_label: int = 0
-  max_instances_per_category: int = 256
-  offset: int = 256 * 256 * 256
-  is_thing: List[float] = dataclasses.field(
-      default_factory=list)
-  rescale_predictions: bool = False
-  report_per_class_metrics: bool = False
-  
 
 @dataclasses.dataclass
 class MaskFormerTask(cfg.TaskConfig):
@@ -125,9 +113,9 @@ class MaskFormerTask(cfg.TaskConfig):
   init_checkpoint_modules: Union[str, List[str]] = 'backbone'  # all, backbone
   annotation_file: Optional[str] = None
   per_category_metrics: bool = False
-  panoptic_quality_evaluator: PanopticQualityEvaluator = PanopticQualityEvaluator()
 
 # TODO : we should pass this via cmd 
+# COCO_INPUT_PATH_BASE = '/depot/davisjam/data/vishal/datasets/coco/'
 COCO_INPUT_PATH_BASE = 'gs://cam2-datasets/coco_panoptic/'
 COCO_TRAIN_EXAMPLES = 118287
 COCO_VAL_EXAMPLES = 5000

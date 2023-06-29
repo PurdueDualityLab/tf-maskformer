@@ -1,19 +1,16 @@
 import tensorflow as tf
 
 class PanopticInference():
-    
-    def call(self, pred_logits, mask_pred, image_shape, num_classes):
+    def call(self, mask_true, mask_pred, image_shape, num_classes):
         #interpolate = tf.keras.layers.Resizing(
         #            image_shape[1], image_shape[2], interpolation = "bilinear")
         #mask_pred = interpolate(mask_pred)
         mask_pred =  tf.image.resize(mask_pred, (image_shape[1], image_shape[2]), method=tf.image.ResizeMethod.BILINEAR)
-        probs = tf.keras.activations.softmax(pred_logits, axis=-1)
-        print("Probs_shape: ", probs.shape)
+        probs = tf.keras.activations.softmax(mask_true, axis=-1)
         scores = tf.reduce_max(probs, axis=-1)
         labels = tf.argmax(probs, axis=-1)
         mask_pred = tf.keras.activations.sigmoid(mask_pred)
 
-        exit()
         config_num_classes = num_classes
         object_mask_threshold = 0.0
         keep = tf.math.logical_and(tf.math.not_equal(labels, config_num_classes), scores > object_mask_threshold)
@@ -27,7 +24,7 @@ class PanopticInference():
         curr_masks = mask_pred[keep]
         print(f"curr_masks[keep]: {curr_masks.shape}")
         #curr_masks = tf.boolean_mask(mask_pred, keep)
-        curr_mask_cls = pred_logits[keep]
+        curr_mask_cls = mask_true[keep]
         print(f"mask_true[keep]: {curr_mask_cls.shape}")
         curr_mask_cls = tf.slice(curr_mask_cls, [0, 0], [-1, curr_mask_cls.shape[1] - 1])
 

@@ -19,6 +19,9 @@ runtime.enable_xla=True,\
 trainer.train_steps=554400,\
 trainer.optimizer_config.learning_rate.stepwise.boundaries=[369600],
 "
+#runtime.enable_xla=True,\
+
+
 python3 models/official/projects/maskformer/train.py \
   --experiment maskformer_coco_panoptic \
   --mode train \

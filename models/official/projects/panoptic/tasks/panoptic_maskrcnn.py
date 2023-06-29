@@ -387,6 +387,7 @@ class PanopticMaskRCNNTask(maskrcnn.MaskRCNNTask):
           segmentation_labels, outputs['segmentation_outputs']
       )
 
+    if self.panoptic_quality_metric is not None:
       pq_metric_labels = {
           'category_mask': labels['groundtruths']['gt_panoptic_category_mask'],
           'instance_mask': labels['groundtruths']['gt_panoptic_instance_mask'],

@@ -25,7 +25,6 @@ def main(_):
 	gin.parse_config_files_and_bindings(FLAGS.gin_file, FLAGS.gin_params)
 	params = train_utils.parse_configuration(FLAGS)
 	model_dir = FLAGS.model_dir
-	
 	if 'train' in FLAGS.mode:
 		# Pure eval modes do not output yaml files. Otherwise continuous eval job
 		# may race against the train job for writing the same file.
@@ -47,7 +46,7 @@ def main(_):
 			num_gpus=params.runtime.num_gpus,
 			tpu_address=params.runtime.tpu)
         
-	# tf.profiler.experimental.server.start(6000)
+	tf.profiler.experimental.server.start(6000)
         #cluster_resolver = tf.distribute.cluster_resolver.TPUClusterResolver(tpu = os.environ["TPU_NAME"], zone = os.environ['TPU_ZONE'], project = os.environ['TPU_PROJECT'])
 	#tf.config.experimental_connect_to_cluster(cluster_resolver)
 	#tf.tpu.experimental.initialize_tpu_system(cluster_resolver)
