@@ -170,9 +170,7 @@ class PanopticTask(base_task.Task):
 		features, labels = inputs
 		with tf.GradientTape() as tape:
 			outputs = model(features, training=True)
-			print("outputs : ", tf.shape(outputs["class_prob_predictions"]))
-			print("pred_masks :", tf.shape(outputs["mask_prob_predictions"]))
-			exit()
+			
 			loss = 0.0
 			cls_loss = 0.0
 			focal_loss = 0.0
