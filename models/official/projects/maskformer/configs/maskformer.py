@@ -117,7 +117,7 @@ class MaskFormerTask(cfg.TaskConfig):
 # TODO : we should pass this via cmd 
 # COCO_INPUT_PATH_BASE = '/depot/davisjam/data/vishal/datasets/coco/'
 COCO_INPUT_PATH_BASE_GCP_BUCKET = 'gs://cam2-datasets/coco_panoptic/'
-COCO_INPUT_PATH_BASE = "~"
+COCO_INPUT_PATH_BASE = "/home/vishalpurohit55595"
 COCO_TRAIN_EXAMPLES = 118287
 COCO_VAL_EXAMPLES = 5000
 
