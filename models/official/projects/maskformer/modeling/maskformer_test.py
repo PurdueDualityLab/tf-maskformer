@@ -4,7 +4,7 @@ import tensorflow as tf
 
 class MaskFormerTest(tf.test.TestCase, parameterized.TestCase):
     # TODO(ibrahim): Add more testcases.
-    @parameterized.named_parameters(('test1', 256, 100, 256, "5", 0, 6, 199, 1))
+    @parameterized.named_parameters(('test1', 256, 100, 256, "5", 0, 6, 133, 1))
     def test_pass_through(self,
                         fpn_feat_dims,
                         num_queries,
@@ -31,7 +31,8 @@ class MaskFormerTest(tf.test.TestCase, parameterized.TestCase):
         expected_mask_probs_shape = [1, 184, 275, 100] # B,H,W,C
 
         output = maskformer(input_image)
-        print(output.keys())
+        print("Class prob shape : ", output["class_prob_predictions"].shape)
+        print("Mask prob shape : ", output["mask_prob_predictions"].shape)
         exit()
         self.assertAllEqual(
             output["class_prob_predictions"].shape.as_list(), expected_class_probs_shape)
