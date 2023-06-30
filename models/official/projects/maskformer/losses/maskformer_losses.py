@@ -110,7 +110,7 @@ class FocalLossMod(focal_loss.FocalLoss):
         loss = tf.einsum("bnc,bmc->bnm",focal_pos,y_true) + tf.einsum(
         "bnc,bmc->bnm", focal_neg,(1 - y_true)
         )
-        return tf.cast(loss / hw,tf.bfloat16)
+        return loss / hw
     
 
 
@@ -126,7 +126,7 @@ class DiceLoss(tf.keras.losses.Loss):
        
         y_pred = tf.reshape(tf.keras.activations.sigmoid(y_pred), (y_pred.shape[0],y_pred.shape[1],-1))
         y_true = tf.reshape(y_true, (y_true.shape[0],tf.shape(y_true)[1],-1))
-        y_true=tf.cast(y_true,tf.bfloat16) 
+        
         numerator = 2 * tf.reduce_sum(y_pred * y_true, axis=-1)
         denominator = tf.reduce_sum(y_pred, axis=-1) + tf.reduce_sum(y_true, axis=-1)
         loss = 1 - (numerator + 1) / (denominator + 1)
@@ -145,7 +145,7 @@ class DiceLoss(tf.keras.losses.Loss):
 
         loss = 1 - (numerator + 1) / (denominator + 1)
         
-        return tf.cast(loss,tf.bfloat16)
+        return loss
 
 class Loss:
     def __init__(self, num_classes, matcher, eos_coef, cost_class = 1, cost_focal = 1, cost_dice = 1):
@@ -159,9 +159,9 @@ class Loss:
 
     
     def memory_efficient_matcher(self, outputs, y_true):
-        batch_size, num_queries = outputs["pred_logits"].shape[:2]
+        
         out_mask = outputs["pred_masks"]
-        out_mask = tf.transpose(out_mask, perm=[0,3,1,2])
+        out_mask = tf.transpose(out_mask, perm=[0,3,1,2]) # # (1, h, w, 100) -> (1,100, h, w)
         
         tgt_ids = tf.cast(y_true["unique_ids"], dtype=tf.int64)
         
@@ -252,7 +252,7 @@ class Loss:
         focal_loss_weighted = tf.where(background_new, tf.zeros_like(focal_loss), focal_loss)
         dice_loss_weighted = tf.where(background_new, tf.zeros_like(dice_loss), dice_loss)
         focal_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(focal_loss_weighted), num_masks_sum)
-        dice_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(dice_loss_weighted), tf.cast(num_masks_sum,tf.bfloat16))
+        dice_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(dice_loss_weighted), num_masks_sum)
 
         
         return cls_loss, focal_loss_final, dice_loss_final
@@ -261,14 +261,21 @@ class Loss:
         """
         This performs the loss computation.
         Parameters:
-             outputs: dict of tensors, see the output specification of the model for the format
-             y_true: list of dicts, such that len(y_true) == batch_size.
-                     The expected keys in each dict depends on the losses applied, see each loss' doc
+             outputs: dict of tensors with the following key-values:
+                    "pred_logits": tensor of shape (batch_size, num_queries, num_classes) with the classification logits
+                    "pred_masks": tensor of shape (batch_size, num_queries, h, w) with the pred masks
+                    "aux_outputs": list of tensors of shape (batch_size, num_queries, h, w) with the masks at intermediate layers
+                    
+             y_true: dict with the following key-values:
+                    "unique_ids": tensor of shape (batch_size, num_gt_objects+padded) with the unique ids of the ground-truth objects
+                    "individual_masks": tensor of shape (batch_size, h, w,num_gt_objects) with the ground-truth masks of the objects
+                     
         """
         outputs_without_aux = {k: v for k, v in outputs.items() if k != "aux_outputs"}
         batch_size, num_queries = outputs["pred_logits"].shape[:2]
+        
         indices = self.memory_efficient_matcher(outputs_without_aux, y_true) # (batchsize, num_queries, num_queries)
-              
+        
         losses = {}
       
         cls_loss_final, focal_loss_final, dice_loss_final = self.get_loss(batch_size, outputs, y_true, indices)
@@ -276,7 +283,8 @@ class Loss:
         losses.update({"loss_ce": self.cost_class*cls_loss_final,
                     "loss_focal": self.cost_focal*focal_loss_final,
                     "loss_dice": self.cost_dice*dice_loss_final})
-        
+        print("Updated Losses : ", losses)
+        exit()
         # if "aux_outputs" in outputs and outputs["aux_outputs"] is not None:
         #     for i, aux_outputs in enumerate(outputs["aux_outputs"]):
         #         indices = self.memory_efficient_matcher(aux_outputs, y_true)

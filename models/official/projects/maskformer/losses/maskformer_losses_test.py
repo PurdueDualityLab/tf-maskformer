@@ -2,7 +2,7 @@ from official.projects.maskformer.losses.maskformer_losses import Loss
 from official.projects.detr.ops.matchers import hungarian_matching
 from absl.testing import parameterized
 import tensorflow as tf
-
+from official.vision.ops import preprocess_ops
 import numpy as np
 
 import pickle
@@ -41,6 +41,8 @@ class LossTest(tf.test.TestCase, parameterized.TestCase):
         aux_outputs = [aux_out_0, aux_out_1, aux_out_2, aux_out_3, aux_out_4]
         pred_logits_load = tf.convert_to_tensor(np.load(main_pth+"/tensors/output_pred_logits.npy")) 
         pred_masks_load = tf.convert_to_tensor(np.load(main_pth+"/tensors/output_pred_masks.npy"))
+        pred_masks_load = tf.transpose(pred_masks_load, [0,2,3,1]) # (1,100, h, w) -> (1, h, w, 100)
+        
         outputs = {
             "pred_logits": pred_logits_load,
             "pred_masks": pred_masks_load,
@@ -48,17 +50,35 @@ class LossTest(tf.test.TestCase, parameterized.TestCase):
         }
 
         # Load the new_targets_dict NumPy array
-        targets = []
-        # TODO :  Caution the below loop is for each image in the batch
-        for i in range(2): # Here 2 is for batch size 
-            targets.append(
-                {
-                    "labels": tf.convert_to_tensor(np.load(main_pth+'/tensors/targets_labels_'+str(i)+'.npy')),
-                    "masks": tf.convert_to_tensor(np.load(main_pth+'/tensors/targets_masks_'+str(i)+'.npy')),
-                }
-            )
+        targets = {}
+        
+        # pad tensor with zeros to make it of shape (100, )
+        target_labels_1 = tf.convert_to_tensor(np.load(main_pth+'/tensors/targets_labels_0.npy'))
+        target_labels_2 = tf.convert_to_tensor(np.load(main_pth+'/tensors/targets_labels_1.npy'))
+        target_labels_1_padded = preprocess_ops.clip_or_pad_to_fixed_size(target_labels_1, 100)
+        target_labels_2_padded = preprocess_ops.clip_or_pad_to_fixed_size(target_labels_2, 100)
+        target_labels_stacked = tf.stack([target_labels_1_padded, target_labels_2_padded], axis=0) # Stacking the two tensors along the batch dimension
+       
+        target_masks_1 = tf.transpose(tf.convert_to_tensor(np.load(main_pth+'/tensors/targets_masks_0.npy')), [1,2,0])
+        target_masks_2 = tf.transpose(tf.convert_to_tensor(np.load(main_pth+'/tensors/targets_masks_1.npy')), [1,2,0])
+        target_masks_1 =  tf.image.resize(tf.cast(target_masks_1, float), (640, 640))
+        target_masks_2 =  tf.image.resize(tf.cast(target_masks_2,float), (640, 640))
 
+        # Resize the tensor to fixed H and W and then pad it with zeros to make it of shape (100, H, W)
+        target_masks_1_reshaped = tf.transpose(target_masks_1, [2,0,1])
+        target_masks_2_reshaped = tf.transpose(target_masks_2, [2,0,1])
 
+        target_masks_1_padded = preprocess_ops.clip_or_pad_to_fixed_size(target_masks_1_reshaped, 100)
+        target_masks_2_padded = preprocess_ops.clip_or_pad_to_fixed_size(target_masks_2_reshaped, 100)
+        
+        target_masks_stacked = tf.stack([target_masks_1_padded, target_masks_2_padded], axis=0) # Stacking the two tensors along the batch dimension
+        targets["unique_ids"] = target_labels_stacked
+        targets["individual_masks"] = tf.transpose(tf.expand_dims(target_masks_stacked, -1), [0,2,3,1,4]) # (B,  H, W, 100, 1) -> (B, 100, H, W, 1)
+
+        # print("targets['unique_ids'] shape is : ", targets["unique_ids"].shape)
+        # print("targets['individual_masks'] shape is : ", targets["individual_masks"].shape)
+        # exit()
+        # Vectorized loss function accepts batched inputs
         losses = loss(outputs, targets)
        
 
