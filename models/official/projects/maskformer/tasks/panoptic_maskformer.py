@@ -79,20 +79,20 @@ class PanopticTask(base_task.Task):
 		parser = panoptic_input.mask_former_parser(params.parser, is_training = params.is_training, decoder_fn=decoder.decode)
 		reader = input_reader.InputFn(params,dataset_fn = dataset_fn.pick_dataset_fn(params.file_type),parser_fn = parser)
 		dataset = reader(ctx=input_context)
-		for sample in dataset.take(1):
-			print(f"unique ids : {sample[1]['unique_ids'].shape}")
-			print("individual masks :", sample[1]["individual_masks"].shape)
-			# print(f"image shape : {sample[0].shape}")
-			# logger.debug(f"category_mask : {sample[1]['category_mask'].shape}")
-			# logger.debug(f"mask_labels :{sample[1]['mask_labels']}")
-			# logger.debug(f"instance_mask:{sample[1]['instance_mask'].shape}")
-			# print(sample[1]["instance_centers_heatmap"].shape)
-			# print(sample[1]["instance_centers_offset"].shape)
-			# print(sample[1]["semantic_weights"].shape)
-			# print(sample[1]["valid_mask"].shape)
-			# print(sample[1]["things_mask"].shape)
+		# for sample in dataset.take(1):
+		# 	print(f"unique ids : {sample[1]['unique_ids'].shape}")
+		# 	print("individual masks :", sample[1]["individual_masks"].shape)
+		# 	# print(f"image shape : {sample[0].shape}")
+		# 	# logger.debug(f"category_mask : {sample[1]['category_mask'].shape}")
+		# 	# logger.debug(f"mask_labels :{sample[1]['mask_labels']}")
+		# 	# logger.debug(f"instance_mask:{sample[1]['instance_mask'].shape}")
+		# 	# print(sample[1]["instance_centers_heatmap"].shape)
+		# 	# print(sample[1]["instance_centers_offset"].shape)
+		# 	# print(sample[1]["semantic_weights"].shape)
+		# 	# print(sample[1]["valid_mask"].shape)
+		# 	# print(sample[1]["things_mask"].shape)
 			
-		exit()
+		# exit()
 		return dataset
 
 
@@ -170,7 +170,9 @@ class PanopticTask(base_task.Task):
 		features, labels = inputs
 		with tf.GradientTape() as tape:
 			outputs = model(features, training=True)
-			
+			print("outputs : ", tf.shape(outputs["class_prob_predictions"]))
+			print("pred_masks :", tf.shape(outputs["mask_prob_predictions"]))
+			exit()
 			loss = 0.0
 			cls_loss = 0.0
 			focal_loss = 0.0
