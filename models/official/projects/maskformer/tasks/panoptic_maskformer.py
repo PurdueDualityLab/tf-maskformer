@@ -80,7 +80,7 @@ class PanopticTask(base_task.Task):
 		reader = input_reader.InputFn(params,dataset_fn = dataset_fn.pick_dataset_fn(params.file_type),parser_fn = parser)
 		dataset = reader(ctx=input_context)
 		for sample in dataset.take(1):
-			print(f"unique ids : {sample[1]['unique_ids']}")
+			print(f"unique ids : {sample[1]['unique_ids'].shape}")
 			print("individual masks :", sample[1]["individual_masks"].shape)
 			# print(f"image shape : {sample[0].shape}")
 			# logger.debug(f"category_mask : {sample[1]['category_mask'].shape}")
