@@ -1,13 +1,8 @@
 #!/bin/bash
-fusermount -u ~/datasets
-fusermount -u ~/models
-gcsfuse --implicit-dirs cam2-datasets ~/datasets
-gcsfuse cam2-models ~/models
 export PYTHONPATH=$PYTHONPATH:~/tf-maskformer/models
-export MODEL_DIR="gs://cam2-models/maskformer_resnet/v2"
+export MODEL_DIR="gs://cam2-models/maskformer/v2"
 export BACKBONE_DIR="gs://cam2-models/maskformer_dummy/resnet50_v1"
-export DATA_PTH="coco_panoptic"
-export TPU_NAME="tf-debug-15"
+export TPU_NAME="tf-debug-4"
 export TPU_SOFTWARE="2.11.0"
 export TPU_PROJECT="red-atlas-305317"
 export TPU_ZONE="us-central1-f"
@@ -17,11 +12,7 @@ export TPU_ZONE="us-central1-f"
 export OVERRIDES="runtime.distribution_strategy=tpu,\
 runtime.enable_xla=True,\
 trainer.train_steps=554400,\
-trainer.optimizer_config.learning_rate.stepwise.boundaries=[369600],
-"
-#runtime.enable_xla=True,\
-
-
+trainer.optimizer_config.learning_rate.stepwise.boundaries=[369600],"
 python3 models/official/projects/maskformer/train.py \
   --experiment maskformer_coco_panoptic \
   --mode train \
