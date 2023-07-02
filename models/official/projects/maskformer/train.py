@@ -46,7 +46,7 @@ def main(_):
 			num_gpus=params.runtime.num_gpus,
 			tpu_address=params.runtime.tpu)
         
-	tf.profiler.experimental.server.start(6000)
+	
         #cluster_resolver = tf.distribute.cluster_resolver.TPUClusterResolver(tpu = os.environ["TPU_NAME"], zone = os.environ['TPU_ZONE'], project = os.environ['TPU_PROJECT'])
 	#tf.config.experimental_connect_to_cluster(cluster_resolver)
 	#tf.tpu.experimental.initialize_tpu_system(cluster_resolver)
