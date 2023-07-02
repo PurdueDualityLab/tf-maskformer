@@ -21,7 +21,7 @@ trainer.optimizer_config.learning_rate.stepwise.boundaries=[369600],
 #runtime.enable_xla=True,\
 
 
-TPU_LOAD_LIBRARY=0 python3 models/official/projects/maskformer/train.py \
+python3 models/official/projects/maskformer/train.py \
   --experiment maskformer_coco_panoptic \
   --mode train \
   --model_dir $MODEL_DIR \
