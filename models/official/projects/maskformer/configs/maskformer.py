@@ -49,7 +49,7 @@ class Parser(hyperparams.Config):
     sigma: float = 8.0
     small_instance_area_threshold: int = 4096
     small_instance_weight: float = 3.0
-    dtype: str = 'bfloat16'
+    dtype: str = 'float32'
     seed: int = None
 
 @dataclasses.dataclass
@@ -62,7 +62,7 @@ class DataConfig(cfg.DataConfig):
   is_training: bool = False
   regenerate_source_id: bool = False
   # TODO : Change the dtype to bloat16 for TPU training
-  dtype: str = 'bfloat16'
+  dtype: str = 'float32'
   decoder: common.DataDecoder = common.DataDecoder()
   shuffle_buffer_size: int = 10000
   file_type: str = 'tfrecord'
@@ -167,7 +167,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
                     sigma = 8.0,
                     small_instance_area_threshold = 4096,
                     small_instance_weight = 3.0,
-                    dtype = 'bfloat16',
+                    dtype = 'float32',
                     seed = 2045,
                 )
           ),

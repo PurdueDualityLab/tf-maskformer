@@ -58,7 +58,7 @@ def main(_):
 	with distribution_strategy.scope():
 		task = task_factory.get_task(params.task, logging_dir=model_dir)
 		
-	tf.keras.mixed_precision.set_global_policy('mixed_bfloat16')
+	#tf.keras.mixed_precision.set_global_policy('mixed_bfloat16')
 	train_lib.run_experiment(
 			distribution_strategy=distribution_strategy,
 			task=task,

@@ -128,7 +128,7 @@ class PanopticTask(base_task.Task):
                 calculated_losses = loss(outputs, targets)
                 
                 # Losses are returned as weighted sum of individual losses
-                total_loss = tf.cast(calculated_losses['loss_ce'], tf.bfloat16) + tf.cast(calculated_losses['loss_dice'], tf.bfloat16) + tf.cast(calculated_losses['loss_focal'], tf.bfloat16)
+                total_loss = calculated_losses['loss_ce'] + calculated_losses['loss_dice'] + calculated_losses['loss_focal']
 
                 weighted_ce = calculated_losses['loss_ce']
                 weighted_focal = calculated_losses['loss_dice']
@@ -269,9 +269,9 @@ class PanopticTask(base_task.Task):
                 logs = {self.loss: total_loss}
         
                 outputs = {"pred_logits": output["class_prob_predictions"], "pred_masks": output["mask_prob_predictions"]}
-                panoptic_seg, segments_info = PanopticInference(output["pred_logits"], output["pred_masks"], features.shape,  self._task_config.model.num_classes)
+                #panoptic_seg, segments_info = PanopticInference(output["pred_logits"], output["pred_masks"], features.shape,  self._task_config.model.num_classes)
         
-                logs.update({'panoptic_seg': panoptic_seg, 'segments_info': segments_info})
+                #logs.update({'panoptic_seg': panoptic_seg, 'segments_info': segments_info})
 
                 all_losses = {
                                 'cls_loss': cls_loss,
