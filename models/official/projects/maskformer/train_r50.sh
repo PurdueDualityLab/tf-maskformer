@@ -17,9 +17,6 @@ export TPU_ZONE="us-central1-a"
 export OVERRIDES="runtime.distribution_strategy=tpu,\
 runtime.enable_xla=True,\
 trainer.optimizer_config.learning_rate.stepwise.boundaries=[369600],"
-
-
-
 python3 models/official/projects/maskformer/train.py \
   --experiment maskformer_coco_panoptic \
   --mode train \
