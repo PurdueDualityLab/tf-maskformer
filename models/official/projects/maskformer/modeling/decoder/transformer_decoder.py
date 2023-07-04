@@ -1,9 +1,6 @@
 import math
 import tensorflow as tf
-
 from official.projects.detr.modeling.detr import position_embedding_sine
-from official.projects.detr.modeling import transformer
-from official.modeling import tf_utils
 from official.projects.maskformer.modeling.decoder.detr_transformer import DETRTransformer
   
 class MaskFormerTransformer(tf.keras.layers.Layer):
@@ -34,6 +31,12 @@ class MaskFormerTransformer(tf.keras.layers.Layer):
 
 
     def build(self, input_shape):
+
+        # FIXME : using float32 for stability.
+        policy = tf.keras.mixed_precision.global_policy()
+        if policy.name == "mixed_bfloat16":
+            policy = tf.float32
+
         self._transformer = DETRTransformer(num_encoder_layers=self._num_encoder_layers,
                                             num_decoder_layers=self._num_decoder_layers,
                                             dropout_rate=self._dropout_rate)

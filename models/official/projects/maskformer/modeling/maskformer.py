@@ -5,7 +5,6 @@ from official.projects.maskformer.modeling.decoder.transformer_decoder import Ma
 from official.projects.maskformer.modeling.layers.nn_block import MLPHead
 from official.projects.maskformer.modeling.decoder.transformer_pixel_decoder import TransformerFPN
 
-# TODO(ibrahim): Add all parameters model parameters and remove hardcoding.
 class MaskFormer(tf.keras.Model):
   """Maskformer"""
   def __init__(self,
@@ -68,13 +67,6 @@ class MaskFormer(tf.keras.Model):
   def build(self, image_shape):
     #backbone
     print("[Build MaskFormer] image shape: ", image_shape)
-    #self.backbone = resnet.ResNet(50, input_specs=self._input_specs, bn_trainable=False)
-    #ckpt_dir_or_file = "gs://cam2-models/maskformer_dummy/resnet50_v1"
-    #ckpt_dir_or_file = tf.train.latest_checkpoint(ckpt_dir_or_file)
-    #ckpt = tf.train.Checkpoint(backbone=self.backbone)
-    #status = ckpt.restore(ckpt_dir_or_file)
-    #status.expect_partial().assert_existing_objects_matched()
-    #print("Loaded checkpoint")
 
     #decoders
     self.pixel_decoder = TransformerFPN(batch_size = self._batch_size,
@@ -103,8 +95,6 @@ class MaskFormer(tf.keras.Model):
                         hidden_dim=self._hidden_size, 
                         mask_dim=self._fpn_feat_dims)
     
-    #self.panoptic_interpolate = tf.keras.layers.Resizing(
-    #          image_shape[1], image_shape[2], interpolation = "bilinear")
     super(MaskFormer, self).build(image_shape)
  
   def process_feature_maps(self, maps):
