@@ -50,19 +50,19 @@ python3 create_coco_tf_record.py \
   --logtostderr \
   --image_dir="$DATA_DIR/val2017" \
   --object_annotations_file="$DATA_DIR/annotations/instances_val2017.json" \
-  --output_file_prefix="$DATA_DIR/tfrecords/val" \
+  --output_file_prefix="$DATA_DIR/tfrecords_new/val" \
   --panoptic_annotations_file="$DATA_DIR/annotations/panoptic_val2017.json" \
   --panoptic_masks_dir="$DATA_DIR/panoptic_val2017" \
   --num_shards=8 \
   --include_panoptic_masks
 
-# python3 create_coco_tf_record.py \
-#   --logtostderr \
-#   --image_dir="$DATA_DIR/train2017" \
-#   --object_annotations_file="$DATA_DIR/annotations/instances_train2017.json" \
-#   --output_file_prefix="$DATA_DIR/tfrecords/train" \
-#   --panoptic_annotations_file="$DATA_DIR/annotations/panoptic_train2017.json" \
-#   --panoptic_masks_dir="$DATA_DIR/panoptic_train2017" \
-#   --num_shards=150 \
-#   --include_panoptic_masks\
-#   --num_processes 16\
+python3 create_coco_tf_record.py \
+  --logtostderr \
+  --image_dir="$DATA_DIR/train2017" \
+  --object_annotations_file="$DATA_DIR/annotations/instances_train2017.json" \
+  --output_file_prefix="$DATA_DIR/tfrecords_new/train" \
+  --panoptic_annotations_file="$DATA_DIR/annotations/panoptic_train2017.json" \
+  --panoptic_masks_dir="$DATA_DIR/panoptic_train2017" \
+  --num_shards=150 \
+  --include_panoptic_masks\
+  --num_processes 16\

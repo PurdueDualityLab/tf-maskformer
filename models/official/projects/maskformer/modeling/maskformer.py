@@ -68,14 +68,7 @@ class MaskFormer(tf.keras.Model):
   def build(self, image_shape):
     #backbone
     print("[Build MaskFormer] image shape: ", image_shape)
-    #self.backbone = resnet.ResNet(50, input_specs=self._input_specs, bn_trainable=False)
-    #ckpt_dir_or_file = "gs://cam2-models/maskformer_dummy/resnet50_v1"
-    #ckpt_dir_or_file = tf.train.latest_checkpoint(ckpt_dir_or_file)
-    #ckpt = tf.train.Checkpoint(backbone=self.backbone)
-    #status = ckpt.restore(ckpt_dir_or_file)
-    #status.expect_partial().assert_existing_objects_matched()
-    #print("Loaded checkpoint")
-
+  
     #decoders
     self.pixel_decoder = TransformerFPN(batch_size = self._batch_size,
                             fpn_feat_dims=self._fpn_feat_dims,
@@ -99,12 +92,12 @@ class MaskFormer(tf.keras.Model):
                                             num_encoder_layers=self._detr_encoder_layers,
                                             num_decoder_layers=self._num_decoder_layers,
                                             dropout_rate=self._dropout_rate)
+    # FIXME : Added extra class for no object class. 
+    # One class is for no object (as mentioned in the paper as class phi) but targets are still 133 in number.
     self.head = MLPHead(num_classes=self._num_classes, 
                         hidden_dim=self._hidden_size, 
                         mask_dim=self._fpn_feat_dims)
     
-    #self.panoptic_interpolate = tf.keras.layers.Resizing(
-    #          image_shape[1], image_shape[2], interpolation = "bilinear")
     super(MaskFormer, self).build(image_shape)
  
   def process_feature_maps(self, maps):
@@ -114,14 +107,10 @@ class MaskFormer(tf.keras.Model):
     return new_dict
 
   def call(self, image, training = False):
-    # image = tf.reshape(image, [1, 800, 1135, 3])
-    # image = tf.ones((1, 640, 640, 3))
     backbone_feature_maps = self.backbone(image)
     mask_features, transformer_enc_feat = self.pixel_decoder(self.process_feature_maps(backbone_feature_maps))
     transformer_features = self.transformer({"features": transformer_enc_feat})
         
     seg_pred = self.head({"per_pixel_embeddings" : mask_features,
                           "per_segment_embeddings": transformer_features})
-    #if not training:
-    #    seg_pred["pred_masks"] = self.panoptic_interpolate(seg_pred["pred_masks"])
     return seg_pred

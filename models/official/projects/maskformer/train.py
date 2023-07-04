@@ -40,19 +40,12 @@ def main(_):
 	# Uncomment to test on TPU
 	if params.runtime.mixed_precision_dtype:
 		performance.set_mixed_precision_policy(params.runtime.mixed_precision_dtype)
+
 	distribution_strategy = distribute_utils.get_distribution_strategy(
 			distribution_strategy="tpu",
         		all_reduce_alg=params.runtime.all_reduce_alg,
 			num_gpus=params.runtime.num_gpus,
 			tpu_address=params.runtime.tpu)
-        
-	
-    #cluster_resolver = tf.distribute.cluster_resolver.TPUClusterResolver(tpu = os.environ["TPU_NAME"], zone = os.environ['TPU_ZONE'], project = os.environ['TPU_PROJECT'])
-	#tf.config.experimental_connect_to_cluster(cluster_resolver)
-	#tf.tpu.experimental.initialize_tpu_system(cluster_resolver)
-      #  distribution_strategy = tf.distribute.experimental.TPUStrategy(cluster_resolver)
-
-	# 		num_gpus=1)
 	
 	# Below code is independent of compute platform
 	with distribution_strategy.scope():

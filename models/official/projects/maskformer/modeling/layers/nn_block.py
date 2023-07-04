@@ -28,10 +28,8 @@ class MLPHead(tf.keras.layers.Layer):
     def build(self, input_shape):
         self._mlp = MLP(self._hidden_dim, self._hidden_dim, self._mask_dim, 3)
         self._linear_classifier = tf.keras.layers.Dense(self._num_classes + 1)
-        # No Softmax used in their code? Need to figure out!!
-        # self.linear_classifier = tf.keras.layers.Dense(input_shape=hidden_dim, out_dim=num_classes + 1, activation=None)
-
-        # self.dec_supervision = dec_supervision
+        
+        
 
     def call(self, inputs):
         per_pixel_embeddings = inputs['per_pixel_embeddings']

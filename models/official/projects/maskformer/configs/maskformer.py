@@ -74,9 +74,6 @@ class DataConfig(cfg.DataConfig):
 class Losses(hyperparams.Config):
   # TODO update these for maskformer
   class_offset: int = 0
-  lambda_cls: float = 1.0
-  lambda_box: float = 5.0
-  lambda_giou: float = 2.0
   background_cls_weight: float = 0.1
   l2_weight_decay: float = 1e-4
   cost_class = 1.0
@@ -92,7 +89,7 @@ class MaskFormer(hyperparams.Config):
   num_queries: int = 100
   hidden_size: int = 256
   # TODO: Actually there are 133 classes for panoptic segmentation
-  num_classes: int = 133  # 0: background
+  num_classes: int = 133  # 0: no object class 
   fpn_encoder_layers: int = 6
   detr_encoder_layers: int = 0
   num_decoder_layers: int = 6
@@ -115,7 +112,6 @@ class MaskFormerTask(cfg.TaskConfig):
   per_category_metrics: bool = False
 
 # TODO : we should pass this via cmd 
-# COCO_INPUT_PATH_BASE = '/depot/davisjam/data/vishal/datasets/coco/'
 COCO_INPUT_PATH_BASE = 'gs://cam2-datasets/coco_panoptic/'
 COCO_TRAIN_EXAMPLES = 118287
 COCO_VAL_EXAMPLES = 5000
@@ -186,10 +182,11 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
       trainer=cfg.TrainerConfig(
           train_steps=train_steps,
           validation_steps=COCO_VAL_EXAMPLES // eval_batch_size,
-          steps_per_loop=steps_per_epoch,
-          summary_interval=steps_per_epoch,
-          checkpoint_interval=steps_per_epoch,
-          validation_interval= 5 * steps_per_epoch,
+          # FIXME steps per value is set to 10000
+          steps_per_loop=10000,
+          summary_interval=10000,
+          checkpoint_interval=10000,
+          validation_interval= 5 * 10000,
           max_to_keep=1,
           best_checkpoint_export_subdir='best_ckpt',
           # TODO: Not defined the metric
