@@ -261,6 +261,10 @@ class Loss:
         # FIXME: check if we need to cast dice_loss_weighted to tf.bfloat16
         dice_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(dice_loss_weighted), tf.cast(num_masks_sum, tf.bfloat16))
 
+        # FIXME : cast all losses to bfloat16
+        cls_loss = tf.cast(cls_loss, tf.bfloat16)
+        focal_loss_final = tf.cast(focal_loss_final, tf.bfloat16)
+        dice_loss_final = tf.cast(dice_loss_final, tf.bfloat16)
         return cls_loss, focal_loss_final, dice_loss_final
     
     def __call__(self, outputs, y_true):
