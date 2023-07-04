@@ -71,7 +71,7 @@ class DETRTransformer(tf.keras.layers.Layer):
       self_attention_mask = None
       
     decoded = self._decoder(
-        tf.zeros_like(targets),
+        tf.cast(tf.zeros_like(targets), tf.bfloat16),
         memory,
         # TODO(b/199545430): self_attention_mask could be set to None when this
         # bug is resolved. Passing ones for now.

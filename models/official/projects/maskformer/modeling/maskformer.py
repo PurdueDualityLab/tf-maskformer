@@ -104,14 +104,12 @@ class MaskFormer(tf.keras.Model):
     return new_dict
 
   def call(self, image, training = False):
-    # image = tf.reshape(image, [1, 800, 1135, 3])
-    # image = tf.ones((1, 640, 640, 3))
+   
     backbone_feature_maps = self.backbone(image)
     mask_features, transformer_enc_feat = self.pixel_decoder(self.process_feature_maps(backbone_feature_maps))
     transformer_features = self.transformer({"features": transformer_enc_feat})
         
     seg_pred = self.head({"per_pixel_embeddings" : mask_features,
                           "per_segment_embeddings": transformer_features})
-    #if not training:
-    #    seg_pred["pred_masks"] = self.panoptic_interpolate(seg_pred["pred_masks"])
+   
     return seg_pred

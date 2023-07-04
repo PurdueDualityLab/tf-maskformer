@@ -152,12 +152,7 @@ class Fpn(tf.keras.layers.Layer):
 
             lateral = self._conv2d_op_lateral[i](feat)
             lateral = self._lateral_groupnorm[i](lateral)
-            print(down.shape)
-            print(nearest_upsampling(down, 2).shape)
-            print(lateral.shape)
-            exit()
             down = nearest_upsampling(down, 2) + lateral
-
             down = self._conv2d_op_down[i + 1](down)
             down = self._down_groupnorm[i+1](down)
             down = self._relu2(down)

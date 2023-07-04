@@ -81,6 +81,7 @@ class TransformerFPN(tf.keras.layers.Layer):
                                                   padding='same',
                                                   name = f"input_proj",
                                                   use_bias = True)
+        
         self._transformer_encoder = TransformerEncoder(norm_first=False,
                                                        dropout_rate = .1,
                                                        num_layers=self._num_encoder_layers)
