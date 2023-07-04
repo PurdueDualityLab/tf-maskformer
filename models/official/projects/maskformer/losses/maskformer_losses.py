@@ -179,6 +179,10 @@ class Loss:
         
         cost_focal = FocalLossMod().batch(tgt_mask, out_mask)
         cost_dice = DiceLoss().batch(tgt_mask, out_mask)
+
+        # FIXME : Cast the loss tensors to tf.bfloat16 
+        cost_focal = tf.cast(cost_focal, dtype=tf.bfloat16)
+        cost_dice = tf.cast(cost_dice, dtype=tf.bfloat16)
         
         total_cost = (
                 self.cost_focal * cost_focal
