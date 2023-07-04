@@ -73,7 +73,6 @@ class DETRTransformer(tf.keras.layers.Layer):
     # FIXME : The decoder uses float32 so cast all inputs to float32
     targets = tf.cast(targets, tf.float32)
     memory = tf.cast(memory, tf.float32)
-    self_attention_mask = tf.cast(self_attention_mask, tf.float32)
     cross_attention_mask = tf.cast(cross_attention_mask, tf.float32)
     pos_embed = tf.cast(pos_embed, tf.float32)
     targets = tf.cast(targets, tf.float32)
