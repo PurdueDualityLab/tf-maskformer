@@ -123,7 +123,8 @@ class DiceLoss(tf.keras.losses.Loss):
         """
         y_true: (b size, 100, h*w)
         """
-       
+        # FIXME : cast y_true to bfloat16 for loss calculation
+        y_true = tf.cast(y_true, tf.bfloat16)
         y_pred = tf.reshape(tf.keras.activations.sigmoid(y_pred), (y_pred.shape[0],y_pred.shape[1],-1))
         y_true = tf.reshape(y_true, (y_true.shape[0],tf.shape(y_true)[1],-1))
         numerator = 2 * tf.reduce_sum(y_pred * y_true, axis=-1)
@@ -183,7 +184,7 @@ class Loss:
         # FIXME : Cast the loss tensors to tf.bfloat16 
         cost_focal = tf.cast(cost_focal, dtype=tf.bfloat16)
         cost_dice = tf.cast(cost_dice, dtype=tf.bfloat16)
-        
+
         total_cost = (
                 self.cost_focal * cost_focal
                 + self.cost_class * cost_class
