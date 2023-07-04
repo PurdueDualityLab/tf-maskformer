@@ -258,7 +258,9 @@ class Loss:
         dice_loss_weighted = tf.where(background_new, tf.zeros_like(dice_loss), dice_loss)
         focal_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(focal_loss_weighted), num_masks_sum)
         # FIXME: check if we need to cast dice_loss_weighted to tf.bfloat16
-        dice_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(tf.cast(dice_loss_weighted, tf.bfloat16)), num_masks_sum)
+        print("dice_loss_weighted dtype: ", dice_loss_weighted.dtype)
+        exit()
+        dice_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(dice_loss_weighted), num_masks_sum)
 
         
         return cls_loss, focal_loss_final, dice_loss_final
