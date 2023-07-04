@@ -227,7 +227,8 @@ class Loss:
         num_masks_per_replica = tf.reduce_sum(num_masks)
         cls_weights_per_replica = tf.reduce_sum(cls_weights)
         replica_context = tf.distribute.get_replica_context()
-        num_masks_sum, cls_weights_sum = replica_context.all_reduce(tf.distribute.ReduceOp.SUM,[num_masks_per_replica, cls_weights_per_replica])
+        num_masks_sum, cls_weights_sum = replica_context.all_reduce(tf.distribute.ReduceOp.SUM,
+                                                                    [num_masks_per_replica, cls_weights_per_replica])
        
         # Final losses
         cls_loss = tf.math.divide_no_nan(tf.reduce_sum(cls_loss), cls_weights_sum)
@@ -256,7 +257,8 @@ class Loss:
         focal_loss_weighted = tf.where(background_new, tf.zeros_like(focal_loss), focal_loss)
         dice_loss_weighted = tf.where(background_new, tf.zeros_like(dice_loss), dice_loss)
         focal_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(focal_loss_weighted), num_masks_sum)
-        dice_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(dice_loss_weighted), num_masks_sum)
+        # FIXME: check if we need to cast dice_loss_weighted to tf.bfloat16
+        dice_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(tf.cast(dice_loss_weighted, tf.bfloat16)), num_masks_sum)
 
         
         return cls_loss, focal_loss_final, dice_loss_final
