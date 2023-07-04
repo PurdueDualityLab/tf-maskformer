@@ -41,6 +41,17 @@ def main(_):
         		all_reduce_alg=params.runtime.all_reduce_alg,
 			num_gpus=params.runtime.num_gpus,
 			tpu_address=params.runtime.tpu)
+<<<<<<< HEAD
+=======
+        
+	
+        #cluster_resolver = tf.distribute.cluster_resolver.TPUClusterResolver(tpu = os.environ["TPU_NAME"], zone = os.environ['TPU_ZONE'], project = os.environ['TPU_PROJECT'])
+	#tf.config.experimental_connect_to_cluster(cluster_resolver)
+	#tf.tpu.experimental.initialize_tpu_system(cluster_resolver)
+      #  distribution_strategy = tf.distribute.experimental.TPUStrategy(cluster_resolver)
+
+	# 		num_gpus=1)
+>>>>>>> d763da1b5adafd0fedf8d87ddcefdff83342cbb8
 	
 	# Below code is independent of compute platform
 	with distribution_strategy.scope():

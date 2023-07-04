@@ -2,7 +2,7 @@ import tensorflow as tf
 from official.vision.losses import focal_loss
 from official.projects.detr.ops import matchers
 from loguru import logger
-tf.compat.v1.enable_eager_execution()
+# tf.compat.v1.enable_eager_execution()
 
 def _max_by_axis(the_list):
     all_max = the_list[0]
