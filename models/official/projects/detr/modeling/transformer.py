@@ -839,7 +839,7 @@ class TransformerDecoderBlock(tf.keras.layers.Layer):
       attention_output = source_self_attention_output + attention_output
     else:
       attention_output = self.encdec_attention_layer_norm(
-        self_attention_output + attention_output)
+        self_attention_output + tf.cast(attention_output, tf.float32))
     if self._norm_first:
       source_attention_output = attention_output
       attention_output = self.output_layer_norm(attention_output)
