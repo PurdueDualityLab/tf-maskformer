@@ -822,8 +822,8 @@ class TransformerDecoderBlock(tf.keras.layers.Layer):
           self_attention_output)
     # Print all the input dtypes for debugging.
     # tf.print("self_attention_output", tf.shape(self_attention_output), self_attention_output.dtype)
-    tf.print("memory", tf.shape(memory), memory.dtype)
-    tf.print("memory_pos_embed", tf.shape(memory_pos_embed), memory_pos_embed.dtype)
+    print("memory", tf.shape(memory), memory.dtype)
+    print("memory_pos_embed", tf.shape(memory_pos_embed), memory_pos_embed.dtype)
     # tf.print("attention_mask", tf.shape(attention_mask), attention_mask.dtype)
     # tf.print("input_pos_embed", tf.shape(input_pos_embed), input_pos_embed.dtype)
     # tf.print("self_attention_mask", tf.shape(self_attention_mask), self_attention_mask.dtype)
