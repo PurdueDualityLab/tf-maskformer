@@ -69,15 +69,18 @@ class DETRTransformer(tf.keras.layers.Layer):
     else:
       cross_attention_mask = None
       self_attention_mask = None
-      
+    
+    # FIXME : The decoder uses float32 so cast all inputs to float32
     decoded = self._decoder(
-        tf.cast(tf.zeros_like(targets), tf.bfloat16),
-        memory,
+        tf.zeros_like(targets, dtype=tf.float32),
+        tf.cast(memory, tf.float32),
         # TODO(b/199545430): self_attention_mask could be set to None when this
         # bug is resolved. Passing ones for now.
-        self_attention_mask=self_attention_mask,
-        cross_attention_mask=cross_attention_mask,
+        self_attention_mask=tf.cast(self_attention_mask, tf.float32),
+        cross_attention_mask=tf.cast(cross_attention_mask, tf.float32),
         return_all_decoder_outputs=False,
-        input_pos_embed=targets,
-        memory_pos_embed=pos_embed)
-    return decoded
+        input_pos_embed=tf.cast(targets, tf.float32),
+        memory_pos_embed=tf.cast(pos_embed, tf.float32),)
+    
+    # FIXME : Return decode as bfloat16
+    return tf.cast(decoded, tf.bfloat16)
