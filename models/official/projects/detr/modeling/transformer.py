@@ -820,6 +820,14 @@ class TransformerDecoderBlock(tf.keras.layers.Layer):
       source_self_attention_output = self_attention_output
       self_attention_output = self.encdec_attention_layer_norm(
           self_attention_output)
+    # Print all the input dtypes for debugging.
+    tf.print("self_attention_output", tf.shape(self_attention_output), tf.dtype(self_attention_output))
+    tf.print("memory", tf.shape(memory), tf.dtype(memory))
+    tf.print("memory_pos_embed", tf.shape(memory_pos_embed), tf.dtype(memory_pos_embed))
+    tf.print("attention_mask", tf.shape(attention_mask), tf.dtype(attention_mask))
+    tf.print("input_pos_embed", tf.shape(input_pos_embed), tf.dtype(input_pos_embed))
+    tf.print("self_attention_mask", tf.shape(self_attention_mask), tf.dtype(self_attention_mask))
+
     cross_attn_inputs = dict(
         query=self_attention_output + input_pos_embed,
         key=memory + memory_pos_embed,
