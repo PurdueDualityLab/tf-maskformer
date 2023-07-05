@@ -74,7 +74,7 @@ class PanopticTask(base_task.Task):
 
 			"""
 			
-			# tf.profiler.experimental.server.start(6000)
+			
 			if params.decoder.type == 'simple_decoder':
 				decoder = panoptic_input.TfExampleDecoder(regenerate_source_id = params.regenerate_source_id)
 			else:
@@ -83,7 +83,7 @@ class PanopticTask(base_task.Task):
 			parser = panoptic_input.mask_former_parser(params.parser, is_training = params.is_training, decoder_fn=decoder.decode)
 			reader = input_reader.InputFn(params,dataset_fn = dataset_fn.pick_dataset_fn(params.file_type),parser_fn = parser)
 			dataset = reader(ctx=input_context)
-			tf.profiler.experimental.server.start(6000)
+			
 
 			return dataset
 
