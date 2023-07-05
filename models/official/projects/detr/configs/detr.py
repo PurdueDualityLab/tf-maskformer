@@ -79,7 +79,7 @@ class DetrTask(cfg.TaskConfig):
   per_category_metrics: bool = False
 
 
-COCO_INPUT_PATH_BASE = 'coco'
+COCO_INPUT_PATH_BASE = 'gs://cam2-datasets/coco'
 COCO_TRAIN_EXAMPLES = 118287
 COCO_VAL_EXAMPLES = 5000
 
