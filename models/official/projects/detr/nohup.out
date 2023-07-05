@@ -1,0 +1,433 @@
+2023-07-05 14:52:48.466722: I tensorflow/tsl/cuda/cudart_stub.cc:28] Could not find cuda drivers on your machine, GPU will not be used.
+2023-07-05 14:52:48.532225: I tensorflow/tsl/cuda/cudart_stub.cc:28] Could not find cuda drivers on your machine, GPU will not be used.
+2023-07-05 14:52:48.532997: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2023-07-05 14:52:49.768860: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow_addons/utils/tfa_eol_msg.py:23: UserWarning: 
+
+TensorFlow Addons (TFA) has ended development and introduction of new features.
+TFA has entered a minimal maintenance and release mode until a planned end of life in May 2024.
+Please modify downstream libraries to take dependencies from other repositories in our TensorFlow community (e.g. Keras, Keras-CV, and Keras-NLP). 
+
+For more information see: https://github.com/tensorflow/addons/issues/2807 
+
+  warnings.warn(
+I0705 14:52:52.381013 139798206351168 train_utils.py:359] Final experiment parameters:
+{'runtime': {'all_reduce_alg': None,
+             'batchnorm_spatial_persistent': False,
+             'dataset_num_private_threads': None,
+             'default_shard_dim': -1,
+             'distribution_strategy': 'mirrored',
+             'enable_xla': False,
+             'gpu_thread_mode': None,
+             'loss_scale': None,
+             'mixed_precision_dtype': None,
+             'num_cores_per_replica': 1,
+             'num_gpus': 0,
+             'num_packs': 1,
+             'per_gpu_thread_count': 0,
+             'run_eagerly': False,
+             'task_index': -1,
+             'tpu': 'tf-debug-1',
+             'tpu_enable_xla_dynamic_padder': None,
+             'worker_hosts': None},
+ 'task': {'allow_image_summary': False,
+          'annotation_file': 'gs://cam2-datasets/annotations/instances_val2017.json',
+          'differential_privacy_config': None,
+          'init_checkpoint': '',
+          'init_checkpoint_modules': 'backbone',
+          'losses': {'background_cls_weight': 0.1,
+                     'class_offset': 0,
+                     'l2_weight_decay': 0.0001,
+                     'lambda_box': 5.0,
+                     'lambda_cls': 1.0,
+                     'lambda_giou': 2.0},
+          'model': {'backbone': {'resnet': {'bn_trainable': False,
+                                            'depth_multiplier': 1.0,
+                                            'model_id': 50,
+                                            'replace_stem_max_pool': False,
+                                            'resnetd_shortcut': False,
+                                            'scale_stem': True,
+                                            'se_ratio': 0.0,
+                                            'stem_type': 'v0',
+                                            'stochastic_depth_drop_rate': 0.0},
+                                 'type': 'resnet'},
+                    'backbone_endpoint_name': '5',
+                    'hidden_size': 256,
+                    'input_size': [1333, 1333, 3],
+                    'norm_activation': {'activation': 'relu',
+                                        'norm_epsilon': 0.001,
+                                        'norm_momentum': 0.99,
+                                        'use_sync_bn': True},
+                    'num_classes': 91,
+                    'num_decoder_layers': 6,
+                    'num_encoder_layers': 6,
+                    'num_queries': 100},
+          'name': None,
+          'per_category_metrics': False,
+          'train_data': {'apply_tf_data_service_before_batching': False,
+                         'block_length': 1,
+                         'cache': False,
+                         'cycle_length': None,
+                         'decoder': {'simple_decoder': {'attribute_names': [],
+                                                        'mask_binarize_threshold': None,
+                                                        'regenerate_source_id': False},
+                                     'type': 'simple_decoder'},
+                         'deterministic': None,
+                         'drop_remainder': True,
+                         'dtype': 'bfloat16',
+                         'enable_shared_tf_data_service_between_parallel_trainers': False,
+                         'enable_tf_data_service': False,
+                         'file_type': 'tfrecord',
+                         'global_batch_size': 64,
+                         'input_path': 'gs://cam2-datasets/coco/train*',
+                         'is_training': True,
+                         'prefetch_buffer_size': None,
+                         'seed': None,
+                         'sharding': True,
+                         'shuffle_buffer_size': 1000,
+                         'tf_data_service_address': None,
+                         'tf_data_service_job_name': None,
+                         'tfds_as_supervised': False,
+                         'tfds_data_dir': '',
+                         'tfds_name': '',
+                         'tfds_skip_decoding_feature': '',
+                         'tfds_split': 'train',
+                         'trainer_id': None},
+          'validation_data': {'apply_tf_data_service_before_batching': False,
+                              'block_length': 1,
+                              'cache': False,
+                              'cycle_length': None,
+                              'decoder': {'simple_decoder': {'attribute_names': [],
+                                                             'mask_binarize_threshold': None,
+                                                             'regenerate_source_id': False},
+                                          'type': 'simple_decoder'},
+                              'deterministic': None,
+                              'drop_remainder': False,
+                              'dtype': 'bfloat16',
+                              'enable_shared_tf_data_service_between_parallel_trainers': False,
+                              'enable_tf_data_service': False,
+                              'file_type': 'tfrecord',
+                              'global_batch_size': 64,
+                              'input_path': 'gs://cam2-datasets/coco/val*',
+                              'is_training': False,
+                              'prefetch_buffer_size': None,
+                              'seed': None,
+                              'sharding': True,
+                              'shuffle_buffer_size': 10000,
+                              'tf_data_service_address': None,
+                              'tf_data_service_job_name': None,
+                              'tfds_as_supervised': False,
+                              'tfds_data_dir': '',
+                              'tfds_name': '',
+                              'tfds_skip_decoding_feature': '',
+                              'tfds_split': 'train',
+                              'trainer_id': None}},
+ 'trainer': {'allow_tpu_summary': False,
+             'best_checkpoint_eval_metric': 'AP',
+             'best_checkpoint_export_subdir': 'best_ckpt',
+             'best_checkpoint_metric_comp': 'higher',
+             'checkpoint_interval': 1848,
+             'continuous_eval_timeout': 3600,
+             'eval_tf_function': True,
+             'eval_tf_while_loop': False,
+             'loss_upper_bound': 1000000.0,
+             'max_to_keep': 1,
+             'optimizer_config': {'ema': None,
+                                  'learning_rate': {'stepwise': {'boundaries': [369600],
+                                                                 'name': 'PiecewiseConstantDecay',
+                                                                 'offset': 0,
+                                                                 'values': [0.0001,
+                                                                            1e-05]},
+                                                    'type': 'stepwise'},
+                                  'optimizer': {'detr_adamw': {'amsgrad': False,
+                                                               'beta_1': 0.9,
+                                                               'beta_2': 0.999,
+                                                               'clipnorm': None,
+                                                               'clipvalue': None,
+                                                               'epsilon': 1e-07,
+                                                               'exclude_from_weight_decay': None,
+                                                               'global_clipnorm': 0.1,
+                                                               'gradient_clip_norm': 0.0,
+                                                               'include_in_weight_decay': None,
+                                                               'name': 'AdamWeightDecay',
+                                                               'weight_decay_rate': 0.0001},
+                                                'type': 'detr_adamw'},
+                                  'warmup': {'type': None}},
+             'preemption_on_demand_checkpoint': True,
+             'recovery_begin_steps': 0,
+             'recovery_max_trials': 0,
+             'steps_per_loop': 1848,
+             'summary_interval': 1848,
+             'train_steps': 554400,
+             'train_tf_function': True,
+             'train_tf_while_loop': True,
+             'validation_interval': 9240,
+             'validation_steps': 78,
+             'validation_summary_subdir': 'validation'}}
+I0705 14:52:52.381618 139798206351168 train_utils.py:371] Saving experiment configuration to gs://cam2-models/detr_test/params.yaml
+WARNING:tensorflow:There are non-GPU devices in `tf.distribute.Strategy`, not using nccl allreduce.
+W0705 14:52:52.612527 139798206351168 cross_device_ops.py:1387] There are non-GPU devices in `tf.distribute.Strategy`, not using nccl allreduce.
+INFO:tensorflow:Using MirroredStrategy with devices ('/job:localhost/replica:0/task:0/device:CPU:0',)
+I0705 14:52:52.644140 139798206351168 mirrored_strategy.py:374] Using MirroredStrategy with devices ('/job:localhost/replica:0/task:0/device:CPU:0',)
+I0705 14:52:52.781063 139798206351168 train_utils.py:98] Created the best checkpoint exporter. data_dir: gs://cam2-models/detr_test, export_subdir: best_ckpt, metric_name: AP
+I0705 14:52:52.783529 139798206351168 train_utils.py:245] Running default trainer.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:52.822257 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:52.864912 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:52.868764 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:52.872964 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:52.875980 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:53.150878 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:53.154585 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:53.157865 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:53.262887 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:53.266190 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:53.269589 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:53.365416 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:53.368371 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:53.371548 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:53.374588 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:53.520907 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:53.523984 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:53.527593 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:53.633961 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:53.637092 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:53.640144 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:53.743668 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:53.747099 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:53.750140 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:53.852244 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:53.855427 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:53.858712 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:53.862491 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:54.032149 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:54.035514 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:54.039417 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:54.167012 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:54.170239 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:54.173282 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:54.295118 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:54.298454 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:54.301564 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:54.433290 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:54.436448 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:54.439611 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:54.559014 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:54.562243 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:54.565434 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:54.691462 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:54.694247 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:54.697237 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:54.701032 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:54.940143 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:54.943253 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:54.946361 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:55.112913 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:55.116028 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+WARNING:tensorflow:`tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+W0705 14:52:55.119026 139798206351168 batch_normalization.py:1426] `tf.keras.layers.experimental.SyncBatchNormalization` endpoint is deprecated and will be removed in a future release. Please use `tf.keras.layers.BatchNormalization` with parameter `synchronized` set to True.
+I0705 14:52:55.295202 139798206351168 legacy_adamw.py:56] AdamWeightDecay gradient_clip_norm=0.000000
+I0705 14:53:00.799112 139798206351168 controller.py:431] restoring or initializing model...
+INFO:tensorflow:Customized initialization is done through the passed `init_fn`.
+I0705 14:53:00.799364 139798206351168 checkpoint_management.py:877] Customized initialization is done through the passed `init_fn`.
+I0705 14:53:00.799492 139798206351168 train_lib.py:255] Starts to execute mode: train
+I0705 14:53:00.803612 139798206351168 controller.py:256] train | step:      0 | training until step 554400...
+2023-07-05 14:53:01.592587: I tensorflow/core/common_runtime/executor.cc:1197] [/device:CPU:0] (DEBUG INFO) Executor start aborting (this does not indicate an error and you can ignore this message): INVALID_ARGUMENT: You must feed a value for placeholder tensor 'Placeholder/_0' with dtype string and shape [1023]
+	 [[{{node Placeholder/_0}}]]
+2023-07-05 14:53:01.593241: I tensorflow/core/common_runtime/executor.cc:1197] [/device:CPU:0] (DEBUG INFO) Executor start aborting (this does not indicate an error and you can ignore this message): INVALID_ARGUMENT: You must feed a value for placeholder tensor 'Placeholder/_0' with dtype string and shape [1023]
+	 [[{{node Placeholder/_0}}]]
+2023-07-05 14:53:02.942350: W tensorflow/core/framework/dataset.cc:807] Input of GeneratorDatasetOp::Dataset will not be optimized because the dataset does not implement the AsGraphDefInternal() method needed to apply optimizations.
+2023-07-05 14:53:02.943208: I tensorflow/core/common_runtime/executor.cc:1197] [/device:CPU:0] (DEBUG INFO) Executor start aborting (this does not indicate an error and you can ignore this message): INVALID_ARGUMENT: You must feed a value for placeholder tensor 'Placeholder/_0' with dtype variant
+	 [[{{node Placeholder/_0}}]]
+2023-07-05 14:53:03.051240: I tensorflow/core/common_runtime/executor.cc:1197] [/device:CPU:0] (DEBUG INFO) Executor start aborting (this does not indicate an error and you can ignore this message): INVALID_ARGUMENT: You must feed a value for placeholder tensor 'num_steps' with dtype int32
+	 [[{{node num_steps}}]]
+WARNING:tensorflow:From /opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/util/dispatch.py:1176: calling foldl_v2 (from tensorflow.python.ops.functional_ops) with back_prop=False is deprecated and will be removed in a future version.
+Instructions for updating:
+back_prop=False is deprecated. Consider using tf.stop_gradient instead.
+Instead of:
+results = tf.foldl(fn, elems, back_prop=False)
+Use:
+results = tf.nest.map_structure(tf.stop_gradient, tf.foldl(fn, elems))
+W0705 14:53:13.193777 139795630102272 deprecation.py:641] From /opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/util/dispatch.py:1176: calling foldl_v2 (from tensorflow.python.ops.functional_ops) with back_prop=False is deprecated and will be removed in a future version.
+Instructions for updating:
+back_prop=False is deprecated. Consider using tf.stop_gradient instead.
+Instead of:
+results = tf.foldl(fn, elems, back_prop=False)
+Use:
+results = tf.nest.map_structure(tf.stop_gradient, tf.foldl(fn, elems))
+WARNING:tensorflow:From /opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/autograph/impl/api.py:458: calling while_loop_v2 (from tensorflow.python.ops.control_flow_ops) with back_prop=False is deprecated and will be removed in a future version.
+Instructions for updating:
+back_prop=False is deprecated. Consider using tf.stop_gradient instead.
+Instead of:
+results = tf.while_loop(c, b, vars, back_prop=False)
+Use:
+results = tf.nest.map_structure(tf.stop_gradient, tf.while_loop(c, b, vars))
+W0705 14:53:13.556254 139795630102272 deprecation.py:641] From /opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/autograph/impl/api.py:458: calling while_loop_v2 (from tensorflow.python.ops.control_flow_ops) with back_prop=False is deprecated and will be removed in a future version.
+Instructions for updating:
+back_prop=False is deprecated. Consider using tf.stop_gradient instead.
+Instead of:
+results = tf.while_loop(c, b, vars, back_prop=False)
+Use:
+results = tf.nest.map_structure(tf.stop_gradient, tf.while_loop(c, b, vars))
+INFO:tensorflow:Error reported to Coordinator: 
+Traceback (most recent call last):
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/training/coordinator.py", line 293, in stop_on_exception
+    yield
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/distribute/mirrored_run.py", line 226, in _call_for_each_replica
+    t.has_paused.wait()
+  File "/opt/conda/envs/tf-detr/lib/python3.9/threading.py", line 581, in wait
+    signaled = self._cond.wait(timeout)
+  File "/opt/conda/envs/tf-detr/lib/python3.9/threading.py", line 312, in wait
+    waiter.acquire()
+KeyboardInterrupt
+I0705 14:53:21.157469 139798206351168 coordinator.py:213] Error reported to Coordinator: 
+Traceback (most recent call last):
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/training/coordinator.py", line 293, in stop_on_exception
+    yield
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/distribute/mirrored_run.py", line 226, in _call_for_each_replica
+    t.has_paused.wait()
+  File "/opt/conda/envs/tf-detr/lib/python3.9/threading.py", line 581, in wait
+    signaled = self._cond.wait(timeout)
+  File "/opt/conda/envs/tf-detr/lib/python3.9/threading.py", line 312, in wait
+    waiter.acquire()
+KeyboardInterrupt
+restoring or initializing model...
+train | step:      0 | training until step 554400...
+Traceback (most recent call last):
+  File "/home/wenxinjan/tf-maskformer/models/official/projects/detr/train.py", line 70, in <module>
+    app.run(main)
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/absl/app.py", line 308, in run
+    _run_main(main, args)
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/absl/app.py", line 254, in _run_main
+    sys.exit(main(argv))
+  File "/home/wenxinjan/tf-maskformer/models/official/projects/detr/train.py", line 58, in main
+    train_lib.run_experiment(
+  File "/home/wenxinjan/tf-maskformer/models/official/core/train_lib.py", line 357, in run_experiment
+    return runner.run()
+  File "/home/wenxinjan/tf-maskformer/models/official/core/train_lib.py", line 258, in run
+    self.controller.train(steps=params.trainer.train_steps)
+  File "/home/wenxinjan/tf-maskformer/models/orbit/controller.py", line 260, in train
+    self._train_n_steps(num_steps)
+  File "/home/wenxinjan/tf-maskformer/models/orbit/controller.py", line 485, in _train_n_steps
+    train_output = self.trainer.train(num_steps_tensor)
+  File "/home/wenxinjan/tf-maskformer/models/orbit/standard_runner.py", line 146, in train
+    self._train_loop_fn(self._train_iter, num_steps)
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/util/traceback_utils.py", line 150, in error_handler
+    return fn(*args, **kwargs)
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/eager/polymorphic_function/polymorphic_function.py", line 894, in __call__
+    result = self._call(*args, **kwds)
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/eager/polymorphic_function/polymorphic_function.py", line 942, in _call
+    self._initialize(args, kwds, add_initializers_to=initializers)
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/eager/polymorphic_function/polymorphic_function.py", line 763, in _initialize
+    self._variable_creation_fn    # pylint: disable=protected-access
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/eager/polymorphic_function/tracing_compiler.py", line 171, in _get_concrete_function_internal_garbage_collected
+    concrete_function, _ = self._maybe_define_concrete_function(args, kwargs)
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/eager/polymorphic_function/tracing_compiler.py", line 166, in _maybe_define_concrete_function
+    return self._maybe_define_function(args, kwargs)
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/eager/polymorphic_function/tracing_compiler.py", line 396, in _maybe_define_function
+    concrete_function = self._create_concrete_function(
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/eager/polymorphic_function/tracing_compiler.py", line 300, in _create_concrete_function
+    func_graph_module.func_graph_from_py_func(
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/framework/func_graph.py", line 1214, in func_graph_from_py_func
+    func_outputs = python_func(*func_args, **func_kwargs)
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/eager/polymorphic_function/polymorphic_function.py", line 667, in wrapped_fn
+    out = weak_wrapped_fn().__wrapped__(*args, **kwds)
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/framework/func_graph.py", line 1189, in autograph_handler
+    return autograph.converted_call(
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/autograph/impl/api.py", line 439, in converted_call
+    result = converted_f(*effective_args, **kwargs)
+  File "/tmp/__autograph_generated_filewazmuf5h.py", line 42, in tf__loop_fn
+    ag__.for_stmt(ag__.converted_call(ag__.ld(tf).range, (ag__.ld(num_steps),), None, fscope), None, loop_body, get_state_1, set_state_1, (), {'iterate_names': '_'})
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/autograph/operators/control_flow.py", line 451, in for_stmt
+    for_fn(iter_, extra_test, body, get_state, set_state, symbol_names, opts)
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/autograph/operators/control_flow.py", line 658, in _tf_range_for_stmt
+    _tf_while_stmt(
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/autograph/operators/control_flow.py", line 1202, in _tf_while_stmt
+    final_loop_vars = control_flow_ops.while_loop(
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/ops/control_flow_ops.py", line 2774, in while_loop
+    return while_v2.while_loop(
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/ops/while_v2.py", line 223, in while_loop
+    body_graph = func_graph_module.func_graph_from_py_func(
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/framework/func_graph.py", line 1214, in func_graph_from_py_func
+    func_outputs = python_func(*func_args, **func_kwargs)
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/ops/while_v2.py", line 201, in wrapped_body
+    outputs = body(
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/autograph/operators/control_flow.py", line 1173, in aug_body
+    body()
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/autograph/operators/control_flow.py", line 634, in aug_body
+    body(iterate)
+  File "/tmp/__autograph_generated_filewazmuf5h.py", line 40, in loop_body
+    ag__.converted_call(ag__.ld(step_fn), (ag__.ld(iterator),), None, fscope)
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/autograph/impl/api.py", line 441, in converted_call
+    result = converted_f(*effective_args)
+  File "/tmp/__autograph_generated_file6v5fdjvb.py", line 34, in tf__train_step
+    ag__.converted_call(ag__.ld(self).strategy.run, (ag__.ld(step_fn),), dict(args=(ag__.ld(inputs),), options=ag__.ld(self)._runtime_options), fscope)
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/autograph/impl/api.py", line 377, in converted_call
+    return _call_unconverted(f, args, kwargs, options)
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/autograph/impl/api.py", line 458, in _call_unconverted
+    return f(*args, **kwargs)
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/distribute/distribute_lib.py", line 1316, in run
+    return self._extended.call_for_each_replica(fn, args=args, kwargs=kwargs)
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/distribute/distribute_lib.py", line 2895, in call_for_each_replica
+    return self._call_for_each_replica(fn, args, kwargs)
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/distribute/mirrored_strategy.py", line 696, in _call_for_each_replica
+    return mirrored_run.call_for_each_replica(
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/distribute/mirrored_run.py", line 102, in call_for_each_replica
+    return _call_for_each_replica(strategy, fn, args, kwargs)
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/distribute/mirrored_run.py", line 284, in _call_for_each_replica
+    coord.join(threads)
+  File "/opt/conda/envs/tf-detr/lib/python3.9/site-packages/tensorflow/python/training/coordinator.py", line 369, in join
+    time.sleep(stop_wait_secs)
+KeyboardInterrupt
