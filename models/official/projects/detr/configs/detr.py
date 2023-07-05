@@ -80,6 +80,7 @@ class DetrTask(cfg.TaskConfig):
 
 
 COCO_INPUT_PATH_BASE = 'gs://cam2-datasets/coco'
+COCO_ANNOTATION_PATH_BASE = 'gs://cam2-datasets/annotations'
 COCO_TRAIN_EXAMPLES = 118287
 COCO_VAL_EXAMPLES = 5000
 
@@ -163,7 +164,7 @@ def detr_coco_tfrecord() -> cfg.ExperimentConfig:
       task=DetrTask(
           init_checkpoint='',
           init_checkpoint_modules='backbone',
-          annotation_file=os.path.join(COCO_INPUT_PATH_BASE,
+          annotation_file=os.path.join(COCO_ANNOTATION_PATH_BASE,
                                        'instances_val2017.json'),
           model=Detr(
               input_size=[1333, 1333, 3],
