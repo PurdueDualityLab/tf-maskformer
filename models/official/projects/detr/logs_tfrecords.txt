@@ -324,3 +324,5 @@ results = tf.nest.map_structure(tf.stop_gradient, tf.while_loop(c, b, vars))
 2023-07-05 14:55:14.151695: I tensorflow/core/common_runtime/executor.cc:1197] [/device:CPU:0] (DEBUG INFO) Executor start aborting (this does not indicate an error and you can ignore this message): INVALID_ARGUMENT: You must feed a value for placeholder tensor 'num_steps' with dtype int32
 	 [[{{node num_steps}}]]
 2023-07-05 14:56:13.694793: W tensorflow/tsl/framework/cpu_allocator_impl.cc:83] Allocation of 7289061376 exceeds 10% of free system memory.
+2023-07-05 14:56:31.222915: W tensorflow/tsl/framework/cpu_allocator_impl.cc:83] Allocation of 6372753408 exceeds 10% of free system memory.
+2023-07-05 14:56:32.470797: W tensorflow/tsl/framework/cpu_allocator_impl.cc:83] Allocation of 6372753408 exceeds 10% of free system memory.
