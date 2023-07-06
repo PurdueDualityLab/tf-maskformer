@@ -186,10 +186,10 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
       trainer=cfg.TrainerConfig(
           train_steps=train_steps,
           validation_steps=COCO_VAL_EXAMPLES // eval_batch_size,
-          steps_per_loop=10000,
-          summary_interval=10000,
-          checkpoint_interval=10000,
-          validation_interval= 5 * 10000,
+          steps_per_loop=steps_per_epoch,
+          summary_interval=steps_per_epoch,
+          checkpoint_interval=steps_per_epoch,
+          validation_interval= 5 * steps_per_epoch,
           max_to_keep=1,
           best_checkpoint_export_subdir='best_ckpt',
           # TODO: Not defined the metric
