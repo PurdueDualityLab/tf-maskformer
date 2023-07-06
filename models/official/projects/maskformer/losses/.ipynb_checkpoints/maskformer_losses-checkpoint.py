@@ -124,7 +124,7 @@ class DiceLoss(tf.keras.losses.Loss):
         y_true: (b size, 100, h*w)
         """
         # FIXME : cast y_true to bfloat16 for loss calculation
-        #y_true = tf.cast(y_true, tf.bfloat16)
+        y_true = tf.cast(y_true, tf.bfloat16)
         y_pred = tf.reshape(tf.keras.activations.sigmoid(y_pred), (y_pred.shape[0],y_pred.shape[1],-1))
         y_true = tf.reshape(y_true, (y_true.shape[0],tf.shape(y_true)[1],-1))
         numerator = 2 * tf.reduce_sum(y_pred * y_true, axis=-1)
@@ -182,8 +182,8 @@ class Loss:
         cost_dice = DiceLoss().batch(tgt_mask, out_mask)
 
         # FIXME : Cast the loss tensors to tf.bfloat16 
-        #cost_focal = tf.cast(cost_focal, dtype=tf.bfloat16)
-        #cost_dice = tf.cast(cost_dice, dtype=tf.bfloat16)
+        cost_focal = tf.cast(cost_focal, dtype=tf.bfloat16)
+        cost_dice = tf.cast(cost_dice, dtype=tf.bfloat16)
 
         total_cost = (
                 self.cost_focal * cost_focal
@@ -259,12 +259,12 @@ class Loss:
         
         focal_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(focal_loss_weighted), num_masks_sum)
         # FIXME: check if we need to cast dice_loss_weighted to tf.bfloat16
-        dice_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(dice_loss_weighted), num_masks_sum)
+        dice_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(dice_loss_weighted), tf.cast(num_masks_sum, tf.bfloat16))
 
         # FIXME : cast all losses to bfloat16
-        #cls_loss = tf.cast(cls_loss, tf.bfloat16)
-        #focal_loss_final = tf.cast(focal_loss_final, tf.bfloat16)
-        #dice_loss_final = tf.cast(dice_loss_final, tf.bfloat16)
+        cls_loss = tf.cast(cls_loss, tf.bfloat16)
+        focal_loss_final = tf.cast(focal_loss_final, tf.bfloat16)
+        dice_loss_final = tf.cast(dice_loss_final, tf.bfloat16)
         return cls_loss, focal_loss_final, dice_loss_final
     
     def __call__(self, outputs, y_true):

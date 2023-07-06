@@ -1,11 +1,9 @@
+"""Feature Pyramid Networks used in MaskFormer."""
 import tensorflow as tf
 import tensorflow_addons as tfa
 from official.vision.ops.spatial_transform_ops import nearest_upsampling
-from official.projects.detr.modeling.detr import position_embedding_sine
-from official.projects.detr.modeling.transformer import TransformerEncoder
-#from official.projects.maskformer.modeling.decoder.detr_transformer import DETRTransformer
 
-class TransformerFPN(tf.keras.layers.Layer):
+class Fpn(tf.keras.layers.Layer):
     """MaskFormer Feature Pyramid Networks."""
 
     def __init__(self,
@@ -22,7 +20,6 @@ class TransformerFPN(tf.keras.layers.Layer):
                  activity_regularizer=None,
                  kernel_constraint=None,
                  bias_constraint=None,
-                 num_encoder_layers = 0,
                  **kwargs):
         """FPN initialization function.
         Args:
@@ -31,7 +28,7 @@ class TransformerFPN(tf.keras.layers.Layer):
           TODO: fill in new args
           
         """
-        super(TransformerFPN, self).__init__(**kwargs)
+        super(Fpn, self).__init__(**kwargs)
 
         # conv2d params
         self._fpn_feat_dims = fpn_feat_dims
@@ -47,7 +44,6 @@ class TransformerFPN(tf.keras.layers.Layer):
         self._activity_regularizer = activity_regularizer
         self._kernel_constraint = kernel_constraint
         self._bias_constraint = bias_constraint
-        self._num_encoder_layers = num_encoder_layers
         
 
         if tf.keras.backend.image_data_format() == 'channels_last':
@@ -62,7 +58,7 @@ class TransformerFPN(tf.keras.layers.Layer):
             "data_format": self._data_format,
             "dilation_rate": self._dilation_rate,
             "groups": self._groups,
-            "activation": None,
+            "activation": self._activation,
             "use_bias": self._use_bias,
             "kernel_initializer": self._kernel_initializer,
             "bias_initializer": self._bias_initializer,
@@ -76,16 +72,6 @@ class TransformerFPN(tf.keras.layers.Layer):
         input_levels = list(multilevel_features.keys())
         levels = input_levels[:-1]
 
-        self._input_proj = tf.keras.layers.Conv2D(filters=self._fpn_feat_dims,
-                                                  kernel_size=(1, 1),
-                                                  padding='same',
-                                                  name = f"input_proj",
-                                                  use_bias = True)
-        
-        self._transformer_encoder = TransformerEncoder(norm_first=False,
-                                                       dropout_rate = .1,
-                                                       num_layers=self._num_encoder_layers)
-        self._interpolations = []                                               
         self._conv2d_op_lateral = []
         self._lateral_groupnorm = []
         for level in levels[::-1]:
@@ -95,12 +81,8 @@ class TransformerFPN(tf.keras.layers.Layer):
                                              name = f"lateral_{level}",
                                              **conv_args)
             lateral_norm = tf.keras.layers.GroupNormalization(name = f"lateral_norm_{level}")
-            interpolate = tf.keras.layers.Resizing(
-              multilevel_features[level][1], multilevel_features[level][2], interpolation = "nearest")
-
             self._conv2d_op_lateral.append(lateral)
             self._lateral_groupnorm.append(lateral_norm)
-            self._interpolations.append(interpolate)
 
         self._conv2d_op_down = []
         self._down_groupnorm = []
@@ -139,13 +121,7 @@ class TransformerFPN(tf.keras.layers.Layer):
             self._permute1 = tf.keras.layers.Permute((2, 3, 1))
             self._permute2 = tf.keras.layers.Permute((2, 3, 1))
 
-        super(TransformerFPN, self).build(multilevel_features)
-    
-    def _generate_image_mask(self, features: tf.Tensor) -> tf.Tensor:
-        """Generates image mask from input image."""
-        mask = tf.zeros([features.shape[0],features.shape[1],features.shape[2]])
-        mask = tf.cast(mask, dtype = bool)
-        return mask
+        super(Fpn, self).build(multilevel_features)
 
     def call(self, multilevel_features):
         """Returns the FPN features for a given multilevel features.
@@ -159,20 +135,11 @@ class TransformerFPN(tf.keras.layers.Layer):
         input_levels = list(multilevel_features.keys())
 
         feat = multilevel_features[input_levels[-1]]
-        
+
         if not self._channels_last:
             feat = self._permute_1(feat)
-        
-        mask = self._generate_image_mask(feat)
-        pos_embed = position_embedding_sine(
-            mask, num_pos_features=self._fpn_feat_dims)
 
-        features = self._input_proj(feat)
-        
-        transformer = self._transformer_encoder(features, None, pos_embed)
-        
-
-        down = self._conv2d_op_down[0](transformer)
+        down = self._conv2d_op_down[0](feat)
         down = self._down_groupnorm[0](down)
         down = self._relu1(down)
 
@@ -185,13 +152,11 @@ class TransformerFPN(tf.keras.layers.Layer):
 
             lateral = self._conv2d_op_lateral[i](feat)
             lateral = self._lateral_groupnorm[i](lateral)
-
-            down = self._interpolations[i](down) + lateral
-
+            down = nearest_upsampling(down, 2) + lateral
             down = self._conv2d_op_down[i + 1](down)
             down = self._down_groupnorm[i+1](down)
             down = self._relu2(down)
 
         mask = self._conv2d_op_mask(down)
 
-        return mask, transformer
+        return mask

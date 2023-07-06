@@ -35,6 +35,7 @@ class PanopticTask(base_task.Task):
 					detr_encoder_layers=self._task_config.model.detr_encoder_layers,
 					num_decoder_layers=self._task_config.model.num_decoder_layers,
 					num_classes=self._task_config.model.num_classes,
+                    bfloat16=self._task_config.bfloat16
 					)
 		
 		#ckpt_dir_or_file = self._task_config.init_checkpoint
@@ -73,6 +74,8 @@ class PanopticTask(base_task.Task):
 			Build panoptic segmentation dataset.
 
 			"""
+            if self._task_config.bfloat16:
+                params.parser.dtype = "bfloat16"
 			
 			
 			if params.decoder.type == 'simple_decoder':

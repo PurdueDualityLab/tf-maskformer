@@ -31,6 +31,7 @@ class MaskFormer(tf.keras.Model):
                backbone_endpoint_name='5',
                num_classes=133,
                batch_size=1,
+               bfloat16=True
                **kwargs):
     super(MaskFormer, self).__init__(**kwargs)
     self._input_specs = input_specs
@@ -60,6 +61,7 @@ class MaskFormer(tf.keras.Model):
     self._hidden_size = hidden_size
     self._dropout_rate = dropout_rate
     self._backbone_endpoint = backbone_endpoint_name
+    self._bfloat16 = bfloat16
     
     self.backbone = resnet.ResNet(50, input_specs = self._input_specs, bn_trainable=False)
     #super(MaskFormer, self).__init__(**kwargs)
@@ -107,7 +109,11 @@ class MaskFormer(tf.keras.Model):
    
     backbone_feature_maps = self.backbone(image)
     mask_features, transformer_enc_feat = self.pixel_decoder(self.process_feature_maps(backbone_feature_maps))
+    if self._bfloat16:
+        transformer_enc_feat = tf.cast(transformer_enc_feat, tf.float32)
     transformer_features = self.transformer({"features": transformer_enc_feat})
+    if self._bfloat16:
+        transformer_features = tf.cast(transformer_features, tf.bfloat16)
         
     seg_pred = self.head({"per_pixel_embeddings" : mask_features,
                           "per_segment_embeddings": transformer_features})
