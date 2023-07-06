@@ -74,8 +74,9 @@ class PanopticTask(base_task.Task):
 			Build panoptic segmentation dataset.
 
 			"""
-            if self._task_config.bfloat16:
-                params.parser.dtype = "bfloat16"
+            		if self._task_config.bfloat16:
+                		params.parser.dtype = "bfloat16"
+				params.dtype = "bfloat16"
 			
 			
 			if params.decoder.type == 'simple_decoder':
@@ -84,7 +85,7 @@ class PanopticTask(base_task.Task):
 				raise ValueError('Unknown decoder type: {}!'.format(params.decoder.type))
 			
 			parser = panoptic_input.mask_former_parser(params.parser, is_training = params.is_training, decoder_fn=decoder.decode)
-			reader = input_reader.InputFn(params,dataset_fn = dataset_fn.pick_dataset_fn(params.file_type),parser_fn = parser)
+			reader = input_reader.InputFn(params, dataset_fn = dataset_fn.pick_dataset_fn(params.file_type),parser_fn = parser)
 			dataset = reader(ctx=input_context)
 			
 
