@@ -134,6 +134,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
       task=MaskFormerTask(
           init_checkpoint="gs://cam2-models/maskformer_dummy/resnet50_v1/",
           init_checkpoint_modules='backbone',
+          bfloat16 = True,
           annotation_file=os.path.join(COCO_INPUT_PATH_BASE,'annotations'
                                        'instances_train2017.json'),
           model=MaskFormer(
