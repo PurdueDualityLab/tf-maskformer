@@ -1,7 +1,7 @@
 import math
 import tensorflow as tf
-from official.projects.detr.modeling.detr import position_embedding_sine, DETRTransformer
-#from official.projects.maskformer.modeling.decoder.detr_transformer import DETRTransformer
+from official.projects.detr.modeling.detr import position_embedding_sine
+from official.projects.maskformer.modeling.decoder.detr_transformer import DETRTransformer
   
 class MaskFormerTransformer(tf.keras.layers.Layer):
     def __init__(self,

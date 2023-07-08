@@ -87,4 +87,4 @@ class DETRTransformer(tf.keras.layers.Layer):
         memory_pos_embed=pos_embed,)
     
     # FIXME : Return decode as bfloat16
-    return tf.cast(decoded, tf.bfloat16)
+    return decoded

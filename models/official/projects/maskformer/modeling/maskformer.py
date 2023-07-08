@@ -31,7 +31,7 @@ class MaskFormer(tf.keras.Model):
                backbone_endpoint_name='5',
                num_classes=133,
                batch_size=1,
-               bfloat16=True
+               bfloat16=True,
                **kwargs):
     super(MaskFormer, self).__init__(**kwargs)
     self._input_specs = input_specs
