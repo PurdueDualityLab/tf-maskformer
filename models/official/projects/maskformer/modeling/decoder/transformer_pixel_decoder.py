@@ -23,6 +23,7 @@ class TransformerFPN(tf.keras.layers.Layer):
                  kernel_constraint=None,
                  bias_constraint=None,
                  num_encoder_layers = 0,
+                 bfloat16 = True,
                  **kwargs):
         """FPN initialization function.
         Args:
@@ -48,7 +49,7 @@ class TransformerFPN(tf.keras.layers.Layer):
         self._kernel_constraint = kernel_constraint
         self._bias_constraint = bias_constraint
         self._num_encoder_layers = num_encoder_layers
-        
+        self._bfloat16 = bfloat16
 
         if tf.keras.backend.image_data_format() == 'channels_last':
             # format: (batch_size, height, width, channels)
@@ -168,9 +169,15 @@ class TransformerFPN(tf.keras.layers.Layer):
             mask, num_pos_features=self._fpn_feat_dims)
 
         features = self._input_proj(feat)
+
+        if self._bfloat16:
+            features = tf.cast(features, tf.float32)
+            pos_embed = tf.cast(pos_emed, tf.float32)
         
         transformer = self._transformer_encoder(features, None, pos_embed)
-        
+
+        if self._bfloat16:
+            transformer = tf.cast(features, tf.bfloat16)        
 
         down = self._conv2d_op_down[0](transformer)
         down = self._down_groupnorm[0](down)
