@@ -34,7 +34,6 @@ class MaskFormerTest(tf.test.TestCase, parameterized.TestCase):
 
         output = maskformer(input_image)
         print(output.keys())
-        exit()
         self.assertAllEqual(
             output["class_prob_predictions"].shape.as_list(), expected_class_probs_shape)
         self.assertAllEqual(
