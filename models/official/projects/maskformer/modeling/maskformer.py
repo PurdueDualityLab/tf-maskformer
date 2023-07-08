@@ -4,6 +4,7 @@ from official.vision.modeling.backbones import resnet
 from official.projects.maskformer.modeling.decoder.transformer_decoder import MaskFormerTransformer
 from official.projects.maskformer.modeling.layers.nn_block import MLPHead
 from official.projects.maskformer.modeling.decoder.transformer_pixel_decoder import TransformerFPN
+from official.projects.maskformer.modeling.decoder.pixel_decoder import Fpn
 
 # TODO(ibrahim): Add all parameters model parameters and remove hardcoding.
 class MaskFormer(tf.keras.Model):
@@ -77,7 +78,7 @@ class MaskFormer(tf.keras.Model):
     #print("Loaded checkpoint")
 
     #decoders
-    self.pixel_decoder = TransformerFPN(batch_size = self._batch_size,
+    self.pixel_decoder = Fpn((batch_size = self._batch_size,
                             fpn_feat_dims=self._fpn_feat_dims,
                             data_format=self._data_format,
                             dilation_rate=self._dilation_rate,
@@ -92,6 +93,7 @@ class MaskFormer(tf.keras.Model):
                             kernel_constraint=self._kernel_constraint,
                             bias_constraint=self._bias_constraint,
                             num_encoder_layers = self._fpn_encoder_layers)
+
     self.transformer = MaskFormerTransformer(backbone_endpoint_name=self._backbone_endpoint,
                                             batch_size=self._batch_size,
                                             num_queries=self._num_queries,
