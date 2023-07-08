@@ -11,7 +11,8 @@ export TPU_ZONE="us-central1-a"
 
 nohup python3 train.py \
 	--experiment detr_coco_tfrecord\
-	--mode train \
+	--mode train_and_eval \
+	--config_file "configs/detr_tpu.yaml"\
 	--model_dir $MODEL_DIR \
 	--tpu $TPU_NAME \
 	> logs_tfrecords_256.txt &
