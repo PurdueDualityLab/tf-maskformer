@@ -78,7 +78,7 @@ class MaskFormer(tf.keras.Model):
     #print("Loaded checkpoint")
 
     #decoders
-    self.pixel_decoder = Fpn((batch_size = self._batch_size,
+    self.pixel_decoder = Fpn(batch_size = self._batch_size,
                             fpn_feat_dims=self._fpn_feat_dims,
                             data_format=self._data_format,
                             dilation_rate=self._dilation_rate,
