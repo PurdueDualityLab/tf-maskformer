@@ -199,7 +199,7 @@ class Loss:
     
     def get_loss(self, batch_size, outputs, y_true, indices):
         
-        target_index = tf.math.argmax(indices, axis=1) #[batchsize, 100]
+        #target_index = tf.math.argmax(indices, axis=1) #[batchsize, 100]
         target_labels = y_true["unique_ids"] #[batchsize, num_gt_objects]
         cls_outputs = outputs["pred_logits"] # [batchsize, num_queries, num_classes] [1,100,134]
         cls_masks = outputs["pred_masks"]# [batchsize, h, w, num_queries]
@@ -207,8 +207,8 @@ class Loss:
 
        
 
-        cls_assigned = tf.gather(cls_outputs, target_index, batch_dims=1, axis=1)
-        mask_assigned = tf.gather(cls_masks, target_index, batch_dims=1, axis=1)
+        #cls_assigned = tf.gather(cls_outputs, target_index, batch_dims=1, axis=1)
+       #mask_assigned = tf.gather(cls_masks, target_index, batch_dims=1, axis=1)
 
         target_classes = tf.cast(target_labels, dtype=tf.int32)
         background = tf.equal(target_classes, 0) # Pytorch padds 133 class number where classes are background
@@ -221,8 +221,8 @@ class Loss:
         # num_masks = tf.maximum(num_masks / tf.distribute.get_strategy().num_replicas_in_sync, 1.0)
         #########################################################################################################
         
-        xentropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=target_classes, logits=cls_assigned)
-        cls_loss = self.cost_class * tf.where(background, 0.1 * xentropy, xentropy)
+        #xentropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=target_classes, logits=cls_assigned)
+        cls_loss = self.cost_class #* tf.where(background, 0.1 * xentropy, xentropy)
         cls_weights = tf.where(background, 0.1 * tf.ones_like(cls_loss), tf.ones_like(cls_loss))
     
         num_masks_per_replica = tf.reduce_sum(num_masks)
@@ -278,11 +278,11 @@ class Loss:
         """
         outputs_without_aux = {k: v for k, v in outputs.items() if k != "aux_outputs"}
         batch_size, num_queries = outputs["pred_logits"].shape[:2]
-        indices = self.memory_efficient_matcher(outputs_without_aux, y_true) # (batchsize, num_queries, num_queries)
+        #indices = self.memory_efficient_matcher(outputs_without_aux, y_true) # (batchsize, num_queries, num_queries)
               
         losses = {}
       
-        cls_loss_final, focal_loss_final, dice_loss_final = self.get_loss(batch_size, outputs, y_true, indices)
+        cls_loss_final, focal_loss_final, dice_loss_final = self.get_loss(batch_size, outputs, y_true)
         
         losses.update({"loss_ce": self.cost_class*cls_loss_final,
                     "loss_focal": self.cost_focal*focal_loss_final,
