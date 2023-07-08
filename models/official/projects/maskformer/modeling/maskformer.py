@@ -92,7 +92,8 @@ class MaskFormer(tf.keras.Model):
                             activity_regularizer=self._activity_regularizer,
                             kernel_constraint=self._kernel_constraint,
                             bias_constraint=self._bias_constraint,
-                            num_encoder_layers = self._fpn_encoder_layers)
+                            # num_encoder_layers = self._fpn_encoder_layers
+                            )
 
     self.transformer = MaskFormerTransformer(backbone_endpoint_name=self._backbone_endpoint,
                                             batch_size=self._batch_size,
