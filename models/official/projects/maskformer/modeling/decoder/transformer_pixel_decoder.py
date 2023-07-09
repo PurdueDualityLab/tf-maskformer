@@ -172,7 +172,7 @@ class TransformerFPN(tf.keras.layers.Layer):
 
         if self._bfloat16:
             features = tf.cast(features, tf.float32)
-            pos_embed = tf.cast(pos_emed, tf.float32)
+            pos_embed = tf.cast(pos_embed, tf.float32)
         
         transformer = self._transformer_encoder(features, None, pos_embed)
 
