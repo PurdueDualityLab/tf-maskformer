@@ -4,6 +4,7 @@ from official.vision.modeling.backbones import resnet
 from official.projects.maskformer.modeling.decoder.transformer_decoder import MaskFormerTransformer
 from official.projects.maskformer.modeling.layers.nn_block import MLPHead
 from official.projects.maskformer.modeling.decoder.transformer_pixel_decoder import TransformerFPN
+from official.projects.maskformer.modeling.decoder.pixel_decoder import Fpn
 
 class MaskFormer(tf.keras.Model):
   """Maskformer"""
@@ -71,7 +72,8 @@ class MaskFormer(tf.keras.Model):
     print("[Build MaskFormer] image shape: ", image_shape)
 
     #decoders
-    self.pixel_decoder = TransformerFPN(batch_size = self._batch_size,
+    if False:
+      self.pixel_decoder = TransformerFPN(batch_size = self._batch_size,
                             fpn_feat_dims=self._fpn_feat_dims,
                             data_format=self._data_format,
                             dilation_rate=self._dilation_rate,
@@ -86,6 +88,8 @@ class MaskFormer(tf.keras.Model):
                             kernel_constraint=self._kernel_constraint,
                             bias_constraint=self._bias_constraint,
                             num_encoder_layers = self._fpn_encoder_layers)
+    else:
+      self.pixel_decoder = Fpn()
     self.transformer = MaskFormerTransformer(backbone_endpoint_name=self._backbone_endpoint,
                                             batch_size=self._batch_size,
                                             num_queries=self._num_queries,
@@ -108,7 +112,10 @@ class MaskFormer(tf.keras.Model):
   def call(self, image, training = False):
    
     backbone_feature_maps = self.backbone(image)
-    mask_features, transformer_enc_feat = self.pixel_decoder(self.process_feature_maps(backbone_feature_maps))
+    backbone_feature_maps = self.process_feature_maps(backbone_feature_maps)
+    #mask_features, transformer_enc_feat = self.pixel_decoder()
+    mask_features = self.pixel_decoder()
+    transformer_enc_feat = backbone_feature_maps['5']
     if self._bfloat16:
         transformer_enc_feat = tf.cast(transformer_enc_feat, tf.float32)
     transformer_features = self.transformer({"features": transformer_enc_feat})
