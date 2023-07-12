@@ -120,7 +120,7 @@ SET_BFLOAT16 = False
 @exp_factory.register_config_factory('maskformer_coco_panoptic')
 def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
   """Config to get results that matches the paper."""
-  train_batch_size = 8
+  train_batch_size = 16
   eval_batch_size = 8
   steps_per_epoch = COCO_TRAIN_EXAMPLES // train_batch_size
   train_steps = 300 * steps_per_epoch  # 300 epochs
