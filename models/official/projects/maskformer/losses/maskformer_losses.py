@@ -202,7 +202,7 @@ class Loss:
 
     
     
-    def get_loss(self, batch_size, outputs, y_true, indices):
+    def get_loss(self, outputs, y_true, indices):
         
         target_index = tf.math.argmax(indices, axis=1) #[batchsize, 100]
         target_labels = y_true["unique_ids"] #[batchsize, num_gt_objects]
