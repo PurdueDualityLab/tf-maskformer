@@ -27,7 +27,8 @@ from official.core import train_utils
 from official.modeling import performance
 from cloud_tpu_client import Client
 
-
+from official.projects.maskformer.configs import maskformer
+from official.projects.maskformer.tasks import panoptic_maskformer
 
 FLAGS = flags.FLAGS
 def main(_):
