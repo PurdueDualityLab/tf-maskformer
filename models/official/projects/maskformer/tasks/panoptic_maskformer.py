@@ -174,7 +174,7 @@ class PanopticTask(base_task.Task):
 			total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels)
 			
 			if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
-					total_loss = optimizer.get_scaled_loss(total_loss)
+				total_loss = optimizer.get_scaled_loss(total_loss)
 					
 			tvars = model.trainable_variables
 			
@@ -201,52 +201,17 @@ class PanopticTask(base_task.Task):
 			logs = {self.loss: total_loss}
 
 			all_losses = {
-							'cls_loss': cls_loss,
-							'focal_loss': focal_loss,
-					'dice_loss': dice_loss,
-			}
+				'cls_loss': cls_loss,
+				'focal_loss': focal_loss,
+				'dice_loss': dice_loss,}
 
 					
-					# # Metric results will be added to logs for you.
-					if metrics:
-									for m in metrics:
-											m.update_state(all_losses[m.name])
-					return logs
-
-	def validation_step(self, inputs, model, optimizer, metrics=None):
-			features, labels = inputs
-			outputs = model(features, training=False)
-							
-			loss = 0.0
-			cls_loss = 0.0
-			focal_loss = 0.0
-			dice_loss = 0.0
-
-			total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels)
-
-			num_replicas_in_sync = tf.distribute.get_strategy().num_replicas_in_sync
-			total_loss *= num_replicas_in_sync
-			cls_loss *= num_replicas_in_sync
-			focal_loss *= num_replicas_in_sync
-			dice_loss *= num_replicas_in_sync
-			
-			#####################################################################
-			# # Trainer class handles loss metric for you.
-			logs = {self.loss: total_loss}
-
-			outputs = {"pred_logits": output["class_prob_predictions"], "pred_masks": output["mask_prob_predictions"]}
-			#panoptic_seg, segments_info = PanopticInference(output["pred_logits"], output["pred_masks"], features.shape,  self._task_config.model.num_classes)
-
-			#logs.update({'panoptic_seg': panoptic_seg, 'segments_info': segments_info})
-
-			all_losses = {
-											'cls_loss': cls_loss,
-											'focal_loss': focal_loss,
-									'dice_loss': dice_loss,
-							}
-
 			# # Metric results will be added to logs for you.
 			if metrics:
-											for m in metrics:
-															m.update_state(all_losses[m.name])
+				for m in metrics:
+					m.update_state(all_losses[m.name])
+
 			return logs
+
+	def validation_step(self, inputs, model, optimizer, metrics=None):
+		pass
