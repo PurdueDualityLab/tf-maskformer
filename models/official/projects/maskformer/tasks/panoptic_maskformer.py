@@ -89,6 +89,7 @@ class PanopticTask(base_task.Task):
           dataset_fn=dataset_fn.pick_dataset_fn(params.file_type),
           decoder_fn=decoder.decode,
           parser_fn=parser.parse_fn(params.is_training))
+		
 		dataset = reader.read(input_context=input_context)
 		
 		return dataset
