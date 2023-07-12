@@ -74,16 +74,11 @@ class DataConfig(cfg.DataConfig):
 class Losses(hyperparams.Config):
   # TODO update these for maskformer
   class_offset: int = 0
-  lambda_cls: float = 1.0
-  lambda_box: float = 5.0
-  lambda_giou: float = 2.0
   background_cls_weight: float = 0.1
   l2_weight_decay: float = 1e-4
   cost_class = 1.0
   cost_dice = 1.0
   cost_focal = 20.0
-  no_object_weight = .1
-
 
 @dataclasses.dataclass
 class MaskFormer(hyperparams.Config):
@@ -96,6 +91,7 @@ class MaskFormer(hyperparams.Config):
   fpn_encoder_layers: int = 6
   detr_encoder_layers: int = 0
   num_decoder_layers: int = 6
+  which_pixel_decoder: str = 'fpn' # change this to transformer FPN to use transformer FPN as per pytorch codebase
   input_size: List[int] = dataclasses.field(default_factory=list)
   backbone: backbones.Backbone = backbones.Backbone(
       type='resnet', resnet=backbones.ResNet(model_id=50, bn_trainable=False))
@@ -109,18 +105,17 @@ class MaskFormerTask(cfg.TaskConfig):
   train_data: cfg.DataConfig = cfg.DataConfig()
   validation_data: cfg.DataConfig = cfg.DataConfig()
   losses: Losses = Losses()
-  init_checkpoint: Optional[str] = "gs://cam2-models/maskformer_dummy/resnet50_v1/"
+  init_checkpoint: Optional[str] = ""
   init_checkpoint_modules: Union[str, List[str]] = 'backbone'  # all, backbone
   annotation_file: Optional[str] = None
   per_category_metrics: bool = False
-  bfloat16: bool = True
+  bfloat16: bool = False
 
 # TODO : we should pass this via cmd 
-# COCO_INPUT_PATH_BASE = '/depot/davisjam/data/vishal/datasets/coco/'
 COCO_INPUT_PATH_BASE = 'gs://cam2-datasets/coco_panoptic/'
 COCO_TRAIN_EXAMPLES = 118287
 COCO_VAL_EXAMPLES = 5000
-
+SET_BFLOAT16 = False
 
 @exp_factory.register_config_factory('maskformer_coco_panoptic')
 def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
@@ -131,17 +126,18 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
   train_steps = 300 * steps_per_epoch  # 300 epochs
   decay_at = train_steps - 100 * steps_per_epoch  # 200 epochs
   config = cfg.ExperimentConfig(
-      task=MaskFormerTask(
-          init_checkpoint="gs://cam2-models/maskformer_dummy/resnet50_v1/",
-          init_checkpoint_modules='backbone',
-          bfloat16 = True,
+  task = MaskFormerTask(
+          # FIXME : For now we will not use the pretrained weights for ResNet50 Backbone
+          init_checkpoint="",
+          init_checkpoint_modules='',
+          bfloat16 = SET_BFLOAT16,
           annotation_file=os.path.join(COCO_INPUT_PATH_BASE,'annotations'
                                        'instances_train2017.json'),
-          model=MaskFormer(
+          model = MaskFormer(
               input_size=[640, 640, 3],
               norm_activation=common.NormActivation()),
-          losses=Losses(),
-          train_data=DataConfig(
+          losses = Losses(),
+          train_data = DataConfig(
               input_path=os.path.join(COCO_INPUT_PATH_BASE, 'tfrecords/train*'),
               is_training=True,
               global_batch_size=train_batch_size,
@@ -168,15 +164,15 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
                     sigma = 8.0,
                     small_instance_area_threshold = 4096,
                     small_instance_weight = 3.0,
-                    dtype = 'float32',
+                    dtype = 'bfloat16' if SET_BFLOAT16 else 'float32',
                     seed = 2045,
                 )
           ),
-          validation_data=DataConfig(
-              input_path=os.path.join(COCO_INPUT_PATH_BASE, 'tfrecords/val*'),
-              is_training=False,
-              global_batch_size=eval_batch_size,
-              drop_remainder=False,
+          validation_data = DataConfig(
+              input_path = os.path.join(COCO_INPUT_PATH_BASE, 'tfrecords/val*'),
+              is_training = False,
+              global_batch_size = eval_batch_size,
+              drop_remainder = False,
               parser = Parser(
                     output_size = [640,640],
                     pad_output = True,
@@ -193,7 +189,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
           validation_interval= 5 * steps_per_epoch,
           max_to_keep=1,
           best_checkpoint_export_subdir='best_ckpt',
-          # TODO: Not defined the metric
+          # TODO: Metric not implemented yet
           optimizer_config=optimization.OptimizationConfig({
               'optimizer': {
                   'type': 'detr_adamw',

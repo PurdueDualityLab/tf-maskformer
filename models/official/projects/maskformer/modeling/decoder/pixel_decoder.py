@@ -3,7 +3,7 @@ import tensorflow as tf
 import tensorflow_addons as tfa
 from official.vision.ops.spatial_transform_ops import nearest_upsampling
 
-class Fpn(tf.keras.layers.Layer):
+class CNNFPN(tf.keras.layers.Layer):
     """MaskFormer Feature Pyramid Networks."""
 
     def __init__(self,
@@ -28,7 +28,7 @@ class Fpn(tf.keras.layers.Layer):
           TODO: fill in new args
           
         """
-        super(Fpn, self).__init__(**kwargs)
+        super(CNNFPN, self).__init__(**kwargs)
 
         # conv2d params
         self._fpn_feat_dims = fpn_feat_dims
@@ -121,7 +121,7 @@ class Fpn(tf.keras.layers.Layer):
             self._permute1 = tf.keras.layers.Permute((2, 3, 1))
             self._permute2 = tf.keras.layers.Permute((2, 3, 1))
 
-        super(Fpn, self).build(multilevel_features)
+        super(CNNFPN, self).build(multilevel_features)
 
     def call(self, multilevel_features):
         """Returns the FPN features for a given multilevel features.
