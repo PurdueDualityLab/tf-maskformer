@@ -332,6 +332,8 @@ class mask_former_parser(parser.Parser):
 
         # FIXME : Use dummy masks for now to identify the bottleneck for training.
         # Dummy Individual masks
+        print("*"*100)
+        print("Using dummy individual masks")
         individual_masks = tf.zeros((self._max_instances, self._output_size[0], self._output_size[1], 1), dtype=tf.float32)
         
         # Resize image and masks to output size.
