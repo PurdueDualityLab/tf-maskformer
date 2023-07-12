@@ -21,6 +21,12 @@ from loguru import logger
 
 @task_factory.register_task_cls(exp_cfg.MaskFormerTask)
 class PanopticTask(base_task.Task):
+	"""A single-replica view of training procedure.
+
+	PanopticTask task provides artifacts for training/evalution procedures, including
+	loading/iterating over Datasets, initializing the model, calculating the loss,
+	post-processing, and customized metrics with reduction.
+	"""
 	def build_model(self)-> tf.keras.Model:
 		"""Builds MaskFormer Model."""
 		# TODO : Remove hardcoded values, Verify the number of classes 
@@ -72,7 +78,14 @@ class PanopticTask(base_task.Task):
 			raise ValueError('Unknown decoder type: {}!'.format(params.decoder.type))
 		
 		parser = panoptic_input.mask_former_parser(params.parser, is_training = params.is_training, decoder_fn=decoder.decode)
-		reader = input_reader.InputFn(params, dataset_fn = dataset_fn.pick_dataset_fn(params.file_type),parser_fn = parser)
+		# FIXME : Use default Input reader instead of custom input reader
+
+		#reader = input_reader.InputFn(params, dataset_fn = dataset_fn.pick_dataset_fn(params.file_type),parser_fn = parser)
+		reader = input_reader_factory.input_reader_generator(
+          params,
+          dataset_fn=dataset_fn.pick_dataset_fn(params.file_type),
+          decoder_fn=decoder.decode,
+          parser_fn=parser.parse_fn(params.is_training))
 		dataset = reader(ctx=input_context)
 		
 		return dataset

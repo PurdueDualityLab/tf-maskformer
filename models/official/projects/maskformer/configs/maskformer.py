@@ -135,7 +135,8 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
                                        'instances_train2017.json'),
           model = MaskFormer(
               input_size=[640, 640, 3],
-              norm_activation=common.NormActivation()),
+              norm_activation=common.NormActivation(),
+              which_pixel_decoder='fpn',),
           losses = Losses(),
           train_data = DataConfig(
               input_path=os.path.join(COCO_INPUT_PATH_BASE, 'tfrecords/train*'),
