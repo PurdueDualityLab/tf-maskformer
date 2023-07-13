@@ -327,14 +327,14 @@ class mask_former_parser(parser.Parser):
             self._output_size if self._pad_output else crop_im_size,
             is_training=is_training)
         
-        # individual_masks = self._get_individual_masks(
-        #         class_ids=class_ids,contig_instance_mask=contigious_mask)
+        individual_masks = self._get_individual_masks(
+                class_ids=class_ids,contig_instance_mask=contigious_mask)
 
-        # FIXME : Use dummy masks for now to identify the bottleneck for training.
-        # Dummy Individual masks
-        print("*"*100)
-        print("Using dummy individual masks")
-        individual_masks = tf.zeros((self._max_instances, self._output_size[0], self._output_size[1], 1), dtype=tf.float32)
+        # # FIXME : Use dummy masks for now to identify the bottleneck for training.
+        # # Dummy Individual masks
+        # print("*"*100)
+        # print("Using dummy individual masks")
+        # individual_masks = tf.zeros((self._max_instances, self._output_size[0], self._output_size[1], 1), dtype=tf.float32)
         
         # Resize image and masks to output size.
         image = tf.image.resize(image, self._output_size, method='nearest')
