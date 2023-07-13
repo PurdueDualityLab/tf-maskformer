@@ -214,13 +214,8 @@ class Loss:
         background = tf.equal(target_classes, 0) # Pytorch padds 133 class number where classes are background but our code uses 0 for background
         
         num_masks = tf.reduce_sum(tf.cast(tf.logical_not(background), tf.float32), axis=-1)
-
-        
-        # FIXME: added to handle distributed training
-        num_masks = tf.distribute.get_strategy().reduce(tf.distribute.ReduceOp.SUM, num_masks, axis=None)
         num_masks = tf.maximum(num_masks / tf.distribute.get_strategy().num_replicas_in_sync, 1.0)
       
-        
         xentropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=target_classes, logits=cls_assigned)
         cls_loss = self.cost_class * tf.where(background, 0.1 * xentropy, xentropy)
         cls_weights = tf.where(background, 0.1 * tf.ones_like(cls_loss), tf.ones_like(cls_loss))
