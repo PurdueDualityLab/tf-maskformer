@@ -138,7 +138,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
           annotation_file=os.path.join(COCO_INPUT_PATH_BASE,'annotations'
                                        'instances_train2017.json'),
           model = MaskFormer(
-              input_size=[1330,1330, 3],
+              input_size=[1280,1280, 3],
               norm_activation=common.NormActivation(),
               which_pixel_decoder='fpn',),
           losses = Losses(),
@@ -149,7 +149,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
               shuffle_buffer_size=1000,
               dtype = 'bfloat16' if SET_DATA_BFLOAT16 else 'float32',
               parser = Parser(
-                    output_size = [1330,1330],
+                    output_size = [1280,1280],
                     min_scale = 0.3,
                     aspect_ratio_range = (0.5, 2.0),
                     min_overlap_params = (0.0, 1.4, 0.2, 0.1),
