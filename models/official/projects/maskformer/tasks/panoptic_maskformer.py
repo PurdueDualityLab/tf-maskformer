@@ -134,7 +134,7 @@ class PanopticTask(base_task.Task):
 	def build_metrics(self, training=True):
 		"""Builds panoptic metrics."""
 		metrics = []
-		metric_names = ['cls_loss', 'focal_loss', 'dice_loss']
+		metric_names = ['weighted_ce', 'weighted_focal', 'weighted_dice']
 		for name in metric_names:
 			metrics.append(tf.keras.metrics.Mean(name, dtype=tf.float32))
 		# TODO : Need panoptic quality metric for evaluation
@@ -162,19 +162,12 @@ class PanopticTask(base_task.Task):
 
 		with tf.GradientTape() as tape:
 			outputs = model(features, training=True)
-			loss = 0.0
-			cls_loss = 0.0
-			focal_loss = 0.0
-			dice_loss = 0.0
-
 			##########################################################
-			# TODO : Need to use this for TPU training when we use mirrored startegy
+			# FIXME : This loop must be used for auxilary outputs
 
-			# print(outputs.shape)
-			# exit()
+			
 			# for output in outputs:
-			#       # Computes per-replica loss.
-							
+			#       # Computes per-replica loss.	
 			#       total_loss, cls_loss_, focal_loss_, dice_loss_ = self.build_losses(
 			#               output=output, labels=labels)
 			#       loss += total_loss
@@ -198,11 +191,6 @@ class PanopticTask(base_task.Task):
 			
 			grads = tape.gradient(total_loss, tvars)
 
-			####################################################################
-			# Do not use mixed precision for now
-			# # Scales back gradient when LossScaleOptimizer is used.
-			# if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
-			#       grads = optimizer.get_unscaled_gradients(grads)
 			optimizer.apply_gradients(list(zip(grads, tvars)))
 			
 			# # Multiply for logging.
@@ -214,17 +202,16 @@ class PanopticTask(base_task.Task):
 			cls_loss *= num_replicas_in_sync
 			focal_loss *= num_replicas_in_sync
 			dice_loss *= num_replicas_in_sync
-			#####################################################################
-			# # Trainer class handles loss metric for you.
+			
 			logs = {self.loss: total_loss}
 
 			all_losses = {
-				'cls_loss': cls_loss,
-				'focal_loss': focal_loss,
-				'dice_loss': dice_loss,}
+				'weighted_ce': cls_loss,
+				'weighted_focal': focal_loss,
+				'weighted_dice': dice_loss,}
 
 					
-			# # Metric results will be added to logs for you.
+			# Metric results will be added to logs for you.
 			if metrics:
 				for m in metrics:
 					m.update_state(all_losses[m.name])

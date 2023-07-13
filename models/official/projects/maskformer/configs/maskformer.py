@@ -123,7 +123,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
   """Config to get results that matches the paper."""
 
   # FIXME : Batch size needs to be changed according to set global batch size in sh file
-  train_batch_size = 128
+  train_batch_size = 512
   eval_batch_size = 64
 
   steps_per_epoch = COCO_TRAIN_EXAMPLES // train_batch_size
@@ -143,7 +143,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
               which_pixel_decoder='fpn',),
           losses = Losses(),
           train_data = DataConfig(
-              input_path=os.path.join(COCO_INPUT_PATH_BASE, 'tfrecords/train*'),
+              input_path=os.path.join(COCO_INPUT_PATH_BASE, 'tfrecords_new/train*'),
               is_training=True,
               global_batch_size=train_batch_size,
               shuffle_buffer_size=1000,
@@ -175,7 +175,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
                 )
           ),
           validation_data = DataConfig(
-              input_path = os.path.join(COCO_INPUT_PATH_BASE, 'tfrecords/val*'),
+              input_path = os.path.join(COCO_INPUT_PATH_BASE, 'tfrecords_new/val*'),
               is_training = False,
               global_batch_size = eval_batch_size,
               drop_remainder = False,

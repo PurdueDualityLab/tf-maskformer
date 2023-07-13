@@ -83,13 +83,8 @@ class FocalLossMod(focal_loss.FocalLoss):
         Returns:
         Loss float `Tensor`.
         """
-        # background_indices = tf.expand_dims(self.background_indices, axis=0)
         weighted_loss = super().call(y_true, y_pred)
-        # print("weighted loss :", weighted_loss.shape) #(1, 100, 442368)
-        # mean over all pixels
         loss = tf.math.reduce_mean(weighted_loss, axis=-1)
-        # logger.debug("loss shape: {}".format(loss.shape))
-        # logger.debug("loss: {}".format(loss))
         return loss
 
     def batch(self, y_true, y_pred):
@@ -142,7 +137,7 @@ class DiceLoss(tf.keras.losses.Loss):
         return loss
 
 class Loss:
-    def __init__(self, num_classes, matcher, eos_coef, cost_class = 1, cost_focal = 1, cost_dice = 1):
+    def __init__(self, num_classes, matcher, eos_coef, cost_class = 1.0, cost_focal = 20.0, cost_dice = 1.0):
        
         self.num_classes = num_classes
         self.matcher = matcher
@@ -189,12 +184,12 @@ class Loss:
 
         # FIXME : Where there is no object append very high cost
         # # Append highest cost where there are no objects : No object class == 0
-        # valid = tf.expand_dims(tf.cast(tf.not_equal(tgt_ids, 0), dtype=total_cost.dtype), axis=1)
-        # total_cost = (1 - valid) * max_cost + valid * total_cost
-        # total_cost = tf.where(
-        # tf.logical_or(tf.math.is_nan(total_cost), tf.math.is_inf(total_cost)),
-        # max_cost * tf.ones_like(total_cost, dtype=total_cost.dtype),
-        # total_cost)
+        valid = tf.expand_dims(tf.cast(tf.not_equal(tgt_ids, 0), dtype=total_cost.dtype), axis=1)
+        total_cost = (1 - valid) * max_cost + valid * total_cost
+        total_cost = tf.where(
+        tf.logical_or(tf.math.is_nan(total_cost), tf.math.is_inf(total_cost)),
+        max_cost * tf.ones_like(total_cost, dtype=total_cost.dtype),
+        total_cost)
     
         _, inds = matchers.hungarian_matching(total_cost)
 
@@ -216,16 +211,15 @@ class Loss:
         target_classes = tf.cast(target_labels, dtype=tf.int32)
 
         # FIXME : The no object class should be 0 for our  case but for pytorch code it is 133
-        background = tf.equal(target_classes, 133) # Pytorch padds 133 class number where classes are background but our code uses 0 for background
+        background = tf.equal(target_classes, 0) # Pytorch padds 133 class number where classes are background but our code uses 0 for background
         
         num_masks = tf.reduce_sum(tf.cast(tf.logical_not(background), tf.float32), axis=-1)
 
-        ########################################################################################################  
-        # TODO: check if we need this!
-        # if Utils.is_dist_avail_and_initialized():
-        #     num_masks = tf.distribute.get_strategy().reduce(tf.distribute.ReduceOp.SUM, num_masks, axis=None)
-        # num_masks = tf.maximum(num_masks / tf.distribute.get_strategy().num_replicas_in_sync, 1.0)
-        #########################################################################################################
+        
+        # FIXME: added to handle distributed training
+        num_masks = tf.distribute.get_strategy().reduce(tf.distribute.ReduceOp.SUM, num_masks, axis=None)
+        num_masks = tf.maximum(num_masks / tf.distribute.get_strategy().num_replicas_in_sync, 1.0)
+      
         
         xentropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=target_classes, logits=cls_assigned)
         cls_loss = self.cost_class * tf.where(background, 0.1 * xentropy, xentropy)
@@ -241,13 +235,9 @@ class Loss:
        
         losses = {'focal_loss' : 0.0, 'dice_loss': 0.0}
         
-        
-        # out_mask = tf.transpose(cls_masks, perm=[0,3,1,2])
         out_mask = mask_assigned
         tgt_mask = individual_masks
 
-        
-        # tgt_mask = tf.transpose(tgt_mask, perm=[0,2,3,1,4])
         tgt_mask = tf.cast(tgt_mask, dtype=tf.float32)
         # transpose to make it compatible with tf.image.resize
         tgt_mask = tf.transpose(tgt_mask, perm=[0,2,3,1]) # [b, h, w, 100]
