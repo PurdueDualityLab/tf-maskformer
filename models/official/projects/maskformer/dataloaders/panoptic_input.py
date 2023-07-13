@@ -330,11 +330,7 @@ class mask_former_parser(parser.Parser):
         individual_masks = self._get_individual_masks(
                 class_ids=class_ids,contig_instance_mask=contigious_mask)
 
-        # # FIXME : Use dummy masks for now to identify the bottleneck for training.
-        # # Dummy Individual masks
-        # print("*"*100)
-        # print("Using dummy individual masks")
-        # individual_masks = tf.zeros((self._max_instances, self._output_size[0], self._output_size[1], 1), dtype=tf.float32)
+        
         
         # Resize image and masks to output size.
         image = tf.image.resize(image, self._output_size, method='nearest')
@@ -342,13 +338,9 @@ class mask_former_parser(parser.Parser):
         instance_mask = tf.image.resize(instance_mask, self._output_size, method='nearest')
         individual_masks = tf.image.resize(individual_masks, self._output_size, method='nearest')
 
-        # pad the individual masks to the max number of instances and unique ids
-#         individual_masks = tf.pad(individual_masks, [[0, self._max_instances - tf.shape(individual_masks)[0]], [0, 0], [0, 0], [0,0]], constant_values=self._ignore_label)
-        # unique_ids = tf.pad(class_ids, [[0, self._max_instances - tf.shape(class_ids)[0]]], constant_values=self._ignore_label)
         unique_ids = preprocess_ops.clip_or_pad_to_fixed_size(
                 class_ids, self._max_instances)
-        # unique_ids = tf.zeros([self._max_instances], dtype=tf.float32)
-       
+      
         # Cast image to float and set shapes of output.
         
         image = tf.cast(image, dtype=self._dtype)

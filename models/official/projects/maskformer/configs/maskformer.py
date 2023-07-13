@@ -123,7 +123,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
   """Config to get results that matches the paper."""
 
   # FIXME : Batch size needs to be changed according to set global batch size in sh file
-  train_batch_size = 64
+  train_batch_size = 128
   eval_batch_size = 64
 
   steps_per_epoch = COCO_TRAIN_EXAMPLES // train_batch_size
