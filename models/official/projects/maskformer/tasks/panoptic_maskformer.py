@@ -68,9 +68,10 @@ class PanopticTask(base_task.Task):
 		Build panoptic segmentation dataset.
 
 		"""
-		if self._task_config.bfloat16:
-			params.parser.dtype = "bfloat16"
-			params.dtype = "bfloat16"
+		# NOTE : This is not required as we are setting two different flags for data and model
+		# if self._task_config.bfloat16:
+		# 	params.parser.dtype = "bfloat16"
+		# 	params.dtype = "bfloat16"
 		
 		if params.decoder.type == 'simple_decoder':
 			decoder = panoptic_input.TfExampleDecoder(regenerate_source_id = params.regenerate_source_id)

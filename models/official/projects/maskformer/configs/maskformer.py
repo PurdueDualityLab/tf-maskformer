@@ -115,13 +115,16 @@ class MaskFormerTask(cfg.TaskConfig):
 COCO_INPUT_PATH_BASE = 'gs://cam2-datasets/coco_panoptic/'
 COCO_TRAIN_EXAMPLES = 118287
 COCO_VAL_EXAMPLES = 5000
-SET_BFLOAT16 = False
+SET_MODEL_BFLOAT16 = False
+SET_DATA_BFLOAT16 = False
 
 @exp_factory.register_config_factory('maskformer_coco_panoptic')
 def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
   """Config to get results that matches the paper."""
+
+  # FIXME : Batch size needs to be changed according to set global batch size in sh file
   train_batch_size = 64
-  eval_batch_size = 8
+  eval_batch_size = 64
 
   steps_per_epoch = COCO_TRAIN_EXAMPLES // train_batch_size
   train_steps = 300 * steps_per_epoch  # 300 epochs
@@ -131,7 +134,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
           # FIXME : For now we will not use the pretrained weights for ResNet50 Backbone
           init_checkpoint="",
           init_checkpoint_modules='',
-          bfloat16 = SET_BFLOAT16,
+          bfloat16 = SET_MODEL_BFLOAT16,
           annotation_file=os.path.join(COCO_INPUT_PATH_BASE,'annotations'
                                        'instances_train2017.json'),
           model = MaskFormer(
@@ -144,6 +147,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
               is_training=True,
               global_batch_size=train_batch_size,
               shuffle_buffer_size=1000,
+              dtype = 'bfloat16' if SET_DATA_BFLOAT16 else 'float32',
               parser = Parser(
                     output_size = [640,640],
                     min_scale = 0.3,
@@ -166,7 +170,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
                     sigma = 8.0,
                     small_instance_area_threshold = 4096,
                     small_instance_weight = 3.0,
-                    dtype = 'bfloat16' if SET_BFLOAT16 else 'float32',
+                    dtype = 'bfloat16' if SET_DATA_BFLOAT16 else 'float32',
                     seed = 2045,
                 )
           ),
