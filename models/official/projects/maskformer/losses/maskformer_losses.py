@@ -184,12 +184,12 @@ class Loss:
 
         # FIXME : Where there is no object append very high cost
         # # Append highest cost where there are no objects : No object class == 0
-        valid = tf.expand_dims(tf.cast(tf.not_equal(tgt_ids, 0), dtype=total_cost.dtype), axis=1)
-        total_cost = (1 - valid) * max_cost + valid * total_cost
-        total_cost = tf.where(
-        tf.logical_or(tf.math.is_nan(total_cost), tf.math.is_inf(total_cost)),
-        max_cost * tf.ones_like(total_cost, dtype=total_cost.dtype),
-        total_cost)
+        # valid = tf.expand_dims(tf.cast(tf.not_equal(tgt_ids, 0), dtype=total_cost.dtype), axis=1)
+        # total_cost = (1 - valid) * max_cost + valid * total_cost
+        # total_cost = tf.where(
+        # tf.logical_or(tf.math.is_nan(total_cost), tf.math.is_inf(total_cost)),
+        # max_cost * tf.ones_like(total_cost, dtype=total_cost.dtype),
+        # total_cost)
     
         _, inds = matchers.hungarian_matching(total_cost)
 
