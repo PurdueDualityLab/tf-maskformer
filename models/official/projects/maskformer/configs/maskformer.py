@@ -115,7 +115,7 @@ class MaskFormerTask(cfg.TaskConfig):
 COCO_INPUT_PATH_BASE = 'gs://cam2-datasets/coco_panoptic/'
 COCO_TRAIN_EXAMPLES = 118287
 COCO_VAL_EXAMPLES = 5000
-SET_MODEL_BFLOAT16 = True
+SET_MODEL_BFLOAT16 = False
 SET_DATA_BFLOAT16 = True
 
 @exp_factory.register_config_factory('maskformer_coco_panoptic')
