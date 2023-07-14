@@ -36,7 +36,6 @@ import numpy as np
 
 from pycocotools import mask
 import tensorflow as tf
-from tqdm import tqdm
 import multiprocessing as mp
 from official.vision.data import tfrecord_lib
 
