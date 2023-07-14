@@ -216,7 +216,7 @@ class Loss:
         target_classes = tf.cast(target_labels, dtype=tf.int32)
 
         # FIXME : The no object class should be 0 for our  case but for pytorch code it is 133
-        background = tf.equal(target_classes, 133) # Pytorch padds 133 class number where classes are background but our code uses 0 for background
+        background = tf.equal(target_classes, 0) # Pytorch padds 133 class number where classes are background but our code uses 0 for background
         
         num_masks = tf.reduce_sum(tf.cast(tf.logical_not(background), tf.float32), axis=-1)
 
