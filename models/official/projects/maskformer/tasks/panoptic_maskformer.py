@@ -134,7 +134,7 @@ class PanopticTask(base_task.Task):
 	def build_metrics(self, training=True):
 		"""Builds panoptic metrics."""
 		metrics = []
-		metric_names = ['weighted_ce', 'weighted_focal', 'weighted_dice']
+		metric_names = ['cls_loss', 'focal_loss', 'dice_loss']
 		for name in metric_names:
 			metrics.append(tf.keras.metrics.Mean(name, dtype=tf.float32))
 		# TODO : Need panoptic quality metric for evaluation
@@ -164,7 +164,10 @@ class PanopticTask(base_task.Task):
 			outputs = model(features, training=True)
 			##########################################################
 			# FIXME : This loop must be used for auxilary outputs
-
+			loss = 0.0
+			cls_loss = 0.0
+			focal_loss = 0.0
+			dice_loss = 0.0
 			
 			# for output in outputs:
 			#       # Computes per-replica loss.	
@@ -206,9 +209,9 @@ class PanopticTask(base_task.Task):
 			logs = {self.loss: total_loss}
 
 			all_losses = {
-				'weighted_ce': cls_loss,
-				'weighted_focal': focal_loss,
-				'weighted_dice': dice_loss,}
+				'cls_loss': cls_loss,
+				'focal_loss': focal_loss,
+				'dice_loss': dice_loss,}
 
 					
 			# Metric results will be added to logs for you.

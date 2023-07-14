@@ -87,7 +87,7 @@ class MaskFormer(hyperparams.Config):
   num_queries: int = 100
   hidden_size: int = 256
   # TODO: Actually there are 133 classes for panoptic segmentation
-  num_classes: int = 133  # 0: background
+  num_classes: int = 199  # 0: background
   fpn_encoder_layers: int = 6
   detr_encoder_layers: int = 0
   num_decoder_layers: int = 6
@@ -138,7 +138,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
           annotation_file=os.path.join(COCO_INPUT_PATH_BASE,'annotations'
                                        'instances_train2017.json'),
           model = MaskFormer(
-              input_size=[640,640, 3],
+              input_size=[640,640,3],
               norm_activation=common.NormActivation(),
               which_pixel_decoder='fpn',),
           losses = Losses(),
