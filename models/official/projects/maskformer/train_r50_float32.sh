@@ -6,7 +6,7 @@ gcsfuse cam2-models ~/models
 export PYTHONPATH=$PYTHONPATH:~/tf-maskformer/models
 export MODEL_DIR="gs://cam2-models/maskformer_vishal_exps/EXP_02"
 export BACKBONE_DIR="gs://cam2-models/maskformer_dummy/resnet50_v1"
-export TPU_NAME="tf-debug-1"
+export TPU_NAME="tf-debug-2"
 export TPU_SOFTWARE="2.11.0"
 export TPU_PROJECT="red-atlas-305317"
 export TPU_ZONE="us-central1-a"
