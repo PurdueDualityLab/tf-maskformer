@@ -30,7 +30,7 @@ class MaskFormer(tf.keras.Model):
 			   num_decoder_layers=6,
 			   dropout_rate=0.1,
 			   backbone_endpoint_name='5',
-			   num_classes=133,
+			   num_classes=199,
 			   batch_size=1,
 			   bfloat16=True,
 			   which_pixel_decoder='fpn',
