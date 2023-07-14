@@ -123,7 +123,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
   """Config to get results that matches the paper."""
 
   # FIXME : Batch size needs to be changed according to set global batch size in sh file
-  train_batch_size = 128
+  train_batch_size = 512
   eval_batch_size = 64
 
   steps_per_epoch = COCO_TRAIN_EXAMPLES // train_batch_size
@@ -141,10 +141,10 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
               input_size=[640,640,3],
               norm_activation=common.NormActivation(),
               which_pixel_decoder='fpn',
-              num_classes=199,),
+              num_classes=133,),
           losses = Losses(),
           train_data = DataConfig(
-              input_path=os.path.join(COCO_INPUT_PATH_BASE, 'tfrecords_not_working/train*'),
+              input_path=os.path.join(COCO_INPUT_PATH_BASE, 'tfrecords/train*'),
               is_training=True,
               global_batch_size=train_batch_size,
               shuffle_buffer_size=1000,
@@ -176,7 +176,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
                 )
           ),
           validation_data = DataConfig(
-              input_path = os.path.join(COCO_INPUT_PATH_BASE, 'tfrecords_not_working/val*'),
+              input_path = os.path.join(COCO_INPUT_PATH_BASE, 'tfrecords/val*'),
               is_training = False,
               global_batch_size = eval_batch_size,
               drop_remainder = False,
@@ -194,7 +194,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
           summary_interval=steps_per_epoch,
           checkpoint_interval=steps_per_epoch,
           validation_interval= 5 * steps_per_epoch,
-          max_to_keep=1,
+          max_to_keep=10,
           best_checkpoint_export_subdir='best_ckpt',
           # TODO: Metric not implemented yet
           optimizer_config=optimization.OptimizationConfig({

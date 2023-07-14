@@ -183,13 +183,13 @@ class Loss:
                     )
 
         # FIXME : Where there is no object append very high cost
-        # # Append highest cost where there are no objects : No object class == 0
-        # valid = tf.expand_dims(tf.cast(tf.not_equal(tgt_ids, 0), dtype=total_cost.dtype), axis=1)
-        # total_cost = (1 - valid) * max_cost + valid * total_cost
-        # total_cost = tf.where(
-        # tf.logical_or(tf.math.is_nan(total_cost), tf.math.is_inf(total_cost)),
-        # max_cost * tf.ones_like(total_cost, dtype=total_cost.dtype),
-        # total_cost)
+        # Append highest cost where there are no objects : No object class == 0
+        valid = tf.expand_dims(tf.cast(tf.not_equal(tgt_ids, 133), dtype=total_cost.dtype), axis=1)
+        total_cost = (1 - valid) * max_cost + valid * total_cost
+        total_cost = tf.where(
+        tf.logical_or(tf.math.is_nan(total_cost), tf.math.is_inf(total_cost)),
+        max_cost * tf.ones_like(total_cost, dtype=total_cost.dtype),
+        total_cost)
     
         _, inds = matchers.hungarian_matching(total_cost)
 
@@ -211,7 +211,7 @@ class Loss:
         target_classes = tf.cast(target_labels, dtype=tf.int32)
 
         # FIXME : The no object class should be 0 for our  case but for pytorch code it is 133
-        background = tf.equal(target_classes, 0) # Pytorch padds 133 class number where classes are background but our code uses 0 for background
+        background = tf.equal(target_classes, 133) # Pytorch padds 133 class number where classes are background but our code uses 0 for background
         
         num_masks = tf.reduce_sum(tf.cast(tf.logical_not(background), tf.float32), axis=-1)
         

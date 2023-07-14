@@ -338,8 +338,9 @@ class mask_former_parser(parser.Parser):
         instance_mask = tf.image.resize(instance_mask, self._output_size, method='nearest')
         individual_masks = tf.image.resize(individual_masks, self._output_size, method='nearest')
 
+        #FIXME : Nedd to change the constanct value to 0 later
         unique_ids = preprocess_ops.clip_or_pad_to_fixed_size(
-                class_ids, self._max_instances)
+                class_ids, self._max_instances, constant_values=133)
       
         # Cast image to float and set shapes of output.
         
