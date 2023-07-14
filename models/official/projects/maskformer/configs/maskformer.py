@@ -144,7 +144,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
               num_classes=199,),
           losses = Losses(),
           train_data = DataConfig(
-              input_path=os.path.join(COCO_INPUT_PATH_BASE, 'tfrecords_new/train*'),
+              input_path=os.path.join(COCO_INPUT_PATH_BASE, 'tfrecords_not_working/train*'),
               is_training=True,
               global_batch_size=train_batch_size,
               shuffle_buffer_size=1000,
@@ -176,7 +176,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
                 )
           ),
           validation_data = DataConfig(
-              input_path = os.path.join(COCO_INPUT_PATH_BASE, 'tfrecords_new/val*'),
+              input_path = os.path.join(COCO_INPUT_PATH_BASE, 'tfrecords_not_working/val*'),
               is_training = False,
               global_batch_size = eval_batch_size,
               drop_remainder = False,
