@@ -121,14 +121,14 @@ class MaskFormer(tf.keras.Model):
 	def call(self, image, training = False):
 		backbone_feature_maps = self.backbone(image)
 
-		backbone_feature_maps = self.process_feature_maps(backbone_feature_maps)
+		backbone_feature_maps_procesed = self.process_feature_maps(backbone_feature_maps)
 
 		if self._pixel_decoder == 'fpn':
-			mask_features = self.pixel_decoder(backbone_feature_maps)
-			transformer_enc_feat = backbone_feature_maps['5']
+			mask_features = self.pixel_decoder(backbone_feature_maps_procesed)
+			transformer_enc_feat = backbone_feature_maps_procesed['5']
 
 		elif self._pixel_decoder == 'transformer_fpn':
-			mask_features, transformer_enc_feat = self.pixel_decoder(backbone_feature_maps)
+			mask_features, transformer_enc_feat = self.pixel_decoder(backbone_feature_maps_procesed)
 		
 		if self._bfloat16:
 			transformer_enc_feat = tf.cast(transformer_enc_feat, tf.float32)
