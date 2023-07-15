@@ -3,7 +3,7 @@ import tensorflow_addons as tfa
 from official.vision.ops.spatial_transform_ops import nearest_upsampling
 from official.projects.detr.modeling.detr import position_embedding_sine
 from official.projects.detr.modeling.transformer import TransformerEncoder
-#from official.projects.maskformer.modeling.decoder.detr_transformer import DETRTransformer
+# from official.projects.maskformer.modeling.decoder.detr_transformer import DETRTransformer
 
 class TransformerFPN(tf.keras.layers.Layer):
     """MaskFormer Feature Pyramid Networks."""
@@ -176,8 +176,10 @@ class TransformerFPN(tf.keras.layers.Layer):
         
         transformer = self._transformer_encoder(features, None, pos_embed)
 
+        # FIXME : Fixed incorrect logic for bfloat16
         if self._bfloat16:
-            transformer = tf.cast(features, tf.bfloat16)        
+            
+            transformer = tf.cast(transformer, tf.bfloat16)        
 
         down = self._conv2d_op_down[0](transformer)
         down = self._down_groupnorm[0](down)

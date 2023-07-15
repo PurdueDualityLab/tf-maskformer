@@ -32,7 +32,7 @@ class MaskFormer(tf.keras.Model):
 			   backbone_endpoint_name='5',
 			   num_classes=199,
 			   batch_size=1,
-			   bfloat16=True,
+			   bfloat16=False,
 			   which_pixel_decoder='fpn',
 			   **kwargs):
 		super(MaskFormer, self).__init__(**kwargs)
@@ -66,7 +66,7 @@ class MaskFormer(tf.keras.Model):
 		self._backbone_endpoint = backbone_endpoint_name
 		self._bfloat16 = bfloat16
 		self._pixel_decoder = which_pixel_decoder
-
+		print("[MaskFormer] Bfloat config : ", self._bfloat16)
 		# Backbone feature extractor.
 		self.backbone = resnet.ResNet(50, input_specs = self._input_specs, bn_trainable=False)
 		
@@ -90,7 +90,8 @@ class MaskFormer(tf.keras.Model):
 									activity_regularizer=self._activity_regularizer,
 									kernel_constraint=self._kernel_constraint,
 									bias_constraint=self._bias_constraint,
-									num_encoder_layers = self._fpn_encoder_layers)
+									num_encoder_layers = self._fpn_encoder_layers,
+									bfloat16=self._bfloat16)
 		
 		elif self._pixel_decoder == 'fpn':
 			# FIXME : Add the input arguments to CNNFPN

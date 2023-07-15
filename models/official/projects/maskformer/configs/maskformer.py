@@ -140,7 +140,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
           model = MaskFormer(
               input_size=[640,640,3],
               norm_activation=common.NormActivation(),
-              which_pixel_decoder='fpn',
+              which_pixel_decoder='transformer_fpn',
               num_classes=133,),
           losses = Losses(),
           train_data = DataConfig(
