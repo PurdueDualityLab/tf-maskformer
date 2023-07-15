@@ -91,7 +91,7 @@ class MaskFormer(hyperparams.Config):
   fpn_encoder_layers: int = 6
   detr_encoder_layers: int = 0
   num_decoder_layers: int = 6
-  which_pixel_decoder: str = 'fpn' # change this to transformer FPN to use transformer FPN as per pytorch codebase
+  which_pixel_decoder: str = 'transformer_fpn' # change this to transformer FPN to use transformer FPN as per pytorch codebase
   input_size: List[int] = dataclasses.field(default_factory=list)
   backbone: backbones.Backbone = backbones.Backbone(
       type='resnet', resnet=backbones.ResNet(model_id=50, bn_trainable=False))
@@ -123,7 +123,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
   """Config to get results that matches the paper."""
 
   # FIXME : Batch size needs to be changed according to set global batch size in sh file
-  train_batch_size = 512
+  train_batch_size = 64
   eval_batch_size = 64
 
   steps_per_epoch = COCO_TRAIN_EXAMPLES // train_batch_size
