@@ -11,7 +11,7 @@ export TPU_SOFTWARE="2.11.0"
 export TPU_PROJECT="red-atlas-305317"
 export TPU_ZONE="us-central1-a"
 export OVERRIDES="runtime.distribution_strategy=tpu,runtime.mixed_precision_dtype=float32,\
-task.train_data.global_batch_size=512,task.model.which_pixel_decoder="fpn",\
+task.train_data.global_batch_size=512,task.model.which_pixel_decoder=fpn"
 python3 models/official/projects/maskformer/train.py \
   --experiment maskformer_coco_panoptic \
   --mode train \
