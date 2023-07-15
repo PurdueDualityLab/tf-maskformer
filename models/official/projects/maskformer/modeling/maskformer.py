@@ -75,7 +75,7 @@ class MaskFormer(tf.keras.Model):
 		print("[Build MaskFormer] image shape: ", image_shape)
 
 		#decoders
-		if self._pixel_decoder == 'tranformer_fpn':
+		if self._pixel_decoder == 'transformer_fpn':
 			self.pixel_decoder = TransformerFPN(batch_size = self._batch_size,
 									fpn_feat_dims=self._fpn_feat_dims,
 									data_format=self._data_format,
