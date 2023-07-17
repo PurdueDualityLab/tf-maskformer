@@ -287,8 +287,8 @@ class PanopticTask(base_task.Task):
 			'instance_mask': labels['instance_mask'],
 			'image_info': labels['image_info'],
 			}
-
-			output_category_mask, output_instance_mask = self._postprocess_outputs(outputs, labels['image_info'])
+			# FIXME : The image shape must not be fixed
+			output_category_mask, output_instance_mask = self._postprocess_outputs(outputs, [640, 640])
 			pq_metric_outputs = {
 			'category_mask': output_category_mask,
 			'instance_mask': output_instance_mask,
