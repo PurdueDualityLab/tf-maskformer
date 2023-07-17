@@ -279,7 +279,7 @@ class PanopticTask(base_task.Task):
 				'focal_loss': focal_loss,
 				'dice_loss': dice_loss,
 			}
-		print("All losses : ", all_losses)
+		
 		if self.panoptic_quality_metric is not None:
 			
 			pq_metric_labels = {
