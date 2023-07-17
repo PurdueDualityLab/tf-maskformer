@@ -363,8 +363,6 @@ class PanopticQualityV2(tf.keras.metrics.Metric):
     super().__init__(name=name, dtype=dtype)
 
     self._num_categories = num_categories
-    print("------------------- num_categories :", num_categories)
-    exit()
 
     if is_thing is not None:
       self._is_thing = tf.convert_to_tensor(is_thing)
