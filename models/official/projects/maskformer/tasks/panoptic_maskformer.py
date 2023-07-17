@@ -57,8 +57,7 @@ class PanopticTask(base_task.Task):
 		
 		ckpt_dir_or_file = self._task_config.init_checkpoint
 		# Restoring checkpoint.
-		if tf.io.gfile.isdir(ckpt_dir_or_file):
-			ckpt_dir_or_file = tf.train.latest_checkpoint(ckpt_dir_or_file)
+		
 
 		if self._task_config.init_checkpoint_modules == 'all':
 			print("INSIDE ALL........")
@@ -68,6 +67,9 @@ class PanopticTask(base_task.Task):
 			status.assert_consumed()
 			status.expect_partial().assert_existing_objects_matched()
 		
+		if tf.io.gfile.isdir(ckpt_dir_or_file):
+			ckpt_dir_or_file = tf.train.latest_checkpoint(ckpt_dir_or_file)
+			
 		elif self._task_config.init_checkpoint_modules == 'backbone':
 			ckpt = tf.train.Checkpoint(backbone=model.backbone)
 			status = ckpt.restore(ckpt_dir_or_file)
