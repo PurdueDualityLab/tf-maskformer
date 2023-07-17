@@ -133,7 +133,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
   decay_at = train_steps - 100 * steps_per_epoch  # 200 epochs
   config = cfg.ExperimentConfig(
   task = MaskFormerTask(
-          init_checkpoint="gs://cam2-models/resnet50_pretrained/non_tfmg/",
+          init_checkpoint="gs://cam2-models/maskformer_vishal_exps/resnet50_pretrained/non_tfmg/",
           init_checkpoint_modules='backbone',
           bfloat16 = SET_MODEL_BFLOAT16,
           annotation_file=os.path.join(COCO_INPUT_PATH_BASE,'annotations'
