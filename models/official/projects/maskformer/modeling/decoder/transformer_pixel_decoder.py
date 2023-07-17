@@ -158,7 +158,7 @@ class TransformerFPN(tf.keras.layers.Layer):
           Mask projection
         """
         input_levels = list(multilevel_features.keys())
-        print("Input Levels : ", input_levels)
+        
         feat = multilevel_features[input_levels[-1]]
         
         if not self._channels_last:
