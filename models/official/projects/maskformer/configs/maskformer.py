@@ -98,6 +98,14 @@ class MaskFormer(hyperparams.Config):
   norm_activation: common.NormActivation = common.NormActivation()
   backbone_endpoint_name: str = '5'
 
+@dataclasses.dataclass
+class PanopticQuality(hyperparams.Config):
+  """MaskFormer model pq evaluator config."""
+  num_categories: int = 133
+  is_thing : List[bool] = dataclasses.field(default_factory=list)
+  ignore_label: int = 133
+  rescale_predictions: bool = False
+  
 
 @dataclasses.dataclass
 class MaskFormerTask(cfg.TaskConfig):
@@ -110,6 +118,7 @@ class MaskFormerTask(cfg.TaskConfig):
   annotation_file: Optional[str] = None
   per_category_metrics: bool = False
   bfloat16: bool = False
+  panoptic_quality_evaluator: PanopticQuality = PanopticQuality()
 
 # TODO : we should pass this via cmd 
 COCO_INPUT_PATH_BASE = 'gs://cam2-datasets/coco_panoptic/'
@@ -185,6 +194,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
                     output_size = [640,640],
                     pad_output = True,
                     seed = 4096,
+                    dtype = 'bfloat16' if SET_DATA_BFLOAT16 else 'float32',
                 )
               
           )),

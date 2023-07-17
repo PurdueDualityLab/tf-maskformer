@@ -16,6 +16,9 @@ from official.projects.maskformer.dataloaders import panoptic_input
 from official.projects.detr.ops.matchers import hungarian_matching
 from official.projects.maskformer.losses.maskformer_losses import Loss
 
+from official.vision.evaluation import panoptic_quality
+from official.projects.maskformer.losses.inference import PanopticInference
+
 import numpy as np
 from loguru import logger
 
@@ -68,10 +71,6 @@ class PanopticTask(base_task.Task):
 		Build panoptic segmentation dataset.
 
 		"""
-		# NOTE : This is not required as we are setting two different flags for data and model
-		# if self._task_config.bfloat16:
-		# 	params.parser.dtype = "bfloat16"
-		# 	params.dtype = "bfloat16"
 		
 		if params.decoder.type == 'simple_decoder':
 			decoder = panoptic_input.TfExampleDecoder(regenerate_source_id = params.regenerate_source_id)
@@ -142,7 +141,18 @@ class PanopticTask(base_task.Task):
 		for name in metric_names:
 			metrics.append(tf.keras.metrics.Mean(name, dtype=tf.float32))
 		# TODO : Need panoptic quality metric for evaluation
-		
+		if not training:
+			print("[INFO] Building panoptic quality metric ")
+			pq_config = self._task_config.panoptic_quality_evaluator
+			self.panoptic_quality_metric = panoptic_quality.PanopticQualityV2(
+				num_categories=pq_config.num_categories,
+				is_thing=pq_config.is_thing,
+				ignored_label=pq_config.ignored_label,
+				rescale_predictions=pq_config.rescale_predictions,
+			)
+			self.panoptic_inference = PanopticInference(
+				
+			)
 		return metrics
 		
 		
@@ -224,6 +234,104 @@ class PanopticTask(base_task.Task):
 					m.update_state(all_losses[m.name])
 
 			return logs
+	def _postprocess_outputs(self, outputs: Dict[str, Any]):
+		""" 
+		Implements postprocessing using the output binary masks and labels to produce
+		1. Output Category Mask
+		2. Output Instance Mask
 
-	def validation_step(self, inputs, model, optimizer, metrics=None):
-		pass
+		"""
+		pred_binary_masks = outputs["mask_prob_predictions"]
+		pred_labels = outputs["class_prob_predictions"]
+		
+
+	def validation_step(self, inputs, model, metrics=None):
+		features, labels = inputs
+		outputs = model(features, training=False)
+		total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels)
+		num_replicas_in_sync = tf.distribute.get_strategy().num_replicas_in_sync
+		total_loss *= num_replicas_in_sync
+		cls_loss *= num_replicas_in_sync
+		focal_loss *= num_replicas_in_sync
+		dice_loss *= num_replicas_in_sync
+		logs = {self.loss: total_loss}
+		all_losses = {
+				'cls_loss': cls_loss,
+				'focal_loss': focal_loss,
+			    'dice_loss': dice_loss,
+			}
+		if self.panoptic_quality_metric is not None:
+			
+			pq_metric_labels = {
+			'category_mask': labels['category_mask'],
+			'instance_mask': labels['instance_mask'],
+			'image_info': labels['image_info'],
+			}
+
+			output_category_mask, output_instance_mask = self._postprocess_outputs(outputs)
+			pq_metric_outputs = {
+			'category_mask': output_category_mask,
+			'instance_mask': output_instance_mask,
+			}
+			
+			self.panoptic_quality_metric.update_state(
+		  	pq_metric_labels, pq_metric_outputs
+	  		)
+
+	def aggregate_logs(self, state=None, step_outputs=None):
+		is_first_step = not state
+		if state is None:
+			state = self.panoptic_quality_metric
+		state.update_state(
+			step_outputs['ground_truths'],
+			step_outputs['predictions'])
+		
+		return state
+	
+	def reduce_aggregated_logs(self, aggregated_logs, global_step=None):
+		if self.panoptic_quality_metric is not None:
+			self._reduce_panoptic_metrics(aggregated_logs)
+			self.panoptic_quality_metric.reset_state()	
+		return aggregated_logs
+	
+	def _reduce_panoptic_metrics(self, logs: Dict[str, Any]):
+		"""
+		Updates the per class and mean panoptic metrics in the logs.
+		
+		"""
+		result = self.panoptic_quality_metric.result()
+		valid_thing_classes = result['valid_thing_classes']
+		valid_stuff_classes = result['valid_stuff_classes']
+		valid_classes = valid_stuff_classes | valid_thing_classes
+		num_categories = tf.math.count_nonzero(valid_classes, dtype=tf.float32)
+		num_thing_categories = tf.math.count_nonzero(
+			valid_thing_classes, dtype=tf.float32
+		)
+		num_stuff_categories = tf.math.count_nonzero(
+			valid_stuff_classes, dtype=tf.float32
+		)
+		valid_thing_classes = tf.cast(valid_thing_classes, dtype=tf.float32)
+		valid_stuff_classes = tf.cast(valid_stuff_classes, dtype=tf.float32)
+
+		logs['panoptic_quality/All_num_categories'] = num_categories
+		logs['panoptic_quality/Things_num_categories'] = num_thing_categories
+		logs['panoptic_quality/Stuff_num_categories'] = num_stuff_categories
+		for metric in ['pq', 'sq', 'rq']:
+			metric_per_class = result[f'{metric}_per_class']
+			logs[f'panoptic_quality/All_{metric}'] = tf.math.divide_no_nan(
+				tf.reduce_sum(metric_per_class), num_categories
+			)
+			logs[f'panoptic_quality/Things_{metric}'] = tf.math.divide_no_nan(
+				tf.reduce_sum(metric_per_class * valid_thing_classes),
+				num_thing_categories,
+			)
+			logs[f'panoptic_quality/Stuff_{metric}'] = tf.math.divide_no_nan(
+				tf.reduce_sum(metric_per_class * valid_stuff_classes),
+				num_stuff_categories,
+			)
+			if self.task_config.panoptic_quality_evaluator.report_per_class_metrics:
+				for i, is_valid in enumerate(valid_classes.numpy()):
+					if is_valid:
+						logs[f'panoptic_quality/{metric}/class_{i}'] = metric_per_class[i]
+		
+	
