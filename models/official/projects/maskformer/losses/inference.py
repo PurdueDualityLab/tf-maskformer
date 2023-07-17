@@ -37,8 +37,9 @@ class PanopticInference:
         curr_masks = mask_pred[keep]
         curr_mask_cls = pred_logits[keep]
         # Save the masks here and visualize the output
+        print(curr_mask_cls)
         np.save("masks.npy", curr_masks.numpy())
-        np.save("classes.npy", curr_classes.numpy())
+        np.save("classes.npy", curr_mask_cls.numpy())
         exit()
         # curr_prob_masks = tf.reshape(curr_scores, [-1, 1, 1]) * curr_masks
         height, width = tf.shape(curr_masks)[-2:]
