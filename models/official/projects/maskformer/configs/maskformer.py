@@ -125,15 +125,16 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
   # FIXME : Batch size needs to be changed according to set global batch size in sh file
   train_batch_size = 512
   eval_batch_size = 64
+  ckpt_interval = (COCO_TRAIN_EXAMPLES // train_batch_size) * 20 # Don't write ckpts frequently. Slows down the training.
+
 
   steps_per_epoch = COCO_TRAIN_EXAMPLES // train_batch_size
   train_steps = 300 * steps_per_epoch  # 300 epochs
   decay_at = train_steps - 100 * steps_per_epoch  # 200 epochs
   config = cfg.ExperimentConfig(
   task = MaskFormerTask(
-          # FIXME : For now we will not use the pretrained weights for ResNet50 Backbone
-          init_checkpoint="",
-          init_checkpoint_modules='',
+          init_checkpoint="gs://cam2-models/resnet50_pretrained/non_tfmg/",
+          init_checkpoint_modules='backbone',
           bfloat16 = SET_MODEL_BFLOAT16,
           annotation_file=os.path.join(COCO_INPUT_PATH_BASE,'annotations'
                                        'instances_train2017.json'),
@@ -191,8 +192,8 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
           train_steps=train_steps,
           validation_steps=COCO_VAL_EXAMPLES // eval_batch_size,
           steps_per_loop=steps_per_epoch,
-          summary_interval=steps_per_epoch,
-          checkpoint_interval=steps_per_epoch,
+          summary_interval=ckpt_interval,
+          checkpoint_interval=ckpt_interval,
           validation_interval= 5 * steps_per_epoch,
           max_to_keep=1,
           best_checkpoint_export_subdir='best_ckpt',
