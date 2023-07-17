@@ -9,10 +9,12 @@ class PanopticInference:
         self.background_class_id = background_class_id
         
 
-    def call(self, pred_logits, mask_pred, image_shape):
+    def __call__(self, pred_logits, mask_pred, image_shape):
         
         cat_id_map = {}
         is_this_thing = {}
+        print("Image Shape: ", image_shape)
+        
         # Apply softmax and sigmoid on the predictions and predicted masks
         mask_pred =  tf.image.resize(mask_pred, (image_shape[1], image_shape[2]), method=tf.image.ResizeMethod.BILINEAR)
         mask_pred = tf.keras.activations.sigmoid(mask_pred)

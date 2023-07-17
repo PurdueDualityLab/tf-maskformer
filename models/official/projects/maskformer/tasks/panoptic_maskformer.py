@@ -66,7 +66,7 @@ class PanopticTask(base_task.Task):
 		# Restoring checkpoint.
 		
 		if self._task_config.init_checkpoint_modules == 'all':
-			print("#"*50)
+		
 			checkpoint_path = _get_checkpoint_path(
 			ckpt_dir_or_file)
 			ckpt = tf.train.Checkpoint(**model.checkpoint_items)
@@ -74,7 +74,7 @@ class PanopticTask(base_task.Task):
 			status.expect_partial().assert_existing_objects_matched()
 			
 		elif self._task_config.init_checkpoint_modules == 'backbone':
-			print("*"*50)
+			
 			ckpt = tf.train.Checkpoint(backbone=model.backbone)
 			status = ckpt.restore(ckpt_dir_or_file)
 			status.expect_partial().assert_existing_objects_matched()
@@ -167,7 +167,8 @@ class PanopticTask(base_task.Task):
 				rescale_predictions=pq_config.rescale_predictions,
 			)
 			self.panoptic_inference = PanopticInference(
-				
+				num_classes=self._task_config.model.num_classes, 
+				background_class_id=pq_config.ignored_label
 			)
 		return metrics
 		
@@ -243,14 +244,15 @@ class PanopticTask(base_task.Task):
 				'focal_loss': focal_loss,
 				'dice_loss': dice_loss,}
 
-					
+			
 			# Metric results will be added to logs for you.
 			if metrics:
 				for m in metrics:
 					m.update_state(all_losses[m.name])
 
 			return logs
-	def _postprocess_outputs(self, outputs: Dict[str, Any]):
+		
+	def _postprocess_outputs(self, outputs: Dict[str, Any], image_shapes):
 		""" 
 		Implements postprocessing using the output binary masks and labels to produce
 		1. Output Category Mask
@@ -259,7 +261,8 @@ class PanopticTask(base_task.Task):
 		"""
 		pred_binary_masks = outputs["mask_prob_predictions"]
 		pred_labels = outputs["class_prob_predictions"]
-		
+		ouput_instance_mask, output_category_mask = self.panoptic_inference( pred_labels,pred_binary_masks, image_shapes)
+		return ouput_instance_mask, output_category_mask
 
 	def validation_step(self, inputs, model, metrics=None):
 		features, labels = inputs
@@ -276,6 +279,7 @@ class PanopticTask(base_task.Task):
 				'focal_loss': focal_loss,
 				'dice_loss': dice_loss,
 			}
+		print("All losses : ", all_losses)
 		if self.panoptic_quality_metric is not None:
 			
 			pq_metric_labels = {
@@ -284,7 +288,7 @@ class PanopticTask(base_task.Task):
 			'image_info': labels['image_info'],
 			}
 
-			output_category_mask, output_instance_mask = self._postprocess_outputs(outputs)
+			output_category_mask, output_instance_mask = self._postprocess_outputs(outputs, labels['image_info'])
 			pq_metric_outputs = {
 			'category_mask': output_category_mask,
 			'instance_mask': output_instance_mask,
