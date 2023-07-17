@@ -33,9 +33,8 @@ class PanopticTask(base_task.Task):
 	def build_model(self)-> tf.keras.Model:
 		"""Builds MaskFormer Model."""
 		# TODO : Remove hardcoded values, Verify the number of classes 
-		# input_specs = tf.keras.layers.InputSpec(shape=[None] + self._task_config.model.input_size)
-		# FIXME : This is for running the evlaution script.
-		input_specs = tf.keras.layers.InputSpec(shape=[64] + self._task_config.model.input_size)
+		input_specs = tf.keras.layers.InputSpec(shape=[None] + self._task_config.model.input_size)
+		
 		model = MaskFormer(input_specs= input_specs,
 							num_queries=self._task_config.model.num_queries,
 							hidden_size=self._task_config.model.hidden_size,
