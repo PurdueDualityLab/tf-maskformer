@@ -58,7 +58,7 @@ class PanopticTask(base_task.Task):
 		ckpt_dir_or_file = self._task_config.init_checkpoint
 		# Restoring checkpoint.
 		if tf.io.gfile.isdir(ckpt_dir_or_file):
-			 = tf.train.latest_checkpoint(ckckpt_dir_or_filept_dir_or_file)
+			ckpt_dir_or_file = tf.train.latest_checkpoint(ckpt_dir_or_file)
 
 		if self._task_config.init_checkpoint_modules == 'all':
 			ckpt = tf.train.Checkpoint(**model.checkpoint_items)
