@@ -1,3 +1,4 @@
+from absl import logging
 import tensorflow as tf
 
 from official.core import base_task
@@ -20,7 +21,7 @@ from official.vision.evaluation import panoptic_quality
 from official.projects.maskformer.losses.inference import PanopticInference
 
 import numpy as np
-from loguru import logger
+
 
 @task_factory.register_task_cls(exp_cfg.MaskFormerTask)
 class PanopticTask(base_task.Task):
@@ -53,19 +54,25 @@ class PanopticTask(base_task.Task):
 		"""
 		if not self._task_config.init_checkpoint:
 			return
+		
 		ckpt_dir_or_file = self._task_config.init_checkpoint
-
 		# Restoring checkpoint.
 		if tf.io.gfile.isdir(ckpt_dir_or_file):
-			ckpt_dir_or_file = tf.train.latest_checkpoint(ckpt_dir_or_file)
+			 = tf.train.latest_checkpoint(ckckpt_dir_or_filept_dir_or_file)
 
 		if self._task_config.init_checkpoint_modules == 'all':
 			ckpt = tf.train.Checkpoint(**model.checkpoint_items)
 			status = ckpt.restore(ckpt_dir_or_file)
 			status.assert_consumed()
+			status.expect_partial().assert_existing_objects_matched()
+		
 		elif self._task_config.init_checkpoint_modules == 'backbone':
 			ckpt = tf.train.Checkpoint(backbone=model.backbone)
 			status = ckpt.restore(ckpt_dir_or_file)
+			status.expect_partial().assert_existing_objects_matched()
+
+		logging.info('Finished loading pretrained checkpoint from %s',
+                 ckpt_dir_or_file)
 
 	def build_inputs(self, params, input_context: Optional[tf.distribute.InputContext] = None) -> tf.data.Dataset:
 		""" 
