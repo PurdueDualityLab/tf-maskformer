@@ -134,7 +134,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
 
   # FIXME : Batch size needs to be changed according to set global batch size in sh file
   train_batch_size = 512
-  eval_batch_size = 64
+  eval_batch_size = 2
   ckpt_interval = (COCO_TRAIN_EXAMPLES // train_batch_size) * 20 # Don't write ckpts frequently. Slows down the training.
 
 
