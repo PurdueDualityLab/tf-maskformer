@@ -55,22 +55,21 @@ class PanopticTask(base_task.Task):
 		if not self._task_config.init_checkpoint:
 			return
 		
+		print("INisde Initialize......")
 		ckpt_dir_or_file = self._task_config.init_checkpoint
 		# Restoring checkpoint.
-		
-
+		if tf.io.gfile.isdir(ckpt_dir_or_file):
+			print("Inside restoring ckpt.....")
+			ckpt_dir_or_file = tf.train.latest_checkpoint(ckpt_dir_or_file)
+	
 		if self._task_config.init_checkpoint_modules == 'all':
-			print("INSIDE ALL........")
-			exit()
+			print("Inisde all modules.....")
 			ckpt = tf.train.Checkpoint(**model.checkpoint_items)
 			status = ckpt.restore(ckpt_dir_or_file)
-			status.assert_consumed()
 			status.expect_partial().assert_existing_objects_matched()
-		
-		if tf.io.gfile.isdir(ckpt_dir_or_file):
-			ckpt_dir_or_file = tf.train.latest_checkpoint(ckpt_dir_or_file)
 			
 		elif self._task_config.init_checkpoint_modules == 'backbone':
+			print("Inisde backbone.....")
 			ckpt = tf.train.Checkpoint(backbone=model.backbone)
 			status = ckpt.restore(ckpt_dir_or_file)
 			status.expect_partial().assert_existing_objects_matched()
