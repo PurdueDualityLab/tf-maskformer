@@ -74,6 +74,7 @@ class PanopticTask(base_task.Task):
 			status.expect_partial().assert_existing_objects_matched()
 			
 		elif self._task_config.init_checkpoint_modules == 'backbone':
+			print("*"*50)
 			ckpt = tf.train.Checkpoint(backbone=model.backbone)
 			status = ckpt.restore(ckpt_dir_or_file)
 			status.expect_partial().assert_existing_objects_matched()
