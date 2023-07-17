@@ -116,8 +116,8 @@ class DiceLoss(tf.keras.losses.Loss):
         """
         y_true: (b size, 100, h*w)
         """
-        y_pred = tf.reshape(tf.keras.activations.sigmoid(y_pred), (y_pred.shape[0],y_pred.shape[1],-1))
-        y_true = tf.reshape(y_true, (y_true.shape[0],tf.shape(y_true)[1],-1))
+        y_pred = tf.reshape(tf.keras.activations.sigmoid(y_pred), (tf.shape(y_pred)[0],tf.shape(y_pred)[1],-1))
+        y_true = tf.reshape(y_true, (tf.shape(y_true)[0],tf.shape(y_true)[1],-1))
         numerator = 2 * tf.reduce_sum(y_pred * y_true, axis=-1)
         denominator = tf.reduce_sum(y_pred, axis=-1) + tf.reduce_sum(y_true, axis=-1)
         loss = 1 - (numerator + 1) / (denominator + 1)
@@ -126,7 +126,7 @@ class DiceLoss(tf.keras.losses.Loss):
     
     def batch(self, y_true, y_pred):
         y_pred = tf.sigmoid(y_pred)
-        y_pred = tf.reshape(y_pred, [y_pred.shape[0], y_pred.shape[1],-1])
+        y_pred = tf.reshape(y_pred, [tf.shape(y_pred)[0],tf.shape(y_pred)[1],-1])
         y_pred = tf.cast(y_pred, tf.float32)
         numerator = 2 * tf.einsum("bnc,bmc->bnm", y_pred, y_true)
         op1 = tf.transpose(tf.reduce_sum(y_pred, axis=-1)[:, tf.newaxis], [0, 2, 1])	
