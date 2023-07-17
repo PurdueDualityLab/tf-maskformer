@@ -4,7 +4,7 @@ fusermount -u ~/models
 gcsfuse --implicit-dirs cam2-datasets ~/datasets
 gcsfuse cam2-models ~/models
 export PYTHONPATH=$PYTHONPATH:~/tf-maskformer/models
-export MODEL_DIR="gs://cam2-models/maskformer_vishal_exps/EXP02_v256"
+export MODEL_DIR="gs://cam2-models/maskformer_vishal_exps/EXP05_v256"
 export TPU_NAME="tf-debug-2"
 export TPU_SOFTWARE="2.11.0"
 export TPU_PROJECT="red-atlas-305317"
