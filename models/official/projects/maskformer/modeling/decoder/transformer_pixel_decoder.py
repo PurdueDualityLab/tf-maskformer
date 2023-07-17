@@ -144,8 +144,6 @@ class TransformerFPN(tf.keras.layers.Layer):
     
     def _generate_image_mask(self, features: tf.Tensor) -> tf.Tensor:
         """Generates image mask from input image."""
-        print(features.shape[0],features.shape[1],features.shape[2])
-        exit()
         mask = tf.zeros([features.shape[0],features.shape[1],features.shape[2]])
         mask = tf.cast(mask, dtype = bool)
         return mask
