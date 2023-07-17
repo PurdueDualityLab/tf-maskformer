@@ -145,7 +145,7 @@ class PanopticTask(base_task.Task):
 			print("[INFO] Building panoptic quality metric ")
 			pq_config = self._task_config.panoptic_quality_evaluator
 			self.panoptic_quality_metric = panoptic_quality.PanopticQualityV2(
-				num_categories=pq_config.num_categories[0],
+				num_categories=pq_config.num_categories,
 				is_thing=pq_config.is_thing,
 				ignored_label=pq_config.ignored_label,
 				rescale_predictions=pq_config.rescale_predictions,
