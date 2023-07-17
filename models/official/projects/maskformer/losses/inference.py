@@ -14,8 +14,9 @@ class PanopticInference:
         
         cat_id_map = {}
         is_this_thing = {}
-        
-        
+        np.save("masks.npy", pred_logits.numpy())
+        np.save("classes.npy", mask_pred.numpy())
+        exit()
         # Apply softmax and sigmoid on the predictions and predicted masks
         mask_pred =  tf.image.resize(mask_pred, (image_shape[0], image_shape[1]), method=tf.image.ResizeMethod.BILINEAR)
         mask_pred = tf.keras.activations.sigmoid(mask_pred)
@@ -38,8 +39,7 @@ class PanopticInference:
         curr_mask_cls = pred_logits[keep]
         # Save the masks here and visualize the output
         print(curr_mask_cls)
-        np.save("masks.npy", curr_masks.numpy())
-        np.save("classes.npy", curr_mask_cls.numpy())
+      
         exit()
         # curr_prob_masks = tf.reshape(curr_scores, [-1, 1, 1]) * curr_masks
         height, width = tf.shape(curr_masks)[-2:]
