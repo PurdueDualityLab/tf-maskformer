@@ -16,7 +16,7 @@ class PanopticInference:
         print("Image Shape: ", image_shape)
         
         # Apply softmax and sigmoid on the predictions and predicted masks
-        mask_pred =  tf.image.resize(mask_pred, (image_shape[1], image_shape[2]), method=tf.image.ResizeMethod.BILINEAR)
+        mask_pred =  tf.image.resize(mask_pred, (image_shape[0][0], image_shape[0][1]), method=tf.image.ResizeMethod.BILINEAR)
         mask_pred = tf.keras.activations.sigmoid(mask_pred)
         probs = tf.keras.activations.softmax(pred_logits, axis=-1)
         scores = tf.reduce_max(probs, axis=-1)
