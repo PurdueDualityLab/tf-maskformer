@@ -103,7 +103,7 @@ class PanopticQuality(hyperparams.Config):
   """MaskFormer model pq evaluator config."""
   num_categories: int = 133
   is_thing : List[bool] = dataclasses.field(default_factory=list)
-  ignore_label: int = 133
+  ignored_label: int = 133
   rescale_predictions: bool = False
   
 
