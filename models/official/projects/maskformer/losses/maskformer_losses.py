@@ -192,8 +192,8 @@ class Loss:
         total_cost)
     
         _, inds = matchers.hungarian_matching(total_cost)
-
-        return inds
+        indices = tf.stop_gradient(inds)
+        return indices
 
     
     
