@@ -178,7 +178,7 @@ class Loss:
         
         max_cost = (
                     self.cost_class * 0.0 +
-                    self.cost_focal * 4. +
+                    self.cost_focal * 100. +
                     self.cost_dice * 0.0
                     )
 
@@ -217,7 +217,7 @@ class Loss:
         
       
         xentropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=target_classes, logits=cls_assigned)
-        cls_loss = self.cost_class * tf.where(background, 0.1 * xentropy, xentropy)
+        cls_loss =  tf.where(background, 0.1 * xentropy, xentropy)
         cls_weights = tf.where(background, 0.1 * tf.ones_like(cls_loss), tf.ones_like(cls_loss))
     
         num_masks_per_replica = tf.reduce_sum(num_masks)
