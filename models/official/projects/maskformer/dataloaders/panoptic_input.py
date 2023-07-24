@@ -256,8 +256,9 @@ class mask_former_parser(parser.Parser):
         contigious_mask = tf.cast(data['groundtruth_panoptic_contigious_mask'][:, :, 0],
             dtype=tf.float32)
         class_ids = tf.sparse.to_dense(data['groundtruth_panoptic_class_ids'], default_value=0)
+        instance_ids = tf.sparse.to_dense(data['groundtruth_panoptic_instance_ids'], default_value=0)
         class_ids = tf.cast(class_ids, dtype=tf.float32)
-        
+        instance_ids = tf.cast(instance_ids, dtype=tf.float32)
         # applies by pixel augmentation (saturation, brightness, contrast)
         if self._color_aug_ssd:
             image = preprocess_ops.color_jitter(
@@ -328,7 +329,7 @@ class mask_former_parser(parser.Parser):
             is_training=is_training)
         
         individual_masks = self._get_individual_masks(
-                class_ids=class_ids,contig_instance_mask=contigious_mask)
+                class_ids=class_ids,contig_instance_mask=contigious_mask, instance_id = instance_ids)
 
         
         
@@ -376,19 +377,21 @@ class mask_former_parser(parser.Parser):
         return self._parse_data(data=data, is_training=False)
 
     
-    def _get_individual_masks(self, class_ids, contig_instance_mask):
+    def _get_individual_masks(self, class_ids, contig_instance_mask, instance_id):
         
         individual_mask_list = tf.TensorArray(tf.float32, size=self._max_instances) 
         counter = 0
         
-        for class_id in class_ids:
+        for i,class_id in enumerate(class_ids):
             mask = tf.equal(contig_instance_mask, class_id)
+            mask = tf.logical_and(mask, tf.equal(instance_id, instance_id[i]))
             individual_mask_list = individual_mask_list.write(counter, tf.cast(mask, tf.float32))
             counter += 1
 
         for idx in tf.range(100-tf.size(class_ids)):
             new_mask = tf.zeros(tf.shape(contig_instance_mask))
             individual_mask_list = individual_mask_list.write(counter, tf.cast(new_mask, tf.float32))
+            counter += 1
         
         return individual_mask_list.stack()
 
