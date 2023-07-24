@@ -112,6 +112,7 @@ class PanopticTask(base_task.Task):
 			print("individual masks :", sample[1]["individual_masks"].shape)
 			print(f"image shape : {sample[0].shape}")
 			np.save("individual_masks.npy", sample[1]["individual_masks"].numpy())
+			np.save("image.npy", sample[0].numpy())
 			exit()
 		return dataset
 
