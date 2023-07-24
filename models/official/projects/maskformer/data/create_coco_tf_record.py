@@ -281,7 +281,7 @@ def generate_coco_panoptics_masks(segments_info, mask_path,
 				segments_encoded_mask, dtype=np.uint8) * _VOID_INSTANCE_ID
 		
 	class_ids = []
-	
+	instance_ids = []
 	for idx, segment in enumerate(segments_info):
 		segment_id = segment['id']
 		category_id = segment['category_id']
@@ -305,14 +305,14 @@ def generate_coco_panoptics_masks(segments_info, mask_path,
 			instance_id = _VOID_INSTANCE_ID
 
 		segment_mask = (segments_encoded_mask == segment_id)
-
 		semantic_segmentation_mask[segment_mask] = encoded_category_id
-		contiguous_id_mask[segment_mask] = category_id
+		
 		if include_panoptic_masks:
 			category_mask[segment_mask] =  category_id
 			instance_mask[segment_mask] = instance_id
-			if not is_crowd:
-				class_ids.append(contiguous_id)
+			contiguous_id_mask[segment_mask] = contiguous_id
+			class_ids.append(contiguous_id)
+			instance_ids.append(instance_id)
 				
 	outputs = {
 			'semantic_segmentation_mask': tfrecord_lib.encode_mask_as_png(
@@ -324,6 +324,7 @@ def generate_coco_panoptics_masks(segments_info, mask_path,
 				'instance_mask': tfrecord_lib.encode_mask_as_png(instance_mask),
 				'class_ids': class_ids,
 				'contiguous_id_mask': tfrecord_lib.encode_mask_as_png(contiguous_id_mask),
+				'instance_ids': instance_ids
 				})
 	return outputs
 
@@ -510,7 +511,7 @@ def create_tf_example(image,
 		feature_dict.update(
 				{'image/segmentation/class/encoded': tfrecord_lib.convert_to_feature(
 						encoded_panoptic_masks['semantic_segmentation_mask'])})
-		print("Encoded panoptic class idss :", encoded_panoptic_masks['class_ids'])
+		
 		if include_panoptic_masks:
 			feature_dict.update({
 					'image/panoptic/category_mask': tfrecord_lib.convert_to_feature(
@@ -520,7 +521,9 @@ def create_tf_example(image,
 					'image/panoptic/class_ids': tfrecord_lib.convert_to_feature(
 							encoded_panoptic_masks['class_ids'], value_type="int64_list"),
 					'image/panoptic/contiguous_mask': tfrecord_lib.convert_to_feature(
-							encoded_panoptic_masks['contiguous_id_mask'])
+							encoded_panoptic_masks['contiguous_id_mask']),
+					'image/panoptic/instance_ids': tfrecord_lib.convert_to_feature(
+							encoded_panoptic_masks['instance_ids'], value_type="int64_list")
 						})
 	
 	example = tf.train.Example(features=tf.train.Features(feature=feature_dict))
