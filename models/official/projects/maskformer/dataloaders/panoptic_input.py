@@ -301,9 +301,9 @@ class mask_former_parser(parser.Parser):
         # )
                                                                       
                                                                       
-        # category_mask = tf.squeeze(masks[0])
-        # instance_mask = tf.squeeze(masks[1])
-        # contigious_mask = tf.squeeze(masks[2])
+        category_mask = tf.squeeze(masks[0])
+        instance_mask = tf.squeeze(masks[1])
+        contigious_mask = tf.squeeze(masks[2])
         
         
         # crop_im_size = tf.cast(tf.shape(cropped_image)[0:2], tf.int32)
