@@ -329,7 +329,7 @@ class mask_former_parser(parser.Parser):
             is_training=is_training)
         
         individual_masks = self._get_individual_masks(
-                class_ids=class_ids,contig_instance_mask=contigious_mask, instance_id = instance_ids)
+                class_ids=class_ids,contig_instance_mask=contigious_mask, instance_id = instance_ids, instance_mask=instance_mask)
 
         
         
@@ -377,14 +377,14 @@ class mask_former_parser(parser.Parser):
         return self._parse_data(data=data, is_training=False)
 
     
-    def _get_individual_masks(self, class_ids, contig_instance_mask, instance_id):
+    def _get_individual_masks(self, class_ids, contig_instance_mask, instance_id, instance_mask):
         
         individual_mask_list = tf.TensorArray(tf.float32, size=self._max_instances) 
         counter = 0
         
         for i,class_id in enumerate(class_ids):
             mask = tf.equal(contig_instance_mask, class_id)
-            mask = tf.logical_and(mask, tf.equal(instance_id, instance_id[i]))
+            mask = tf.logical_and(mask, tf.equal(instance_mask, instance_id[i]))
             individual_mask_list = individual_mask_list.write(counter, tf.cast(mask, tf.float32))
             counter += 1
 
