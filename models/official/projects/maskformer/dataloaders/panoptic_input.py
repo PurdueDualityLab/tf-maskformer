@@ -53,6 +53,7 @@ class TfExampleDecoder(tf_example_decoder.TfExampleDecoder):
         self._panoptic_instance_mask_key = panoptic_instance_mask_key
         self._panoptic_contigious_mask_key = 'image/panoptic/contiguous_mask'
         self._class_ids_key = 'image/panoptic/class_ids'
+        self._class_instance_ids_key = 'image/panoptic/instance_ids'
         self._image_height_key = 'image/height'
         self._image_width_key = 'image/width'
         self._image_key = ""
@@ -64,7 +65,9 @@ class TfExampleDecoder(tf_example_decoder.TfExampleDecoder):
             self._panoptic_contigious_mask_key:
                 tf.io.FixedLenFeature((), tf.string, default_value=''),
             self._class_ids_key:
-                tf.io.VarLenFeature(tf.int64),        
+                tf.io.VarLenFeature(tf.int64),    
+            self._class_instance_ids_key:
+                tf.io.VarLenFeature(tf.int64),    
         }
 
 
@@ -83,7 +86,7 @@ class TfExampleDecoder(tf_example_decoder.TfExampleDecoder):
         contigious_mask = tf.io.decode_png(
             parsed_tensors[self._panoptic_contigious_mask_key], channels=1)
         class_ids = parsed_tensors[self._class_ids_key]
-
+        instance_ids = parsed_tensors[self._class_instance_ids_key]
         category_mask.set_shape([None, None, 1])
         instance_mask.set_shape([None, None, 1])
         contigious_mask.set_shape([None, None, 1])
@@ -92,6 +95,7 @@ class TfExampleDecoder(tf_example_decoder.TfExampleDecoder):
             'groundtruth_panoptic_instance_mask': instance_mask,
             'groundtruth_panoptic_contigious_mask': contigious_mask,
             'groundtruth_panoptic_class_ids': class_ids,
+            'groundtruth_panoptic_instance_ids': instance_ids,
         })
         
         return decoded_tensors
