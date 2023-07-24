@@ -386,9 +386,9 @@ class mask_former_parser(parser.Parser):
         individual_mask_list = tf.TensorArray(tf.float32, size=self._max_instances) 
         counter = 0
         
-        for i,class_id in enumerate(class_ids):
+        for class_id in class_ids:
             mask = tf.equal(contig_instance_mask, class_id)
-            mask = tf.logical_and(mask, tf.equal(instance_mask, instance_id[i]))
+            mask = tf.logical_and(mask, tf.equal(instance_mask, instance_id[counter]))
             individual_mask_list = individual_mask_list.write(counter, tf.cast(mask, tf.float32))
             counter += 1
 
