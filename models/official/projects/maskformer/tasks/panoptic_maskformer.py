@@ -107,11 +107,12 @@ class PanopticTask(base_task.Task):
 		  parser_fn=parser.parse_fn(params.is_training))
 		
 		dataset = reader.read(input_context=input_context)
-		# for sample in dataset.take(1):
-		# 	print(f"unique ids : {sample[1]['unique_ids']}")
-		# 	print("individual masks :", sample[1]["individual_masks"].shape)
-		# 	print(f"image shape : {sample[0].shape}")
-		# 	exit()
+		for sample in dataset.take(1):
+			print(f"unique ids : {sample[1]['unique_ids']}")
+			print("individual masks :", sample[1]["individual_masks"].shape)
+			print(f"image shape : {sample[0].shape}")
+			np.save("individual_masks.npy", sample[1]["individual_masks"].numpy())
+			exit()
 		return dataset
 
 
