@@ -263,9 +263,9 @@ class mask_former_parser(parser.Parser):
         instance_ids = tf.sparse.to_dense(data['groundtruth_panoptic_instance_ids'], default_value=0)
         class_ids = tf.cast(class_ids, dtype=tf.float32)
         instance_ids = tf.cast(instance_ids, dtype=tf.float32)
-        print("instance mask shape:", tf.shape(instance_mask))
-        print("category mask shape:", tf.shape(category_mask))
-        print("contigious mask shape:", tf.shape(contigious_mask))
+        # print("instance mask shape:", tf.shape(instance_mask))
+        # print("category mask shape:", tf.shape(category_mask))
+        # print("contigious mask shape:", tf.shape(contigious_mask))
         # applies by pixel augmentation (saturation, brightness, contrast)
         if self._color_aug_ssd:
             image = preprocess_ops.color_jitter(
@@ -304,9 +304,12 @@ class mask_former_parser(parser.Parser):
         # )
                                                                       
                                                                       
-        category_mask = tf.squeeze(masks[0])
-        instance_mask = tf.squeeze(masks[1])
-        contigious_mask = tf.squeeze(masks[2])
+        # category_mask = tf.squeeze(masks[0])
+        # instance_mask = tf.squeeze(masks[1])
+        # contigious_mask = tf.squeeze(masks[2])
+        category_mask = masks[0]
+        instance_mask = masks[1]
+        contigious_mask = masks[2]
         
         
         # crop_im_size = tf.cast(tf.shape(cropped_image)[0:2], tf.int32)
