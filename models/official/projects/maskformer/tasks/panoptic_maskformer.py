@@ -76,7 +76,7 @@ class PanopticTask(base_task.Task):
 		elif self._task_config.init_checkpoint_modules == 'backbone':
 			
 			ckpt = tf.train.Checkpoint(backbone=model.backbone)
-			status = ckpt.restore(ckpt_dir_or_file)
+			status = ckpt.read(ckpt_dir_or_file)
 			status.expect_partial().assert_existing_objects_matched()
 
 		logging.info('Finished loading pretrained checkpoint from %s',
