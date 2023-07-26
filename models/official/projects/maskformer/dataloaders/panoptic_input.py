@@ -372,7 +372,7 @@ class mask_former_parser(parser.Parser):
             'instance_mask': instance_mask,
             'valid_mask': valid_mask,
             'things_mask': things_mask,
-            # 'image_info': image_info,
+            'image_info': image_info,
             'unique_ids': unique_ids,
             'individual_masks': individual_masks,
         }
