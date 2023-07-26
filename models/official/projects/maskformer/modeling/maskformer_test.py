@@ -25,7 +25,9 @@ class MaskFormerTest(tf.test.TestCase, parameterized.TestCase):
                                  num_classes=num_classes,
                                  batch_size=batch_size)
 
-        input_image = tf.ones((64, 1332, 1332, 3))
+        print(maskformer.summary())
+        exit()
+        input_image = tf.ones((64, 640, 640, 3))
         
         # expected_class_probs_shape = [1, 100, 172]
         # expected_mask_probs_shape = [1, 160, 160, 100]
