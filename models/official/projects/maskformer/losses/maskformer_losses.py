@@ -2,59 +2,6 @@ import tensorflow as tf
 from official.vision.losses import focal_loss
 from official.projects.detr.ops import matchers
 
-def _max_by_axis(the_list):
-    all_max = the_list[0]
-    for sublist in the_list[1:]:
-        for idx, item in enumerate(sublist):
-            all_max[idx] = max(all_max[idx], item)
-    return all_max
-
-class NestedTensor(object):
-    def __init__(self, tensors, mask=None):
-        self.tensors = tf.convert_to_tensor(tensors)
-        self.mask = tf.convert_to_tensor(mask) if mask is not None else None
-
-    def to(self, device):
-        with tf.device(device):
-            cast_tensor = tf.identity(self.tensors)
-            cast_mask = tf.identity(self.mask) if self.mask is not None else None
-        return NestedTensor(cast_tensor, cast_mask)
-
-    def decompose(self):
-        return self.tensors, self.mask
-
-    def __repr__(self):
-        return str(self.tensors)
-    
-    
-def nested_tensor_from_tensor_list(tensor_list):
-    if tf.rank(tensor_list[0]).numpy() == 3:
-        max_size = _max_by_axis([list(img.shape) for img in tensor_list])
-
-        batch_shape = [len(tensor_list)] + max_size
-        b, c, h, w = batch_shape
-
-        dtype = tensor_list[0].dtype
-        device = tensor_list[0].device
-
-        with tf.device(device):
-            tensor = tf.zeros(batch_shape, dtype=dtype)
-            mask = tf.ones((b, h, w), dtype=tf.bool)
-
-        for img, pad_img, m in zip(tensor_list, tensor, mask):
-            pad_img = tf.Variable(pad_img)
-            pad_img[:img.shape[0], :img.shape[1], :img.shape[2]].assign(img)
-            pad_img = tf.convert_to_tensor(pad_img)
-
-            m = tf.Variable(m)
-            false_tensor = tf.zeros((img.shape[1], img.shape[2]), dtype=tf.bool)
-            m[:img.shape[1], :img.shape[2]].assign(false_tensor)
-            m = tf.convert_to_tensor(m)
-        return NestedTensor(tensor, mask)
-    else:
-        raise ValueError("not supported")
-
-
 class FocalLossMod(focal_loss.FocalLoss):
     """Implements a Focal loss for segmentation problems.
     Reference:
@@ -214,7 +161,7 @@ class Loss:
         background = tf.equal(target_classes, 133) # Pytorch padds 133 class number where classes are background but our code uses 0 for background
         
         num_masks = tf.reduce_sum(tf.cast(tf.logical_not(background), tf.float32), axis=-1)
-        
+        print("num_masks :", num_masks)
       
         xentropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=target_classes, logits=cls_assigned)
         cls_loss =  tf.where(background, 0.1 * xentropy, xentropy)
