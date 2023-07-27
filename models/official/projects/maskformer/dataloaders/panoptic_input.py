@@ -396,7 +396,7 @@ class mask_former_parser(parser.Parser):
             mask = tf.equal(contig_instance_mask, class_id)
             mask = tf.logical_and(mask, tf.equal(instance_mask, instance_id[counter]))
             
-            if tf.reduce_sum(mask,[0,1,2]) == 0:
+            if tf.reduce_sum(tf.cast(mask,tf.float32), [0,1,2]) == 0:
                 continue
             individual_mask_list = individual_mask_list.write(counter, tf.cast(mask, tf.float32))
             classes_list = classes_list.write(counter, tf.cast(class_id, tf.float32))
