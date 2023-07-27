@@ -341,13 +341,13 @@ class mask_former_parser(parser.Parser):
         individual_masks = self._get_individual_masks(
                 class_ids=class_ids,contig_instance_mask=contigious_mask, instance_id = instance_ids, instance_mask=instance_mask)
 
-        indices = tf.where(tf.not_equal(tf.reduce_sum(individual_masks), 0))
-        print("Indices shape:", tf.shape(indices))
+        indices = tf.where(tf.not_equal(tf.reduce_sum(individual_masks, [1,2]), 0))
+      
         individual_masks = tf.gather(individual_masks, indices)
-        print("Individual masks shape:", tf.shape(individual_masks))
-        exit()
+        print("individual_masks shape:", tf.shape(individual_masks))
         class_ids = tf.gather(class_ids, indices)
-        
+        print("class_ids shape:", tf.shape(class_ids))
+        exit()
         # Resize image and masks to output size.
         image = tf.image.resize(image, self._output_size, method='nearest')
         category_mask = tf.image.resize(category_mask, self._output_size, method='nearest')
