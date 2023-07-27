@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-# tf.config.run_functions_eagerly(True)
+tf.config.run_functions_eagerly(True)
 
 class PanopticInference:
     """Panoptic Inference"""
