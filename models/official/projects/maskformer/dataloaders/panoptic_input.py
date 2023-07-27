@@ -338,16 +338,16 @@ class mask_former_parser(parser.Parser):
             self._output_size if self._pad_output else crop_im_size,
             is_training=is_training)
         
-        individual_masks = self._get_individual_masks(
+        individual_masks, classes = self._get_individual_masks(
                 class_ids=class_ids,contig_instance_mask=contigious_mask, instance_id = instance_ids, instance_mask=instance_mask)
 
-        indices = tf.where(tf.not_equal(tf.reduce_sum(individual_masks, [1,2]), 0))
+        # indices = tf.where(tf.not_equal(tf.reduce_sum(individual_masks, [1,2]), 0))
       
-        individual_masks = tf.gather(individual_masks, indices)
-        print("individual_masks shape:", tf.shape(individual_masks))
-        class_ids = tf.gather(class_ids, indices)
-        print("class_ids shape:", tf.shape(class_ids))
-        exit()
+        # individual_masks = tf.gather(individual_masks, indices)
+        # print("individual_masks shape:", tf.shape(individual_masks))
+        # class_ids = tf.gather(class_ids, indices)
+        # print("class_ids shape:", tf.shape(class_ids))
+        # exit()
         # Resize image and masks to output size.
         image = tf.image.resize(image, self._output_size, method='nearest')
         category_mask = tf.image.resize(category_mask, self._output_size, method='nearest')
@@ -395,18 +395,24 @@ class mask_former_parser(parser.Parser):
     def _get_individual_masks(self, class_ids, contig_instance_mask, instance_id, instance_mask):
         
         individual_mask_list = tf.TensorArray(tf.float32, size=self._max_instances) 
+        classes_list = tf.TensorArray(tf.float32, size=self._max_instances)
         counter = 0
         
         for class_id in class_ids:
             mask = tf.equal(contig_instance_mask, class_id)
-         
             mask = tf.logical_and(mask, tf.equal(instance_mask, instance_id[counter]))
+            print("mask shape:", tf.shape(mask))
+            exit()
+            if tf.reduce_sum(mask,[0,1,2]) == 0:
+                continue
             individual_mask_list = individual_mask_list.write(counter, tf.cast(mask, tf.float32))
+            classes_list = classes_list.write(counter, tf.cast(class_id, tf.float32))
             counter += 1
 
         for idx in tf.range(100-tf.size(class_ids)):
             new_mask = tf.zeros(tf.shape(contig_instance_mask))
             individual_mask_list = individual_mask_list.write(counter, tf.cast(new_mask, tf.float32))
+            classes_list = classes_list.write(counter, tf.cast(133, tf.float32))
             counter += 1
         
         return individual_mask_list.stack()
