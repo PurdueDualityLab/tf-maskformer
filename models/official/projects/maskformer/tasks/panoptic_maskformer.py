@@ -54,29 +54,19 @@ class PanopticTask(base_task.Task):
 		"""
 		if not self._task_config.init_checkpoint:
 			return
-		
-		def _get_checkpoint_path(checkpoint_dir_or_file):
-			checkpoint_path = checkpoint_dir_or_file
-
-			if tf.io.gfile.isdir(checkpoint_dir_or_file):
-				checkpoint_path = tf.train.latest_checkpoint(checkpoint_dir_or_file)
-			return checkpoint_path
-		
+	
 		ckpt_dir_or_file = self._task_config.init_checkpoint
-		# Restoring checkpoint.
 		
+		if tf.io.gfile.isdir(ckpt_dir_or_file):
+			ckpt_dir_or_file = tf.train.latest_checkpoint(ckpt_dir_or_file)
+
 		if self._task_config.init_checkpoint_modules == 'all':
-		
-			checkpoint_path = _get_checkpoint_path(
-			ckpt_dir_or_file)
 			ckpt = tf.train.Checkpoint(**model.checkpoint_items)
-			status = ckpt.read(checkpoint_path)
-			status.expect_partial().assert_existing_objects_matched()
-			
+			status = ckpt.restore(ckpt_dir_or_file)
+			status.assert_consumed()
 		elif self._task_config.init_checkpoint_modules == 'backbone':
-			
 			ckpt = tf.train.Checkpoint(backbone=model.backbone)
-			status = ckpt.read(ckpt_dir_or_file)
+			status = ckpt.restore(ckpt_dir_or_file)
 			status.expect_partial().assert_existing_objects_matched()
 
 		logging.info('Finished loading pretrained checkpoint from %s',
@@ -102,13 +92,13 @@ class PanopticTask(base_task.Task):
 		  parser_fn=parser.parse_fn(params.is_training))
 		
 		dataset = reader.read(input_context=input_context)
-		# for sample in dataset.take(1):
-		# 	print(f"unique ids : {sample[1]['unique_ids']}")
-		# 	print("individual masks :", sample[1]["individual_masks"].shape)
-		# 	print(f"image shape : {sample[0].shape}")
-		# 	np.save("individual_masks.npy", sample[1]["individual_masks"].numpy())
-		# 	np.save("image.npy", sample[0].numpy())
-		# 	exit()
+		for sample in dataset.take(1):
+			print(f"unique ids : {sample[1]['unique_ids']}")
+			print("individual masks :", sample[1]["individual_masks"].shape)
+			print(f"image shape : {sample[0].shape}")
+			np.save("individual_masks.npy", sample[1]["individual_masks"].numpy())
+			np.save("image.npy", sample[0].numpy())
+			exit()
 		return dataset
 
 
@@ -218,36 +208,36 @@ class PanopticTask(base_task.Task):
 			if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
 				total_loss = optimizer.get_scaled_loss(total_loss)
 					
-			tvars = model.trainable_variables
-			
-			grads = tape.gradient(total_loss, tvars)
+		tvars = model.trainable_variables
+		
+		grads = tape.gradient(total_loss, tvars)
 
-			optimizer.apply_gradients(list(zip(grads, tvars)))
-			
-			# # Multiply for logging.
-			# # Since we expect the gradient replica sum to happen in the optimizer,
-			# # the loss is scaled with global num_boxes and weights.
-			# # To have it more interpretable/comparable we scale it back when logging.
-			num_replicas_in_sync = tf.distribute.get_strategy().num_replicas_in_sync
-			total_loss *= num_replicas_in_sync
-			cls_loss *= num_replicas_in_sync
-			focal_loss *= num_replicas_in_sync
-			dice_loss *= num_replicas_in_sync
-			
-			logs = {self.loss: total_loss}
+		optimizer.apply_gradients(list(zip(grads, tvars)))
+		
+		# # Multiply for logging.
+		# # Since we expect the gradient replica sum to happen in the optimizer,
+		# # the loss is scaled with global num_boxes and weights.
+		# # To have it more interpretable/comparable we scale it back when logging.
+		num_replicas_in_sync = tf.distribute.get_strategy().num_replicas_in_sync
+		total_loss *= num_replicas_in_sync
+		cls_loss *= num_replicas_in_sync
+		focal_loss *= num_replicas_in_sync
+		dice_loss *= num_replicas_in_sync
+		
+		logs = {self.loss: total_loss}
 
-			all_losses = {
-				'cls_loss': cls_loss,
-				'focal_loss': focal_loss,
-				'dice_loss': dice_loss,}
+		all_losses = {
+			'cls_loss': cls_loss,
+			'focal_loss': focal_loss,
+			'dice_loss': dice_loss,}
 
-			
-			# Metric results will be added to logs for you.
-			if metrics:
-				for m in metrics:
-					m.update_state(all_losses[m.name])
+		
+		# Metric results will be added to logs for you.
+		if metrics:
+			for m in metrics:
+				m.update_state(all_losses[m.name])
 
-			return logs
+		return logs
 		
 	def _postprocess_outputs(self, outputs: Dict[str, Any], image_shapes):
 		""" 

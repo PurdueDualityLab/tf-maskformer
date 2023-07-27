@@ -341,7 +341,9 @@ class mask_former_parser(parser.Parser):
         individual_masks = self._get_individual_masks(
                 class_ids=class_ids,contig_instance_mask=contigious_mask, instance_id = instance_ids, instance_mask=instance_mask)
 
-        
+        indices = tf.where(tf.not_equal(tf.reduce_sum(individual_masks), 0))
+        individual_masks = tf.gather(individual_masks, indices)
+        class_ids = tf.gather(class_ids, indices)
         
         # Resize image and masks to output size.
         image = tf.image.resize(image, self._output_size, method='nearest')
