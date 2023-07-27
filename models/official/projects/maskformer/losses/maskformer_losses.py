@@ -158,14 +158,14 @@ class Loss:
         target_classes = tf.cast(target_labels, dtype=tf.int32)
 
         # FIXME : The no object class should be 0 for our  case but for pytorch code it is 133
-        background = tf.equal(target_classes, 133) # Pytorch padds 133 class number where classes are background but our code uses 0 for background
+        background = tf.equal(target_classes, 133) 
         
         num_masks = tf.reduce_sum(tf.cast(tf.logical_not(background), tf.float32), axis=-1)
-        print("num_masks :", num_masks)
+        
       
         xentropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=target_classes, logits=cls_assigned)
-        cls_loss =  tf.where(background, 0.1 * xentropy, xentropy)
-        cls_weights = tf.where(background, 0.1 * tf.ones_like(cls_loss), tf.ones_like(cls_loss))
+        cls_loss =  tf.where(background, self.eos_coef * xentropy, xentropy)
+        cls_weights = tf.where(background, self.eos_coef * tf.ones_like(cls_loss), tf.ones_like(cls_loss))
     
         num_masks_per_replica = tf.reduce_sum(num_masks)
         cls_weights_per_replica = tf.reduce_sum(cls_weights)
@@ -175,12 +175,11 @@ class Loss:
         # Final losses
         cls_loss = tf.math.divide_no_nan(tf.reduce_sum(cls_loss), cls_weights_sum)
        
-        losses = {'focal_loss' : 0.0, 'dice_loss': 0.0}
-        
         out_mask = mask_assigned
         tgt_mask = individual_masks
 
         tgt_mask = tf.cast(tgt_mask, dtype=tf.float32)
+
         # transpose to make it compatible with tf.image.resize
         tgt_mask = tf.transpose(tgt_mask, perm=[0,2,3,1]) # [b, h, w, 100]
         tgt_mask = tf.image.resize(tgt_mask, [tf.shape(out_mask)[2], tf.shape(out_mask)[3]], method='bilinear') # [b, h, w, 100]
@@ -196,8 +195,7 @@ class Loss:
         dice_loss = DiceLoss()(tgt_mask, out_mask)
         
         
-        losses['focal_loss'] = focal_loss
-        losses['dice_loss'] = dice_loss
+        
         background_new = background
 
         focal_loss_weighted = tf.where(background_new, tf.zeros_like(focal_loss), focal_loss)
@@ -216,8 +214,7 @@ class Loss:
                      The expected keys in each dict depends on the losses applied, see each loss' doc
         """
         outputs_without_aux = {k: v for k, v in outputs.items() if k != "aux_outputs"}
-        batch_size, num_queries = outputs["pred_logits"].shape[:2]
-
+        
         # NOTE : Change shape of pred and target masks to [batch_size, num_queries, h, w] 
         outputs_without_aux["pred_masks"] = tf.transpose(outputs["pred_masks"], perm=[0,3,1,2])
         y_true["individual_masks"] = tf.squeeze(y_true["individual_masks"], axis=-1)

@@ -155,7 +155,13 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
               norm_activation=common.NormActivation(),
               which_pixel_decoder='transformer_fpn',
               num_classes=133,), # Extra class will be added automatically for background
-          losses = Losses(),
+          losses = Losses(class_offset = 0,
+                    # FIXME : Background class weight needs to be changed 0.1 according to pytorch implementation
+                    background_cls_weight= 0.0,
+                    l2_weight_decay= 1e-4,
+                    cost_class = 1.0,
+                    cost_dice = 1.0,
+                    cost_focal = 20.0),
           train_data = DataConfig(
               input_path=os.path.join(COCO_INPUT_PATH_BASE, 'tfrecords/train*'),
               is_training=True,

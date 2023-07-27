@@ -16,7 +16,7 @@ class MaskFormerTest(tf.test.TestCase, parameterized.TestCase):
                         num_classes,
                         batch_size):    
         input_specs = tf.keras.layers.InputSpec(shape=[None] +
-                                            [1332, 1332, 3])    
+                                            [640, 640, 3])    
         maskformer = MaskFormer(input_specs= input_specs, hidden_size=hidden_size,
                                  backbone_endpoint_name=backbone_endpoint_name,
                                  fpn_encoder_layers=fpn_encoder_layers,
@@ -24,9 +24,18 @@ class MaskFormerTest(tf.test.TestCase, parameterized.TestCase):
                                  num_decoder_layers=num_decoder_layers,
                                  num_classes=num_classes,
                                  batch_size=batch_size)
-
-        print(maskformer.summary())
-        exit()
+        maskformer = MaskFormer(input_specs= input_specs,
+							num_queries=100,
+							hidden_size=hidden_size,
+							backbone_endpoint_name=backbone_endpoint_name,
+							fpn_encoder_layers=fpn_encoder_layers,
+							detr_encoder_layers=detr_encoder_layers,
+							num_decoder_layers=num_decoder_layers,
+							num_classes=num_classes,
+							bfloat16=False, 
+							which_pixel_decoder='transformer_fpn',)
+        
+        
         input_image = tf.ones((64, 640, 640, 3))
         
         # expected_class_probs_shape = [1, 100, 172]
@@ -36,6 +45,7 @@ class MaskFormerTest(tf.test.TestCase, parameterized.TestCase):
 
         output = maskformer(input_image)
         print(output.keys())
+        print(maskformer.summary())
         exit()
         self.assertAllEqual(
             output["class_prob_predictions"].shape.as_list(), expected_class_probs_shape)

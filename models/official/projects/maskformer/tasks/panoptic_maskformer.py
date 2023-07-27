@@ -94,12 +94,7 @@ class PanopticTask(base_task.Task):
 			raise ValueError('Unknown decoder type: {}!'.format(params.decoder.type))
 		
 		parser = panoptic_input.mask_former_parser(params.parser, is_training = params.is_training, decoder_fn=decoder.decode)
-		
-
-		#reader = input_reader.InputFn(params, dataset_fn = dataset_fn.pick_dataset_fn(params.file_type),parser_fn = parser)
-		#dataset = reader(ctx=input_context)
-		
-		# FIXME : Use default Input reader instead of custom input reader (uncomment above lines to use old reader)
+	
 		reader = input_reader_factory.input_reader_generator(
 		  params,
 		  dataset_fn=dataset_fn.pick_dataset_fn(params.file_type),
