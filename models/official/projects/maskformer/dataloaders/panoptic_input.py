@@ -391,7 +391,7 @@ class mask_former_parser(parser.Parser):
         individual_mask_list = tf.TensorArray(tf.float32, size=self._max_instances) 
         classes_list = tf.TensorArray(tf.float32, size=self._max_instances)
         counter = 0
-        
+        counter_1 = 0
         for class_id in class_ids:
             mask = tf.equal(contig_instance_mask, class_id)
             mask = tf.logical_and(mask, tf.equal(instance_mask, instance_id[counter]))
@@ -399,13 +399,15 @@ class mask_former_parser(parser.Parser):
             if tf.reduce_sum(tf.cast(mask,tf.float32), [0,1,2]) == 0:
                 continue
             individual_mask_list = individual_mask_list.write(counter, tf.cast(mask, tf.float32))
-            classes_list = classes_list.write(counter, tf.cast(class_id, tf.float32))
+            classes_list = classes_list.write(counter_1, tf.cast(class_id, tf.float32))
+            counter_1 += 1
             counter += 1
 
         for idx in tf.range(100-tf.size(class_ids)):
             new_mask = tf.zeros(tf.shape(contig_instance_mask))
             individual_mask_list = individual_mask_list.write(counter, tf.cast(new_mask, tf.float32))
-            classes_list = classes_list.write(counter, tf.cast(133, tf.float32))
+            classes_list = classes_list.write(counter_1, tf.cast(133, tf.float32))
+            counter_1 += 1
             counter += 1
         
         return individual_mask_list.stack()
