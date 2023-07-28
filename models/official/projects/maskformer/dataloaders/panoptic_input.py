@@ -349,16 +349,16 @@ class mask_former_parser(parser.Parser):
         individual_masks = tf.image.resize(individual_masks, self._output_size, method='nearest')
 
         #FIXME : Nedd to change the constanct value to 0 later
-        unique_ids = preprocess_ops.clip_or_pad_to_fixed_size(
-                class_ids, self._max_instances, constant_values=133)
-      
+        # unique_ids = preprocess_ops.clip_or_pad_to_fixed_size(
+        #         class_ids, self._max_instances, constant_values=133)
+        unique_ids = classes
         # Cast image to float and set shapes of output.
         
         image = tf.cast(image, dtype=self._dtype)
         category_mask = tf.cast(category_mask, dtype=self._dtype)
         instance_mask = tf.cast(instance_mask, dtype=self._dtype)
         individual_masks = tf.cast(individual_masks, dtype=self._dtype)
-        unique_ids =  tf.cast(unique_ids, dtype=tf.float32)
+        # unique_ids =  tf.cast(unique_ids, dtype=tf.float32)
 
         valid_mask = tf.not_equal(
             category_mask, self._ignore_label)
@@ -392,19 +392,21 @@ class mask_former_parser(parser.Parser):
         classes_list = tf.TensorArray(tf.float32, size=self._max_instances)
         counter = 0
         counter_1 = 0
+
         for class_id in class_ids:
             mask = tf.equal(contig_instance_mask, class_id)
             mask = tf.logical_and(mask, tf.equal(instance_mask, instance_id[counter]))
-            
-            
-            
             if tf.greater(tf.reduce_sum(tf.cast(mask,tf.float32), [0,1,2]),0):
                 classes_list = classes_list.write(counter_1, tf.cast(class_id, tf.float32))
                 individual_mask_list = individual_mask_list.write(counter, tf.cast(mask, tf.float32))
                 counter_1 += 1
                 counter += 1
             else:
-                continue
+                classes_list = classes_list.write(counter_1, tf.cast(133, tf.float32))
+                new_mask = tf.zeros(tf.shape(contig_instance_mask))
+                individual_mask_list = individual_mask_list.write(counter, tf.cast(new_mask, tf.float32))
+                counter_1 += 1
+                counter += 1
             
         for idx in tf.range(100-counter):
             new_mask = tf.zeros(tf.shape(contig_instance_mask))
@@ -413,7 +415,7 @@ class mask_former_parser(parser.Parser):
             counter_1 += 1
             counter += 1
         
-        return individual_mask_list.stack()
+        return individual_mask_list.stack(), classes_list.stack()
 
     def __call__(self, value):
         """Parses data to an image and associated training labels.
