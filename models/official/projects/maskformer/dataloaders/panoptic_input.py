@@ -365,7 +365,7 @@ class mask_former_parser(parser.Parser):
         things_mask = tf.not_equal(
             instance_mask, self._ignore_label)
 
-        
+        print("unique ids in dataloaloader : ", unique_ids)
         labels = {
             'category_mask': category_mask,
             'instance_mask': instance_mask,
