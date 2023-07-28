@@ -116,7 +116,6 @@ class MaskFormer(tf.keras.Model):
 	def process_feature_maps(self, maps):
 		new_dict = {}
 		for k in maps.keys():
-			print(maps[k].shape)
 			new_dict[k[0]] = maps[k]
 		return new_dict
 
