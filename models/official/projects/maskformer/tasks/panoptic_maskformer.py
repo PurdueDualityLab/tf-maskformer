@@ -96,9 +96,9 @@ class PanopticTask(base_task.Task):
 			print(f"unique idsin dataset take : {sample[1]['unique_ids']}")
 			print("individual masks :", sample[1]["individual_masks"].shape)
 			print(f"image shape : {sample[0].shape}")
-			# np.save("individual_masks.npy", sample[1]["individual_masks"].numpy())
-			# np.save("unique_ids.npy", sample[1]["unique_ids"].numpy())
-			# np.save("image.npy", sample[0].numpy())
+			np.save("individual_masks.npy", sample[1]["individual_masks"].numpy())
+			np.save("unique_ids.npy", sample[1]["unique_ids"].numpy())
+			np.save("image.npy", sample[0].numpy())
 			exit()
 		return dataset
 
@@ -255,10 +255,10 @@ class PanopticTask(base_task.Task):
 	def validation_step(self, inputs, model, metrics=None):
 		features, labels = inputs
 		outputs = model(features, training=False)
-		np.save("individual_masks.npy", labels["individual_masks"])
-		print("Unique_ids in validation step : ", labels["unique_ids"])
-		np.save("targets.npy", labels["unique_ids"])
-		np.save("image.npy", features)
+		# np.save("individual_masks.npy", labels["individual_masks"])
+		# print("Unique_ids in validation step : ", labels["unique_ids"])
+		# np.save("targets.npy", labels["unique_ids"])
+		# np.save("image.npy", features)
 		total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels)
 		num_replicas_in_sync = tf.distribute.get_strategy().num_replicas_in_sync
 		total_loss *= num_replicas_in_sync
