@@ -131,7 +131,10 @@ class Loss:
 
         # FIXME : Where there is no object append very high cost
         # Append highest cost where there are no objects : No object class == 0
+        print("tgt_ids :", tgt_ids)
         valid = tf.expand_dims(tf.cast(tf.not_equal(tgt_ids, 133), dtype=total_cost.dtype), axis=1)
+        # print("valid :", valid)
+        # print("total_cost :", tf.shape(valid))
         total_cost = (1 - valid) * max_cost + valid * total_cost
         total_cost = tf.where(
         tf.logical_or(tf.math.is_nan(total_cost), tf.math.is_inf(total_cost)),
@@ -140,6 +143,7 @@ class Loss:
     
         _, inds = matchers.hungarian_matching(total_cost)
         indices = tf.stop_gradient(inds)
+       
         return indices
 
     
@@ -147,6 +151,7 @@ class Loss:
     def get_loss(self, outputs, y_true, indices):
         
         target_index = tf.math.argmax(indices, axis=1) #[batchsize, 100]
+        print("target_index :", target_index)
         target_labels = y_true["unique_ids"] #[batchsize, num_gt_objects]
         cls_outputs = outputs["pred_logits"] # [batchsize, num_queries, num_classes] [1,100,134]
         cls_masks = outputs["pred_masks"]# [batchsize,num_queries, h, w]
@@ -157,12 +162,10 @@ class Loss:
 
         target_classes = tf.cast(target_labels, dtype=tf.int32)
 
-        # FIXME : The no object class should be 0 for our  case but for pytorch code it is 133
+        # FIXME : The no object class should be 0 if we are using non contiguos class ids
         background = tf.equal(target_classes, 133) 
         
         num_masks = tf.reduce_sum(tf.cast(tf.logical_not(background), tf.float32), axis=-1)
-        
-      
         xentropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=target_classes, logits=cls_assigned)
         cls_loss =  tf.where(background, self.eos_coef * xentropy, xentropy)
         cls_weights = tf.where(background, self.eos_coef * tf.ones_like(cls_loss), tf.ones_like(cls_loss))
@@ -194,10 +197,9 @@ class Loss:
         focal_loss = FocalLossMod()(tgt_mask, out_mask)
         dice_loss = DiceLoss()(tgt_mask, out_mask)
         
-        
-        
-        background_new = background
 
+        # Which all masks belong to background classes
+        background_new = background
         focal_loss_weighted = tf.where(background_new, tf.zeros_like(focal_loss), focal_loss)
         dice_loss_weighted = tf.where(background_new, tf.zeros_like(dice_loss), dice_loss)
         focal_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(focal_loss_weighted), num_masks_sum)
@@ -228,7 +230,8 @@ class Loss:
         losses.update({"loss_ce": self.cost_class*cls_loss_final,
                     "loss_focal": self.cost_focal*focal_loss_final,
                     "loss_dice": self.cost_dice*dice_loss_final})
-        
+        print("[INFO] Weighted losses : ", losses)
+        exit()
         # FIXME : check if we need to add aux_outputs
         # if "aux_outputs" in outputs and outputs["aux_outputs"] is not None:
         #     for i, aux_outputs in enumerate(outputs["aux_outputs"]):

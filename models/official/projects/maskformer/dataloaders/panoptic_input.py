@@ -365,7 +365,7 @@ class mask_former_parser(parser.Parser):
         things_mask = tf.not_equal(
             instance_mask, self._ignore_label)
 
-        print("unique ids in dataloaloader : ", unique_ids)
+        # print("unique ids in dataloaloader : ", unique_ids)
         labels = {
             'category_mask': category_mask,
             'instance_mask': instance_mask,
@@ -408,7 +408,7 @@ class mask_former_parser(parser.Parser):
                 counter_1 += 1
                 counter += 1
             
-        for idx in tf.range(100-counter):
+        for idx in tf.range(100-tf.size(class_ids)):
             new_mask = tf.zeros(tf.shape(contig_instance_mask))
             individual_mask_list = individual_mask_list.write(counter, tf.cast(new_mask, tf.float32))
             classes_list = classes_list.write(counter_1, tf.cast(133, tf.float32))
