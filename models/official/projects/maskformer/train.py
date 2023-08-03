@@ -34,10 +34,11 @@ from official.projects.maskformer.tasks import panoptic_maskformer
 FLAGS = flags.FLAGS
 def main(_):
 
-	# This is for configuring the TPU software version programatically
-	c = Client(os.environ['TPU_NAME'], zone=os.environ['TPU_ZONE'], project=os.environ['TPU_PROJECT'])
-	c.configure_tpu_version(os.environ["TPU_SOFTWARE"], restart_type='ifNeeded')
-	c.wait_for_healthy()
+	if FLAGS.tpu:
+		# This is for configuring the TPU software version programatically
+		c = Client(os.environ['TPU_NAME'], zone=os.environ['TPU_ZONE'], project=os.environ['TPU_PROJECT'])
+		c.configure_tpu_version(os.environ["TPU_SOFTWARE"], restart_type='ifNeeded')
+		c.wait_for_healthy()
 
 
 	gin.parse_config_files_and_bindings(FLAGS.gin_file, FLAGS.gin_params)
@@ -48,7 +49,8 @@ def main(_):
 		# Pure eval modes do not output yaml files. Otherwise continuous eval job
 		# may race against the train job for writing the same file.
 		train_utils.serialize_config(params, model_dir)
-	if FLAGS.mode == "eval":
+
+	if FLAGS.mode == "eval" or FLAGS.tpu == None:
 		tf.config.run_functions_eagerly(True)
 	# Sets mixed_precision policy. Using 'mixed_float16' or 'mixed_bfloat16'
 	# can have significant impact on model speeds by utilizing float16 in case of

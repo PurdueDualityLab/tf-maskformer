@@ -25,18 +25,6 @@ from official.vision.ops import augment
 from official.vision.ops import preprocess_ops
 from official.core import config_definitions as cfg
 
-def _compute_gaussian_from_std(sigma):
-    """Computes the Gaussian and its size from a given standard deviation."""
-    size = int(6 * sigma + 3)
-    x = np.arange(size, dtype=float)
-    y = x[:, np.newaxis]
-    x0, y0 = 3 * sigma + 1, 3 * sigma + 1
-    gaussian = tf.constant(
-        np.exp(-((x - x0) ** 2 + (y - y0) ** 2) / (2 * sigma ** 2)),
-        dtype=tf.float32)
-    return gaussian, size
-
-
 class TfExampleDecoder(tf_example_decoder.TfExampleDecoder):
     """Tensorflow Example proto decoder."""
 
@@ -148,62 +136,29 @@ class mask_former_parser(parser.Parser):
         
         if self._pad_output == True and self._output_size is None:
             raise Exception("Error: no output pad provided")
+        
         if self._decoder == None:
             print("assuming default decoder")
             self._decoder = TfExampleDecoder()
         
         self._is_training = is_training
+
         if is_training == None:
             print("assuming training mode")
             self._is_training = True
         
-       
-        self._resize_eval_groundtruth = params.resize_eval_groundtruth
-        if (not params.resize_eval_groundtruth) and (params.groundtruth_padded_size is None):
-            raise ValueError(
-                'groundtruth_padded_size ([height, width]) needs to be'
-                'specified when resize_eval_groundtruth is False.')
-        self._groundtruth_padded_size = params.groundtruth_padded_size
-        self._ignore_label = params.ignore_label
 
+        self._ignore_label = params.ignore_label
         # Data augmentation
         self._aug_rand_hflip = params.aug_rand_hflip
         self._aug_scale_min = params.aug_scale_min
         self._aug_scale_max = params.aug_scale_max
-        
-        # Auto Augment
-        if params.aug_type and aug_type.type:
-            if aug_type.type == 'autoaug':
-                self._augmenter = augment.AutoAugment(
-                    augmentation_name=aug_type.autoaug.augmentation_name,
-                    cutout_const=aug_type.autoaug.cutout_const,
-                    translate_const=aug_type.autoaug.translate_const)
-            else:
-                raise ValueError('Augmentation policy {} not supported.'.format(
-                    aug_type.type))
-        else:
-            self._augmenter = None
-        
         #Cropping:
         self._min_scale = params.min_scale
         self._aspect_ratio_range = params.aspect_ratio_range
         self._min_overlap_params = params.min_overlap_params
         self._max_retry = params.max_retry
 
-
-        
-        # color augmentation
-        self._color_aug_ssd = params.color_aug_ssd
-        self._brightness = params.brightness
-        self._saturation = params.saturation
-        self._contrast = params.contrast
-        
-        self._sigma = params.sigma
-        self._gaussian, self._gaussian_size = _compute_gaussian_from_std(
-            self._sigma)
-        self._gaussian = tf.reshape(self._gaussian, shape=[-1])
-        self._small_instance_area_threshold = params.small_instance_area_threshold
-        self._small_instance_weight = params.small_instance_weight
 
     def _resize_and_crop_mask(self, mask, image_info, crop_dims, is_training):
         """Resizes and crops mask using `image_info` dict."""
@@ -239,16 +194,13 @@ class mask_former_parser(parser.Parser):
             self._ignore_label * tf.ones_like(mask),
             mask)
         mask = tf.squeeze(mask, axis=0)
+        
         return mask
     
         
     def _parse_data(self, data, is_training):
         image = data['image']
-        
-        # Auto-augment (if configured)
-        if self._augmenter is not None and is_training:
-            image = self._augmenter.distort(image)
-        
+    
         # Normalize and prepare image and masks
         image = preprocess_ops.normalize_image(image)
         category_mask = tf.cast(
@@ -263,32 +215,22 @@ class mask_former_parser(parser.Parser):
         instance_ids = tf.sparse.to_dense(data['groundtruth_panoptic_instance_ids'], default_value=0)
         class_ids = tf.cast(class_ids, dtype=tf.float32)
         instance_ids = tf.cast(instance_ids, dtype=tf.float32)
-        # print("instance mask shape:", tf.shape(instance_mask))
-        # print("category mask shape:", tf.shape(category_mask))
-        # print("contigious mask shape:", tf.shape(contigious_mask))
-        # applies by pixel augmentation (saturation, brightness, contrast)
-        if self._color_aug_ssd:
-            image = preprocess_ops.color_jitter(
-                image = image,
-                brightness = self._brightness,
-                contrast = self._contrast,
-                saturation = self._saturation,
-                seed = self._seed,
-            )
+        
         # Flips image randomly during training.
         if self._aug_rand_hflip and is_training:
-            # print("doing random flip")
+           
             masks = tf.stack([category_mask, instance_mask, contigious_mask], axis=0)
             image, _, masks = preprocess_ops.random_horizontal_flip(
                 image=image, 
                 masks=masks,
-                seed = self._seed)
+                seed = self._seed,
+                prob=0.5)
 
             category_mask = masks[0]
             instance_mask = masks[1]
             contigious_mask = masks[2]
+
         # Resize and crops image.
-        
         masks = tf.stack([category_mask, instance_mask, contigious_mask], axis=0)
         masks = tf.expand_dims(masks, -1)
        
@@ -307,10 +249,6 @@ class mask_former_parser(parser.Parser):
         category_mask = tf.squeeze(masks[0])
         instance_mask = tf.squeeze(masks[1])
         contigious_mask = tf.squeeze(masks[2])
-        # category_mask = masks[0]
-        # instance_mask = masks[1]
-        # contigious_mask = masks[2]
-        
         
         crop_im_size = tf.cast(tf.shape(cropped_image)[0:2], tf.int32)
         
@@ -347,32 +285,28 @@ class mask_former_parser(parser.Parser):
         category_mask = tf.image.resize(category_mask, self._output_size, method='nearest')
         instance_mask = tf.image.resize(instance_mask, self._output_size, method='nearest')
         individual_masks = tf.image.resize(individual_masks, self._output_size, method='nearest')
-
-        #FIXME : Nedd to change the constanct value to 0 later
-        # unique_ids = preprocess_ops.clip_or_pad_to_fixed_size(
-        #         class_ids, self._max_instances, constant_values=133)
-        unique_ids = classes
-        # Cast image to float and set shapes of output.
         
+        # Cast image to float and set shapes of output.
         image = tf.cast(image, dtype=self._dtype)
         category_mask = tf.cast(category_mask, dtype=self._dtype)
         instance_mask = tf.cast(instance_mask, dtype=self._dtype)
         individual_masks = tf.cast(individual_masks, dtype=self._dtype)
-        # unique_ids =  tf.cast(unique_ids, dtype=tf.float32)
+        
 
         valid_mask = tf.not_equal(
             category_mask, self._ignore_label)
         things_mask = tf.not_equal(
             instance_mask, self._ignore_label)
 
-        # print("unique ids in dataloaloader : ", unique_ids)
+       
         labels = {
             'category_mask': category_mask,
             'instance_mask': instance_mask,
+            'contigious_mask': contigious_mask, 
             'valid_mask': valid_mask,
             'things_mask': things_mask,
             'image_info': image_info,
-            'unique_ids': unique_ids,
+            'unique_ids': classes,
             'individual_masks': individual_masks,
         }
         return image, labels

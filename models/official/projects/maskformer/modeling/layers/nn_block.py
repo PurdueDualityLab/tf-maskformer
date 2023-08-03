@@ -34,14 +34,14 @@ class MLPHead(tf.keras.layers.Layer):
         # self.dec_supervision = dec_supervision
 
     def call(self, inputs):
-        per_pixel_embeddings = inputs['per_pixel_embeddings']
-        per_segment_embeddings = inputs['per_segment_embeddings']
-
+        per_pixel_embeddings = inputs['per_pixel_embeddings'] # mask feat
+        per_segment_embeddings = inputs['per_segment_embeddings'] #transformer feat
+       
         class_prob_prediction = self._linear_classifier(per_segment_embeddings)
         mask_embedding = self._mlp(per_segment_embeddings)
         mask_prob_prediction = tf.einsum(
             "bqc,bhwc->bhwq", mask_embedding, per_pixel_embeddings)
-
+        
         return {'class_prob_predictions': class_prob_prediction,'mask_prob_predictions': mask_prob_prediction}
 
 

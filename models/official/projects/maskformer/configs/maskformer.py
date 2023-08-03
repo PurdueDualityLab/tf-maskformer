@@ -41,14 +41,6 @@ class Parser(hyperparams.Config):
     aug_rand_hflip: bool = True
     aug_scale_min: float = 1.0
     aug_scale_max: float = 1.0
-    color_aug_ssd: bool = False
-    brightness: float = 0.2
-    saturation: float = 0.3
-    contrast: float = 0.5
-    aug_type: Optional[common.Augmentation] = None
-    sigma: float = 8.0
-    small_instance_area_threshold: int = 4096
-    small_instance_weight: float = 3.0
     dtype: str = 'float32'
     seed: int = None
 
@@ -116,25 +108,23 @@ class MaskFormerTask(cfg.TaskConfig):
   losses: Losses = Losses()
   init_checkpoint: Optional[str] = ""
   init_checkpoint_modules: Union[str, List[str]] = 'backbone'  # all, backbone
-  annotation_file: Optional[str] = None
   per_category_metrics: bool = False
   bfloat16: bool = False
   panoptic_quality_evaluator: PanopticQuality = PanopticQuality()
 
 # TODO : we should pass this via cmd 
-COCO_INPUT_PATH_BASE = 'gs://cam2-datasets/coco_panoptic/'
+COCO_INPUT_PATH_BASE = os.environ.get('TFRECORDS_DIR')
 COCO_TRAIN_EXAMPLES = 118287
 COCO_VAL_EXAMPLES = 5000
 SET_MODEL_BFLOAT16 = False
-SET_DATA_BFLOAT16 = True
+SET_DATA_BFLOAT16 = False
 
 @exp_factory.register_config_factory('maskformer_coco_panoptic')
 def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
   """Config to get results that matches the paper."""
-
-  # FIXME : Batch size needs to be changed according to set global batch size in sh file
-  train_batch_size = 512
-  eval_batch_size = 2
+  
+  train_batch_size = int(os.environ.get('TRAIN_BATCH_SIZE'))
+  eval_batch_size = int(os.environ.get('EVAL_BATCH_SIZE'))
   ckpt_interval = (COCO_TRAIN_EXAMPLES // train_batch_size) * 20 # Don't write ckpts frequently. Slows down the training.
 
 
@@ -146,8 +136,6 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
           init_checkpoint=os.environ['RESNET_CKPT'],
           init_checkpoint_modules='backbone',
           bfloat16 = SET_MODEL_BFLOAT16,
-          annotation_file=os.path.join(COCO_INPUT_PATH_BASE,'annotations'
-                                       'instances_train2017.json'),
           model = MaskFormer(
               input_size=[640,640,3],
               norm_activation=common.NormActivation(),
@@ -155,7 +143,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
               num_classes=133,), # Extra class will be added automatically for background
           losses = Losses(),
           train_data = DataConfig(
-              input_path=os.path.join(COCO_INPUT_PATH_BASE, 'tfrecords/train*'),
+              input_path=os.path.join(COCO_INPUT_PATH_BASE, 'train*'),
               is_training=True,
               global_batch_size=train_batch_size,
               shuffle_buffer_size=1000,
@@ -166,28 +154,19 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
                     aspect_ratio_range = (0.5, 2.0),
                     min_overlap_params = (0.0, 1.4, 0.2, 0.1),
                     max_retry = 50,
-                    pad_output = False,
+                    pad_output = True,
                     resize_eval_groundtruth = True,
                     groundtruth_padded_size = None,
-                    ignore_label = 0,
+                    ignore_label = 133,
                     aug_rand_hflip = True,
                     aug_scale_min = 1.0,
                     aug_scale_max = 1.0,
-                    color_aug_ssd = False,
-                    brightness = 0.2,
-                    saturation = 0.3,
-                    contrast = 0.5,
-                    # TODO choose appropriate augmentation
-                    aug_type = None,
-                    sigma = 8.0,
-                    small_instance_area_threshold = 4096,
-                    small_instance_weight = 3.0,
                     dtype = 'bfloat16' if SET_DATA_BFLOAT16 else 'float32',
                     seed = 2045,
                 )
           ),
           validation_data = DataConfig(
-              input_path = os.path.join(COCO_INPUT_PATH_BASE, 'tfrecords/val*'),
+              input_path = os.path.join(COCO_INPUT_PATH_BASE, 'val*'),
               is_training = False,
               global_batch_size = eval_batch_size,
               drop_remainder = False,
@@ -214,16 +193,17 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
                   'type': 'detr_adamw',
                   'detr_adamw': {
                       'weight_decay_rate': 1e-4,
+                      #FIXME: Updated gradient global_clipnorm from 0.1 to 0.01
                       'global_clipnorm': 0.1,
                       # Avoid AdamW legacy behavior.
-                      'gradient_clip_norm': 0.0
+                      'gradient_clip_norm': 0.01
                   }
               },
               'learning_rate': {
                   'type': 'stepwise',
                   'stepwise': {
                       'boundaries': [decay_at],
-                      'values': [0.0001, 1.0e-05]
+                      'values': [float(os.environ.get('BASE_LR')), float(os.environ.get('BASE_LR'))/10]
                   }
               },
           })),

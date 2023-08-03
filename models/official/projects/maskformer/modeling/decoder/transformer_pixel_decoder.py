@@ -54,9 +54,11 @@ class TransformerFPN(tf.keras.layers.Layer):
         if tf.keras.backend.image_data_format() == 'channels_last':
             # format: (batch_size, height, width, channels)
             self._channels_last = True
+            print("channels last is Truee....")
         else:
             # format: (batch_size, channels, width, height)
             self._channels_last = False
+            print("channels last is False....")
 
     def build(self, multilevel_features):
         conv_args = {
@@ -77,6 +79,8 @@ class TransformerFPN(tf.keras.layers.Layer):
         input_levels = list(multilevel_features.keys())
         levels = input_levels[:-1]
 
+        # TODO : Input projection layer needs to be initialized with xavier init
+        # TODO : Input projection layer does not use bias 
         self._input_proj = tf.keras.layers.Conv2D(filters=self._fpn_feat_dims,
                                                   kernel_size=(1, 1),
                                                   padding='same',
@@ -84,7 +88,7 @@ class TransformerFPN(tf.keras.layers.Layer):
                                                   use_bias = True)
         
         self._transformer_encoder = TransformerEncoder(norm_first=False,
-                                                       dropout_rate = .1,
+                                                       dropout_rate = 0.1,
                                                        num_layers=self._num_encoder_layers)
         self._interpolations = []                                               
         self._conv2d_op_lateral = []
@@ -105,6 +109,7 @@ class TransformerFPN(tf.keras.layers.Layer):
 
         self._conv2d_op_down = []
         self._down_groupnorm = []
+        
         down = tf.keras.layers.Conv2D(filters=self._fpn_feat_dims,
                                       strides=(1, 1),
                                       kernel_size=(3, 3),
@@ -126,6 +131,7 @@ class TransformerFPN(tf.keras.layers.Layer):
             self._conv2d_op_down.append(down)
             self._down_groupnorm.append(down_norm)
 
+        
         self._conv2d_op_mask = tf.keras.layers.Conv2D(
             filters=self._fpn_feat_dims,
             kernel_size=(3, 3),
@@ -159,8 +165,8 @@ class TransformerFPN(tf.keras.layers.Layer):
         """
         input_levels = list(multilevel_features.keys())
         
-        feat = multilevel_features[input_levels[-1]]
-        
+        feat = multilevel_features[input_levels[-1]] # use the highest level feature as input
+       
         if not self._channels_last:
             feat = self._permute_1(feat)
         
@@ -169,17 +175,9 @@ class TransformerFPN(tf.keras.layers.Layer):
             mask, num_pos_features=self._fpn_feat_dims)
 
         features = self._input_proj(feat)
-
-        if self._bfloat16:
-            features = tf.cast(features, tf.float32)
-            pos_embed = tf.cast(pos_embed, tf.float32)
         
         transformer = self._transformer_encoder(features, None, pos_embed)
 
-        # FIXME : Fixed incorrect logic for bfloat16
-        if self._bfloat16:
-            
-            transformer = tf.cast(transformer, tf.bfloat16)        
 
         down = self._conv2d_op_down[0](transformer)
         down = self._down_groupnorm[0](down)

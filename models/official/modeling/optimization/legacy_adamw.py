@@ -54,6 +54,7 @@ class AdamWeightDecay(tf.keras.optimizers.legacy.Adam):
     self._include_in_weight_decay = include_in_weight_decay
     self._exclude_from_weight_decay = exclude_from_weight_decay
     logging.info('AdamWeightDecay gradient_clip_norm=%f', gradient_clip_norm)
+    
 
   def _prepare_local(self, var_device, var_dtype, apply_state):
     super(AdamWeightDecay, self)._prepare_local(var_device, var_dtype,  # pytype: disable=attribute-error  # typed-keras

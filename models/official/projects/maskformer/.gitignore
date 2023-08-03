@@ -1,9 +1,9 @@
 .gitignore
 myreadme.md
 ckpts/
-.npy
+*/*.npy
 */__pycache__/
-*/.ipynb_checkpoints/
-*/.idea/
-*/.vscode/
+*/*.ipynb_checkpoints/
+*/*.idea/
+*/*.vscode/
 

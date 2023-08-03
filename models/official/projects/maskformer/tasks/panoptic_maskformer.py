@@ -93,9 +93,11 @@ class PanopticTask(base_task.Task):
 		
 		dataset = reader.read(input_context=input_context)
 		# for sample in dataset.take(1):
-		# 	print(f"unique idsin dataset take : {sample[1]['unique_ids']}")
-		# 	print("individual masks :", sample[1]["individual_masks"].shape)
-		# 	print(f"image shape : {sample[0].shape}")
+		# 	# print(f"unique idsin dataset take : {sample[1]['unique_ids']}")
+		# 	# print("individual masks :", sample[1]["individual_masks"].shape)
+		# 	print("contigious mask :", sample[1]["contigious_mask"])
+		# 	np.save("contigious_mask.npy", sample[1]["contigious_mask"].numpy())
+		# 	# print(f"image shape : {sample[0].shape}")
 		# 	np.save("individual_masks.npy", sample[1]["individual_masks"].numpy())
 		# 	np.save("unique_ids.npy", sample[1]["unique_ids"].numpy())
 		# 	np.save("image.npy", sample[0].numpy())
@@ -106,7 +108,7 @@ class PanopticTask(base_task.Task):
 	def build_losses(self, output, labels, aux_outputs=None):
 		# TODO : Auxilary outputs
 		# NOTE : Loss calculation using Bfloat16 hampers the convergence of the model
-		outputs = {"pred_logits": tf.cast(output["class_prob_predictions"],tf.float32), "pred_masks": tf.cast(output["mask_prob_predictions"],tf.float32)}
+		outputs = {"pred_logits": output["class_prob_predictions"], "pred_masks": output["mask_prob_predictions"]}
 		targets = labels
 
 		matcher = hungarian_matching
@@ -178,7 +180,8 @@ class PanopticTask(base_task.Task):
 						
 						
 		features, labels = inputs
-
+		
+		
 		with tf.GradientTape() as tape:
 			outputs = model(features, training=True)
 			##########################################################
@@ -227,6 +230,13 @@ class PanopticTask(base_task.Task):
 		
 		logs = {self.loss: total_loss}
 
+		pred_logits = outputs["class_prob_predictions"]
+		probs = tf.keras.activations.softmax(pred_logits, axis=-1) # (batch, num_predictions, num_classes) (2,100,134)
+		scores = tf.reduce_max(probs, axis=-1) 
+		print("gt labels :", labels["unique_ids"])
+		predicted_labels = tf.argmax(probs, axis=-1)
+		print("predicted labels :", predicted_labels)
+	
 		all_losses = {
 			'cls_loss': cls_loss,
 			'focal_loss': focal_loss,

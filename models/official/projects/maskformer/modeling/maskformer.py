@@ -5,7 +5,7 @@ from official.projects.maskformer.modeling.decoder.transformer_decoder import Ma
 from official.projects.maskformer.modeling.layers.nn_block import MLPHead
 from official.projects.maskformer.modeling.decoder.transformer_pixel_decoder import TransformerFPN
 from official.projects.maskformer.modeling.decoder.pixel_decoder import CNNFPN
-
+import numpy as np
 class MaskFormer(tf.keras.Model):
 	"""Maskformer"""
 	def __init__(self,
@@ -120,6 +120,8 @@ class MaskFormer(tf.keras.Model):
 		return new_dict
 
 	def call(self, image, training = False):
+		
+		
 		backbone_feature_maps = self.backbone(image)
 
 		backbone_feature_maps_procesed = self.process_feature_maps(backbone_feature_maps)
@@ -130,15 +132,11 @@ class MaskFormer(tf.keras.Model):
 
 		elif self._pixel_decoder == 'transformer_fpn':
 			mask_features, transformer_enc_feat = self.pixel_decoder(backbone_feature_maps_procesed)
-		
-		if self._bfloat16:
-			transformer_enc_feat = tf.cast(transformer_enc_feat, tf.float32)
+	
 		
 		transformer_features = self.transformer({"features": transformer_enc_feat})
 
-		if self._bfloat16:
-			transformer_features = tf.cast(transformer_features, tf.bfloat16)
-			
+		
 		seg_pred = self.head({"per_pixel_embeddings" : mask_features,
 							"per_segment_embeddings": transformer_features})
 	

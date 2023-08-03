@@ -47,11 +47,13 @@ class DETRTransformer(tf.keras.layers.Layer):
     pos_embed = inputs["pos_embed"]
     mask = inputs["mask"]
     input_shape = tf_utils.get_shape_list(sources)
+
     if mask is not None:
       source_attention_mask = tf.tile(
           tf.expand_dims(mask, axis=1), [1, input_shape[1], 1])
     else:
       source_attention_mask = None
+
     if self._encoder is not None:
       memory = self._encoder(
           sources, attention_mask=source_attention_mask, pos_embed=pos_embed)
@@ -62,18 +64,19 @@ class DETRTransformer(tf.keras.layers.Layer):
     target_shape = tf.shape(targets)
     
     if mask is not None:
+      
       cross_attention_mask = tf.tile(
           tf.expand_dims(mask, axis=1), [1, target_shape[1], 1])
       self_attention_mask=tf.ones(
             (target_shape[0], target_shape[1], target_shape[1]))
     else:
+      
       cross_attention_mask = None
-      self_attention_mask = None
+      # FIXME : This is a hack to get around the fact that the self attention mask is required to ones instead of None
+      self_attention_mask = tf.ones(
+            (target_shape[0], target_shape[1], target_shape[1]))
     
-    # FIXME : The decoder uses float32 so cast all inputs to float32
-    # memory = tf.cast(memory, tf.float32)
-    # pos_embed = tf.cast(pos_embed, tf.float32)
-    # targets = tf.cast(targets, tf.float32)
+    
     decoded = self._decoder(
         tf.zeros_like(targets),
        memory,
@@ -85,5 +88,4 @@ class DETRTransformer(tf.keras.layers.Layer):
         input_pos_embed=targets,
         memory_pos_embed=pos_embed,)
     
-    # FIXME : Return decode as bfloat16
     return decoded
