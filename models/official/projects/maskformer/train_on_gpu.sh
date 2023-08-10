@@ -8,6 +8,7 @@ export TFRECORDS_DIR="/depot/davisjam/data/vishal/datasets/coco/tfrecords"
 export TRAIN_BATCH_SIZE=$train_bsize
 export EVAL_BATCH_SIZE=$eval_bsize
 export BASE_LR=0.00005
+export IMG_SIZE=1024
 export OVERRIDES="runtime.distribution_strategy=one_device,runtime.num_gpus=1,runtime.mixed_precision_dtype=float32,\
 task.train_data.global_batch_size=$train_bsize,"
 python3 models/official/projects/maskformer/train.py \

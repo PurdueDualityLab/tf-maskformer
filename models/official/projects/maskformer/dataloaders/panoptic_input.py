@@ -231,6 +231,7 @@ class mask_former_parser(parser.Parser):
         # masks = tf.expand_dims(masks, -1)
         
         if do_crop:
+            print("///////////////////////// Inside Cropping /////////////////////////")
             # category_mask = masks[0]
             # instance_mask = masks[1]
             # contigious_mask = masks[2]

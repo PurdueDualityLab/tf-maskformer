@@ -125,8 +125,8 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
   
   train_batch_size = int(os.environ.get('TRAIN_BATCH_SIZE'))
   eval_batch_size = int(os.environ.get('EVAL_BATCH_SIZE'))
-  ckpt_interval = (COCO_TRAIN_EXAMPLES // train_batch_size) * 20 # Don't write ckpts frequently. Slows down the training.
-
+  ckpt_interval = (COCO_TRAIN_EXAMPLES // train_batch_size) * 20 # Don't write ckpts frequently. Slows down the training
+  image_size = int(os.environ.get('IMG_SIZE'))
 
   steps_per_epoch = COCO_TRAIN_EXAMPLES // train_batch_size
   train_steps = 300 * steps_per_epoch  # 300 epochs
@@ -137,7 +137,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
           init_checkpoint_modules='backbone',
           bfloat16 = SET_MODEL_BFLOAT16,
           model = MaskFormer(
-              input_size=[1280,1280,3],
+              input_size=[image_size,image_size,3],
               norm_activation=common.NormActivation(),
               which_pixel_decoder='transformer_fpn',
               num_classes=133,), # Extra class will be added automatically for background
@@ -149,7 +149,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
               shuffle_buffer_size=1000,
               dtype = 'bfloat16' if SET_DATA_BFLOAT16 else 'float32',
               parser = Parser(
-                    output_size = [1280,1280],
+                    output_size = [image_size,image_size],
                     min_scale = 0.3,
                     aspect_ratio_range = (0.5, 2.0),
                     min_overlap_params = (0.0, 1.4, 0.2, 0.1),
@@ -171,7 +171,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
               global_batch_size = eval_batch_size,
               drop_remainder = False,
               parser = Parser(
-                    output_size = [1280,1280],
+                    output_size = [image_size,image_size],
                     pad_output = True,
                     seed = 4096,
                     dtype = 'float32',

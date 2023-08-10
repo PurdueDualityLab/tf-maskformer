@@ -96,11 +96,11 @@ class PanopticTask(base_task.Task):
 		# 	# print(f"unique idsin dataset take : {sample[1]['unique_ids']}")
 		# 	print("individual masks :", sample[1]["individual_masks"].shape)
 			
-		# 	np.save("contigious_mask.npy", sample[1]["contigious_mask"].numpy())
+		# 	# np.save("contigious_mask.npy", sample[1]["contigious_mask"].numpy())
 		# 	print(f"image shape : {sample[0].shape}")
-		# 	np.save("individual_masks.npy", sample[1]["individual_masks"].numpy())
-		# 	np.save("unique_ids.npy", sample[1]["unique_ids"].numpy())
-		# 	np.save("image.npy", sample[0].numpy())
+		# 	# np.save("individual_masks.npy", sample[1]["individual_masks"].numpy())
+		# 	# np.save("unique_ids.npy", sample[1]["unique_ids"].numpy())
+		# 	# np.save("image.npy", sample[0].numpy())
 		# 	exit()
 		return dataset
 
