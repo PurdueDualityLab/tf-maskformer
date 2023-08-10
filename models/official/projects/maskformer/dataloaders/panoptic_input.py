@@ -160,22 +160,59 @@ class mask_former_parser(parser.Parser):
         self._max_retry = params.max_retry
 
 
-    def _resize_and_crop_mask(self, mask, image_info, is_training):
+    # def _resize_and_crop_mask(self, mask, image_info, is_training):
+    #     """Resizes and crops mask using `image_info` dict."""
+    #     offset = image_info[3, : ]
+    #     im_height = int(image_info[0][0])
+    #     im_width = int(image_info[0][1])
+        
+    #     mask = tf.reshape(mask, shape=[1, im_height, im_width, 1])
+    #     mask += 1
+
+    #     if is_training:
+    #         image_scale = image_info[2, :]
+    #         offset = image_info[3, :]
+    #         mask = preprocess_ops.resize_and_crop_masks(
+    #             mask,
+    #             image_scale,
+    #             self._output_size,
+    #             offset)
+    #     else:
+    #         mask = tf.image.pad_to_bounding_box(
+    #             mask, 0, 0,
+    #             self._groundtruth_padded_size[0],
+    #             self._groundtruth_padded_size[1])
+    #     mask -= 1
+
+    #     # Assign ignore label to the padded region.
+    #     mask = tf.where(
+    #         tf.equal(mask, -1),
+    #         self._ignore_label * tf.ones_like(mask),
+    #         mask)
+    #     mask = tf.squeeze(mask, axis=0)
+        
+    #     return mask
+    
+    def _resize_and_crop_mask(self, mask, image_info, crop_dims, is_training):
         """Resizes and crops mask using `image_info` dict."""
+        
+        image_scale = image_info[2, :]
         offset = image_info[3, : ]
         im_height = int(image_info[0][0])
         im_width = int(image_info[0][1])
+
+        # print(mask.shape)
         
         mask = tf.reshape(mask, shape=[1, im_height, im_width, 1])
+        # print(mask.shape)
         mask += 1
 
-        if is_training:
-            image_scale = image_info[2, :]
-            offset = image_info[3, :]
+        if is_training or self._resize_eval_groundtruth:
+            # print("using image offset:",offset)
             mask = preprocess_ops.resize_and_crop_masks(
                 mask,
                 image_scale,
-                self._output_size,
+                crop_dims,
                 offset)
         else:
             mask = tf.image.pad_to_bounding_box(
@@ -192,8 +229,6 @@ class mask_former_parser(parser.Parser):
         mask = tf.squeeze(mask, axis=0)
         
         return mask
-    
-        
     # def _parse_data(self, data, is_training):
     #     image = data['image']
     
