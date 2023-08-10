@@ -2,6 +2,7 @@ import tensorflow as tf
 from official.vision.losses import focal_loss
 from official.projects.detr.ops import matchers
 import numpy as np
+
 class FocalLossMod(focal_loss.FocalLoss):
     """Implements a Focal loss for segmentation problems.
     Reference:
@@ -92,6 +93,7 @@ class Loss:
         self.cost_class = cost_class
         self.cost_focal = cost_focal
         self.cost_dice = cost_dice
+        
 
     
     def memory_efficient_matcher(self, outputs, y_true):
@@ -102,8 +104,8 @@ class Loss:
             tgt_mask = y_true["individual_masks"]
         
         cost_class = tf.gather(-tf.nn.softmax(outputs["pred_logits"]), tgt_ids, batch_dims=1, axis=-1)
-        tgt_mask = tf.cast(tgt_mask, dtype=tf.float32)
         
+        tgt_mask = tf.cast(tgt_mask, dtype=tf.float32)
         # reorder the tgt mask so that tf.image.resize can be applied
         tgt_mask = tf.transpose(tgt_mask, perm=[0,2,3,1]) # [b, h, w, 100]
         tgt_mask = tf.image.resize(tgt_mask, tf.shape(out_mask)[-2:], method='bilinear') # [b, h, w, 100]
@@ -116,6 +118,7 @@ class Loss:
         
         cost_focal = FocalLossMod().batch(tgt_mask_permuted, out_mask)
         cost_dice = DiceLoss().batch(tgt_mask_permuted, out_mask)
+       
         
         total_cost = (
                 self.cost_focal * cost_focal
@@ -125,7 +128,7 @@ class Loss:
         
         max_cost = (
                     self.cost_class * 0.0 +
-                    self.cost_focal * 100000000.0 +
+                    self.cost_focal * 4.0 +
                     self.cost_dice * 0.0
                     )
 
@@ -138,6 +141,7 @@ class Loss:
         max_cost * tf.ones_like(total_cost, dtype=total_cost.dtype),
         total_cost)
        
+       
         _, inds = matchers.hungarian_matching(total_cost)
         indices = tf.stop_gradient(inds)
        
@@ -146,15 +150,14 @@ class Loss:
     
     
     def get_loss(self, outputs, y_true, indices):
-        hungarian_assignment = np.where(indices.numpy()[0])[1]
-        print("hungarian_assignment for first image in the batch:", hungarian_assignment)
+      
         target_index = tf.math.argmax(indices, axis=1) #[batchsize, 100]
-        # print("target_index :", target_index)
+        
         target_labels = y_true["unique_ids"] #[batchsize, num_gt_objects]
         cls_outputs = outputs["pred_logits"] # [batchsize, num_queries, num_classes] [1,100,134]
         cls_masks = outputs["pred_masks"]# [batchsize,num_queries, h, w]
         individual_masks = y_true["individual_masks"] # [batchsize, num_gt_objects, h, w,]
-        # contigious_masks = y_true["contigious_mask"] # [batchsize, h, w, 1]
+        contigious_masks = y_true["contigious_mask"] # [batchsize, h, w, 1]
         
         cls_assigned = tf.gather(cls_outputs, target_index, batch_dims=1, axis=1)
         mask_assigned = tf.gather(cls_masks, target_index, batch_dims=1, axis=1)
@@ -191,10 +194,11 @@ class Loss:
         # tgt_mask = tf.transpose(tgt_mask, perm=[0,3,1,2]) # [b, 100, h, w]
         out_mask = tf.transpose(out_mask, perm=[0,3,1,2])
         # FIXME : Do we need this??
-        # invalid_mask = tf.expand_dims(tf.cast(tf.equal(tf.squeeze(contigious_masks, -1), 133), dtype=tf.float32), axis=1) # [b, 1, h, w]
         
-        # out_mask = out_mask * (1 - invalid_mask) 
-        # tgt_mask = tgt_mask * (1 - invalid_mask)
+        invalid_mask = tf.expand_dims(tf.cast(tf.equal(tf.squeeze(contigious_masks, -1), 133), dtype=tf.float32), axis=1) # [b, 1, h, w]
+        
+        out_mask = out_mask * (1 - invalid_mask) 
+        tgt_mask = tgt_mask * (1 - invalid_mask)
         out_mask = tf.reshape(out_mask, [tf.shape(out_mask)[0], tf.shape(out_mask)[1], -1]) # [b, 100, h*w]
         tgt_mask = tf.reshape(tgt_mask, [tf.shape(tgt_mask)[0],tf.shape(tgt_mask)[1], -1])
         
@@ -209,7 +213,7 @@ class Loss:
         dice_loss_weighted = tf.where(background_new, tf.zeros_like(dice_loss), dice_loss)
         focal_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(focal_loss_weighted), num_masks_sum)
         dice_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(dice_loss_weighted), num_masks_sum)
-        print("Num masks sum :", num_masks_sum)
+        
         return cls_loss, focal_loss_final, dice_loss_final
     
     def __call__(self, outputs, y_true):
@@ -235,8 +239,7 @@ class Loss:
         losses.update({"loss_ce": self.cost_class*cls_loss_final,
                     "loss_focal": self.cost_focal*focal_loss_final,
                     "loss_dice": self.cost_dice*dice_loss_final})
-        print("Losses :", losses)
-        exit()
+        
         # FIXME : check if we need to add aux_outputs
         # if "aux_outputs" in outputs and outputs["aux_outputs"] is not None:
         #     for i, aux_outputs in enumerate(outputs["aux_outputs"]):

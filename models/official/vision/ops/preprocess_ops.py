@@ -555,7 +555,7 @@ def resize_and_crop_masks(masks,
     with tf.name_scope('resize_and_crop_masks'):
         mask_size = tf.cast(tf.shape(masks)[1:3], tf.float32)
         
-        # Pad masks to avoid empty mask annotations.
+        # # Pad masks to avoid empty mask annotations.
         masks = tf.concat([tf.zeros([1, mask_size[0], mask_size[1], 1]), masks], axis=0)
         
         scaled_size = tf.cast(image_scale * mask_size, tf.int32)
@@ -563,6 +563,7 @@ def resize_and_crop_masks(masks,
         scaled_masks = tf.image.resize(
             masks, scaled_size, method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
         offset = tf.cast(offset, tf.int32)
+        output_size = tf.cast(output_size, tf.int32)
         scaled_masks = scaled_masks[
                        :,
                        offset[0]:offset[0] + output_size[0],

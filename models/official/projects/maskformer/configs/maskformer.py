@@ -137,7 +137,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
           init_checkpoint_modules='backbone',
           bfloat16 = SET_MODEL_BFLOAT16,
           model = MaskFormer(
-              input_size=[640,640,3],
+              input_size=[1280,1280,3],
               norm_activation=common.NormActivation(),
               which_pixel_decoder='transformer_fpn',
               num_classes=133,), # Extra class will be added automatically for background
@@ -149,7 +149,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
               shuffle_buffer_size=1000,
               dtype = 'bfloat16' if SET_DATA_BFLOAT16 else 'float32',
               parser = Parser(
-                    output_size = [640,640],
+                    output_size = [1280,1280],
                     min_scale = 0.3,
                     aspect_ratio_range = (0.5, 2.0),
                     min_overlap_params = (0.0, 1.4, 0.2, 0.1),
@@ -171,7 +171,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
               global_batch_size = eval_batch_size,
               drop_remainder = False,
               parser = Parser(
-                    output_size = [640,640],
+                    output_size = [1280,1280],
                     pad_output = True,
                     seed = 4096,
                     dtype = 'float32',

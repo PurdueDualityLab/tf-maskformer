@@ -99,6 +99,7 @@ class LossTest(tf.test.TestCase, parameterized.TestCase):
         # print("[INFO] Tensors Copy Successful!!!...")
         # exit()
         # Vectorized loss function accepts batched inputs
+        print("[INFO] Calling loss function....")
         losses = loss(outputs, targets)
        
 

@@ -25,6 +25,8 @@ from official.vision.ops import augment
 from official.vision.ops import preprocess_ops
 from official.core import config_definitions as cfg
 
+RESIZE_SCALES = (480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800)
+
 class TfExampleDecoder(tf_example_decoder.TfExampleDecoder):
     """Tensorflow Example proto decoder."""
 
@@ -133,18 +135,16 @@ class mask_former_parser(parser.Parser):
         # TODO
         self._max_instances = 100
         self._decoder = decoder_fn
-        
+        self._resize_scales = RESIZE_SCALES
         if self._pad_output == True and self._output_size is None:
             raise Exception("Error: no output pad provided")
         
         if self._decoder == None:
-            print("assuming default decoder")
             self._decoder = TfExampleDecoder()
         
         self._is_training = is_training
 
         if is_training == None:
-            print("assuming training mode")
             self._is_training = True
         
 
@@ -160,26 +160,22 @@ class mask_former_parser(parser.Parser):
         self._max_retry = params.max_retry
 
 
-    def _resize_and_crop_mask(self, mask, image_info, crop_dims, is_training):
+    def _resize_and_crop_mask(self, mask, image_info, is_training):
         """Resizes and crops mask using `image_info` dict."""
-        
-        image_scale = image_info[2, :]
         offset = image_info[3, : ]
         im_height = int(image_info[0][0])
         im_width = int(image_info[0][1])
-
-        # print(mask.shape)
         
         mask = tf.reshape(mask, shape=[1, im_height, im_width, 1])
-        # print(mask.shape)
         mask += 1
 
-        if is_training or self._resize_eval_groundtruth:
-            # print("using image offset:",offset)
+        if is_training:
+            image_scale = image_info[2, :]
+            offset = image_info[3, :]
             mask = preprocess_ops.resize_and_crop_masks(
                 mask,
                 image_scale,
-                crop_dims,
+                self._output_size,
                 offset)
         else:
             mask = tf.image.pad_to_bounding_box(
@@ -230,62 +226,80 @@ class mask_former_parser(parser.Parser):
             instance_mask = masks[1]
             contigious_mask = masks[2]
 
-        # Resize and crops image.
-        masks = tf.stack([category_mask, instance_mask, contigious_mask], axis=0)
-        masks = tf.expand_dims(masks, -1)
-       
-        # Resizes and crops image.
-        cropped_image, masks = preprocess_ops.random_crop_image_masks(
-            img = image,
-            masks = masks,
-            min_scale = self._min_scale,
-            aspect_ratio_range = self._aspect_ratio_range,
-            min_overlap_params = self._min_overlap_params,
-            max_retry = self._max_retry,
-            seed = self._seed,
-        )
-                                                                      
-                                                                      
-        category_mask = tf.squeeze(masks[0])
-        instance_mask = tf.squeeze(masks[1])
-        contigious_mask = tf.squeeze(masks[2])
+        do_crop = tf.greater(tf.random.uniform([]), 0.5)
+        # masks = tf.stack([category_mask, instance_mask, contigious_mask], axis=0)
+        # masks = tf.expand_dims(masks, -1)
         
-        crop_im_size = tf.cast(tf.shape(cropped_image)[0:2], tf.int32)
-        
-        # Resize image
-        image, image_info = preprocess_ops.resize_and_crop_image(
-            cropped_image,
-            self._output_size if self._pad_output else crop_im_size,
-            self._output_size if self._pad_output else crop_im_size,
-            aug_scale_min=self._aug_scale_min if self._pad_output or not self._is_training else 1.0,
-            aug_scale_max=self._aug_scale_max  if self._pad_output or not self._is_training else 1.0)
-     
-        category_mask = self._resize_and_crop_mask(
-            category_mask,
-            image_info,
-            self._output_size if self._pad_output else crop_im_size,
-            is_training=is_training)
-        instance_mask = self._resize_and_crop_mask(
-            instance_mask,
-            image_info,
-            self._output_size if self._pad_output else crop_im_size,
-            is_training=is_training)
-        contigious_mask = self._resize_and_crop_mask(
-            contigious_mask,
-            image_info,
-            self._output_size if self._pad_output else crop_im_size,
-            is_training=is_training)
-        
+        if do_crop:
+            # category_mask = masks[0]
+            # instance_mask = masks[1]
+            # contigious_mask = masks[2]
+            index = tf.random.categorical(tf.zeros([1, 3]), 1)[0]
+            scales = tf.gather([400.0, 500.0, 600.0], index, axis=0)
+            short_side = scales[0]
+            image, image_info = preprocess_ops.resize_image(image, short_side)
+            # image_info[0] --> original image size
+            # image_info[1] --> scaled image size
+            # image_info[2] --> y_scale, x_scale
+            # image_info[3] --> offset
+
+            category_mask = self._resize_and_crop_mask(category_mask, image_info, is_training)
+            instance_mask = self._resize_and_crop_mask(instance_mask, image_info, is_training)
+            contigious_mask = self._resize_and_crop_mask(contigious_mask, image_info, is_training)
+
+            # Do cropping
+            shape = tf.cast(image_info[1], dtype=tf.int32) # resized image h,w
+            h = tf.random.uniform([],
+                            384,
+                            tf.math.minimum(shape[0], 600),
+                            dtype=tf.int32)
+            w = tf.random.uniform([],
+                            384,
+                            tf.math.minimum(shape[1], 600),
+                            dtype=tf.int32)
+            i = tf.random.uniform([], 0, shape[0] - h + 1, dtype=tf.int32)
+            j = tf.random.uniform([], 0, shape[1] - w + 1, dtype=tf.int32)
+            image = tf.image.crop_to_bounding_box(image, i, j, h, w)
+            category_mask = tf.image.crop_to_bounding_box(category_mask, i, j, h, w)
+            instance_mask = tf.image.crop_to_bounding_box(instance_mask, i, j, h, w)
+            contigious_mask = tf.image.crop_to_bounding_box(contigious_mask, i, j, h, w)
+            # masks = tf.stack([category_mask, instance_mask, contigious_mask], axis=0)
+            
+        scales = tf.constant(self._resize_scales, dtype=tf.float32)
+        index = tf.random.categorical(tf.zeros([1, 11]), 1)[0]
+        scales = tf.gather(scales, index, axis=0)
+
+        short_side = scales[0]
+        image, image_info = preprocess_ops.resize_image(image, short_side,
+                                                    max(self._output_size))
+        # Resize and crop masks.
+        # masks = preprocess_ops.resize_and_crop_masks(
+        #         masks,
+        #         image_info[2, :],
+        #         image_info[1, :],
+        #         image_info[3, :],  ignore_label=self._ignore_label)
+        category_mask = self._resize_and_crop_mask(category_mask, image_info, is_training)
+        instance_mask = self._resize_and_crop_mask(instance_mask, image_info, is_training)
+        contigious_mask = self._resize_and_crop_mask(contigious_mask, image_info, is_training)
+
+        # category_mask = masks[0]
+        # instance_mask = masks[1]
+        # contigious_mask = masks[2]
+
+        image = tf.image.pad_to_bounding_box(image, 0, 0, self._output_size[0],
+                                         self._output_size[1])
+        category_mask = tf.image.pad_to_bounding_box(category_mask, 0, 0, self._output_size[0], self._output_size[1])
+        instance_mask = tf.image.pad_to_bounding_box(instance_mask, 0, 0, self._output_size[0], self._output_size[1])
+        contigious_mask = tf.image.pad_to_bounding_box(contigious_mask, 0, 0, self._output_size[0], self._output_size[1])
+
         individual_masks, classes = self._get_individual_masks(
                 class_ids=class_ids,contig_instance_mask=contigious_mask, instance_id = instance_ids, instance_mask=instance_mask)
 
-        
-        # Resize image and masks to output size.
-        image = tf.image.resize(image, self._output_size, method='nearest')
-        category_mask = tf.image.resize(category_mask, self._output_size, method='nearest')
-        instance_mask = tf.image.resize(instance_mask, self._output_size, method='nearest')
-        individual_masks = tf.image.resize(individual_masks, self._output_size, method='nearest')
-        
+        # image = tf.image.resize(image, self._output_size, method='nearest')
+        # category_mask = tf.image.resize(category_mask, self._output_size, method='nearest')
+        # instance_mask = tf.image.resize(instance_mask, self._output_size, method='nearest')
+        # individual_masks = tf.image.resize(individual_masks, self._output_size, method='nearest')
+
         # Cast image to float and set shapes of output.
         image = tf.cast(image, dtype=self._dtype)
         category_mask = tf.cast(category_mask, dtype=self._dtype)
