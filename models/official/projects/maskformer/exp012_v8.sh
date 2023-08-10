@@ -1,5 +1,5 @@
 #!/bin/bash
-train_bsize=64
+train_bsize=32
 eval_bsize=32
 export PYTHONPATH=$PYTHONPATH:~/tf-maskformer/models
 export RESNET_CKPT="gs://cam2-models/maskformer_vishal_exps/resnet50_pretrained/tfmg/ckpt-62400"
