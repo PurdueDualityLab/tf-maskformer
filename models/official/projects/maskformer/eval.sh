@@ -1,4 +1,5 @@
 #!/bin/bash
+train_bsize=2
 eval_bsize=2
 export PYTHONPATH=$PYTHONPATH:~/tf-maskformer/models
 export MODEL_DIR="gs://cam2-models/maskformer_vishal_exps/EXP12_v8"
