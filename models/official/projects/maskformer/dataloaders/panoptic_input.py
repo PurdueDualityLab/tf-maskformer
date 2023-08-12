@@ -207,7 +207,7 @@ class mask_former_parser(parser.Parser):
         # print(mask.shape)
         mask += 1
 
-        if is_training or self._resize_eval_groundtruth:
+        if is_training:
             # print("using image offset:",offset)
             mask = preprocess_ops.resize_and_crop_masks(
                 mask,
