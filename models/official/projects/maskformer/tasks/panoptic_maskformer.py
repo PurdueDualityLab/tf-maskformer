@@ -266,7 +266,7 @@ class PanopticTask(base_task.Task):
 		features, labels = inputs
 		outputs = model(features, training=False)
 		# np.save("individual_masks.npy", labels["individual_masks"])
-		# print("Unique_ids in validation step : ", labels["unique_ids"])
+		print("Unique_ids in validation step : ", labels["unique_ids"])
 		# np.save("targets.npy", labels["unique_ids"])
 		# np.save("image.npy", features)
 		total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels)
