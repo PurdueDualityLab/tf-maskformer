@@ -139,6 +139,7 @@ class mask_former_parser(parser.Parser):
         if self._pad_output == True and self._output_size is None:
             raise Exception("Error: no output pad provided")
         
+        self._groundtruth_padded_size = params.groundtruth_padded_size
         if self._decoder == None:
             self._decoder = TfExampleDecoder()
         
