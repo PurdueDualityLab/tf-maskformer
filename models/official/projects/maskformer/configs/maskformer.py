@@ -156,7 +156,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
                     max_retry = 50,
                     pad_output = True,
                     resize_eval_groundtruth = True,
-                    groundtruth_padded_size = None,
+                    groundtruth_padded_size = 640,
                     ignore_label = 133,
                     aug_rand_hflip = True,
                     aug_scale_min = 1.0,
