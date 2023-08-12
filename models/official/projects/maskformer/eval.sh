@@ -12,8 +12,8 @@ export TFRECORDS_DIR="gs://cam2-datasets/coco_panoptic/tfrecords"
 export TRAIN_BATCH_SIZE=$train_bsize
 export EVAL_BATCH_SIZE=$eval_bsize
 export IMG_SIZE=640
-export OVERRIDES="runtime.distribution_strategy=one_device,runtime.mixed_precision_dtype=float32,\
-task.validation_data.global_batch_size=2,task.model.which_pixel_decoder=transformer_fpn,\
+export OVERRIDES="runtime.distribution_strategy=tpu,runtime.mixed_precision_dtype=float32,\
+task.validation_data.global_batch_size=$EVAL_BATCH_SIZE,task.model.which_pixel_decoder=transformer_fpn,\
 task.init_checkpoint_modules=all,\
 task.init_checkpoint=$MODEL_DIR"
 python3 models/official/projects/maskformer/train.py \
