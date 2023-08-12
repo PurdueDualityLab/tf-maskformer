@@ -127,6 +127,7 @@ class mask_former_parser(parser.Parser):
         """
         
         # general settings
+        print("params:", params)
         self._output_size = params.output_size
         self._mask_null = 0
         self._dtype = params.dtype
@@ -141,7 +142,7 @@ class mask_former_parser(parser.Parser):
         
         self._groundtruth_padded_size = params.groundtruth_padded_size
         print("[INFO] groundtruth_padded_size: ", self._groundtruth_padded_size)
-        
+
         if self._decoder == None:
             self._decoder = TfExampleDecoder()
         
