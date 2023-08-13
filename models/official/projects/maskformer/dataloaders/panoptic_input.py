@@ -199,7 +199,9 @@ class mask_former_parser(parser.Parser):
     
     def _resize_and_crop_mask(self, mask, image_info, crop_dims, is_training):
         """Resizes and crops mask using `image_info` dict."""
-        
+        print("[DEBUG] RESIZE and CROP MASK..........")
+        print("Mask type :", type(mask))
+        exit()
         image_scale = image_info[2, :]
         offset = image_info[3, : ]
         im_height = int(image_info[0][0])
@@ -219,6 +221,7 @@ class mask_former_parser(parser.Parser):
                 crop_dims,
                 offset)
         else:
+            
             mask = tf.image.pad_to_bounding_box(
                 mask, 0, 0,
                 self._groundtruth_padded_size,
