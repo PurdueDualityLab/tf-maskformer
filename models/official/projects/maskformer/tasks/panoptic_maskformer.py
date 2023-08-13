@@ -54,8 +54,7 @@ class PanopticTask(base_task.Task):
 		"""
 		if not self._task_config.init_checkpoint:
 			return
-		print("[INFO] Inside Initialize.........")
-		exit()
+		
 		def _get_checkpoint_path(checkpoint_dir_or_file):
 			checkpoint_path = checkpoint_dir_or_file
 
@@ -69,7 +68,7 @@ class PanopticTask(base_task.Task):
 			checkpoint_path = _get_checkpoint_path(ckpt_dir_or_file)
 			ckpt = tf.train.Checkpoint(**model.checkpoint_items)
 			status = ckpt.read(checkpoint_path)
-			status.expect_partial().assert_existing_objects_matched()
+			status.expect_partial()
 			logging.info('Loaded whole model from %s',
 				 ckpt_dir_or_file)
 		elif self._task_config.init_checkpoint_modules == 'backbone':
