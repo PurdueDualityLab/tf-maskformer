@@ -54,25 +54,29 @@ class PanopticTask(base_task.Task):
 		"""
 		if not self._task_config.init_checkpoint:
 			return
-	
+
+		def _get_checkpoint_path(checkpoint_dir_or_file):
+			checkpoint_path = checkpoint_dir_or_file
+
+			if tf.io.gfile.isdir(checkpoint_dir_or_file):
+				checkpoint_path = tf.train.latest_checkpoint(checkpoint_dir_or_file)
+			return checkpoint_path
+		
 		ckpt_dir_or_file = self._task_config.init_checkpoint
 		
-		if tf.io.gfile.isdir(ckpt_dir_or_file):
-			ckpt_dir_or_file = tf.train.latest_checkpoint(ckpt_dir_or_file)
-
 		if self._task_config.init_checkpoint_modules == 'all':
-			print("[INFO] Loading the whole model....")
+			checkpoint_path = _get_checkpoint_path(ckpt_dir_or_file)
 			ckpt = tf.train.Checkpoint(**model.checkpoint_items)
-			status = ckpt.restore(ckpt_dir_or_file)
-			status.expect_partial()
-			
+			status = ckpt.read(checkpoint_path)
+			status.expect_partial().assert_existing_objects_matched()
+			logging.info('Loaded whole model from %s',
+				 ckpt_dir_or_file)
 		elif self._task_config.init_checkpoint_modules == 'backbone':
 			ckpt = tf.train.Checkpoint(backbone=model.backbone)
 			status = ckpt.restore(ckpt_dir_or_file)
 			status.expect_partial().assert_existing_objects_matched()
-
-		logging.info('Finished loading pretrained checkpoint from %s',
-				 ckpt_dir_or_file)
+			logging.info('Finished loading backbone checkpoint from %s',
+					ckpt_dir_or_file)
 
 	def build_inputs(self, params, input_context: Optional[tf.distribute.InputContext] = None) -> tf.data.Dataset:
 		""" 
