@@ -221,8 +221,8 @@ class mask_former_parser(parser.Parser):
         else:
             mask = tf.image.pad_to_bounding_box(
                 mask, 0, 0,
-                640,
-                640)
+                self._groundtruth_padded_size,
+                self._groundtruth_padded_size)
         mask -= 1
 
         # Assign ignore label to the padded region.
