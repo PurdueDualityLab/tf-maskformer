@@ -184,6 +184,8 @@ class OrbitExperimentRunner:
           step_counter=self.trainer.global_step,
           checkpoint_interval=self.params.trainer.checkpoint_interval,
           init_fn=self.trainer.initialize)
+      print("Initialize function :", self.trainer.initialize)
+      exit()
     else:
       checkpoint_manager = None
     return checkpoint_manager
