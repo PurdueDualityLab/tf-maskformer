@@ -61,7 +61,7 @@ def main(_):
 	
 	distribution_strategy = distribute_utils.get_distribution_strategy(
 			distribution_strategy=params.runtime.distribution_strategy,
-        	all_reduce_alg=params.runtime.all_reduce_alg,
+			all_reduce_alg=params.runtime.all_reduce_alg,
 			num_gpus=params.runtime.num_gpus,
 			tpu_address=params.runtime.tpu)
 	
@@ -69,8 +69,7 @@ def main(_):
 	with distribution_strategy.scope():
 		task = task_factory.get_task(params.task, logging_dir=model_dir)
 	
-	 .run_experiment(
-			distribution_strategy=distribution_strategy,
+	train_lib.run_experiment(distribution_strategy=distribution_strategy,
 			task=task,
 			mode=FLAGS.mode,
 			params=params,
