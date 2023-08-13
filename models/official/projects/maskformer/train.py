@@ -50,7 +50,7 @@ def main(_):
 		# may race against the train job for writing the same file.
 		train_utils.serialize_config(params, model_dir)
 
-	if FLAGS.mode == "eval" or FLAGS.tpu == None:
+	if FLAGS.tpu == None:
 		tf.config.run_functions_eagerly(True)
 	# Sets mixed_precision policy. Using 'mixed_float16' or 'mixed_bfloat16'
 	# can have significant impact on model speeds by utilizing float16 in case of
