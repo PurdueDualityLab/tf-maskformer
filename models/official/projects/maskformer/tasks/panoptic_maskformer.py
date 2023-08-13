@@ -54,7 +54,8 @@ class PanopticTask(base_task.Task):
 		"""
 		if not self._task_config.init_checkpoint:
 			return
-
+		print("[INFO] Inside Initialize.........")
+		exit()
 		def _get_checkpoint_path(checkpoint_dir_or_file):
 			checkpoint_path = checkpoint_dir_or_file
 
