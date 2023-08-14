@@ -439,28 +439,15 @@ class mask_former_parser(parser.Parser):
         
         if not is_training:
             # Resize the image
-            image, image_info = preprocess_ops.resize_and_crop_image(image, self._output_size, self._output_size,
-                                                                     aug_scale_min=1.0, aug_scale_max=1.0)
+            image = tf.image.resize(image, self._output_size, method='nearest')
             # expand the dims for the each mask
             category_mask = tf.expand_dims(category_mask, -1)
             instance_mask = tf.expand_dims(instance_mask, -1)
             contigious_mask = tf.expand_dims(contigious_mask, -1)
 
-            category_mask = self._resize_and_crop_mask(
-                category_mask,
-                image_info,
-                self._output_size,
-                is_training=is_training)
-            instance_mask = self._resize_and_crop_mask(
-                instance_mask,
-                image_info,
-                self._output_size,
-                is_training=is_training)
-            contigious_mask = self._resize_and_crop_mask(
-                contigious_mask,
-                image_info,
-                self._output_size,
-                is_training=is_training)
+            category_mask = tf.image.resize(category_mask, self._output_size, method='nearest')
+            instance_mask = tf.image.resize(instance_mask, self._output_size, method='nearest')
+            contigious_mask = tf.image.resize(contigious_mask, self._output_size, method='nearest')
         
 
         individual_masks, classes = self._get_individual_masks(
