@@ -22,10 +22,10 @@ class PanopticInference:
         mask_pred = tf.keras.activations.sigmoid(mask_pred)
         probs = tf.keras.activations.softmax(pred_logits, axis=-1) # (batch, num_predictions, num_classes) (2,100,134)
         scores = tf.reduce_max(probs, axis=-1) 
-        tf.print("scores :", scores)
+        print("scores :", scores)
         labels = tf.argmax(probs, axis=-1)
         
-        tf.print("labels :", labels)
+        print("labels :", labels)
         exit()
         # Keep only those masks that have high confidence and are not background
         # TODO : Some operations may be incompatible on TPU
