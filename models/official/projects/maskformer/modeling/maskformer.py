@@ -6,6 +6,7 @@ from official.projects.maskformer.modeling.layers.nn_block import MLPHead
 from official.projects.maskformer.modeling.decoder.transformer_pixel_decoder import TransformerFPN
 from official.projects.maskformer.modeling.decoder.pixel_decoder import CNNFPN
 import numpy as np
+
 class MaskFormer(tf.keras.Model):
 	"""Maskformer"""
 	def __init__(self,
@@ -120,7 +121,6 @@ class MaskFormer(tf.keras.Model):
 		return new_dict
 
 	def call(self, image, training = False):
-		
 		
 		backbone_feature_maps = self.backbone(image)
 

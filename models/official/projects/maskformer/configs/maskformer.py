@@ -133,10 +133,10 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
   decay_at = train_steps - 100 * steps_per_epoch  # 200 epochs
   config = cfg.ExperimentConfig(
   task = MaskFormerTask(
-        #   init_checkpoint=os.environ['RESNET_CKPT'],
-        #   init_checkpoint_modules='backbone',
-          init_checkpoint = os.environ['MASKFORMER_CKPT'],
-          init_checkpoint_modules='all',
+          init_checkpoint=os.environ['RESNET_CKPT'],
+          init_checkpoint_modules='backbone',
+        #   init_checkpoint = os.environ['MASKFORMER_CKPT'],
+        #   init_checkpoint_modules='all',
           bfloat16 = SET_MODEL_BFLOAT16,
           model = MaskFormer(
               input_size=[image_size,image_size,3],
@@ -187,7 +187,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
           summary_interval=ckpt_interval,
           checkpoint_interval=ckpt_interval,
           validation_interval= 5 * steps_per_epoch,
-          max_to_keep=1,
+          max_to_keep=5,
           best_checkpoint_export_subdir='best_ckpt',
           # TODO: Metric not implemented yet
           optimizer_config=optimization.OptimizationConfig({
