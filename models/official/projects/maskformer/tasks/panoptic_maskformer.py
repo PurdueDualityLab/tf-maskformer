@@ -72,7 +72,7 @@ class PanopticTask(base_task.Task):
 			status.expect_partial()
 			logging.info('Loaded whole model from %s',
 				 ckpt_dir_or_file)
-			exit()
+			
 			
 		elif self._task_config.init_checkpoint_modules == 'backbone':
 			ckpt = tf.train.Checkpoint(backbone=model.backbone)
