@@ -64,7 +64,8 @@ class PanopticTask(base_task.Task):
 			return checkpoint_path
 		
 		ckpt_dir_or_file = self._task_config.init_checkpoint
-		
+		print("[INFO] CKPT DIR or FILE : ", ckpt_dir_or_file)
+		exit()
 		if self._task_config.init_checkpoint_modules == 'all':
 			checkpoint_path = _get_checkpoint_path(ckpt_dir_or_file)
 			ckpt = tf.train.Checkpoint(model)
