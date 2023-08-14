@@ -366,6 +366,7 @@ class mask_former_parser(parser.Parser):
     #     return image, labels
     def _parse_data(self, data, is_training):
         image = data['image']
+
         # Normalize and prepare image and masks
         image = preprocess_ops.normalize_image(image)
         category_mask = tf.cast(
@@ -378,9 +379,15 @@ class mask_former_parser(parser.Parser):
             dtype=tf.float32)
         class_ids = tf.sparse.to_dense(data['groundtruth_panoptic_class_ids'], default_value=0)
         instance_ids = tf.sparse.to_dense(data['groundtruth_panoptic_instance_ids'], default_value=0)
+
         class_ids = tf.cast(class_ids, dtype=tf.float32)
         instance_ids = tf.cast(instance_ids, dtype=tf.float32)
         image_info = None
+        print("Image shape :", image.shape)
+        print("Category mask shape :", category_mask.shape)
+        print("Instance mask shape :", instance_mask.shape)
+        print("Contigious mask shape :", contigious_mask.shape)
+        exit()
         # Flips image randomly and crops randomly during training.
         if self._aug_rand_hflip and is_training:
            
@@ -444,8 +451,10 @@ class mask_former_parser(parser.Parser):
         # Add extra dimension to masks if missing
         if len(category_mask.shape) == 2:
             category_mask = tf.expand_dims(category_mask, axis=-1)
+
         if len(instance_mask.shape) == 2:
             instance_mask = tf.expand_dims(instance_mask, axis=-1)
+
         if len(contigious_mask.shape) == 2:
             contigious_mask = tf.expand_dims(contigious_mask, axis=-1)
 
@@ -459,6 +468,10 @@ class mask_former_parser(parser.Parser):
         instance_mask = tf.image.resize(instance_mask, self._output_size, method='nearest')
         individual_masks = tf.image.resize(individual_masks, self._output_size, method='nearest')
         
+        # print shapes of masks
+        # print('category_mask', category_mask.shape)
+        # print('instance_mask', instance_mask.shape)
+        # print('contigious_mask', contigious_mask.shape)
         # Cast image to float and set shapes of output.
         image = tf.cast(image, dtype=self._dtype)
         category_mask = tf.cast(category_mask, dtype=self._dtype)
