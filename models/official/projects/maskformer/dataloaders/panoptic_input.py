@@ -381,7 +381,7 @@ class mask_former_parser(parser.Parser):
         class_ids = tf.cast(class_ids, dtype=tf.float32)
         instance_ids = tf.cast(instance_ids, dtype=tf.float32)
         
-        # Flips image randomly during training.
+        # Flips image randomly and crops randomly during training.
         if self._aug_rand_hflip and is_training:
            
             masks = tf.stack([category_mask, instance_mask, contigious_mask], axis=0)
@@ -399,8 +399,7 @@ class mask_former_parser(parser.Parser):
             masks = tf.stack([category_mask, instance_mask, contigious_mask], axis=0)
             masks = tf.expand_dims(masks, -1)
        
-        # Resizes and crops image.
-        if is_training:
+            # Resizes and crops image.
             cropped_image, masks = preprocess_ops.random_crop_image_masks(
                 img = image,
                 masks = masks,
@@ -442,6 +441,14 @@ class mask_former_parser(parser.Parser):
                 self._output_size if self._pad_output else crop_im_size,
                 is_training=is_training)
         
+        # Add extra dimension to masks if missing
+        if len(category_mask.shape) == 2:
+            category_mask = tf.expand_dims(category_mask, axis=-1)
+        if len(instance_mask.shape) == 2:
+            instance_mask = tf.expand_dims(instance_mask, axis=-1)
+        if len(contigious_mask.shape) == 2:
+            contigious_mask = tf.expand_dims(contigious_mask, axis=-1)
+            
         individual_masks, classes = self._get_individual_masks(
                 class_ids=class_ids,contig_instance_mask=contigious_mask, instance_id = instance_ids, instance_mask=instance_mask)
 
