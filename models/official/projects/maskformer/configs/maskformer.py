@@ -192,8 +192,8 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
           # TODO: Metric not implemented yet
           optimizer_config=optimization.OptimizationConfig({
               'optimizer': {
-                  'type': 'detr_adamw',
-                  'detr_adamw': {
+                  'type': 'maskformer_adamw',
+                  'maskformer_adamw': {
                       'weight_decay_rate': 1e-4,
                       #FIXME: Updated gradient global_clipnorm from 0.1 to 0.01
                       'global_clipnorm': 0.1,

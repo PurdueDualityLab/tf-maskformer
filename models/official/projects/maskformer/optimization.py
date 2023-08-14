@@ -21,13 +21,13 @@ from official.nlp import optimization as nlp_optimization
 
 
 @dataclasses.dataclass
-class DETRAdamWConfig(optimization.AdamWeightDecayConfig):
+class MaskFormerAdamWConfig(optimization.AdamWeightDecayConfig):
   pass
 
 
 @dataclasses.dataclass
 class OptimizerConfig(optimization.OptimizerConfig):
-  detr_adamw: DETRAdamWConfig = DETRAdamWConfig()
+  maskformer_adamw: MaskFormerAdamWConfig = MaskFormerAdamWConfig()
 
 
 @dataclasses.dataclass
@@ -46,7 +46,7 @@ class OptimizationConfig(optimization.OptimizationConfig):
 
 # TODO(frederickliu): figure out how to make this configuable.
 # TODO(frederickliu): Study if this is needed.
-class _DETRAdamW(nlp_optimization.AdamWeightDecay):
+class _MaskformerAdamW(nlp_optimization.AdamWeightDecay):
   """Custom AdamW to support different lr scaling for backbone.
 
   The code is copied from AdamWeightDecay and Adam with learning scaling.
@@ -58,7 +58,7 @@ class _DETRAdamW(nlp_optimization.AdamWeightDecay):
     
     if 'transformer_fpn' not in var.name and 'mask_former_transformer' not in var.name and 'mlp_head' not in var.name:
       lr_t *= 0.1
-     
+    print(var.name, lr_t)
     decay = self._decay_weights_op(var, lr_t, apply_state)
     with tf.control_dependencies([decay]):
       var_device, var_dtype = var.device, var.dtype.base_dtype
@@ -98,7 +98,7 @@ class _DETRAdamW(nlp_optimization.AdamWeightDecay):
             epsilon=coefficients['epsilon'],
             grad=grad,
             use_locking=self._use_locking)
-
+    exit()
 # Not sure if maskformer uses this
   # def _resource_apply_sparse(self, grad, var, indices, apply_state=None):
   #   lr_t, kwargs = self._get_lr(var.device, var.dtype.base_dtype, apply_state)
@@ -147,4 +147,4 @@ class _DETRAdamW(nlp_optimization.AdamWeightDecay):
   #           use_locking=self._use_locking)
   #       return tf.group(*[var_update, m_t, v_t, v_hat_t])
 
-optimization.register_optimizer_cls('detr_adamw', _DETRAdamW)
+optimization.register_optimizer_cls('maskformer_adamw', _MaskformerAdamW)
