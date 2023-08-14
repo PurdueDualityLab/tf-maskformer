@@ -232,10 +232,10 @@ class Controller:
     tf.summary.experimental.set_step(self.global_step)
 
     # Restores the model if needed.
-    # if self.checkpoint_manager is not None:
-    #   restored_path = self.restore_checkpoint()
-    #   if restored_path:
-    #     _log(f"restored from checkpoint: {restored_path}")
+    if self.checkpoint_manager is not None:
+      restored_path = self.restore_checkpoint()
+      if restored_path:
+        _log(f"restored from checkpoint: {restored_path}")
 
   def train(self, steps: int, checkpoint_at_completion: bool = True):
     """Runs training until the specified global step count has been reached.
