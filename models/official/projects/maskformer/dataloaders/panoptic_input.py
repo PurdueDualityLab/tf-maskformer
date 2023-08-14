@@ -400,6 +400,7 @@ class mask_former_parser(parser.Parser):
         masks = tf.expand_dims(masks, -1)
        
         # Resizes and crops image.
+
         cropped_image, masks = preprocess_ops.random_crop_image_masks(
             img = image,
             masks = masks,
@@ -441,6 +442,11 @@ class mask_former_parser(parser.Parser):
             self._output_size if self._pad_output else crop_im_size,
             is_training=is_training)
         
+        # print shapes of all the masks
+        print('category_mask', category_mask.shape)
+        print('instance_mask', instance_mask.shape)
+        print('contigious_mask', contigious_mask.shape)
+        exit()
         individual_masks, classes = self._get_individual_masks(
                 class_ids=class_ids,contig_instance_mask=contigious_mask, instance_id = instance_ids, instance_mask=instance_mask)
 
