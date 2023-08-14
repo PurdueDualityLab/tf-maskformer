@@ -198,11 +198,18 @@ class mask_former_parser(parser.Parser):
     
     def _resize_and_crop_mask(self, mask, image_info, crop_dims, is_training):
         """Resizes and crops mask using `image_info` dict."""
-        
-        image_scale = image_info[2, :]
-        offset = image_info[3, : ]
-        im_height = int(image_info[0][0])
-        im_width = int(image_info[0][1])
+        if image_info != None and is_training:
+            image_scale = image_info[2, :]
+            offset = image_info[3, : ]
+            im_height = int(image_info[0][0])
+            im_width = int(image_info[0][1])
+        elif image_info == None and not is_training:
+            image_scale = tf.constant([1.0, 1.0])
+            offset = tf.constant([0, 0])
+            im_height = self._output_size[0]
+            im_width = self._output_size[1]
+        else:
+            raise Exception("Error: image_info is None and is_training is True")
 
         # print(mask.shape)
         
@@ -212,6 +219,7 @@ class mask_former_parser(parser.Parser):
 
         if is_training:
             # print("using image offset:",offset)
+            assert crop_dims != None
             mask = preprocess_ops.resize_and_crop_masks(
                 mask,
                 image_scale,
@@ -383,13 +391,12 @@ class mask_former_parser(parser.Parser):
         
         # Flips image randomly during training.
         if self._aug_rand_hflip and is_training:
-           
             masks = tf.stack([category_mask, instance_mask, contigious_mask], axis=0)
             image, _, masks = preprocess_ops.random_horizontal_flip(
                 image=image, 
                 masks=masks,
                 seed = self._seed,
-                prob=0.5)
+                prob=tf.where(self.aug_rand_hflip, 0.5, 0.0))
 
             category_mask = masks[0]
             instance_mask = masks[1]
@@ -426,31 +433,51 @@ class mask_former_parser(parser.Parser):
                 aug_scale_min=self._aug_scale_min if self._pad_output or not self._is_training else 1.0,
                 aug_scale_max=self._aug_scale_max  if self._pad_output or not self._is_training else 1.0)
         
-        category_mask = self._resize_and_crop_mask(
-            category_mask,
-            image_info,
-            self._output_size if self._pad_output else crop_im_size,
-            is_training=is_training)
-        instance_mask = self._resize_and_crop_mask(
-            instance_mask,
-            image_info,
-            self._output_size if self._pad_output else crop_im_size,
-            is_training=is_training)
-        contigious_mask = self._resize_and_crop_mask(
-            contigious_mask,
-            image_info,
-            self._output_size if self._pad_output else crop_im_size,
-            is_training=is_training)
+            category_mask = self._resize_and_crop_mask(
+                category_mask,
+                image_info,
+                self._output_size if self._pad_output else crop_im_size,
+                is_training=is_training)
+            instance_mask = self._resize_and_crop_mask(
+                instance_mask,
+                image_info,
+                self._output_size if self._pad_output else crop_im_size,
+                is_training=is_training)
+            contigious_mask = self._resize_and_crop_mask(
+                contigious_mask,
+                image_info,
+                self._output_size if self._pad_output else crop_im_size,
+                is_training=is_training)
         
-        # print shapes of all the masks
-        print('category_mask', category_mask.shape)
-        print('instance_mask', instance_mask.shape)
-        print('contigious_mask', contigious_mask.shape)
-        exit()
+        if not is_training:
+            # Resize the image
+            image, image_info = preprocess_ops.resize_and_crop_image(image, self._output_size, self._output_size,
+                                                                     aug_scale_min=1.0, aug_scale_max=1.0)
+            # expand the dims for the each mask
+            category_mask = tf.expand_dims(category_mask, -1)
+            instance_mask = tf.expand_dims(instance_mask, -1)
+            contigious_mask = tf.expand_dims(contigious_mask, -1)
+
+            category_mask = self._resize_and_crop_mask(
+                category_mask,
+                image_info,
+                self._output_size,
+                is_training=is_training)
+            instance_mask = self._resize_and_crop_mask(
+                instance_mask,
+                image_info,
+                self._output_size,
+                is_training=is_training)
+            contigious_mask = self._resize_and_crop_mask(
+                contigious_mask,
+                image_info,
+                self._output_size,
+                is_training=is_training)
+        
+
         individual_masks, classes = self._get_individual_masks(
                 class_ids=class_ids,contig_instance_mask=contigious_mask, instance_id = instance_ids, instance_mask=instance_mask)
 
-        
         # Resize image and masks to output size.
         image = tf.image.resize(image, self._output_size, method='nearest')
         category_mask = tf.image.resize(category_mask, self._output_size, method='nearest')
