@@ -439,7 +439,7 @@ class mask_former_parser(parser.Parser):
         
         if not is_training:
             # Resize the image
-            image, _ = preprocess_ops.resize_and_crop_image(image, self._output_size, self._output_size,
+            image, image_info = preprocess_ops.resize_and_crop_image(image, self._output_size, self._output_size,
                                                                      aug_scale_min=1.0, aug_scale_max=1.0)
             # expand the dims for the each mask
             category_mask = tf.expand_dims(category_mask, -1)
