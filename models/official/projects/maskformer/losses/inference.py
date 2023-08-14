@@ -14,8 +14,8 @@ class PanopticInference:
         
         cat_id_map = {}
         is_this_thing = {}
-        # np.save("classes.npy", pred_logits.numpy())
-        # np.save("masks.npy", mask_pred.numpy())
+        np.save("pred_classes.npy", pred_logits.numpy())
+        np.save("pred_masks.npy", mask_pred.numpy())
         # exit()
         # Apply softmax and sigmoid on the predictions and predicted masks
         mask_pred =  tf.image.resize(mask_pred, (image_shape[0], image_shape[1]), method=tf.image.ResizeMethod.BILINEAR)
