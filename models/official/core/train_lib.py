@@ -100,7 +100,7 @@ class OrbitExperimentRunner:
     self._model_dir = model_dir
     self._mode = mode
     self._run_post_eval = run_post_eval
-
+  
     self._trainer = trainer or self._build_trainer(
         task,
         train='train' in mode,
@@ -345,8 +345,7 @@ def run_experiment(
       eval_logs: returns eval metrics logs when run_post_eval is set to True,
         otherwise, returns {}.
   """
-  print("Trainer used :", trainer)
-  exit()
+  
   runner = OrbitExperimentRunner(
       distribution_strategy=distribution_strategy,
       task=task,
