@@ -168,8 +168,7 @@ class Controller:
       ValueError: If `summary_interval` is not a positive integer or is not
         divisible by `steps_per_loop`.
     """
-    print("[INFO] Initilializing controller class....")
-    exit()
+    
     if trainer is None and evaluator is None:
       raise ValueError("`trainer` and `evaluator` should not both be `None`.")
 
@@ -233,10 +232,10 @@ class Controller:
     tf.summary.experimental.set_step(self.global_step)
 
     # Restores the model if needed.
-    if self.checkpoint_manager is not None:
-      restored_path = self.restore_checkpoint()
-      if restored_path:
-        _log(f"restored from checkpoint: {restored_path}")
+    # if self.checkpoint_manager is not None:
+    #   restored_path = self.restore_checkpoint()
+    #   if restored_path:
+    #     _log(f"restored from checkpoint: {restored_path}")
 
   def train(self, steps: int, checkpoint_at_completion: bool = True):
     """Runs training until the specified global step count has been reached.
