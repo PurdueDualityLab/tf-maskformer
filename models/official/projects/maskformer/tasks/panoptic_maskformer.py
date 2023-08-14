@@ -226,8 +226,7 @@ class PanopticTask(base_task.Task):
 		tvars = model.trainable_variables
 		
 		grads = tape.gradient(total_loss, tvars)
-		print("Optimizer :", optimizer)
-		exit()
+		
 		optimizer.apply_gradients(list(zip(grads, tvars)))
 		
 		# # Multiply for logging.
