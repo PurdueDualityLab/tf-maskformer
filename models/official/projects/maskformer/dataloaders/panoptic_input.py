@@ -198,10 +198,7 @@ class mask_former_parser(parser.Parser):
     
     def _resize_and_crop_mask(self, mask, image_info, crop_dims, is_training):
         """Resizes and crops mask using `image_info` dict."""
-        # print("[DEBUG] RESIZE and CROP MASK..........")
-        # print("GT Padded size :", self._groundtruth_padded_size)
-        # print("Mask type :", type(mask))
-        # exit()
+        
         image_scale = image_info[2, :]
         offset = image_info[3, : ]
         im_height = int(image_info[0][0])
@@ -398,51 +395,52 @@ class mask_former_parser(parser.Parser):
             instance_mask = masks[1]
             contigious_mask = masks[2]
 
-        # Resize and crops image.
-        masks = tf.stack([category_mask, instance_mask, contigious_mask], axis=0)
-        masks = tf.expand_dims(masks, -1)
+            # Resize and crops image.
+            masks = tf.stack([category_mask, instance_mask, contigious_mask], axis=0)
+            masks = tf.expand_dims(masks, -1)
        
         # Resizes and crops image.
-        cropped_image, masks = preprocess_ops.random_crop_image_masks(
-            img = image,
-            masks = masks,
-            min_scale = self._min_scale,
-            aspect_ratio_range = self._aspect_ratio_range,
-            min_overlap_params = self._min_overlap_params,
-            max_retry = self._max_retry,
-            seed = self._seed,
-        )
+        if is_training:
+            cropped_image, masks = preprocess_ops.random_crop_image_masks(
+                img = image,
+                masks = masks,
+                min_scale = self._min_scale,
+                aspect_ratio_range = self._aspect_ratio_range,
+                min_overlap_params = self._min_overlap_params,
+                max_retry = self._max_retry,
+                seed = self._seed,
+            )
                                                                       
                                                                       
-        category_mask = tf.squeeze(masks[0])
-        instance_mask = tf.squeeze(masks[1])
-        contigious_mask = tf.squeeze(masks[2])
+            category_mask = tf.squeeze(masks[0])
+            instance_mask = tf.squeeze(masks[1])
+            contigious_mask = tf.squeeze(masks[2])
         
-        crop_im_size = tf.cast(tf.shape(cropped_image)[0:2], tf.int32)
+            crop_im_size = tf.cast(tf.shape(cropped_image)[0:2], tf.int32)
         
-        # Resize image
-        image, image_info = preprocess_ops.resize_and_crop_image(
-            cropped_image,
-            self._output_size if self._pad_output else crop_im_size,
-            self._output_size if self._pad_output else crop_im_size,
-            aug_scale_min=self._aug_scale_min if self._pad_output or not self._is_training else 1.0,
-            aug_scale_max=self._aug_scale_max  if self._pad_output or not self._is_training else 1.0)
-     
-        category_mask = self._resize_and_crop_mask(
-            category_mask,
-            image_info,
-            self._output_size if self._pad_output else crop_im_size,
-            is_training=is_training)
-        instance_mask = self._resize_and_crop_mask(
-            instance_mask,
-            image_info,
-            self._output_size if self._pad_output else crop_im_size,
-            is_training=is_training)
-        contigious_mask = self._resize_and_crop_mask(
-            contigious_mask,
-            image_info,
-            self._output_size if self._pad_output else crop_im_size,
-            is_training=is_training)
+            # Resize image
+            image, image_info = preprocess_ops.resize_and_crop_image(
+                cropped_image,
+                self._output_size if self._pad_output else crop_im_size,
+                self._output_size if self._pad_output else crop_im_size,
+                aug_scale_min=self._aug_scale_min if self._pad_output or not self._is_training else 1.0,
+                aug_scale_max=self._aug_scale_max  if self._pad_output or not self._is_training else 1.0)
+        
+            category_mask = self._resize_and_crop_mask(
+                category_mask,
+                image_info,
+                self._output_size if self._pad_output else crop_im_size,
+                is_training=is_training)
+            instance_mask = self._resize_and_crop_mask(
+                instance_mask,
+                image_info,
+                self._output_size if self._pad_output else crop_im_size,
+                is_training=is_training)
+            contigious_mask = self._resize_and_crop_mask(
+                contigious_mask,
+                image_info,
+                self._output_size if self._pad_output else crop_im_size,
+                is_training=is_training)
         
         individual_masks, classes = self._get_individual_masks(
                 class_ids=class_ids,contig_instance_mask=contigious_mask, instance_id = instance_ids, instance_mask=instance_mask)

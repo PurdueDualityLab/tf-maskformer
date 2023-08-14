@@ -104,16 +104,15 @@ class PanopticTask(base_task.Task):
 		  parser_fn=parser.parse_fn(params.is_training))
 		
 		dataset = reader.read(input_context=input_context)
-		# for sample in dataset.take(1):
-		# 	# print(f"unique idsin dataset take : {sample[1]['unique_ids']}")
-		# 	print("individual masks :", sample[1]["individual_masks"].shape)
-			
-		# 	# np.save("contigious_mask.npy", sample[1]["contigious_mask"].numpy())
-		# 	print(f"image shape : {sample[0].shape}")
-		# 	# np.save("individual_masks.npy", sample[1]["individual_masks"].numpy())
-		# 	# np.save("unique_ids.npy", sample[1]["unique_ids"].numpy())
-		# 	# np.save("image.npy", sample[0].numpy())
-		# 	exit()
+		for sample in dataset.take(1):
+			# print(f"unique idsin dataset take : {sample[1]['unique_ids']}")
+			print("individual masks :", sample[1]["individual_masks"].shape)
+			# np.save("contigious_mask.npy", sample[1]["contigious_mask"].numpy())
+			print(f"image shape : {sample[0].shape}")
+			# np.save("individual_masks.npy", sample[1]["individual_masks"].numpy())
+			# np.save("unique_ids.npy", sample[1]["unique_ids"].numpy())
+			# np.save("image.npy", sample[0].numpy())
+			# exit()
 		return dataset
 
 
@@ -271,9 +270,8 @@ class PanopticTask(base_task.Task):
 		"""
 		pred_binary_masks = outputs["mask_prob_predictions"]
 		pred_labels = outputs["class_prob_predictions"]
-		# ouput_instance_mask, output_category_mask = self.panoptic_inference(pred_labels,pred_binary_masks, image_shapes)
-		# return ouput_instance_mask, output_category_mask
-		self.panoptic_inference(pred_labels,pred_binary_masks, image_shapes)
+		ouput_instance_mask, output_category_mask = self.panoptic_inference( pred_labels,pred_binary_masks, image_shapes)
+		return ouput_instance_mask, output_category_mask
 
 	def validation_step(self, inputs, model, metrics=None):
 		features, labels = inputs
@@ -302,17 +300,16 @@ class PanopticTask(base_task.Task):
 			'instance_mask': labels['instance_mask'],
 			# 'image_info': labels['image_info'],
 			}
-			self._postprocess_outputs(outputs, [640, 640])
 			# FIXME : The image shape must not be fixed
-			# output_category_mask, output_instance_mask = self._postprocess_outputs(outputs, [640, 640])
-			# pq_metric_outputs = {
-			# 'category_mask': output_category_mask,
-			# 'instance_mask': output_instance_mask,
-			# }
+			output_category_mask, output_instance_mask = self._postprocess_outputs(outputs, [640, 640])
+			pq_metric_outputs = {
+			'category_mask': output_category_mask,
+			'instance_mask': output_instance_mask,
+			}
 			
-			# self.panoptic_quality_metric.update_state(
-		  	# pq_metric_labels, pq_metric_outputs
-	  		# )
+			self.panoptic_quality_metric.update_state(
+		  	pq_metric_labels, pq_metric_outputs
+	  		)
 
 	def aggregate_logs(self, state=None, step_outputs=None):
 		is_first_step = not state
