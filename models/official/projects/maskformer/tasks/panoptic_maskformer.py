@@ -52,8 +52,7 @@ class PanopticTask(base_task.Task):
 		"""
 		Used to initialize the models with checkpoint
 		"""
-		print("[DEBUG] : Inside initialize [panoptic_maskformer.py]")
-		exit()
+		
 		if not self._task_config.init_checkpoint:
 			return
 		
@@ -192,7 +191,7 @@ class PanopticTask(base_task.Task):
 						
 						
 		features, labels = inputs
-		exit()
+		
 		
 		with tf.GradientTape() as tape:
 			outputs = model(features, training=True)
