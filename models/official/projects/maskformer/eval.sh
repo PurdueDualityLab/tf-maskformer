@@ -21,6 +21,5 @@ task.init_checkpoint=$MASKFORMER_CKPT"
 python3 models/official/projects/maskformer/train.py \
   --experiment maskformer_coco_panoptic \
   --mode eval \
-  --model_dir $MODEL_DIR \
   --tpu $TPU_NAME \
   --params_override=$OVERRIDES
