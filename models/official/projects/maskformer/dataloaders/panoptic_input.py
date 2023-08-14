@@ -384,7 +384,7 @@ class mask_former_parser(parser.Parser):
                 image=image, 
                 masks=masks,
                 seed = self._seed,
-                prob=tf.where(self.aug_rand_hflip, 0.5, 0.0))
+                prob=tf.where(self._aug_rand_hflip, 0.5, 0.0))
 
             category_mask = masks[0]
             instance_mask = masks[1]
