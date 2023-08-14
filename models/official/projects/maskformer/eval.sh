@@ -2,7 +2,7 @@
 train_bsize=8
 eval_bsize=8
 export PYTHONPATH=$PYTHONPATH:~/tf-maskformer/models
-export MODEL_DIR="gs://cam2-models/maskformer_vishal_exps/EXP12_v8_eval"
+# export MODEL_DIR="gs://cam2-models/maskformer_vishal_exps/EXP12_v8_eval"
 export MASKFORMER_CKPT="gs://cam2-models/maskformer_vishal_exps/EXP12_v8/ckpt-77616"
 export RESNET_CKPT="gs://cam2-models/maskformer_vishal_exps/resnet50_pretrained/tfmg/ckpt-62400"
 export TPU_NAME="tf-debug-10"
@@ -17,7 +17,7 @@ export IMG_SIZE=640
 export OVERRIDES="runtime.distribution_strategy=tpu,runtime.mixed_precision_dtype=float32,\
 task.validation_data.global_batch_size=$EVAL_BATCH_SIZE,task.model.which_pixel_decoder=transformer_fpn,\
 task.init_checkpoint_modules=all,\
-task.init_checkpoint=$MODEL_DIR"
+task.init_checkpoint=$MASKFORMER_CKPT"
 python3 models/official/projects/maskformer/train.py \
   --experiment maskformer_coco_panoptic \
   --mode eval \

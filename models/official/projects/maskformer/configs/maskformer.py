@@ -135,7 +135,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
   task = MaskFormerTask(
         #   init_checkpoint=os.environ['RESNET_CKPT'],
         #   init_checkpoint_modules='backbone',
-          init_checkpoint=os.environ['MASKFORMER_CKPT'],
+          init_checkpoint = os.environ['MASKFORMER_CKPT'],
           init_checkpoint_modules='all',
           bfloat16 = SET_MODEL_BFLOAT16,
           model = MaskFormer(
