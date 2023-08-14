@@ -271,8 +271,9 @@ class PanopticTask(base_task.Task):
 		"""
 		pred_binary_masks = outputs["mask_prob_predictions"]
 		pred_labels = outputs["class_prob_predictions"]
-		ouput_instance_mask, output_category_mask = self.panoptic_inference( pred_labels,pred_binary_masks, image_shapes)
-		return ouput_instance_mask, output_category_mask
+		# ouput_instance_mask, output_category_mask = self.panoptic_inference(pred_labels,pred_binary_masks, image_shapes)
+		# return ouput_instance_mask, output_category_mask
+		self.panoptic_inference(pred_labels,pred_binary_masks, image_shapes)
 
 	def validation_step(self, inputs, model, metrics=None):
 		features, labels = inputs
@@ -301,16 +302,17 @@ class PanopticTask(base_task.Task):
 			'instance_mask': labels['instance_mask'],
 			# 'image_info': labels['image_info'],
 			}
+			self._postprocess_outputs(outputs, [640, 640])
 			# FIXME : The image shape must not be fixed
-			output_category_mask, output_instance_mask = self._postprocess_outputs(outputs, [640, 640])
-			pq_metric_outputs = {
-			'category_mask': output_category_mask,
-			'instance_mask': output_instance_mask,
-			}
+			# output_category_mask, output_instance_mask = self._postprocess_outputs(outputs, [640, 640])
+			# pq_metric_outputs = {
+			# 'category_mask': output_category_mask,
+			# 'instance_mask': output_instance_mask,
+			# }
 			
-			self.panoptic_quality_metric.update_state(
-		  	pq_metric_labels, pq_metric_outputs
-	  		)
+			# self.panoptic_quality_metric.update_state(
+		  	# pq_metric_labels, pq_metric_outputs
+	  		# )
 
 	def aggregate_logs(self, state=None, step_outputs=None):
 		is_first_step = not state
