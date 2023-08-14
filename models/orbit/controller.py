@@ -168,6 +168,8 @@ class Controller:
       ValueError: If `summary_interval` is not a positive integer or is not
         divisible by `steps_per_loop`.
     """
+    print("[INFO] Initilializing controller class....")
+    exit()
     if trainer is None and evaluator is None:
       raise ValueError("`trainer` and `evaluator` should not both be `None`.")
 

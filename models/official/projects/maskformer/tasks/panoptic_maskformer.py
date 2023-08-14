@@ -9,7 +9,7 @@ from official.projects.maskformer.dataloaders import input_reader
 from official.vision.dataloaders import input_reader_factory
 from official.common import dataset_fn
 
-from official.projects.maskformer.configs import maskformer as exp_cfg
+from official.projects.maskformer.configs import maskformer as maskformer_cfg
 from official.projects.maskformer.modeling.maskformer import MaskFormer
 from official.projects.maskformer.losses.maskformer_losses import Loss
 from official.projects.maskformer.dataloaders import panoptic_input
@@ -23,7 +23,7 @@ from official.projects.maskformer.losses.inference import PanopticInference
 import numpy as np
 
 
-@task_factory.register_task_cls(exp_cfg.MaskFormerTask)
+@task_factory.register_task_cls(maskformer_cfg.MaskFormerTask)
 class PanopticTask(base_task.Task):
 	"""A single-replica view of training procedure.
 
