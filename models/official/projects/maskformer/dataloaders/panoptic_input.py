@@ -198,27 +198,16 @@ class mask_former_parser(parser.Parser):
     
     def _resize_and_crop_mask(self, mask, image_info, crop_dims, is_training):
         """Resizes and crops mask using `image_info` dict."""
-        if image_info != None and is_training:
-            image_scale = image_info[2, :]
-            offset = image_info[3, : ]
-            im_height = int(image_info[0][0])
-            im_width = int(image_info[0][1])
-        elif image_info == None and not is_training:
-            image_scale = tf.constant([1.0, 1.0])
-            offset = tf.constant([0, 0])
-            im_height = self._output_size[0]
-            im_width = self._output_size[1]
-        else:
-            raise Exception("Error: image_info is None and is_training is True")
-
-        # print(mask.shape)
+       
+        image_scale = image_info[2, :]
+        offset = image_info[3, : ]
+        im_height = int(image_info[0][0])
+        im_width = int(image_info[0][1])
         
         mask = tf.reshape(mask, shape=[1, im_height, im_width, 1])
-        # print(mask.shape)
         mask += 1
 
         if is_training:
-            # print("using image offset:",offset)
             assert crop_dims != None
             mask = preprocess_ops.resize_and_crop_masks(
                 mask,
@@ -226,7 +215,6 @@ class mask_former_parser(parser.Parser):
                 crop_dims,
                 offset)
         else:
-            
             mask = tf.image.pad_to_bounding_box(
                 mask, 0, 0,
                 self._groundtruth_padded_size[0],
@@ -451,7 +439,7 @@ class mask_former_parser(parser.Parser):
         
         if not is_training:
             # Resize the image
-            image, image_info = preprocess_ops.resize_and_crop_image(image, self._output_size, self._output_size,
+            image, _ = preprocess_ops.resize_and_crop_image(image, self._output_size, self._output_size,
                                                                      aug_scale_min=1.0, aug_scale_max=1.0)
             # expand the dims for the each mask
             category_mask = tf.expand_dims(category_mask, -1)
