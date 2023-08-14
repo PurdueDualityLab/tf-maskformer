@@ -26,7 +26,7 @@ class PanopticInference:
         labels = tf.argmax(probs, axis=-1)
         
         print("labels :", labels)
-        
+        exit()
         # Keep only those masks that have high confidence and are not background
         # TODO : Some operations may be incompatible on TPU
        
