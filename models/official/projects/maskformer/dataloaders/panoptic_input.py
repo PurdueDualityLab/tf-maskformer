@@ -380,7 +380,7 @@ class mask_former_parser(parser.Parser):
         instance_ids = tf.sparse.to_dense(data['groundtruth_panoptic_instance_ids'], default_value=0)
         class_ids = tf.cast(class_ids, dtype=tf.float32)
         instance_ids = tf.cast(instance_ids, dtype=tf.float32)
-        
+        image_info = None
         # Flips image randomly and crops randomly during training.
         if self._aug_rand_hflip and is_training:
            
@@ -448,7 +448,7 @@ class mask_former_parser(parser.Parser):
             instance_mask = tf.expand_dims(instance_mask, axis=-1)
         if len(contigious_mask.shape) == 2:
             contigious_mask = tf.expand_dims(contigious_mask, axis=-1)
-            
+
         individual_masks, classes = self._get_individual_masks(
                 class_ids=class_ids,contig_instance_mask=contigious_mask, instance_id = instance_ids, instance_mask=instance_mask)
 
