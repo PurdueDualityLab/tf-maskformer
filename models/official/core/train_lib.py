@@ -106,6 +106,8 @@ class OrbitExperimentRunner:
         train='train' in mode,
         evaluate=('eval' in mode) or run_post_eval)
     assert self.trainer is not None
+    print("trainer :", self.trainer)
+    
     self._checkpoint_manager = self._maybe_build_checkpoint_manager()
     self._summary_manager = summary_manager
     self._eval_summary_manager = eval_summary_manager
@@ -162,6 +164,7 @@ class OrbitExperimentRunner:
     """Maybe create a CheckpointManager."""
     assert self.trainer is not None
     if self.trainer.checkpoint:
+      print("ckpt manager is not None")
       if self.model_dir is None:
         raise ValueError('model_dir must be specified, but got None')
 
@@ -176,7 +179,7 @@ class OrbitExperimentRunner:
         # workers.
         ckpt_path = tempfile.mkdtemp()
         max_to_keep = 1
-
+      print("initialize function : ", self.trainer.initialize)
       checkpoint_manager = tf.train.CheckpointManager(
           self.trainer.checkpoint,
           directory=ckpt_path,
@@ -186,7 +189,9 @@ class OrbitExperimentRunner:
           init_fn=self.trainer.initialize)
       
     else:
+      print("ckpt manager is None")
       checkpoint_manager = None
+    exit()
     return checkpoint_manager
 
   def _build_controller(self,
