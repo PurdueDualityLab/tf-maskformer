@@ -426,21 +426,21 @@ class mask_former_parser(parser.Parser):
                 aug_scale_min=self._aug_scale_min if self._pad_output or not self._is_training else 1.0,
                 aug_scale_max=self._aug_scale_max  if self._pad_output or not self._is_training else 1.0)
         
-            category_mask = self._resize_and_crop_mask(
-                category_mask,
-                image_info,
-                self._output_size if self._pad_output else crop_im_size,
-                is_training=is_training)
-            instance_mask = self._resize_and_crop_mask(
-                instance_mask,
-                image_info,
-                self._output_size if self._pad_output else crop_im_size,
-                is_training=is_training)
-            contigious_mask = self._resize_and_crop_mask(
-                contigious_mask,
-                image_info,
-                self._output_size if self._pad_output else crop_im_size,
-                is_training=is_training)
+        category_mask = self._resize_and_crop_mask(
+            category_mask,
+            image_info,
+            self._output_size if self._pad_output else crop_im_size,
+            is_training=is_training)
+        instance_mask = self._resize_and_crop_mask(
+            instance_mask,
+            image_info,
+            self._output_size if self._pad_output else crop_im_size,
+            is_training=is_training)
+        contigious_mask = self._resize_and_crop_mask(
+            contigious_mask,
+            image_info,
+            self._output_size if self._pad_output else crop_im_size,
+            is_training=is_training)
         
         # print shapes of all the masks
         print('category_mask', category_mask.shape)
