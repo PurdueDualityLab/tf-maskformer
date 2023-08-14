@@ -229,9 +229,9 @@ class PanopticTask(base_task.Task):
 		
 		optimizer.apply_gradients(list(zip(grads, tvars)))
 		probs = tf.keras.activations.softmax(outputs["class_prob_predictions"], axis=-1)
-		labels = tf.argmax(probs, axis=-1)
+		pred_labels = tf.argmax(probs, axis=-1)
 		print("Target labels :", labels["unique_ids"])
-		print("Output labels :", labels)
+		print("Output labels :", pred_labels)
 
 		# # Multiply for logging.
 		# # Since we expect the gradient replica sum to happen in the optimizer,
