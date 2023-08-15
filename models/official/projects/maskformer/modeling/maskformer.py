@@ -67,14 +67,13 @@ class MaskFormer(tf.keras.Model):
 		self._backbone_endpoint = backbone_endpoint_name
 		self._bfloat16 = bfloat16
 		self._pixel_decoder = which_pixel_decoder
-		print("[MaskFormer] Bfloat config : ", self._bfloat16)
 		# Backbone feature extractor.
-		self.backbone = resnet.ResNet(50, input_specs = self._input_specs, bn_trainable=False)
+		# FIXME : Made BN trainable True
+		self.backbone = resnet.ResNet(50, input_specs = self._input_specs, bn_trainable=True)
 		
 	def build(self, image_shape):
 		#backbone
 		print("[Build MaskFormer] image shape: ", image_shape)
-
 		#decoders
 		if self._pixel_decoder == 'transformer_fpn':
 			self.pixel_decoder = TransformerFPN(batch_size = self._batch_size,

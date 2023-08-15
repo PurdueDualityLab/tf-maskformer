@@ -141,7 +141,6 @@ class Loss:
         max_cost * tf.ones_like(total_cost, dtype=total_cost.dtype),
         total_cost)
        
-       
         _, inds = matchers.hungarian_matching(total_cost)
         indices = tf.stop_gradient(inds)
        
@@ -157,7 +156,7 @@ class Loss:
         cls_outputs = outputs["pred_logits"] # [batchsize, num_queries, num_classes] [1,100,134]
         cls_masks = outputs["pred_masks"]# [batchsize,num_queries, h, w]
         individual_masks = y_true["individual_masks"] # [batchsize, num_gt_objects, h, w,]
-        contigious_masks = y_true["contigious_mask"] # [batchsize, h, w, 1]
+        # contigious_masks = y_true["contigious_mask"] # [batchsize, h, w, 1]
         
         cls_assigned = tf.gather(cls_outputs, target_index, batch_dims=1, axis=1)
         mask_assigned = tf.gather(cls_masks, target_index, batch_dims=1, axis=1)
@@ -195,10 +194,10 @@ class Loss:
         out_mask = tf.transpose(out_mask, perm=[0,3,1,2])
         # FIXME : Do we need this??
         
-        invalid_mask = tf.expand_dims(tf.cast(tf.equal(tf.squeeze(contigious_masks, -1), 133), dtype=tf.float32), axis=1) # [b, 1, h, w]
+        # invalid_mask = tf.expand_dims(tf.cast(tf.equal(tf.squeeze(contigious_masks, -1), 133), dtype=tf.float32), axis=1) # [b, 1, h, w]
         
-        out_mask = out_mask * (1 - invalid_mask) 
-        tgt_mask = tgt_mask * (1 - invalid_mask)
+        # out_mask = out_mask * (1 - invalid_mask) 
+        # tgt_mask = tgt_mask * (1 - invalid_mask)
         out_mask = tf.reshape(out_mask, [tf.shape(out_mask)[0], tf.shape(out_mask)[1], -1]) # [b, 100, h*w]
         tgt_mask = tf.reshape(tgt_mask, [tf.shape(tgt_mask)[0],tf.shape(tgt_mask)[1], -1])
         
