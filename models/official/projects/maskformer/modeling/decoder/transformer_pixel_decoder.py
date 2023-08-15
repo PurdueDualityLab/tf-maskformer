@@ -54,12 +54,10 @@ class TransformerFPN(tf.keras.layers.Layer):
         if tf.keras.backend.image_data_format() == 'channels_last':
             # format: (batch_size, height, width, channels)
             self._channels_last = True
-            print("channels last is Truee....")
         else:
             # format: (batch_size, channels, width, height)
             self._channels_last = False
-            print("channels last is False....")
-
+            
     def build(self, multilevel_features):
         conv_args = {
             "data_format": self._data_format,
