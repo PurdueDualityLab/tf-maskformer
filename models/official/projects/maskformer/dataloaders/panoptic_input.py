@@ -475,7 +475,7 @@ class mask_former_parser(parser.Parser):
         labels = {
             'category_mask': category_mask,
             'instance_mask': instance_mask,
-            'contigious_mask': contigious_mask, 
+            # 'contigious_mask': contigious_mask, 
             'valid_mask': valid_mask,
             'things_mask': things_mask,
             'image_info': image_info,

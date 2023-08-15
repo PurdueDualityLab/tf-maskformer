@@ -148,7 +148,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
               input_path=os.path.join(COCO_INPUT_PATH_BASE, 'train*'),
               is_training=True,
               global_batch_size=train_batch_size,
-              shuffle_buffer_size=10000,
+              shuffle_buffer_size=1000,
               dtype = 'bfloat16' if SET_DATA_BFLOAT16 else 'float32',
               parser = Parser(
                     output_size = [image_size,image_size],

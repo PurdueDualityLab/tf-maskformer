@@ -1,14 +1,14 @@
 #!/bin/bash
-train_bsize=128
+train_bsize=64
 eval_bsize=16
 export PYTHONPATH=$PYTHONPATH:~/tf-maskformer/models
 export RESNET_CKPT="gs://cam2-models/maskformer_vishal_exps/resnet50_pretrained/tfmg/ckpt-62400"
 export MASKFORMER_CKPT="gs://cam2-models/maskformer_vishal_exps/EXP12_v8/ckpt-77616"
 export MODEL_DIR="gs://cam2-models/maskformer_vishal_exps/EXP13_v128"
-export TPU_NAME="tf-train-1"
+export TPU_NAME="tf-debug-1"
 export TPU_SOFTWARE="2.11.0"
 export TPU_PROJECT="red-atlas-305317"
-export TPU_ZONE="europe-west4-a"
+export TPU_ZONE="us-central1-a"
 export TFRECORDS_DIR="gs://cam2-datasets/coco_panoptic/tfrecords"
 export TRAIN_BATCH_SIZE=$train_bsize
 export EVAL_BATCH_SIZE=$eval_bsize
