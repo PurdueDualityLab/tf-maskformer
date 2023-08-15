@@ -72,9 +72,6 @@ class MaskFormer(tf.keras.Model):
 		self.backbone = resnet.ResNet(50, input_specs = self._input_specs, bn_trainable=True)
 		
 	def build(self, image_shape):
-		#backbone
-		print("[Build MaskFormer] image shape: ", image_shape)
-		#decoders
 		if self._pixel_decoder == 'transformer_fpn':
 			self.pixel_decoder = TransformerFPN(batch_size = self._batch_size,
 									fpn_feat_dims=self._fpn_feat_dims,
@@ -125,6 +122,8 @@ class MaskFormer(tf.keras.Model):
 
 		backbone_feature_maps_procesed = self.process_feature_maps(backbone_feature_maps)
 
+		print("Backbone Feature Maps Processed: ", backbone_feature_maps_procesed.keys())
+		exit()
 		if self._pixel_decoder == 'fpn':
 			mask_features = self.pixel_decoder(backbone_feature_maps_procesed)
 			transformer_enc_feat = backbone_feature_maps_procesed['5']

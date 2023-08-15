@@ -125,7 +125,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
   
   train_batch_size = int(os.environ.get('TRAIN_BATCH_SIZE'))
   eval_batch_size = int(os.environ.get('EVAL_BATCH_SIZE'))
-  ckpt_interval = (COCO_TRAIN_EXAMPLES // train_batch_size) * 20 # Don't write ckpts frequently. Slows down the training
+  ckpt_interval = (COCO_TRAIN_EXAMPLES // train_batch_size) * 10 # Don't write ckpts frequently. Slows down the training
   image_size = int(os.environ.get('IMG_SIZE'))
 
   steps_per_epoch = COCO_TRAIN_EXAMPLES // train_batch_size
@@ -135,8 +135,6 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
   task = MaskFormerTask(
           init_checkpoint=os.environ['RESNET_CKPT'],
           init_checkpoint_modules='backbone',
-        #   init_checkpoint = os.environ['MASKFORMER_CKPT'],
-        #   init_checkpoint_modules='all',
           bfloat16 = SET_MODEL_BFLOAT16,
           model = MaskFormer(
               input_size=[image_size,image_size,3],
@@ -182,12 +180,11 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
           )),
       trainer=cfg.TrainerConfig(
           train_steps=train_steps,
-          # validation_steps=COCO_VAL_EXAMPLES // eval_batch_size,
-          validation_steps= 16,
+          validation_steps=COCO_VAL_EXAMPLES // eval_batch_size,
           steps_per_loop=steps_per_epoch,
           summary_interval=ckpt_interval,
           checkpoint_interval=ckpt_interval,
-          validation_interval=1,
+          validation_interval=5 * steps_per_epoch,
           max_to_keep=3,
           best_checkpoint_export_subdir='best_ckpt',
           # TODO: Metric not implemented yet
