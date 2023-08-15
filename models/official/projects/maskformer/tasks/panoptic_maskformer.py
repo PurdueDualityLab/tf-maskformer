@@ -189,8 +189,6 @@ class PanopticTask(base_task.Task):
 						
 						
 		features, labels = inputs
-		
-		
 		with tf.GradientTape() as tape:
 			outputs = model(features, training=True)
 			##########################################################
@@ -222,7 +220,8 @@ class PanopticTask(base_task.Task):
 				total_loss = optimizer.get_scaled_loss(total_loss)
 					
 		tvars = model.trainable_variables
-		
+		print("Trainable variables : ", tvars)
+		exit()
 		grads = tape.gradient(total_loss, tvars)
 		
 		optimizer.apply_gradients(list(zip(grads, tvars)))
