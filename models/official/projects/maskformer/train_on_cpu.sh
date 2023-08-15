@@ -14,6 +14,6 @@ export OVERRIDES="runtime.distribution_strategy=one_device,runtime.mixed_precisi
 task.train_data.global_batch_size=$TRAIN_BATCH_SIZE,task.model.which_pixel_decoder=transformer_fpn"
 python3 models/official/projects/maskformer/train.py \
   --experiment maskformer_coco_panoptic \
-  --mode train \
+  --mode train_and_eval \
   --model_dir $MODEL_DIR \
   --params_override=$OVERRIDES
