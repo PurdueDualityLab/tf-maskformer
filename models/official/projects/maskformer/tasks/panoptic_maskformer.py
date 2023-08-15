@@ -116,13 +116,11 @@ class PanopticTask(base_task.Task):
 
 	def build_losses(self, output, labels, aux_outputs=None):
 		# TODO : Auxilary outputs
-		# NOTE : Loss calculation using Bfloat16 hampers the convergence of the model
 		outputs = {"pred_logits": output["class_prob_predictions"], "pred_masks": output["mask_prob_predictions"]}
 		targets = labels
 
 		matcher = hungarian_matching
 		no_object_weight = self._task_config.losses.background_cls_weight
-		# TODO : Remove hardcoded values, number of classes
 		loss = Loss(num_classes = self._task_config.model.num_classes,
 					matcher = matcher,
 					eos_coef = no_object_weight,
@@ -215,16 +213,17 @@ class PanopticTask(base_task.Task):
 			
 			# TODO : Add auxiallary losses
 			total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels)
-			
+			scaled_loss = total_loss
 			if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
-				total_loss = optimizer.get_scaled_loss(total_loss)
+				total_loss = optimizer.get_scaled_loss(scaled_loss)
 					
 		tvars = model.trainable_variables
-		print("Trainable variables : ", tvars)
-		exit()
-		grads = tape.gradient(total_loss, tvars)
-		
+		grads = tape.gradient(scaled_loss, tvars)
+
+		if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
+			grads = optimizer.get_unscaled_gradients(grads)
 		optimizer.apply_gradients(list(zip(grads, tvars)))
+
 		if os.environ.get('PRINT_OUTPUTS') == 'True':
 			probs = tf.keras.activations.softmax(outputs["class_prob_predictions"], axis=-1)
 			pred_labels = tf.argmax(probs, axis=-1)
@@ -247,13 +246,10 @@ class PanopticTask(base_task.Task):
 			'cls_loss': cls_loss,
 			'focal_loss': focal_loss,
 			'dice_loss': dice_loss,}
-
 		
-		# Metric results will be added to logs for you.
 		if metrics:
 			for m in metrics:
 				m.update_state(all_losses[m.name])
-
 		return logs
 		
 	def _postprocess_outputs(self, outputs: Dict[str, Any], image_shapes):
