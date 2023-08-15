@@ -122,7 +122,10 @@ class MaskFormer(tf.keras.Model):
 
 		backbone_feature_maps_procesed = self.process_feature_maps(backbone_feature_maps)
 
-		print("Backbone Feature Maps Processed: ", backbone_feature_maps_procesed.keys())
+		print("backbone_feature_maps_procesed['2'] : ", backbone_feature_maps_procesed['2'].shape)
+		print("backbone_feature_maps_procesed['3'] : ", backbone_feature_maps_procesed['3'].shape)
+		print("backbone_feature_maps_procesed['4'] : ", backbone_feature_maps_procesed['4'].shape)
+		print("backbone_feature_maps_procesed['5'] : ", backbone_feature_maps_procesed['5'].shape)
 		exit()
 		if self._pixel_decoder == 'fpn':
 			mask_features = self.pixel_decoder(backbone_feature_maps_procesed)
