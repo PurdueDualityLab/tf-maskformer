@@ -68,8 +68,8 @@ class PanopticTask(base_task.Task):
 		if self._task_config.init_checkpoint_modules == 'all':
 			checkpoint_path = _get_checkpoint_path(ckpt_dir_or_file)
 			ckpt = tf.train.Checkpoint(model)
-			status = ckpt.read(checkpoint_path)
-			status.expect_partial()
+			status = ckpt.restore(checkpoint_path)
+			status.expect_partial().assert_existing_objects_matched()
 			logging.info('Loaded whole model from %s',
 				 ckpt_dir_or_file)
 			
