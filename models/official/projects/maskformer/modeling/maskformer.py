@@ -10,6 +10,7 @@ import numpy as np
 class MaskFormer(tf.keras.Model):
 	"""Maskformer"""
 	def __init__(self,
+	      		backbone,
 			   input_specs,
 			   fpn_feat_dims=256,
 			   data_format=None,
@@ -64,12 +65,14 @@ class MaskFormer(tf.keras.Model):
 		self._num_queries = num_queries
 		self._hidden_size = hidden_size
 		self._dropout_rate = dropout_rate
-		self._backbone_endpoint = backbone_endpoint_name
+		if hidden_size % 2 != 0:
+			raise ValueError("hidden_size must be a multiple of 2.")
 		self._bfloat16 = bfloat16
 		self._pixel_decoder = which_pixel_decoder
+		
 		# Backbone feature extractor.
-		# FIXME : Made BN trainable True
-		self.backbone = resnet.ResNet(50, input_specs = self._input_specs, bn_trainable=True)
+		self._backbone = backbone
+		self._backbone_endpoint = backbone_endpoint_name
 		
 	def build(self, image_shape):
 		if self._pixel_decoder == 'transformer_fpn':
@@ -110,6 +113,26 @@ class MaskFormer(tf.keras.Model):
 		
 		super(MaskFormer, self).build(image_shape)
  
+	@property
+	def backbone(self) -> tf.keras.Model:
+		return self._backbone
+	
+	def get_config(self):
+		return {
+			"backbone": self._backbone,
+			"backbone_endpoint_name": self._backbone_endpoint_name,
+			"num_queries": self._num_queries,
+			"hidden_size": self._hidden_size,
+			"num_classes": self._num_classes,
+			"num_encoder_layers": self._num_encoder_layers,
+			"num_decoder_layers": self._num_decoder_layers,
+			"dropout_rate": self._dropout_rate,
+		}
+	
+	@classmethod
+	def from_config(cls, config):
+		return cls(**config)
+	
 	def process_feature_maps(self, maps):
 		new_dict = {}
 		for k in maps.keys():
@@ -118,15 +141,9 @@ class MaskFormer(tf.keras.Model):
 
 	def call(self, image, training = False):
 		
-		backbone_feature_maps = self.backbone(image)
-
+		backbone_feature_maps = self._backbone(image)
 		backbone_feature_maps_procesed = self.process_feature_maps(backbone_feature_maps)
 
-		print("backbone_feature_maps_procesed['2'] : ", backbone_feature_maps_procesed['2'].shape)
-		print("backbone_feature_maps_procesed['3'] : ", backbone_feature_maps_procesed['3'].shape)
-		print("backbone_feature_maps_procesed['4'] : ", backbone_feature_maps_procesed['4'].shape)
-		print("backbone_feature_maps_procesed['5'] : ", backbone_feature_maps_procesed['5'].shape)
-		exit()
 		if self._pixel_decoder == 'fpn':
 			mask_features = self.pixel_decoder(backbone_feature_maps_procesed)
 			transformer_enc_feat = backbone_feature_maps_procesed['5']

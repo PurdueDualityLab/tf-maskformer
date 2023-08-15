@@ -19,7 +19,7 @@ from official.projects.maskformer.losses.maskformer_losses import Loss
 
 from official.vision.evaluation import panoptic_quality
 from official.projects.maskformer.losses.inference import PanopticInference
-
+from official.vision.modeling import backbones
 import numpy as np
 
 
@@ -36,7 +36,11 @@ class PanopticTask(base_task.Task):
 		# TODO : Remove hardcoded values, Verify the number of classes 
 		input_specs = tf.keras.layers.InputSpec(shape=[None] + self._task_config.model.input_size)
 		
-		model = MaskFormer(input_specs= input_specs,
+		backbone = backbones.factory.build_backbone(input_specs=input_specs,
+					backbone_config=self._task_config.model.backbone,
+					norm_activation_config=self._task_config.model.norm_activation)
+
+		model = MaskFormer(backbone=backbone, input_specs= input_specs,
 							num_queries=self._task_config.model.num_queries,
 							hidden_size=self._task_config.model.hidden_size,
 							backbone_endpoint_name=self._task_config.model.backbone_endpoint_name,
@@ -55,24 +59,17 @@ class PanopticTask(base_task.Task):
 		
 		if not self._task_config.init_checkpoint:
 			return
-		
-		def _get_checkpoint_path(checkpoint_dir_or_file):
-			checkpoint_path = checkpoint_dir_or_file
-
-			if tf.io.gfile.isdir(checkpoint_dir_or_file):
-				checkpoint_path = tf.train.latest_checkpoint(checkpoint_dir_or_file)
-			return checkpoint_path
-		
 		ckpt_dir_or_file = self._task_config.init_checkpoint
-		
+
+		# Restoring ckpt
+		if tf.io.gfile.isdir(ckpt_dir_or_file):
+			ckpt_dir_or_file = tf.train.latest_checkpoint(ckpt_dir_or_file)
+
 		if self._task_config.init_checkpoint_modules == 'all':
-			checkpoint_path = _get_checkpoint_path(ckpt_dir_or_file)
-			ckpt = tf.train.Checkpoint(model)
-			status = ckpt.restore(checkpoint_path)
+			ckpt = tf.train.Checkpoint(**model.checkpoint_items)
+			status = ckpt.restore(ckpt_dir_or_file)
 			status.assert_consumed()
-			logging.info('Loaded whole model from %s',
-				 ckpt_dir_or_file)
-			
+			logging.info('Loaded whole model from %s',ckpt_dir_or_file)
 			
 		elif self._task_config.init_checkpoint_modules == 'backbone':
 			ckpt = tf.train.Checkpoint(backbone=model.backbone)

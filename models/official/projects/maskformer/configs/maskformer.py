@@ -86,7 +86,7 @@ class MaskFormer(hyperparams.Config):
   which_pixel_decoder: str = 'transformer_fpn' # change this to transformer FPN to use transformer FPN as per pytorch codebase
   input_size: List[int] = dataclasses.field(default_factory=list)
   backbone: backbones.Backbone = backbones.Backbone(
-      type='resnet', resnet=backbones.ResNet(model_id=50, bn_trainable=False))
+      type='resnet', resnet=backbones.ResNet(model_id=50, bn_trainable=True)) # FIXME : Should the bn_trainable be True or False?
   norm_activation: common.NormActivation = common.NormActivation()
   backbone_endpoint_name: str = '5'
 
@@ -133,7 +133,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
   decay_at = train_steps - 100 * steps_per_epoch  # 200 epochs
   config = cfg.ExperimentConfig(
   task = MaskFormerTask(
-          init_checkpoint=os.environ['RESNET_CKPT'],
+          init_checkpoint="",
           init_checkpoint_modules='backbone',
           bfloat16 = SET_MODEL_BFLOAT16,
           model = MaskFormer(
