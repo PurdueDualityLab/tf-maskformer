@@ -245,13 +245,6 @@ class PanopticTask(base_task.Task):
 		
 		logs = {self.loss: total_loss}
 
-		# pred_logits = outputs["class_prob_predictions"]
-		# probs = tf.keras.activations.softmax(pred_logits, axis=-1) # (batch, num_predictions, num_classes) (2,100,134)
-		# scores = tf.reduce_max(probs, axis=-1) 
-		# print("gt labels :", labels["unique_ids"])
-		# predicted_labels = tf.argmax(probs, axis=-1)
-		# print("predicted labels :", predicted_labels)
-	
 		all_losses = {
 			'cls_loss': cls_loss,
 			'focal_loss': focal_loss,
@@ -280,11 +273,9 @@ class PanopticTask(base_task.Task):
 	def validation_step(self, inputs, model, metrics=None):
 		features, labels = inputs
 		outputs = model(features, training=False)
-		# np.save("individual_masks.npy", labels["individual_masks"])
-		print("Unique_ids in validation step : ", labels["unique_ids"])
-		# np.save("targets.npy", labels["unique_ids"])
-		# np.save("image.npy", features)
 		total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels)
+		
+		
 		num_replicas_in_sync = tf.distribute.get_strategy().num_replicas_in_sync
 		total_loss *= num_replicas_in_sync
 		cls_loss *= num_replicas_in_sync
@@ -296,25 +287,29 @@ class PanopticTask(base_task.Task):
 				'focal_loss': focal_loss,
 				'dice_loss': dice_loss,
 			}
-		# print("Loss :", logs)
-
-		if self.panoptic_quality_metric is not None:
+		
+		# if self.panoptic_quality_metric is not None:
 			
-			pq_metric_labels = {
-			'category_mask': labels['category_mask'],
-			'instance_mask': labels['instance_mask'],
-			# 'image_info': labels['image_info'],
-			}
-			# FIXME : The image shape must not be fixed
-			output_category_mask, output_instance_mask = self._postprocess_outputs(outputs, [640, 640])
-			pq_metric_outputs = {
-			'category_mask': output_category_mask,
-			'instance_mask': output_instance_mask,
-			}
+		# 	pq_metric_labels = {
+		# 	'category_mask': labels['category_mask'],
+		# 	'instance_mask': labels['instance_mask'],
+		# 	# 'image_info': labels['image_info'],
+		# 	}
+		# 	# FIXME : The image shape must not be fixed
+		# 	output_category_mask, output_instance_mask = self._postprocess_outputs(outputs, [640, 640])
+		# 	pq_metric_outputs = {
+		# 	'category_mask': output_category_mask,
+		# 	'instance_mask': output_instance_mask,
+		# 	}
 			
-			self.panoptic_quality_metric.update_state(
-		  	pq_metric_labels, pq_metric_outputs
-	  		)
+		# 	self.panoptic_quality_metric.update_state(
+		#   	pq_metric_labels, pq_metric_outputs
+	  	# 	)
+		if metrics:
+			for m in metrics:
+				m.update_state(all_losses[m.name])
+		return logs
+	
 
 	def aggregate_logs(self, state=None, step_outputs=None):
 		is_first_step = not state

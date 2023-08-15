@@ -1,6 +1,6 @@
 #!/bin/bash
 train_bsize=64
-eval_bsize=16
+eval_bsize=64
 export PYTHONPATH=$PYTHONPATH:~/tf-maskformer/models
 export RESNET_CKPT="gs://cam2-models/maskformer_vishal_exps/resnet50_pretrained/tfmg/ckpt-62400"
 export MASKFORMER_CKPT="gs://cam2-models/maskformer_vishal_exps/EXP12_v8/ckpt-77616"
@@ -18,7 +18,7 @@ export OVERRIDES="runtime.distribution_strategy=tpu,runtime.mixed_precision_dtyp
 task.train_data.global_batch_size=$TRAIN_BATCH_SIZE,task.model.which_pixel_decoder=transformer_fpn"
 python3 models/official/projects/maskformer/train.py \
   --experiment maskformer_coco_panoptic \
-  --mode train \
+  --mode train_and_eval \
   --model_dir $MODEL_DIR \
   --tpu $TPU_NAME \
   --params_override=$OVERRIDES
