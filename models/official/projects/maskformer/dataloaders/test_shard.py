@@ -17,4 +17,5 @@ for each_file in file_paths:
     for raw_record in raw_dataset.take(1):
         data = decoder.decode(raw_record)
         print("Decoded file :", os.path.join(tfrecord_path, each_file))
-       
+        image = data['image']
+        print("Image shape :", image.shape)
