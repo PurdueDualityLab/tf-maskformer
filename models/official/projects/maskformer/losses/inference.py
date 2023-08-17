@@ -24,6 +24,8 @@ class PanopticInference:
         # Keep only those masks that have high confidence and are not background
         # TODO : Some operations may be incompatible on TPU
         keep = tf.math.logical_and(tf.math.not_equal(labels, self.background_class_id), scores > self.object_mask_threshold)
+        print("keep", keep)
+        exit()
         curr_scores = scores[keep]
         curr_classes = labels[keep]
 
