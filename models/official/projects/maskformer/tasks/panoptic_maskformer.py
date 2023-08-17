@@ -56,7 +56,7 @@ class PanopticTask(base_task.Task):
 			
 			# Write the computation graph to TensorBoard
 			tf.summary.trace_on(graph=True, profiler=True)
-			model(tf.ones((1, input_shape)))  # Pass sample input through the model
+			model(tf.ones((1, [self._task_config.model.input_size])))  # Pass sample input through the model
 			with writer.as_default():
 				tf.summary.trace_export(
 					name="my_model_trace",
