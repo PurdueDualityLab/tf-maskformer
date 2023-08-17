@@ -127,7 +127,6 @@ class mask_former_parser(parser.Parser):
         """
         
         # general settings
-        print("params:", params)
         self._output_size = params.output_size
         self._mask_null = 0
         self._dtype = params.dtype
