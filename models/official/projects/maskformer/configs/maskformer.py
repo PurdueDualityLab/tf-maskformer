@@ -36,7 +36,7 @@ class Parser(hyperparams.Config):
     max_retry: int = 50
     pad_output: bool = False
     resize_eval_groundtruth: bool = True
-    groundtruth_padded_size: List[int] = (800, 800)
+    groundtruth_padded_size: List[int] = (1280, 1280)
     ignore_label: int = 0
     aug_rand_hflip: bool = True
     aug_scale_min: float = 1.0
