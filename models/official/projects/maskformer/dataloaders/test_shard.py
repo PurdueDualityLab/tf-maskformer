@@ -21,7 +21,7 @@ for each_file in file_paths:
         image = data['image']
         assert len(image.shape) == 3
         assert image.shape[-1] == 3
-        assert image.all() <= 255
+        assert image.numpy().all() <= 255
         image_count += 1
     
 print("Total images :", image_count)
