@@ -40,7 +40,7 @@ class PanopticTask(base_task.Task):
 		backbone = backbones.factory.build_backbone(input_specs=input_specs,
 					backbone_config=self._task_config.model.backbone,
 					norm_activation_config=self._task_config.model.norm_activation)
-
+		logging.info('Backbone build successful.')
 		model = MaskFormer(backbone=backbone, input_specs= input_specs,
 							num_queries=self._task_config.model.num_queries,
 							hidden_size=self._task_config.model.hidden_size,
@@ -51,14 +51,14 @@ class PanopticTask(base_task.Task):
 							num_classes=self._task_config.model.num_classes,
 							bfloat16=self._task_config.bfloat16, 
 							which_pixel_decoder=self._task_config.model.which_pixel_decoder,)
-			
+		logging.info('Maskformer model build successful.')
 		return model
 
 	def initialize(self, model: tf.keras.Model) -> None:
 		"""
 		Used to initialize the models with checkpoint
 		"""
-		
+		logging.info('Initializing model from checkpoint: %s', self._task_config.init_checkpoint)
 		if not self._task_config.init_checkpoint:
 			return
 		ckpt_dir_or_file = self._task_config.init_checkpoint
