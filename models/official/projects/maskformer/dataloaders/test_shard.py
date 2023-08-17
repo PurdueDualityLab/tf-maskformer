@@ -7,7 +7,7 @@ import os
 import tensorflow as tf
 from panoptic_input import mask_former_parser
 
-tfrecord_path = "gs://cam2-datasets/coco_panoptic/tfrecords"  # specify the filepath to tfrecord
+tfrecord_path = "/home/vishalpurohit55595/datasets/coco_panoptic/tfrecords"  # specify the filepath to tfrecord
 # get list of tfrecord files
 file_paths = tf.io.gfile.glob(tfrecord_path + "/*.tfrecord")
 decoder = panoptic_input.TfExampleDecoder()
