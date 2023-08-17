@@ -8,7 +8,7 @@ def matmul_fn(x, y):
   return z
 
 if __name__ == "__main__":
-	c = Client(os.environ['TPU_NAME'], zone=os.environ['TPU_ZONE'], project=os.environ['TPU_PROJECT'])
+	c = Client("tf-train-1", zone="europe-west4-a", project="red-atlas-305317")
 	c.configure_tpu_version(os.environ["TPU_SOFTWARE"], restart_type='ifNeeded')
 	c.wait_for_healthy()
 	cluster_resolver = tf.distribute.cluster_resolver.TPUClusterResolver(
