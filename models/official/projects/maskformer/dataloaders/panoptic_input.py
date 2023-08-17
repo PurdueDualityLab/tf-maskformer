@@ -282,6 +282,11 @@ class mask_former_parser(parser.Parser):
                                 dtype=tf.int32)
                 i = tf.random.uniform([], 0, shape[0] - h + 1, dtype=tf.int32)
                 j = tf.random.uniform([], 0, shape[1] - w + 1, dtype=tf.int32)
+                # Ensure that the sum of target width and offset is within image width.
+                j = tf.minimum(j, tf.shape(image)[1] - w)
+
+                # Ensure that the sum of target height and offset is within image height.
+                i = tf.minimum(i, tf.shape(image)[0] - h)
                 image = tf.image.crop_to_bounding_box(image, i, j, h, w)
                 instance_mask = tf.image.crop_to_bounding_box(instance_mask, i, j, h, w)
                 contigious_mask = tf.image.crop_to_bounding_box(contigious_mask, i, j, h, w)
