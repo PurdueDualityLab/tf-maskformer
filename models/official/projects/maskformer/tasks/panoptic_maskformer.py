@@ -34,7 +34,7 @@ class PanopticTask(base_task.Task):
 	"""
 	def build_model(self)-> tf.keras.Model:
 		"""Builds MaskFormer Model."""
-		# TODO : Remove hardcoded values, Verify the number of classes 
+		logging.info('Building MaskFormer model.')
 		input_specs = tf.keras.layers.InputSpec(shape=[None] + self._task_config.model.input_size)
 		
 		backbone = backbones.factory.build_backbone(input_specs=input_specs,
@@ -88,7 +88,7 @@ class PanopticTask(base_task.Task):
 		Build panoptic segmentation dataset.
 
 		"""
-		
+		logging.info('Building panoptic segmentation dataset.')
 		if params.decoder.type == 'simple_decoder':
 			decoder = panoptic_input.TfExampleDecoder(regenerate_source_id = params.regenerate_source_id)
 		else:
@@ -116,6 +116,7 @@ class PanopticTask(base_task.Task):
 
 
 	def build_losses(self, output, labels, aux_outputs=None):
+		logging.info('Building panoptic segmentation losses.')
 		# TODO : Auxilary outputs
 		outputs = {"pred_logits": output["class_prob_predictions"], "pred_masks": output["mask_prob_predictions"]}
 		targets = labels
@@ -185,7 +186,6 @@ class PanopticTask(base_task.Task):
 		Returns:
 		A dictionary of logs.
 		"""
-						
 						
 		features, labels = inputs
 		with tf.GradientTape() as tape:
