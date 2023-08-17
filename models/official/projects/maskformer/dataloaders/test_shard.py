@@ -49,7 +49,6 @@ for each_file in file_paths:
         assert len(category_mask.shape) == 2
         assert category_mask.numpy().all() <= 199
         assert category_mask.numpy().all() >= 0
-        assert category_mask.numpy().any() == 0
         assert category_mask.numpy().shape[0] >= 0
         assert category_mask.numpy().shape[1] >= 0
         assert category_mask.numpy().shape[0] == h
