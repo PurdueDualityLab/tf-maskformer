@@ -218,12 +218,11 @@ class PanopticTask(base_task.Task):
 			if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
 				total_loss = optimizer.get_scaled_loss(scaled_loss)
 					
-		tvars = model.trainable_variables
-		grads = tape.gradient(scaled_loss, tvars)
+		grads = tape.gradient(scaled_loss, model.trainable_variables)
 
 		if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
 			grads = optimizer.get_unscaled_gradients(grads)
-		optimizer.apply_gradients(list(zip(grads, tvars)))
+		optimizer.apply_gradients(list(zip(grads,  model.trainable_variables)))
 
 		if os.environ.get('PRINT_OUTPUTS') == 'True':
 			probs = tf.keras.activations.softmax(outputs["class_prob_predictions"], axis=-1)

@@ -32,7 +32,6 @@ class MaskFormerTransformer(tf.keras.layers.Layer):
 
     def build(self, input_shape):
 
-        
         self._transformer = DETRTransformer(num_encoder_layers=self._num_encoder_layers,
                                             num_decoder_layers=self._num_decoder_layers,
                                             dropout_rate=self._dropout_rate)
