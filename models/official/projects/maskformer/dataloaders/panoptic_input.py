@@ -164,7 +164,7 @@ class mask_former_parser(parser.Parser):
 
     def _resize_and_crop_mask(self, mask, image_info, is_training):
         """Resizes and crops mask using `image_info` dict."""
-        offset = image_info[3, : ]
+        
         im_height = int(image_info[0][0])
         im_width = int(image_info[0][1])
         
@@ -182,8 +182,8 @@ class mask_former_parser(parser.Parser):
         else:
             mask = tf.image.pad_to_bounding_box(
                 mask, 0, 0,
-                self._groundtruth_padded_size[0],
-                self._groundtruth_padded_size[1])
+                self._output_size[0],
+                self._output_size[1])
         mask -= 1
 
         # Assign ignore label to the padded region.
@@ -234,9 +234,6 @@ class mask_former_parser(parser.Parser):
     
         # Normalize and prepare image and masks
         image = preprocess_ops.normalize_image(image)
-        # category_mask = tf.cast(
-        #     data['groundtruth_panoptic_category_mask'][:, :, 0],
-        #     dtype=tf.float32)
         instance_mask = tf.cast(
             data['groundtruth_panoptic_instance_mask'][:, :, 0],
             dtype=tf.float32)
@@ -261,7 +258,6 @@ class mask_former_parser(parser.Parser):
 
             do_crop = tf.greater(tf.random.uniform([]), 0.5)
             if do_crop:
-                print("///////////////////////// Inside Cropping /////////////////////////")
                 index = tf.random.categorical(tf.zeros([1, 3]), 1)[0]
                 scales = tf.gather([400.0, 500.0, 600.0], index, axis=0)
                 short_side = scales[0]
@@ -286,17 +282,10 @@ class mask_former_parser(parser.Parser):
                                 dtype=tf.int32)
                 i = tf.random.uniform([], 0, shape[0] - h + 1, dtype=tf.int32)
                 j = tf.random.uniform([], 0, shape[1] - w + 1, dtype=tf.int32)
-                print("I = ", i)
-                print("J = ", j)
-                print("H = ", h)
-                print("W = ", w)
-                print("Image Shape : ", image.shape)
-                print("Instance Mask Shape : ", instance_mask.shape)
-                print("Contigious Mask Shape : ", contigious_mask.shape)
                 image = tf.image.crop_to_bounding_box(image, i, j, h, w)
                 instance_mask = tf.image.crop_to_bounding_box(instance_mask, i, j, h, w)
                 contigious_mask = tf.image.crop_to_bounding_box(contigious_mask, i, j, h, w)
-                print("///////////////////////// Failed inside cropping /////////////////////////")
+               
                 
            
             
