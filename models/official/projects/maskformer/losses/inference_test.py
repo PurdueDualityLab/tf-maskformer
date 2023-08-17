@@ -13,7 +13,7 @@ class PanopticInferenceTest(tf.test.TestCase, parameterized.TestCase):
         background_class_id = 133
         # This test is supposed to give PQ stuff and PQ things metrics for fixed tensor inputs
         # Load pytorch output and targets for testing the PQ stuff and PQ things metrics
-        main_pth = "/depot/qqiu/data/vishal/tf-maskformer/models/official/projects/maskformer/losses"
+        main_pth = "/home/vishalpurohit55595/tf-maskformer/models/official/projects/maskformer/losses"
         
         # Load input image normalized
         input_image =  tf.convert_to_tensor(np.load(main_pth+"/tensors/image.npy"))
