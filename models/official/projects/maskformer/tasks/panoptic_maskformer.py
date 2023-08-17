@@ -36,36 +36,22 @@ class PanopticTask(base_task.Task):
 		"""Builds MaskFormer Model."""
 		# TODO : Remove hardcoded values, Verify the number of classes 
 		input_specs = tf.keras.layers.InputSpec(shape=[None] + self._task_config.model.input_size)
-		log_dir = "logs/graph"
-		writer = tf.summary.create_file_writer(log_dir)
-		with writer.as_default():
-			backbone = backbones.factory.build_backbone(input_specs=input_specs,
-						backbone_config=self._task_config.model.backbone,
-						norm_activation_config=self._task_config.model.norm_activation)
-
-			model = MaskFormer(backbone=backbone, input_specs= input_specs,
-								num_queries=self._task_config.model.num_queries,
-								hidden_size=self._task_config.model.hidden_size,
-								backbone_endpoint_name=self._task_config.model.backbone_endpoint_name,
-								fpn_encoder_layers=self._task_config.model.fpn_encoder_layers,
-								detr_encoder_layers=self._task_config.model.detr_encoder_layers,
-								num_decoder_layers=self._task_config.model.num_decoder_layers,
-								num_classes=self._task_config.model.num_classes,
-								bfloat16=self._task_config.bfloat16, 
-								which_pixel_decoder=self._task_config.model.which_pixel_decoder,)
-			
-			# Write the computation graph to TensorBoard
-			tf.summary.trace_on(graph=True, profiler=True)
-			model(tf.ones((1, 1280, 1280, 3)))  # Pass sample input through the model
-			with writer.as_default():
-				tf.summary.trace_export(
-					name="my_model_trace",
-					step=0,
-					profiler_outdir=log_dir
-				)
 		
-			print("Graph writing done....")
-			exit()
+		backbone = backbones.factory.build_backbone(input_specs=input_specs,
+					backbone_config=self._task_config.model.backbone,
+					norm_activation_config=self._task_config.model.norm_activation)
+
+		model = MaskFormer(backbone=backbone, input_specs= input_specs,
+							num_queries=self._task_config.model.num_queries,
+							hidden_size=self._task_config.model.hidden_size,
+							backbone_endpoint_name=self._task_config.model.backbone_endpoint_name,
+							fpn_encoder_layers=self._task_config.model.fpn_encoder_layers,
+							detr_encoder_layers=self._task_config.model.detr_encoder_layers,
+							num_decoder_layers=self._task_config.model.num_decoder_layers,
+							num_classes=self._task_config.model.num_classes,
+							bfloat16=self._task_config.bfloat16, 
+							which_pixel_decoder=self._task_config.model.which_pixel_decoder,)
+			
 		return model
 
 	def initialize(self, model: tf.keras.Model) -> None:
