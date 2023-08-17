@@ -286,9 +286,6 @@ class mask_former_parser(parser.Parser):
                 instance_mask = tf.image.crop_to_bounding_box(instance_mask, i, j, h, w)
                 contigious_mask = tf.image.crop_to_bounding_box(contigious_mask, i, j, h, w)
                
-                
-           
-            
         scales = tf.constant(self._resize_scales, dtype=tf.float32)
         index = tf.random.categorical(tf.zeros([1, 11]), 1)[0]
         scales = tf.gather(scales, index, axis=0)
