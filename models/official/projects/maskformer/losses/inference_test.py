@@ -41,9 +41,9 @@ class PanopticInferenceTest(tf.test.TestCase, parameterized.TestCase):
         # target_masks_2 = tf.transpose(tf.convert_to_tensor(np.load(main_pth+'/tensors/targets_masks_1.npy')), [1,2,0])
 
         inference = PanopticInference(num_classes=134, background_class_id=133, object_mask_threshold=0.85)
-        instance_mask_predicted, category_mask_predicted = inference(mask_true=outputs["class_prob_predictions"], 
-                                                                          mask_pred=outputs["mask_prob_predictions"],
-                                                                        image_shape = input_image.shape)
+        instance_mask_predicted, category_mask_predicted = inference(outputs["class_prob_predictions"], 
+                                                                        outputs["mask_prob_predictions"],
+                                                                        input_image.shape)
         print("instance_mask_predicted.shape", instance_mask_predicted.shape)
         print("category_mask_predicted.shape", category_mask_predicted.shape)
         
