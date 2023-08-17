@@ -12,8 +12,7 @@ tfrecord_path = "/home/vishalpurohit55595/datasets/coco_panoptic/tfrecords"  # s
 file_paths = tf.io.gfile.glob(tfrecord_path + "/*.tfrecord")
 decoder = panoptic_input.TfExampleDecoder()
 image_count = 0
-h_small = 1000
-w_small = 1000
+
 for each_file in file_paths:
     raw_dataset = tf.data.TFRecordDataset(os.path.join(tfrecord_path, each_file))
     print("Reading file :", os.path.join(tfrecord_path, each_file))
@@ -26,12 +25,12 @@ for each_file in file_paths:
         instance_mask = tf.cast(
             data['groundtruth_panoptic_instance_mask'][:, :, 0],
             dtype=tf.float32)
+        category_mask = tf.cast(
+            data['groundtruth_panoptic_category_mask'][:, :, 0],
+            dtype=tf.float32)
+        
         h,w,c = image.shape
-        if h < h_small:
-            h_small = h
-        if w < w_small:
-            w_small = w
-
+        
         assert len(image.shape) == 3 
         assert image.shape[-1] == 3
         assert image.numpy().all() <= 255
@@ -47,6 +46,14 @@ for each_file in file_paths:
         assert contigious_mask.numpy().shape[0] == h
         assert contigious_mask.numpy().shape[1] == w
 
+        assert len(category_mask.shape) == 2
+        assert category_mask.numpy().all() <= 199
+        assert category_mask.numpy().all() > 0
+        assert category_mask.numpy().shape[0] >= 0
+        assert category_mask.numpy().shape[1] >= 0
+        assert category_mask.numpy().shape[0] == h
+        assert category_mask.numpy().shape[1] == w
+
         assert len(instance_mask.shape) == 2
         assert instance_mask.numpy().all() <= 132
         assert instance_mask.numpy().all() >= 0
@@ -58,4 +65,3 @@ for each_file in file_paths:
         image_count += 1
     
 print("Total images :", image_count)
-print("Smallest image size :", h_small, w_small)
