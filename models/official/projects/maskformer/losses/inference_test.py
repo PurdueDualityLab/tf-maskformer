@@ -16,8 +16,7 @@ class PanopticInferenceTest(tf.test.TestCase, parameterized.TestCase):
         main_pth = "/depot/qqiu/data/vishal/tf-maskformer/models/official/projects/maskformer/losses"
         
         # Load input image normalized
-        input_image = tf.zeros((1, 1280, 1280, 3)) 
-
+        input_image =  tf.convert_to_tensor(np.load(main_pth+"/tensors/image.npy"))
         # Load pytorch predictions
         pred_logits_load = tf.convert_to_tensor(np.load(main_pth+"/tensors/output_pred_logits.npy")) 
         pred_masks_load = tf.convert_to_tensor(np.load(main_pth+"/tensors/output_pred_masks.npy"))
