@@ -36,6 +36,7 @@ class PanopticTask(base_task.Task):
 		"""Builds MaskFormer Model."""
 		# TODO : Remove hardcoded values, Verify the number of classes 
 		input_specs = tf.keras.layers.InputSpec(shape=[None] + self._task_config.model.input_size)
+		log_dir = "logs/graph"
 		
 		backbone = backbones.factory.build_backbone(input_specs=input_specs,
 					backbone_config=self._task_config.model.backbone,
@@ -51,6 +52,10 @@ class PanopticTask(base_task.Task):
 							num_classes=self._task_config.model.num_classes,
 							bfloat16=self._task_config.bfloat16, 
 							which_pixel_decoder=self._task_config.model.which_pixel_decoder,)
+		writer = tf.summary.FileWriter(log_dir, graph=tf.get_default_graph())
+		writer.close()
+		print("Graph writing done....")
+		exit()
 		return model
 
 	def initialize(self, model: tf.keras.Model) -> None:
