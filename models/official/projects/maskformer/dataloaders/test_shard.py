@@ -15,6 +15,6 @@ for each_file in file_paths:
     raw_dataset = tf.data.TFRecordDataset(os.path.join(tfrecord_path, each_file))
     print("Reading file :", os.path.join(tfrecord_path, each_file))
     for raw_record in raw_dataset.take(1):
-        data = decoder(raw_record)
+        data = decoder.decode(raw_record)
         print("Decoded file :", os.path.join(tfrecord_path, each_file))
        
