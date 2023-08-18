@@ -17,6 +17,8 @@ class PanopticInferenceTest(tf.test.TestCase, parameterized.TestCase):
         
         # Load input image normalized
         input_image =  tf.convert_to_tensor(np.load(main_pth+"/tensors/images.npy"))
+        # B, C, H, W -> B, H, W, C
+        input_image = tf.transpose(input_image, [0,2,3,1])
         # Load pytorch predictions
         pred_logits_load = tf.convert_to_tensor(np.load(main_pth+"/tensors/output_pred_logits.npy")) 
         pred_masks_load = tf.convert_to_tensor(np.load(main_pth+"/tensors/output_pred_masks.npy"))
