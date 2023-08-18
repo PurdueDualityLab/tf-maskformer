@@ -28,16 +28,18 @@ class PanopticInference:
         # print("Labels : ", labels)
         # print("Background class id", self.background_class_id)
         keep = tf.math.logical_and(tf.math.not_equal(labels, self.background_class_id), scores > self.object_mask_threshold)
-        print("keep", keep)
-        curr_scores = scores[keep]
-        curr_classes = labels[keep]
-        print("curr_scores", curr_scores)
-        print("curr_classes", curr_classes)
+        
         permute = tf.keras.layers.Permute((3,1,2)) 
         mask_pred = permute(mask_pred) # (batch, num_predictions, height, width)
-        curr_masks = mask_pred[keep]
-        print("curr_masks", curr_masks.shape)
+        
+        curr_masks = tf.boolean_mask(mask_pred, keep) # (num_predictions, height, width)
+        curr_classes = tf.boolean_mask(labels, keep) # (num_predictions)
+        curr_scores = tf.boolean_mask(scores, keep) # (num_predictions)
+        print("Curr masks : ", curr_masks.shape)
+        print("Curr classes : ", curr_classes.shape)
+        print("Curr scores : ", curr_scores.shape)
         exit()
+        
         height, width = tf.shape(curr_masks)[-2:]
 
         # Create  category mask and instance mask
