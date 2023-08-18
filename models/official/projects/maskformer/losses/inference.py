@@ -29,8 +29,7 @@ class PanopticInference:
     
             keep = tf.math.logical_and(tf.math.not_equal(labels, self.background_class_id), scores > self.object_mask_threshold)
             
-            permute = tf.keras.layers.Permute((2,0,1)) 
-            mask_pred_b_sigmoid = permute(mask_pred_b_sigmoid) # (batch, num_predictions, height, width)
+            mask_pred_b_sigmoid = tf.transpose(mask_pred_b_sigmoid, (2, 0, 1)) # (batch, num_predictions, height, width)
             
             # Give batch of predictions to the function
             curr_masks = tf.boolean_mask(mask_pred_b_sigmoid, keep) # (num_predictions, height, width)
