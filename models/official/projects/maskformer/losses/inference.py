@@ -15,7 +15,10 @@ class PanopticInference:
         
         cat_id_map, is_thing_dict = _get_contigious_to_original() # maps from contiguous category id to original category id
         # Apply softmax and sigmoid on the predictions and predicted masks
+        print("mask_pred.shape before resize", mask_pred.shape)
         mask_pred =  tf.image.resize(mask_pred, (image_shape[0], image_shape[1]), method=tf.image.ResizeMethod.BILINEAR)
+        print("mask_pred.shape after resize", mask_pred.shape)
+        exit()
         mask_pred = tf.keras.activations.sigmoid(mask_pred)
         probs = tf.keras.activations.softmax(pred_logits, axis=-1) # (batch, num_predictions, num_classes) (2,100,134)
         scores = tf.reduce_max(probs, axis=-1) 
