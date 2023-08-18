@@ -35,7 +35,8 @@ class PanopticInference:
         permute = tf.keras.layers.Permute((3,1,2)) 
         mask_pred = permute(mask_pred) # (batch, num_predictions, height, width)
         curr_masks = mask_pred[keep]
-    
+        print("curr_masks", curr_masks.shape)
+        exit()
         height, width = tf.shape(curr_masks)[-2:]
 
         # Create  category mask and instance mask
