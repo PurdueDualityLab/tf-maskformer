@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-from mapper import _get_contigious_to_original, _get_original_to_contigious
+from official.projects.maskformer.losses.mapper import _get_contigious_to_original, _get_original_to_contigious
 
 class PanopticInference:
     """Panoptic Inference"""
