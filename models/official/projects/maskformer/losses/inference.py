@@ -35,12 +35,8 @@ class PanopticInference:
             curr_masks = tf.boolean_mask(mask_pred_b_sigmoid, keep) # (num_predictions, height, width)
             curr_classes = tf.boolean_mask(labels, keep) # (num_predictions)
             curr_scores = tf.boolean_mask(scores, keep) # (num_predictions)
-            print("Curr masks : ", curr_masks.shape)
-            print("Curr classes : ", curr_classes.shape)
-            print("Curr scores : ", curr_scores.shape)
-            exit()
             
-            height, width = tf.shape(curr_masks)[-2:]
+            height, width = tf.shape(curr_masks)[1], tf.shape(curr_masks)[2]
 
             # Create  category mask and instance mask
             with tf.device(curr_masks.device):
