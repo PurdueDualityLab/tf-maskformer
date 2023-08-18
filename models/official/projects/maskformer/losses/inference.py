@@ -28,10 +28,11 @@ class PanopticInference:
         # print("Labels : ", labels)
         # print("Background class id", self.background_class_id)
         keep = tf.math.logical_and(tf.math.not_equal(labels, self.background_class_id), scores > self.object_mask_threshold)
-        
+        print("keep", keep)
         curr_scores = scores[keep]
         curr_classes = labels[keep]
-
+        print("curr_scores", curr_scores)
+        print("curr_classes", curr_classes)
         permute = tf.keras.layers.Permute((3,1,2)) 
         mask_pred = permute(mask_pred) # (batch, num_predictions, height, width)
         curr_masks = mask_pred[keep]
