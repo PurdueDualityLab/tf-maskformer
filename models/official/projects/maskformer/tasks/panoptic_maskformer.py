@@ -116,7 +116,6 @@ class PanopticTask(base_task.Task):
 
 
 	def build_losses(self, output, labels, aux_outputs=None):
-		logging.info('Building panoptic segmentation losses.')
 		# TODO : Auxilary outputs
 		outputs = {"pred_logits": output["class_prob_predictions"], "pred_masks": output["mask_prob_predictions"]}
 		targets = labels
@@ -261,7 +260,7 @@ class PanopticTask(base_task.Task):
 		"""
 		pred_binary_masks = outputs["mask_prob_predictions"]
 		pred_labels = outputs["class_prob_predictions"]
-		ouput_instance_mask, output_category_mask = self.panoptic_inference( pred_labels,pred_binary_masks, image_shapes)
+		ouput_instance_mask, output_category_mask = self.panoptic_inference(pred_labels,pred_binary_masks, image_shapes)
 		return ouput_instance_mask, output_category_mask
 
 	def validation_step(self, inputs, model, metrics=None):
@@ -285,12 +284,12 @@ class PanopticTask(base_task.Task):
 		# if self.panoptic_quality_metric is not None:
 			
 		# 	pq_metric_labels = {
-		# 	'category_mask': labels['category_mask'],
+		# 	'category_mask': labels['category_mask'], # ignore label is 133 
 		# 	'instance_mask': labels['instance_mask'],
-		# 	# 'image_info': labels['image_info'],
+		# 	'image_info': labels['image_info'],
 		# 	}
-		# 	# FIXME : The image shape must not be fixed
-		# 	output_category_mask, output_instance_mask = self._postprocess_outputs(outputs, [640, 640])
+		# 	# Output from postprocessing will convert the binary masks to category and instance masks with non-contigious ids
+		# 	output_category_mask, output_instance_mask = self._postprocess_outputs(outputs, [1280, 1280])
 		# 	pq_metric_outputs = {
 		# 	'category_mask': output_category_mask,
 		# 	'instance_mask': output_instance_mask,
@@ -302,6 +301,7 @@ class PanopticTask(base_task.Task):
 		if metrics:
 			for m in metrics:
 				m.update_state(all_losses[m.name])
+
 		return logs
 	
 

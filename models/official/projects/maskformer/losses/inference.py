@@ -60,6 +60,10 @@ class PanopticInference:
                         else:
                             instance_mask = tf.where(binary_mask, instance_id, instance_mask)
                             instance_id = _VOID_INSTANCE_ID
-        
-            return instance_mask, category_mask
+            instance_masks.append(instance_mask)
+            category_masks.append(category_mask)
+
+        instance_masks_stacked = tf.stack(instance_masks, axis=0)
+        category_masks_stacked = tf.stack(category_masks, axis=0)
+        return instance_masks_stacked, category_masks_stacked
 
