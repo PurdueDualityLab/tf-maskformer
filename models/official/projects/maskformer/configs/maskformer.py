@@ -53,7 +53,6 @@ class DataConfig(cfg.DataConfig):
   global_batch_size: int = 0
   is_training: bool = False
   regenerate_source_id: bool = False
-  # TODO : Change the dtype to bloat16 for TPU training
   dtype: str = 'float32'
   decoder: common.DataDecoder = common.DataDecoder()
   shuffle_buffer_size: int = 10000
@@ -64,7 +63,6 @@ class DataConfig(cfg.DataConfig):
 
 @dataclasses.dataclass
 class Losses(hyperparams.Config):
-  # TODO update these for maskformer
   class_offset: int = 0
   background_cls_weight: float = 0.1
   l2_weight_decay: float = 1e-4
@@ -74,7 +72,6 @@ class Losses(hyperparams.Config):
 
 @dataclasses.dataclass
 class MaskFormer(hyperparams.Config):
-  # TODO update these for maskformer
   """MaskFormer model definations."""
   num_queries: int = 100
   hidden_size: int = 256
@@ -94,7 +91,6 @@ class MaskFormer(hyperparams.Config):
 class PanopticQuality(hyperparams.Config):
   """MaskFormer model pq evaluator config."""
   num_categories: int = 133
-  # Is thing needs to be modified accroding to which among 133 classes are things
   is_thing : List[bool] = None
   ignored_label: int = 133
   rescale_predictions: bool = False
@@ -112,12 +108,11 @@ class MaskFormerTask(cfg.TaskConfig):
   bfloat16: bool = False
   panoptic_quality_evaluator: PanopticQuality = PanopticQuality()
 
-# TODO : we should pass this via cmd 
 COCO_INPUT_PATH_BASE = os.environ.get('TFRECORDS_DIR')
 COCO_TRAIN_EXAMPLES = 118287
 COCO_VAL_EXAMPLES = 5000
 SET_MODEL_BFLOAT16 = False
-SET_DATA_BFLOAT16 = False
+SET_DATA_BFLOAT16 = True
 
 @exp_factory.register_config_factory('maskformer_coco_panoptic')
 def maskformer_coco_panoptic() -> cfg.ExperimentConfig:

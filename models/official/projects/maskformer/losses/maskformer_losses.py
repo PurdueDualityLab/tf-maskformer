@@ -162,12 +162,10 @@ class Loss:
         mask_assigned = tf.gather(cls_masks, target_index, batch_dims=1, axis=1)
 
         target_classes = tf.cast(target_labels, dtype=tf.int32)
-
-        # FIXME : The no object class should be 0 if we are using non contiguos class ids
         background = tf.equal(target_classes, 133) 
         
         num_masks = tf.reduce_sum(tf.cast(tf.logical_not(background), tf.float32), axis=-1)
-        print("num_masks :", num_masks)
+        
         xentropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=target_classes, logits=cls_assigned)
         cls_loss =  tf.where(background, self.eos_coef * xentropy, xentropy)
         cls_weights = tf.where(background, self.eos_coef * tf.ones_like(cls_loss), tf.ones_like(cls_loss))
@@ -176,9 +174,6 @@ class Loss:
         cls_weights_per_replica = tf.reduce_sum(cls_weights)
         replica_context = tf.distribute.get_replica_context()
         num_masks_sum, cls_weights_sum = replica_context.all_reduce(tf.distribute.ReduceOp.SUM,[num_masks_per_replica, cls_weights_per_replica])
-
-        print("num_masks_sum :", num_masks_sum)
-        print("cls_weights_sum :", cls_weights_sum)
         # Final losses
         cls_loss = tf.math.divide_no_nan(tf.reduce_sum(cls_loss), cls_weights_sum)
        
@@ -206,7 +201,7 @@ class Loss:
         focal_loss = FocalLossMod()(tgt_mask, out_mask)
         
         dice_loss = DiceLoss()(tgt_mask, out_mask)
-        
+        # print("Background : ", background)
         # Which all masks belong to background classes
         focal_loss_weighted = tf.where(background, tf.zeros_like(focal_loss), focal_loss)
         dice_loss_weighted = tf.where(background, tf.zeros_like(dice_loss), dice_loss)
