@@ -193,7 +193,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
                   'type': 'maskformer_adamw',
                   'maskformer_adamw': {
                       'weight_decay_rate': 1e-4,
-                      'global_clipnorm': 0.01,
+                      'global_clipnorm': 0.1,
                       'gradient_clip_norm': 0.01,
                       'exclude_from_weight_decay': ['LayerNorm', 'layer_norm', 'bias'],
                   }
