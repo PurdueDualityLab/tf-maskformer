@@ -167,6 +167,7 @@ class Loss:
         background = tf.equal(target_classes, 133) 
         
         num_masks = tf.reduce_sum(tf.cast(tf.logical_not(background), tf.float32), axis=-1)
+        print("num_masks :", num_masks)
         xentropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=target_classes, logits=cls_assigned)
         cls_loss =  tf.where(background, self.eos_coef * xentropy, xentropy)
         cls_weights = tf.where(background, self.eos_coef * tf.ones_like(cls_loss), tf.ones_like(cls_loss))
@@ -190,7 +191,6 @@ class Loss:
         out_mask = tf.image.resize(out_mask, [tf.shape(tgt_mask)[2], tf.shape(tgt_mask)[3]], method='bilinear')
 
         # #undo the transpose 
-        # tgt_mask = tf.transpose(tgt_mask, perm=[0,3,1,2]) # [b, 100, h, w]
         out_mask = tf.transpose(out_mask, perm=[0,3,1,2])
         # FIXME : Do we need this??
         
@@ -206,10 +206,8 @@ class Loss:
         dice_loss = DiceLoss()(tgt_mask, out_mask)
         
         # Which all masks belong to background classes
-        background_new = background
-        
-        focal_loss_weighted = tf.where(background_new, tf.zeros_like(focal_loss), focal_loss)
-        dice_loss_weighted = tf.where(background_new, tf.zeros_like(dice_loss), dice_loss)
+        focal_loss_weighted = tf.where(background, tf.zeros_like(focal_loss), focal_loss)
+        dice_loss_weighted = tf.where(background, tf.zeros_like(dice_loss), dice_loss)
         focal_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(focal_loss_weighted), num_masks_sum)
         dice_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(dice_loss_weighted), num_masks_sum)
         
