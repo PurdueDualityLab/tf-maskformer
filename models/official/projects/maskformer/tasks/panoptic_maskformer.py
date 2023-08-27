@@ -111,7 +111,7 @@ class PanopticTask(base_task.Task):
 			np.save("individual_masks_"+str(i)+".npy", sample[1]["individual_masks"].numpy())
 			np.save("unique_ids_"+str(i)+".npy", sample[1]["unique_ids"].numpy())
 			np.save("image_"+str(i)+".npy", sample[0].numpy())
-			exit()
+		exit()
 		return dataset
 
 
