@@ -162,10 +162,10 @@ class TransformerFPN(tf.keras.layers.Layer):
           Mask projection
         """
         input_levels = list(multilevel_features.keys())
-        for each_input_level in input_levels:
-            print(f"Input level {each_input_level} has shape {multilevel_features[each_input_level].shape}")
-        exit()
-        feat = multilevel_features[input_levels[-1]] # use the highest level feature as input
+        # for each_input_level in input_levels:
+        #     print(f"Input level {each_input_level} has shape {multilevel_features[each_input_level].shape}")
+        # exit()
+        feat = multilevel_features[input_levels[-1]] # use the low resolution features first 
        
         if not self._channels_last:
             feat = self._permute_1(feat)
@@ -186,7 +186,7 @@ class TransformerFPN(tf.keras.layers.Layer):
         levels = input_levels[:-1]
         for i, level in enumerate(levels[::-1]):
             feat = multilevel_features[level]
-
+            print("I : ", i, " Level : ", level, " Shape : ", feat.shape)
             if not self._channels_last:
                 feat = self._permute_2(multilevel_features[level])
 
@@ -198,7 +198,7 @@ class TransformerFPN(tf.keras.layers.Layer):
             down = self._conv2d_op_down[i + 1](down)
             down = self._down_groupnorm[i+1](down)
             down = self._relu2(down)
-
+        exit()
         mask = self._conv2d_op_mask(down)
 
         return mask, transformer
