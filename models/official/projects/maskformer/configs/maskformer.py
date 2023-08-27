@@ -193,10 +193,9 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
                   'type': 'maskformer_adamw',
                   'maskformer_adamw': {
                       'weight_decay_rate': 1e-4,
-                      #FIXME: Updated gradient global_clipnorm from 0.1 to 0.01
-                      'global_clipnorm': 0.1,
-                      # Avoid AdamW legacy behavior.
-                      'gradient_clip_norm': 0.01
+                      'global_clipnorm': 0.01,
+                      'gradient_clip_norm': 0.01,
+                      'exclude_from_weight_decay': ['LayerNorm', 'layer_norm', 'bias'],
                   }
               },
               'learning_rate': {
@@ -206,6 +205,12 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
                       'values': [float(os.environ.get('BASE_LR')), float(os.environ.get('BASE_LR'))/10]
                   }
               },
+              'warmup': {
+                  'type': 'linear',
+                  'warmup_steps': 10,
+                    'warmup_learning_rate': 0.0
+
+              } 
           })),
       restrictions=[
           'task.train_data.is_training != None',
