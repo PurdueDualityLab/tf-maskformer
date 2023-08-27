@@ -286,12 +286,13 @@ class mask_former_parser(parser.Parser):
                                 dtype=tf.int32)
                 i = tf.random.uniform([], 0, shape[0] - h + 1, dtype=tf.int32)
                 j = tf.random.uniform([], 0, shape[1] - w + 1, dtype=tf.int32)
-                
+                print("Cropping image to: ", h, w, i, j)
+                print("Image shape: ", image.shape)
                 image = tf.image.crop_to_bounding_box(image, i, j, h, w)
                 instance_mask = tf.image.crop_to_bounding_box(instance_mask, i, j, h, w)
                 contigious_mask = tf.image.crop_to_bounding_box(contigious_mask, i, j, h, w)
                 category_mask = tf.image.crop_to_bounding_box(category_mask, i, j, h, w)
-                
+
         scales = tf.constant(self._resize_scales, dtype=tf.float32)
         index = tf.random.categorical(tf.zeros([1, 11]), 1)[0]
         scales = tf.gather(scales, index, axis=0)
