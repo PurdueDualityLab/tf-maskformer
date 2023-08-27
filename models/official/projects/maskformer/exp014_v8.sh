@@ -17,6 +17,7 @@ export PRINT_OUTPUTS=False
 export OVERRIDES="runtime.distribution_strategy=tpu,runtime.mixed_precision_dtype=float32,\
 task.train_data.global_batch_size=$TRAIN_BATCH_SIZE,\
 task.model.which_pixel_decoder=transformer_fpn,\
+
 task.init_checkpoint=$RESNET_CKPT"
 python3 models/official/projects/maskformer/train.py \
   --experiment maskformer_coco_panoptic \
