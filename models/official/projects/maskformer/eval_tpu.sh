@@ -1,6 +1,6 @@
 #!/bin/bash
 train_bsize=16
-eval_bsize=32
+eval_bsize=16
 export PYTHONPATH=$PYTHONPATH:~/tf-maskformer/models
 export MODEL_DIR="gs://cam2-models/maskformer_vishal_exps/EXP13_v8_eval"
 export MASKFORMER_CKPT="gs://cam2-models/maskformer_vishal_exps/EXP13_v8/ckpt-672672"
