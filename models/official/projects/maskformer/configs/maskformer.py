@@ -207,8 +207,8 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
               },
               'warmup': {
                   'type': 'linear',
+                  'warmup_learning_rate': 0.0,
                   'warmup_steps': 10,
-                    'warmup_learning_rate': 0.0
 
               } 
           })),
