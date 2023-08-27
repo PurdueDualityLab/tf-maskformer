@@ -12,10 +12,10 @@ export IMG_SIZE=1280
 export PRINT_OUTPUTS=True
 export OVERRIDES="runtime.distribution_strategy=one_device,runtime.mixed_precision_dtype=float32,\
 task.train_data.global_batch_size=$TRAIN_BATCH_SIZE,\
-task.model.which_pixel_decoder=transformer_fpn"
-# task.init_checkpoint=$RESNET_CKPT"
+task.model.which_pixel_decoder=transformer_fpn,\
+task.init_checkpoint=$RESNET_CKPT"
 python3 models/official/projects/maskformer/train.py \
   --experiment maskformer_coco_panoptic \
-  --mode train \
+  --mode train_and_eval \
   --model_dir $MODEL_DIR \
   --params_override=$OVERRIDES
