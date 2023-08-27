@@ -162,7 +162,9 @@ class TransformerFPN(tf.keras.layers.Layer):
           Mask projection
         """
         input_levels = list(multilevel_features.keys())
-        
+        for each_input_level in input_levels:
+            print(f"Input level {each_input_level} has shape {multilevel_features[each_input_level].shape}")
+        exit()
         feat = multilevel_features[input_levels[-1]] # use the highest level feature as input
        
         if not self._channels_last:
