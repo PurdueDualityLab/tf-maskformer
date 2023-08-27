@@ -176,7 +176,9 @@ class Loss:
         cls_weights_per_replica = tf.reduce_sum(cls_weights)
         replica_context = tf.distribute.get_replica_context()
         num_masks_sum, cls_weights_sum = replica_context.all_reduce(tf.distribute.ReduceOp.SUM,[num_masks_per_replica, cls_weights_per_replica])
-       
+
+        print("num_masks_sum :", num_masks_sum)
+        print("cls_weights_sum :", cls_weights_sum)
         # Final losses
         cls_loss = tf.math.divide_no_nan(tf.reduce_sum(cls_loss), cls_weights_sum)
        
