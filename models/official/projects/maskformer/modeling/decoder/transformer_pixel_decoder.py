@@ -77,8 +77,6 @@ class TransformerFPN(tf.keras.layers.Layer):
         input_levels = list(multilevel_features.keys())
         levels = input_levels[:-1]
 
-        # TODO : Input projection layer needs to be initialized with xavier init
-        # TODO : Input projection layer does not use bias 
         self._input_proj = tf.keras.layers.Conv2D(filters=self._fpn_feat_dims,
                                                   kernel_size=(1, 1),
                                                   padding='same',
@@ -163,9 +161,7 @@ class TransformerFPN(tf.keras.layers.Layer):
           Mask projection
         """
         input_levels = list(multilevel_features.keys())
-        # for each_input_level in input_levels:
-        #     print(f"Input level {each_input_level} has shape {multilevel_features[each_input_level].shape}")
-        # exit()
+        
         feat = multilevel_features[input_levels[-1]] # use the low resolution features first 
        
         if not self._channels_last:
@@ -175,6 +171,7 @@ class TransformerFPN(tf.keras.layers.Layer):
         mask = self._generate_image_mask(feat)
         pos_embed = position_embedding_sine(mask, num_pos_features=self._fpn_feat_dims)
         transformer = self._transformer_encoder(features, None, pos_embed)
+        
         down = self._conv2d_op_down[0](transformer)
         down = self._down_groupnorm[0](down)
         down = self._relu1(down)
@@ -194,7 +191,7 @@ class TransformerFPN(tf.keras.layers.Layer):
             down = self._conv2d_op_down[i + 1](down)
             down = self._down_groupnorm[i+1](down)
             down = self._relu2(down)
-        exit()
+       
         mask = self._conv2d_op_mask(down)
 
         return mask, transformer
