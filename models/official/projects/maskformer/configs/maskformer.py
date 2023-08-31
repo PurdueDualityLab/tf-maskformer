@@ -64,7 +64,7 @@ class DataConfig(cfg.DataConfig):
 @dataclasses.dataclass
 class Losses(hyperparams.Config):
   class_offset: int = 0
-  background_cls_weight: float = 0.1
+  background_cls_weight: float = 0.0001
   l2_weight_decay: float = 1e-4
   cost_class = 1.0
   cost_dice = 1.0
