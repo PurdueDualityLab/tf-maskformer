@@ -96,6 +96,7 @@ class TransformerEncoder(tf.keras.layers.Layer):
                   models.seq2seq_transformer.attention_initializer(
                       input_shape[2])),
               name=("layer_%d" % i)))
+      
     self.output_normalization = tf.keras.layers.LayerNormalization(
         epsilon=self._norm_epsilon, dtype="float32")
     super(TransformerEncoder, self).build(input_shape)
@@ -407,6 +408,7 @@ class TransformerEncoderBlock(tf.keras.layers.Layer):
     if self._norm_first:
       source_attention_output = attention_output
       attention_output = self._output_layer_norm(attention_output)
+      
     inner_output = self._intermediate_dense(attention_output)
     inner_output = self._intermediate_activation_layer(inner_output)
     inner_output = self._inner_dropout_layer(inner_output)

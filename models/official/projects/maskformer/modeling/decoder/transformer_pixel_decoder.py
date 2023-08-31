@@ -83,7 +83,8 @@ class TransformerFPN(tf.keras.layers.Layer):
                                                   kernel_size=(1, 1),
                                                   padding='same',
                                                   name = f"input_proj",
-                                                  use_bias = True)
+                                                  use_bias = True,
+                                                  kernel_initializer='glorot_uniform',)
         
         self._transformer_encoder = TransformerEncoder(norm_first=False,
                                                        dropout_rate = 0.1,
@@ -170,15 +171,10 @@ class TransformerFPN(tf.keras.layers.Layer):
         if not self._channels_last:
             feat = self._permute_1(feat)
         
-        mask = self._generate_image_mask(feat)
-        pos_embed = position_embedding_sine(
-            mask, num_pos_features=self._fpn_feat_dims)
-
         features = self._input_proj(feat)
-        
+        mask = self._generate_image_mask(feat)
+        pos_embed = position_embedding_sine(mask, num_pos_features=self._fpn_feat_dims)
         transformer = self._transformer_encoder(features, None, pos_embed)
-
-
         down = self._conv2d_op_down[0](transformer)
         down = self._down_groupnorm[0](down)
         down = self._relu1(down)
@@ -186,7 +182,7 @@ class TransformerFPN(tf.keras.layers.Layer):
         levels = input_levels[:-1]
         for i, level in enumerate(levels[::-1]):
             feat = multilevel_features[level]
-            print("I : ", i, " Level : ", level, " Shape : ", feat.shape)
+            
             if not self._channels_last:
                 feat = self._permute_2(multilevel_features[level])
 
