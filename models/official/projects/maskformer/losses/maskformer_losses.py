@@ -2,8 +2,8 @@ import tensorflow as tf
 from official.vision.losses import focal_loss
 from official.projects.detr.ops import matchers
 import numpy as np
-KEEP_FOCAL_LOSS_ONLY = False
-KEEP_DICE_LOSS_ONLY = True
+KEEP_FOCAL_LOSS_ONLY = True
+KEEP_DICE_LOSS_ONLY = False
 
 class FocalLossMod(focal_loss.FocalLoss):
     """Implements a Focal loss for segmentation problems.
