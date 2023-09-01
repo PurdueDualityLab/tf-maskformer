@@ -2,6 +2,8 @@ import tensorflow as tf
 from official.vision.losses import focal_loss
 from official.projects.detr.ops import matchers
 import numpy as np
+KEEP_FOCAL_LOSS_ONLY = False
+KEEP_DICE_LOSS_ONLY = True
 
 class FocalLossMod(focal_loss.FocalLoss):
     """Implements a Focal loss for segmentation problems.
@@ -198,15 +200,17 @@ class Loss:
         out_mask = tf.reshape(out_mask, [tf.shape(out_mask)[0], tf.shape(out_mask)[1], -1]) # [b, 100, h*w]
         tgt_mask = tf.reshape(tgt_mask, [tf.shape(tgt_mask)[0],tf.shape(tgt_mask)[1], -1])
         
-        focal_loss = FocalLossMod()(tgt_mask, out_mask)
-        
-        dice_loss = DiceLoss()(tgt_mask, out_mask)
-        # print("Background : ", background)
-        # Which all masks belong to background classes
-        focal_loss_weighted = tf.where(background, tf.zeros_like(focal_loss), focal_loss)
-        dice_loss_weighted = tf.where(background, tf.zeros_like(dice_loss), dice_loss)
-        focal_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(focal_loss_weighted), num_masks_sum)
-        dice_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(dice_loss_weighted), num_masks_sum)
+        if KEEP_FOCAL_LOSS_ONLY:
+            focal_loss = FocalLossMod()(tgt_mask, out_mask)
+            focal_loss_weighted = tf.where(background, tf.zeros_like(focal_loss), focal_loss)
+            focal_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(focal_loss_weighted), num_masks_sum)
+            dice_loss_final = 0.0
+
+        if KEEP_DICE_LOSS_ONLY:
+            dice_loss = DiceLoss()(tgt_mask, out_mask)
+            dice_loss_weighted = tf.where(background, tf.zeros_like(dice_loss), dice_loss)
+            dice_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(dice_loss_weighted), num_masks_sum)
+            focal_loss_final = 0.0
         
         return cls_loss, focal_loss_final, dice_loss_final
     

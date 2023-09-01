@@ -64,7 +64,7 @@ class DataConfig(cfg.DataConfig):
 @dataclasses.dataclass
 class Losses(hyperparams.Config):
   class_offset: int = 0
-  background_cls_weight: float = 0.0001
+  background_cls_weight: float = 0.1
   l2_weight_decay: float = 1e-4
   cost_class = 1.0
   cost_dice = 1.0
@@ -179,7 +179,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
           steps_per_loop=steps_per_epoch,
           summary_interval=ckpt_interval,
           checkpoint_interval=ckpt_interval,
-          validation_interval=5 * steps_per_epoch,
+          validation_interval=steps_per_epoch, # run validation after every epoch (not efficient, but we want to see the results)
           max_to_keep=3,
           best_checkpoint_export_subdir='best_ckpt',
           # TODO: Metric not implemented yet
