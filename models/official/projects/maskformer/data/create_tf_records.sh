@@ -45,7 +45,7 @@
 #   unzip $DATA_DIR/annotations/panoptic_train2017.zip -d $DATA_DIR
 #   unzip $DATA_DIR/annotations/panoptic_val2017.zip -d $DATA_DIR
 # fi
-DATA_DIR="/depot/davisjam/data/vishal/datasets/coco"
+DATA_DIR="~/unzipped"
 python3 models/official/projects/maskformer/data/create_coco_tf_record.py \
   --logtostderr \
   --image_dir="$DATA_DIR/val2017" \
