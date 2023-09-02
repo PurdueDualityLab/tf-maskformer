@@ -103,14 +103,19 @@ class PanopticTask(base_task.Task):
 		  parser_fn=parser.parse_fn(params.is_training))
 		
 		dataset = reader.read(input_context=input_context)
-		# for i, sample in enumerate(dataset.take(50)):
+		# for i, sample in enumerate(dataset.take(10)):
 		# 	# print(f"unique idsin dataset take : {sample[1]['unique_ids']}")
-		# 	print("individual masks :", sample[1]["individual_masks"].shape)
-		# 	# np.save("contigious_mask.npy", sample[1]["contigious_mask"].numpy())
-		# 	# print(f"image shape : {sample[0].shape}")
-		# 	np.save("individual_masks_"+str(i)+".npy", sample[1]["individual_masks"].numpy())
-		# 	np.save("unique_ids_"+str(i)+".npy", sample[1]["unique_ids"].numpy())
+		# 	# print("individual masks :", sample[1]["individual_masks"].shape)
 		# 	np.save("image_"+str(i)+".npy", sample[0].numpy())
+		# 	np.save("contigious_mask_"+str(i)+".npy", sample[1]["contigious_mask"].numpy())
+		# 	np.save("category_mask_"+str(i)+".npy", sample[1]["category_mask"].numpy())
+		# 	np.save("instance_mask_"+str(i)+".npy", sample[1]["instance_mask"].numpy())
+		# 	np.save("individual_masks_"+str(i)+".npy", sample[1]["individual_masks"].numpy())
+		# 	np.save("valid_mask_"+str(i)+".npy", sample[1]["valid_mask"].numpy())
+		# 	np.save("thing_mask_"+str(i)+".npy", sample[1]["things_mask"].numpy())
+		# 	# print(f"image shape : {sample[0].shape}")
+		# 	np.save("unique_ids_"+str(i)+".npy", sample[1]["unique_ids"].numpy())
+			
 		# exit()
 		return dataset
 
@@ -127,7 +132,7 @@ class PanopticTask(base_task.Task):
 					eos_coef = no_object_weight,
 					cost_class= self._task_config.losses.cost_class,
 					cost_dice= self._task_config.losses.cost_dice,
-					cost_focal= self._task_config.losses.cost_focal,)
+					cost_focal= self._task_config.losses.cost_focal, ignore_label=self._task_config.train_data.parser.ignore_label)
 
 		calculated_losses = loss(outputs, targets)
 		
@@ -284,7 +289,7 @@ class PanopticTask(base_task.Task):
 		# if self.panoptic_quality_metric is not None:
 			
 		# 	pq_metric_labels = {
-		# 	'category_mask': labels['category_mask'], # ignore label is 133 
+		# 	'category_mask': labels['category_mask'], # ignore label is 0 
 		# 	'instance_mask': labels['instance_mask'],
 		# 	'image_info': labels['image_info'],
 		# 	}

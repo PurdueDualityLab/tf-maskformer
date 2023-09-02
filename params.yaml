@@ -1,0 +1,225 @@
+runtime:
+  all_reduce_alg: null
+  batchnorm_spatial_persistent: false
+  dataset_num_private_threads: null
+  default_shard_dim: -1
+  distribution_strategy: one_device
+  enable_xla: false
+  gpu_thread_mode: null
+  loss_scale: null
+  mixed_precision_dtype: float32
+  num_cores_per_replica: 1
+  num_gpus: 1
+  num_packs: 1
+  per_gpu_thread_count: 0
+  run_eagerly: false
+  task_index: -1
+  tpu: null
+  tpu_enable_xla_dynamic_padder: null
+  worker_hosts: null
+task:
+  allow_image_summary: false
+  bfloat16: false
+  differential_privacy_config: null
+  init_checkpoint: /depot/davisjam/data/vishal/pretrained_ckpts/tfmg_resnet50/ckpt-62400
+  init_checkpoint_modules: backbone
+  losses:
+    background_cls_weight: 0.1
+    class_offset: 0
+    l2_weight_decay: 0.0001
+  model:
+    backbone:
+      resnet:
+        bn_trainable: true
+        depth_multiplier: 1.0
+        model_id: 50
+        replace_stem_max_pool: false
+        resnetd_shortcut: false
+        scale_stem: true
+        se_ratio: 0.0
+        stem_type: v0
+        stochastic_depth_drop_rate: 0.0
+      type: resnet
+    backbone_endpoint_name: '5'
+    detr_encoder_layers: 0
+    fpn_encoder_layers: 6
+    hidden_size: 256
+    input_size: [640, 640, 3]
+    norm_activation:
+      activation: relu
+      norm_epsilon: 0.001
+      norm_momentum: 0.99
+      use_sync_bn: true
+    num_classes: 133
+    num_decoder_layers: 6
+    num_queries: 100
+    which_pixel_decoder: transformer_fpn
+  name: null
+  panoptic_quality_evaluator:
+    ignored_label: 0
+    is_thing: null
+    num_categories: 133
+    rescale_predictions: false
+  per_category_metrics: false
+  train_data:
+    apply_tf_data_service_before_batching: false
+    block_length: 1
+    cache: false
+    cycle_length: null
+    decoder:
+      simple_decoder:
+        attribute_names: []
+        mask_binarize_threshold: null
+        regenerate_source_id: false
+      type: simple_decoder
+    deterministic: null
+    drop_remainder: true
+    dtype: bfloat16
+    enable_shared_tf_data_service_between_parallel_trainers: false
+    enable_tf_data_service: false
+    file_type: tfrecord
+    global_batch_size: 2
+    input_path: /depot/davisjam/data/vishal/datasets/coco/tfrecords/train*
+    is_training: true
+    parser:
+      aspect_ratio_range: !!python/tuple
+      - 0.5
+      - 2.0
+      aug_rand_hflip: true
+      aug_scale_max: 1.0
+      aug_scale_min: 1.0
+      dtype: bfloat16
+      groundtruth_padded_size: [640, 640]
+      ignore_label: 0
+      max_retry: 50
+      min_overlap_params: !!python/tuple
+      - 0.0
+      - 1.4
+      - 0.2
+      - 0.1
+      min_scale: 0.3
+      output_size: [640, 640]
+      pad_output: true
+      resize_eval_groundtruth: true
+      seed: 2045
+    prefetch_buffer_size: null
+    regenerate_source_id: false
+    seed: null
+    sharding: true
+    shuffle_buffer_size: 1000
+    tf_data_service_address: null
+    tf_data_service_job_name: null
+    tfds_as_supervised: false
+    tfds_data_dir: ''
+    tfds_name: ''
+    tfds_skip_decoding_feature: ''
+    tfds_split: train
+    trainer_id: null
+  validation_data:
+    apply_tf_data_service_before_batching: false
+    block_length: 1
+    cache: false
+    cycle_length: null
+    decoder:
+      simple_decoder:
+        attribute_names: []
+        mask_binarize_threshold: null
+        regenerate_source_id: false
+      type: simple_decoder
+    deterministic: null
+    drop_remainder: false
+    dtype: float32
+    enable_shared_tf_data_service_between_parallel_trainers: false
+    enable_tf_data_service: false
+    file_type: tfrecord
+    global_batch_size: 1
+    input_path: /depot/davisjam/data/vishal/datasets/coco/tfrecords/val*
+    is_training: false
+    parser:
+      aspect_ratio_range: !!python/tuple
+      - 0.5
+      - 2.0
+      aug_rand_hflip: true
+      aug_scale_max: 1.0
+      aug_scale_min: 1.0
+      dtype: float32
+      groundtruth_padded_size: !!python/tuple
+      - 1280
+      - 1280
+      ignore_label: 0
+      max_retry: 50
+      min_overlap_params: !!python/tuple
+      - 0.0
+      - 1.4
+      - 0.2
+      - 0.1
+      min_scale: 0.3
+      output_size: [640, 640]
+      pad_output: true
+      resize_eval_groundtruth: true
+      seed: 4096
+    prefetch_buffer_size: null
+    regenerate_source_id: false
+    seed: null
+    sharding: true
+    shuffle_buffer_size: 10000
+    tf_data_service_address: null
+    tf_data_service_job_name: null
+    tfds_as_supervised: false
+    tfds_data_dir: ''
+    tfds_name: ''
+    tfds_skip_decoding_feature: ''
+    tfds_split: train
+    trainer_id: null
+trainer:
+  allow_tpu_summary: false
+  best_checkpoint_eval_metric: ''
+  best_checkpoint_export_subdir: best_ckpt
+  best_checkpoint_metric_comp: higher
+  checkpoint_interval: 591430
+  continuous_eval_timeout: 3600
+  eval_tf_function: true
+  eval_tf_while_loop: false
+  loss_upper_bound: 1000000.0
+  max_to_keep: 3
+  optimizer_config:
+    ema: null
+    learning_rate:
+      stepwise:
+        boundaries: [11828600]
+        name: PiecewiseConstantDecay
+        offset: 0
+        values: [5.0e-05, 5.0e-06]
+      type: stepwise
+    optimizer:
+      maskformer_adamw:
+        amsgrad: false
+        beta_1: 0.9
+        beta_2: 0.999
+        clipnorm: null
+        clipvalue: null
+        epsilon: 1.0e-07
+        exclude_from_weight_decay: [LayerNorm, layer_norm, bias]
+        global_clipnorm: 0.1
+        gradient_clip_norm: 0.01
+        include_in_weight_decay: null
+        name: AdamWeightDecay
+        weight_decay_rate: 0.0001
+      type: maskformer_adamw
+    warmup:
+      linear:
+        name: linear
+        warmup_learning_rate: 0.0
+        warmup_steps: 640
+      type: linear
+  preemption_on_demand_checkpoint: true
+  recovery_begin_steps: 0
+  recovery_max_trials: 0
+  steps_per_loop: 59143
+  summary_interval: 591430
+  train_steps: 17742900
+  train_tf_function: true
+  train_tf_while_loop: true
+  validation_interval: 59143
+  validation_steps: 5000
+  validation_summary_subdir: validation

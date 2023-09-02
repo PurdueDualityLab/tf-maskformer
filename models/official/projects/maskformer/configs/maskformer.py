@@ -75,12 +75,12 @@ class MaskFormer(hyperparams.Config):
   """MaskFormer model definations."""
   num_queries: int = 100
   hidden_size: int = 256
-  # TODO: There are 133 classes for panoptic segmentation
+  # There are 134 classes (stuff + things + no object/background) for panoptic segmentation.
   num_classes: int = 133  
   fpn_encoder_layers: int = 6
   detr_encoder_layers: int = 0
   num_decoder_layers: int = 6
-  which_pixel_decoder: str = 'transformer_fpn' # change this to transformer FPN to use transformer FPN as per pytorch codebase
+  which_pixel_decoder: str = 'transformer_fpn' 
   input_size: List[int] = dataclasses.field(default_factory=list)
   backbone: backbones.Backbone = backbones.Backbone(
       type='resnet', resnet=backbones.ResNet(model_id=50, bn_trainable=True)) # FIXME : Should the bn_trainable be True or False?
@@ -92,7 +92,7 @@ class PanopticQuality(hyperparams.Config):
   """MaskFormer model pq evaluator config."""
   num_categories: int = 133
   is_thing : List[bool] = None
-  ignored_label: int = 133
+  ignored_label: int = 0
   rescale_predictions: bool = False
   
 
@@ -120,6 +120,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
   
   train_batch_size = int(os.environ.get('TRAIN_BATCH_SIZE'))
   eval_batch_size = int(os.environ.get('EVAL_BATCH_SIZE'))
+  no_obj_cls_weight = float(os.environ.get('NO_OBJ_CLS_WEIGHT'))
   ckpt_interval = (COCO_TRAIN_EXAMPLES // train_batch_size) * 10 # Don't write ckpts frequently. Slows down the training
   image_size = int(os.environ.get('IMG_SIZE'))
 
@@ -136,7 +137,9 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
               norm_activation=common.NormActivation(),
               which_pixel_decoder='transformer_fpn',
               num_classes=133,), # Extra class will be added automatically for background
-          losses = Losses(),
+          losses = Losses(
+            background_cls_weight=no_obj_cls_weight,
+          ),
           train_data = DataConfig(
               input_path=os.path.join(COCO_INPUT_PATH_BASE, 'train*'),
               is_training=True,
@@ -152,7 +155,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
                     pad_output = True,
                     resize_eval_groundtruth = True,
                     groundtruth_padded_size = [image_size,image_size],
-                    ignore_label = 133,
+                    ignore_label = 0,
                     aug_rand_hflip = True,
                     aug_scale_min = 1.0,
                     aug_scale_max = 1.0,

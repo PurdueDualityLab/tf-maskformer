@@ -261,11 +261,12 @@ def generate_coco_panoptics_masks(segments_info, mask_path,
 	
 	thing_dataset_id_to_contiguous_id = {}
 	stuff_dataset_id_to_contiguous_id = {}
+	# Reserve class :0 for background hence we add +1
 	for i, cat in enumerate(COCO_CATEGORIES):
-			if cat["isthing"]:
-					thing_dataset_id_to_contiguous_id[cat["id"]] = i
-			else:
-					stuff_dataset_id_to_contiguous_id[cat["id"]] = i
+		if cat["isthing"]:
+			thing_dataset_id_to_contiguous_id[cat["id"]] = i+1
+		else:
+			stuff_dataset_id_to_contiguous_id[cat["id"]] = i+1
 	
 	_meta["thing_dataset_id_to_contiguous_id"] = thing_dataset_id_to_contiguous_id
 	_meta["stuff_dataset_id_to_contiguous_id"] = stuff_dataset_id_to_contiguous_id

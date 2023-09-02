@@ -3,7 +3,7 @@ from official.vision.losses import focal_loss
 from official.projects.detr.ops import matchers
 import numpy as np
 KEEP_FOCAL_LOSS_ONLY = True
-KEEP_DICE_LOSS_ONLY = False
+KEEP_DICE_LOSS_ONLY = True
 
 class FocalLossMod(focal_loss.FocalLoss):
     """Implements a Focal loss for segmentation problems.
@@ -87,7 +87,7 @@ class DiceLoss(tf.keras.losses.Loss):
         return loss
 
 class Loss:
-    def __init__(self, num_classes, matcher, eos_coef, cost_class = 1.0, cost_focal = 20.0, cost_dice = 1.0):
+    def __init__(self, num_classes, matcher, eos_coef, cost_class = 1.0, cost_focal = 20.0, cost_dice = 1.0, ignore_label =0):
        
         self.num_classes = num_classes
         self.matcher = matcher
@@ -95,7 +95,7 @@ class Loss:
         self.cost_class = cost_class
         self.cost_focal = cost_focal
         self.cost_dice = cost_dice
-        
+        self.ignore_label = ignore_label
 
     
     def memory_efficient_matcher(self, outputs, y_true):
@@ -135,8 +135,8 @@ class Loss:
                     )
 
         
-        # Append highest cost where there are no objects : No object class == 0
-        valid = tf.expand_dims(tf.cast(tf.not_equal(tgt_ids, 133), dtype=total_cost.dtype), axis=1)
+        # Append highest cost where there are no objects : No object class == 0 (self.ignore_label)
+        valid = tf.expand_dims(tf.cast(tf.not_equal(tgt_ids, self.ignore_label), dtype=total_cost.dtype), axis=1)
         total_cost = (1 - valid) * max_cost + valid * total_cost
         total_cost = tf.where(
         tf.logical_or(tf.math.is_nan(total_cost), tf.math.is_inf(total_cost)),
@@ -148,37 +148,40 @@ class Loss:
        
         return indices
 
-    
-    
     def get_loss(self, outputs, y_true, indices):
       
         target_index = tf.math.argmax(indices, axis=1) #[batchsize, 100]
-        
         target_labels = y_true["unique_ids"] #[batchsize, num_gt_objects]
         cls_outputs = outputs["pred_logits"] # [batchsize, num_queries, num_classes] [1,100,134]
         cls_masks = outputs["pred_masks"]# [batchsize,num_queries, h, w]
         individual_masks = y_true["individual_masks"] # [batchsize, num_gt_objects, h, w,]
-        # contigious_masks = y_true["contigious_mask"] # [batchsize, h, w, 1]
+        valid_masks = y_true["valid_mask"] # [batchsize, h, w,]
+        
         
         cls_assigned = tf.gather(cls_outputs, target_index, batch_dims=1, axis=1)
         mask_assigned = tf.gather(cls_masks, target_index, batch_dims=1, axis=1)
 
         target_classes = tf.cast(target_labels, dtype=tf.int32)
-        background = tf.equal(target_classes, 133) 
+        background = tf.equal(target_classes, self.ignore_label) 
         
         num_masks = tf.reduce_sum(tf.cast(tf.logical_not(background), tf.float32), axis=-1)
         
         xentropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=target_classes, logits=cls_assigned)
+        
         cls_loss =  tf.where(background, self.eos_coef * xentropy, xentropy)
+        
         cls_weights = tf.where(background, self.eos_coef * tf.ones_like(cls_loss), tf.ones_like(cls_loss))
-    
+        
         num_masks_per_replica = tf.reduce_sum(num_masks)
+        
         cls_weights_per_replica = tf.reduce_sum(cls_weights)
+        
         replica_context = tf.distribute.get_replica_context()
         num_masks_sum, cls_weights_sum = replica_context.all_reduce(tf.distribute.ReduceOp.SUM,[num_masks_per_replica, cls_weights_per_replica])
+        
         # Final losses
         cls_loss = tf.math.divide_no_nan(tf.reduce_sum(cls_loss), cls_weights_sum)
-       
+        
         out_mask = mask_assigned
         tgt_mask = individual_masks
 
@@ -191,26 +194,21 @@ class Loss:
 
         # #undo the transpose 
         out_mask = tf.transpose(out_mask, perm=[0,3,1,2])
-        # FIXME : Do we need this??
+        # Calculate the focal loss and dice loss only where valid mask is true
         
-        # invalid_mask = tf.expand_dims(tf.cast(tf.equal(tf.squeeze(contigious_masks, -1), 133), dtype=tf.float32), axis=1) # [b, 1, h, w]
-        
-        # out_mask = out_mask * (1 - invalid_mask) 
-        # tgt_mask = tgt_mask * (1 - invalid_mask)
+        out_mask =  tf.where(tf.expand_dims(tf.squeeze(valid_masks, -1), axis=1), out_mask, tf.zeros_like(out_mask))
+        tgt_mask =  tf.where(tf.expand_dims(tf.squeeze(valid_masks, -1), axis=1), tgt_mask, tf.zeros_like(tgt_mask))
         out_mask = tf.reshape(out_mask, [tf.shape(out_mask)[0], tf.shape(out_mask)[1], -1]) # [b, 100, h*w]
         tgt_mask = tf.reshape(tgt_mask, [tf.shape(tgt_mask)[0],tf.shape(tgt_mask)[1], -1])
         
-        if KEEP_FOCAL_LOSS_ONLY:
-            focal_loss = FocalLossMod()(tgt_mask, out_mask)
-            focal_loss_weighted = tf.where(background, tf.zeros_like(focal_loss), focal_loss)
-            focal_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(focal_loss_weighted), num_masks_sum)
-            dice_loss_final = 0.0
-
-        if KEEP_DICE_LOSS_ONLY:
-            dice_loss = DiceLoss()(tgt_mask, out_mask)
-            dice_loss_weighted = tf.where(background, tf.zeros_like(dice_loss), dice_loss)
-            dice_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(dice_loss_weighted), num_masks_sum)
-            focal_loss_final = 0.0
+        
+        focal_loss = FocalLossMod()(tgt_mask, out_mask)
+        focal_loss_weighted = tf.where(background, tf.zeros_like(focal_loss), focal_loss)
+        focal_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(focal_loss_weighted), num_masks_sum)
+       
+        dice_loss = DiceLoss()(tgt_mask, out_mask)
+        dice_loss_weighted = tf.where(background, tf.zeros_like(dice_loss), dice_loss)
+        dice_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(dice_loss_weighted), num_masks_sum)
         
         return cls_loss, focal_loss_final, dice_loss_final
     

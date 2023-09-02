@@ -43,9 +43,6 @@ class OptimizationConfig(optimization.OptimizationConfig):
   """
   optimizer: OptimizerConfig = OptimizerConfig()
 
-
-# TODO(frederickliu): figure out how to make this configuable.
-# TODO(frederickliu): Study if this is needed.
 class _MaskformerAdamW(nlp_optimization.AdamWeightDecay):
   """Custom AdamW to support different lr scaling for backbone.
 

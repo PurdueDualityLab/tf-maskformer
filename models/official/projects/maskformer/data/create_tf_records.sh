@@ -45,24 +45,26 @@
 #   unzip $DATA_DIR/annotations/panoptic_train2017.zip -d $DATA_DIR
 #   unzip $DATA_DIR/annotations/panoptic_val2017.zip -d $DATA_DIR
 # fi
-
-python3 create_coco_tf_record.py \
+DATA_DIR="/depot/davisjam/data/vishal/datasets/coco"
+python3 models/official/projects/maskformer/data/create_coco_tf_record.py \
   --logtostderr \
   --image_dir="$DATA_DIR/val2017" \
   --object_annotations_file="$DATA_DIR/annotations/instances_val2017.json" \
   --output_file_prefix="$DATA_DIR/tfrecords/val" \
   --panoptic_annotations_file="$DATA_DIR/annotations/panoptic_val2017.json" \
   --panoptic_masks_dir="$DATA_DIR/panoptic_val2017" \
+  --panoptic_skip_crowd\
   --num_shards=8 \
   --include_panoptic_masks
 
-# python3 create_coco_tf_record.py \
-#   --logtostderr \
-#   --image_dir="$DATA_DIR/train2017" \
-#   --object_annotations_file="$DATA_DIR/annotations/instances_train2017.json" \
-#   --output_file_prefix="$DATA_DIR/tfrecords/train" \
-#   --panoptic_annotations_file="$DATA_DIR/annotations/panoptic_train2017.json" \
-#   --panoptic_masks_dir="$DATA_DIR/panoptic_train2017" \
-#   --num_shards=150 \
-#   --include_panoptic_masks\
-#   --num_processes 16\
+python3 models/official/projects/maskformer/data/create_coco_tf_record.py \
+  --logtostderr \
+  --image_dir="$DATA_DIR/train2017" \
+  --object_annotations_file="$DATA_DIR/annotations/instances_train2017.json" \
+  --output_file_prefix="$DATA_DIR/tfrecords/train" \
+  --panoptic_annotations_file="$DATA_DIR/annotations/panoptic_train2017.json" \
+  --panoptic_masks_dir="$DATA_DIR/panoptic_train2017" \
+  --panoptic_skip_crowd\
+  --num_shards=50 \
+  --include_panoptic_masks\
+  --num_processes 16\

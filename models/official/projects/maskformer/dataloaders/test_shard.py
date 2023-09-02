@@ -7,7 +7,8 @@ import os
 import tensorflow as tf
 from panoptic_input import mask_former_parser
 
-tfrecord_path = "/home/vishalpurohit55595/datasets/coco_panoptic/tfrecords"  # specify the filepath to tfrecord
+# tfrecord_path = "/home/vishalpurohit55595/datasets/coco_panoptic/tfrecords" 
+tfrecord_path = "/depot/davisjam/data/vishal/datasets/coco/tfrecords" # specify the filepath to tfrecord
 # get list of tfrecord files
 file_paths = tf.io.gfile.glob(tfrecord_path + "/*.tfrecord")
 decoder = panoptic_input.TfExampleDecoder()
@@ -28,9 +29,10 @@ for each_file in file_paths:
         category_mask = tf.cast(
             data['groundtruth_panoptic_category_mask'][:, :, 0],
             dtype=tf.float32)
+        class_ids = tf.cast(tf.sparse.to_dense(data['groundtruth_panoptic_class_ids'], default_value=255), dtype=tf.int32)
         
         h,w,c = image.shape
-        
+        all_class_stats = [x for x in range(132)]
         assert len(image.shape) == 3 
         assert image.shape[-1] == 3
         assert image.numpy().all() <= 255
@@ -45,23 +47,30 @@ for each_file in file_paths:
         assert contigious_mask.numpy().shape[1] >= 0
         assert contigious_mask.numpy().shape[0] == h
         assert contigious_mask.numpy().shape[1] == w
+        unique_class_ids = np.unique(contigious_mask.numpy())
+        print(unique_class_ids)
+        print(class_ids.numpy())
+        exit()
+        for each_class_id in unique_class_ids:
+            all_class_stats[int(each_class_id)] += 1
+        assert len(unique_class_ids) == len(class_ids.numpy())
+        # assert len(category_mask.shape) == 2
+        # assert category_mask.numpy().all() <= 199
+        # assert category_mask.numpy().all() >= 0
+        # assert category_mask.numpy().shape[0] >= 0
+        # assert category_mask.numpy().shape[1] >= 0
+        # assert category_mask.numpy().shape[0] == h
+        # assert category_mask.numpy().shape[1] == w
 
-        assert len(category_mask.shape) == 2
-        assert category_mask.numpy().all() <= 199
-        assert category_mask.numpy().all() >= 0
-        assert category_mask.numpy().shape[0] >= 0
-        assert category_mask.numpy().shape[1] >= 0
-        assert category_mask.numpy().shape[0] == h
-        assert category_mask.numpy().shape[1] == w
-
-        assert len(instance_mask.shape) == 2
-        assert instance_mask.numpy().all() <= 132
-        assert instance_mask.numpy().all() >= 0
-        assert instance_mask.numpy().shape[0] >= 0
-        assert instance_mask.numpy().shape[1] >= 0
-        assert instance_mask.numpy().shape[0] == h
-        assert instance_mask.numpy().shape[1] == w
+        # assert len(instance_mask.shape) == 2
+        # assert instance_mask.numpy().all() <= 132
+        # assert instance_mask.numpy().all() >= 0
+        # assert instance_mask.numpy().shape[0] >= 0
+        # assert instance_mask.numpy().shape[1] >= 0
+        # assert instance_mask.numpy().shape[0] == h
+        # assert instance_mask.numpy().shape[1] == w
 
         image_count += 1
     
 print("Total images :", image_count)
+print("All class stats :", all_class_stats)

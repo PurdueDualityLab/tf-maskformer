@@ -10,7 +10,7 @@ from official.vision.ops import preprocess_ops
 class PanopticInferenceTest(tf.test.TestCase, parameterized.TestCase):
     @parameterized.named_parameters(('test1',))
     def test_pass_through(self):
-        background_class_id = 133
+        background_class_id = 0
         # This test is supposed to give PQ stuff and PQ things metrics for fixed tensor inputs
         # Load pytorch output and targets for testing the PQ stuff and PQ things metrics
         main_pth = "/home/vishalpurohit55595/tf-maskformer/models/official/projects/maskformer/losses"
