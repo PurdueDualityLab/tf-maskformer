@@ -11,6 +11,7 @@ export TPU_ZONE="us-central1-a"
 export TFRECORDS_DIR="gs://cam2-datasets/coco_panoptic/tfrecords"
 export TRAIN_BATCH_SIZE=$train_bsize
 export EVAL_BATCH_SIZE=$eval_bsize
+export NO_OBJ_CLS_WEIGHT=0.1
 export BASE_LR=0.0001
 export IMG_SIZE=640
 export PRINT_OUTPUTS=False
