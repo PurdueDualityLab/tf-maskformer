@@ -54,7 +54,7 @@ python3 models/official/projects/maskformer/data/create_coco_tf_record.py \
   --object_annotations_file="$DATA_DIR/annotations/instances_val2017.json" \
   --output_file_prefix="$DATA_DIR/tfrecords/val" \
   --panoptic_annotations_file="$DATA_DIR/annotations/panoptic_val2017.json" \
-  --panoptic_masks_dir="$DATA_DIR/panoptic_val2017" \
+  --panoptic_masks_dir="$DATA_DIR/annotations/panoptic_val2017" \
   --panoptic_skip_crowd\
   --num_shards=8 \
   --include_panoptic_masks
@@ -65,7 +65,7 @@ python3 models/official/projects/maskformer/data/create_coco_tf_record.py \
   --object_annotations_file="$DATA_DIR/annotations/instances_train2017.json" \
   --output_file_prefix="$DATA_DIR/tfrecords/train" \
   --panoptic_annotations_file="$DATA_DIR/annotations/panoptic_train2017.json" \
-  --panoptic_masks_dir="$DATA_DIR/panoptic_train2017" \
+  --panoptic_masks_dir="$DATA_DIR/annotations/panoptic_train2017" \
   --panoptic_skip_crowd\
   --num_shards=50 \
   --include_panoptic_masks\
