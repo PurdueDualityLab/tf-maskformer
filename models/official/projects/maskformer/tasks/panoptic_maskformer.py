@@ -36,8 +36,7 @@ class PanopticTask(base_task.Task):
 		"""Builds MaskFormer Model."""
 		logging.info('Building MaskFormer model.')
 		input_specs = tf.keras.layers.InputSpec(shape=[None] + self._task_config.model.input_size)
-		print(self._task_config.model)
-		exit()
+		
 		backbone = backbones.factory.build_backbone(input_specs=input_specs,
 					backbone_config=self._task_config.model.backbone,
 					norm_activation_config=self._task_config.model.norm_activation)
