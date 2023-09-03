@@ -83,7 +83,7 @@ class MaskFormer(hyperparams.Config):
   which_pixel_decoder: str = 'transformer_fpn' 
   input_size: List[int] = dataclasses.field(default_factory=list)
   backbone: backbones.Backbone = backbones.Backbone(
-      type='resnet', resnet=backbones.ResNet(model_id=50, bn_trainable=True)) # FIXME : Should the bn_trainable be True or False?
+      type='resnet', resnet=backbones.ResNet(model_id=50, bn_trainable=False)) 
   norm_activation: common.NormActivation = common.NormActivation()
   backbone_endpoint_name: str = '5'
 

@@ -55,7 +55,7 @@ class _MaskformerAdamW(nlp_optimization.AdamWeightDecay):
     
     if 'transformer_fpn' not in var.name and 'mask_former_transformer' not in var.name and 'mlp_head' not in var.name:
       lr_t *= 0.1
-    
+    # print("var name: ", var.name, " lr_t: ", lr_t)
     decay = self._decay_weights_op(var, lr_t, apply_state)
     with tf.control_dependencies([decay]):
       var_device, var_dtype = var.device, var.dtype.base_dtype

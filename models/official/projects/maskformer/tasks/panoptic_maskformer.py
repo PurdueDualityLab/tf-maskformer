@@ -36,7 +36,8 @@ class PanopticTask(base_task.Task):
 		"""Builds MaskFormer Model."""
 		logging.info('Building MaskFormer model.')
 		input_specs = tf.keras.layers.InputSpec(shape=[None] + self._task_config.model.input_size)
-		
+		print(self._task_config.model)
+		exit()
 		backbone = backbones.factory.build_backbone(input_specs=input_specs,
 					backbone_config=self._task_config.model.backbone,
 					norm_activation_config=self._task_config.model.norm_activation)
@@ -227,13 +228,13 @@ class PanopticTask(base_task.Task):
 		if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
 			grads = optimizer.get_unscaled_gradients(grads)
 		optimizer.apply_gradients(list(zip(grads,  model.trainable_variables)))
-
+		
 		if os.environ.get('PRINT_OUTPUTS') == 'True':
 			probs = tf.keras.activations.softmax(outputs["class_prob_predictions"], axis=-1)
 			pred_labels = tf.argmax(probs, axis=-1)
 			print("Target labels :", labels["unique_ids"])
 			print("Output labels :", pred_labels)
-
+		
 		# # Multiply for logging.
 		# # Since we expect the gradient replica sum to happen in the optimizer,
 		# # the loss is scaled with global num_boxes and weights.
