@@ -86,6 +86,9 @@ class TransformerFPN(tf.keras.layers.Layer):
         
         self._transformer_encoder = TransformerEncoder(norm_first=False,
                                                        dropout_rate = 0.1,
+                                                       # FIXME : Added attention_dropout_rate and intermediate_dropout
+                                                       attention_dropout_rate=0.1,
+                                                       intermediate_dropout=0.1,
                                                        num_layers=self._num_encoder_layers)
         self._interpolations = []                                               
         self._conv2d_op_lateral = []

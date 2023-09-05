@@ -70,11 +70,8 @@ class DETRTransformer(tf.keras.layers.Layer):
       self_attention_mask=tf.ones(
             (target_shape[0], target_shape[1], target_shape[1]))
     else:
-      
       cross_attention_mask = None
-      # FIXME : This is a hack to get around the fact that the self attention mask is required to ones instead of None
-      self_attention_mask = tf.ones(
-            (target_shape[0], target_shape[1], target_shape[1]))
+      self_attention_mask = None
     
     
     decoded = self._decoder(
