@@ -2,8 +2,9 @@ import tensorflow as tf
 from official.vision.losses import focal_loss
 from official.projects.detr.ops import matchers
 import numpy as np
-KEEP_FOCAL_LOSS_ONLY = True
-KEEP_DICE_LOSS_ONLY = True
+import os
+KEEP_FOCAL_LOSS_ONLY = os.environ.get("FOCAL_LOSS")
+KEEP_DICE_LOSS_ONLY = os.environ.get("DICE_LOSS")
 
 class FocalLossMod(focal_loss.FocalLoss):
     """Implements a Focal loss for segmentation problems.
@@ -211,7 +212,7 @@ class Loss:
             dice_loss_weighted = tf.where(background, tf.zeros_like(dice_loss), dice_loss)
             dice_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(dice_loss_weighted), num_masks_sum)
             focal_loss_final = 0.0
-            
+
         
         return cls_loss, focal_loss_final, dice_loss_final
     
