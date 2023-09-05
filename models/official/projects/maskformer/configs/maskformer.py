@@ -207,7 +207,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
                   'type': 'linear',
                     'linear': {
                     'warmup_learning_rate': 0.0,
-                    'warmup_steps': 640,
+                    'warmup_steps': int(os.environ.get('WARMUP_STEPS', 640)),
                     }
 
               } 
