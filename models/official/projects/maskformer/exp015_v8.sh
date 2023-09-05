@@ -14,8 +14,6 @@ export EVAL_BATCH_SIZE=$eval_bsize
 export NO_OBJ_CLS_WEIGHT=0.1
 export BASE_LR=0.000001
 export IMG_SIZE=640
-export FOCAL_LOSS=True
-export DICE_LOSS=True
 export PRINT_OUTPUTS=False
 export OVERRIDES="runtime.distribution_strategy=tpu,runtime.mixed_precision_dtype=float32,\
 task.train_data.global_batch_size=$TRAIN_BATCH_SIZE,\
