@@ -30,7 +30,7 @@ task:
   model:
     backbone:
       resnet:
-        bn_trainable: true
+        bn_trainable: false
         depth_multiplier: 1.0
         model_id: 50
         replace_stem_max_pool: false

@@ -33,8 +33,9 @@ class FocalLossMod(focal_loss.FocalLoss):
         Returns:
         Loss float `Tensor`.
         """
-        weighted_loss = super().call(y_true, y_pred)
-        loss = tf.math.reduce_mean(weighted_loss, axis=-1)
+        weighted_loss = super().call(y_true, y_pred) # [b, 100, h*w]
+        
+        loss = tf.math.reduce_mean(weighted_loss, axis=-1) # [b, 100]
         return loss
 
     def batch(self, y_true, y_pred):
@@ -195,21 +196,20 @@ class Loss:
         # #undo the transpose 
         out_mask = tf.transpose(out_mask, perm=[0,3,1,2])
         # Calculate the focal loss and dice loss only where valid mask is true
-        
-        out_mask =  tf.where(tf.expand_dims(tf.squeeze(valid_masks, -1), axis=1), out_mask, tf.zeros_like(out_mask))
-        tgt_mask =  tf.where(tf.expand_dims(tf.squeeze(valid_masks, -1), axis=1), tgt_mask, tf.zeros_like(tgt_mask))
+        # FIXME : May be we don't need valid masks
+        # out_mask =  tf.where(tf.expand_dims(tf.squeeze(valid_masks, -1), axis=1), out_mask, tf.zeros_like(out_mask))
+        # tgt_mask =  tf.where(tf.expand_dims(tf.squeeze(valid_masks, -1), axis=1), tgt_mask, tf.zeros_like(tgt_mask))
         out_mask = tf.reshape(out_mask, [tf.shape(out_mask)[0], tf.shape(out_mask)[1], -1]) # [b, 100, h*w]
         tgt_mask = tf.reshape(tgt_mask, [tf.shape(tgt_mask)[0],tf.shape(tgt_mask)[1], -1])
         
-        # FIXME
-        # focal_loss = FocalLossMod()(tgt_mask, out_mask)
-        focal_loss = FocalLossMod().batch(tgt_mask, out_mask)
+        
+        focal_loss = FocalLossMod()(tgt_mask, out_mask)
         focal_loss_weighted = tf.where(background, tf.zeros_like(focal_loss), focal_loss)
-        focal_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(focal_loss_weighted), num_masks_sum)
+        focal_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(tf.math.reduce_sum(focal_loss_weighted, axis=-1)), num_masks_sum)
             
         dice_loss = DiceLoss()(tgt_mask, out_mask)
         dice_loss_weighted = tf.where(background, tf.zeros_like(dice_loss), dice_loss)
-        dice_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(dice_loss_weighted), num_masks_sum)
+        dice_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(tf.math.reduce_sum(dice_loss_weighted, axis=-1)), num_masks_sum)
         
         return cls_loss, focal_loss_final, dice_loss_final
     
