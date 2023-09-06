@@ -203,7 +203,7 @@ class Loss:
         tgt_mask = tf.reshape(tgt_mask, [tf.shape(tgt_mask)[0],tf.shape(tgt_mask)[1], -1])
         
         # FIXME : Change alpha value from 0.25 to 0.75
-        focal_loss = FocalLossMod(alpha=0.75, gamma=2)(tgt_mask, out_mask)
+        focal_loss = FocalLossMod(alpha=0.25, gamma=2)(tgt_mask, out_mask)
         focal_loss_weighted = tf.where(background, tf.zeros_like(focal_loss), focal_loss)
         focal_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(tf.math.reduce_sum(focal_loss_weighted, axis=-1)), num_masks_sum)
             
