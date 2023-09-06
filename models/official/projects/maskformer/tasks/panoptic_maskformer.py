@@ -140,8 +140,8 @@ class PanopticTask(base_task.Task):
 		total_loss = calculated_losses['loss_ce'] + calculated_losses['loss_dice'] + calculated_losses['loss_focal']
 
 		weighted_ce = calculated_losses['loss_ce']
-		weighted_focal = calculated_losses['loss_dice']
-		weighted_dice = calculated_losses['loss_focal']
+		weighted_dice = calculated_losses['loss_dice']
+		weighted_focal = calculated_losses['loss_focal']
 
 		# Not implemented auxilary outputs
 		# if aux_outputs is not None:
