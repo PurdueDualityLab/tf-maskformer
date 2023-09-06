@@ -206,12 +206,12 @@ class Loss:
         focal_loss_weighted = tf.where(background, tf.zeros_like(focal_loss), focal_loss)
         focal_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(focal_loss_weighted), num_masks_sum)
             
-        # dice_loss = DiceLoss()(tgt_mask, out_mask)
-        out_mask = tf.reshape(tf.keras.activations.sigmoid(out_mask), (tf.shape(out_mask)[0],tf.shape(out_mask)[1],-1))
-        tgt_mask = tf.reshape(tgt_mask, (tf.shape(tgt_mask)[0],tf.shape(tgt_mask)[1],-1))
-        numerator = 2 * tf.reduce_sum(out_mask * tgt_mask, axis=-1)
-        denominator = tf.reduce_sum(out_mask, axis=-1) + tf.reduce_sum(tgt_mask, axis=-1)
-        dice_loss = 1 - (numerator + 1) / (denominator + 1)
+        dice_loss = DiceLoss()(tgt_mask, out_mask)
+        # out_mask = tf.reshape(tf.keras.activations.sigmoid(out_mask), (tf.shape(out_mask)[0],tf.shape(out_mask)[1],-1))
+        # tgt_mask = tf.reshape(tgt_mask, (tf.shape(tgt_mask)[0],tf.shape(tgt_mask)[1],-1))
+        # numerator = 2 * tf.reduce_sum(out_mask * tgt_mask, axis=-1)
+        # denominator = tf.reduce_sum(out_mask, axis=-1) + tf.reduce_sum(tgt_mask, axis=-1)
+        # dice_loss = 1 - (numerator + 1) / (denominator + 1)
 
         dice_loss_weighted = tf.where(background, tf.zeros_like(dice_loss), dice_loss)
         dice_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(dice_loss_weighted), num_masks_sum)
