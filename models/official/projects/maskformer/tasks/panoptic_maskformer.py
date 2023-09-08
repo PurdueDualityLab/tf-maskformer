@@ -58,6 +58,7 @@ class PanopticTask(base_task.Task):
 		"""
 		Used to initialize the models with checkpoint
 		"""
+		# pass
 		logging.info('Initializing model from checkpoint: %s', self._task_config.init_checkpoint)
 		if not self._task_config.init_checkpoint:
 			return
@@ -68,9 +69,9 @@ class PanopticTask(base_task.Task):
 			ckpt_dir_or_file = tf.train.latest_checkpoint(ckpt_dir_or_file)
 
 		if self._task_config.init_checkpoint_modules == 'all':
-			ckpt = tf.train.Checkpoint(model)
+			ckpt = tf.train.Checkpoint(model=model)
 			status = ckpt.restore(ckpt_dir_or_file)
-			status.expect_partial()
+			status.assert_consumed()
 			logging.info('Loaded whole model from %s',ckpt_dir_or_file)
 			
 		elif self._task_config.init_checkpoint_modules == 'backbone':
@@ -103,20 +104,6 @@ class PanopticTask(base_task.Task):
 		  parser_fn=parser.parse_fn(params.is_training))
 		
 		dataset = reader.read(input_context=input_context)
-		# for i, sample in enumerate(dataset.take(10)):
-		# 	# print(f"unique idsin dataset take : {sample[1]['unique_ids']}")
-		# 	# print("individual masks :", sample[1]["individual_masks"].shape)
-		# 	np.save("image_"+str(i)+".npy", sample[0].numpy())
-		# 	np.save("contigious_mask_"+str(i)+".npy", sample[1]["contigious_mask"].numpy())
-		# 	np.save("category_mask_"+str(i)+".npy", sample[1]["category_mask"].numpy())
-		# 	np.save("instance_mask_"+str(i)+".npy", sample[1]["instance_mask"].numpy())
-		# 	np.save("individual_masks_"+str(i)+".npy", sample[1]["individual_masks"].numpy())
-		# 	np.save("valid_mask_"+str(i)+".npy", sample[1]["valid_mask"].numpy())
-		# 	np.save("thing_mask_"+str(i)+".npy", sample[1]["things_mask"].numpy())
-		# 	# print(f"image shape : {sample[0].shape}")
-		# 	np.save("unique_ids_"+str(i)+".npy", sample[1]["unique_ids"].numpy())
-			
-		# exit()
 		return dataset
 
 
@@ -271,6 +258,12 @@ class PanopticTask(base_task.Task):
 	def validation_step(self, inputs, model, metrics=None):
 		features, labels = inputs
 		outputs = model(features, training=False)
+		if os.environ.get('PRINT_OUTPUTS') == 'True':
+			probs = tf.keras.activations.softmax(outputs["class_prob_predictions"], axis=-1)
+			pred_labels = tf.argmax(probs, axis=-1)
+			print("Probs :", probs)
+			print("Target labels :", labels["unique_ids"])
+			print("Output labels :", pred_labels)
 		total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels)
 		
 		
@@ -286,23 +279,22 @@ class PanopticTask(base_task.Task):
 				'dice_loss': dice_loss,
 			}
 		
-		# if self.panoptic_quality_metric is not None:
+		if self.panoptic_quality_metric is not None:
+			pq_metric_labels = {
+			'category_mask': labels['category_mask'], # ignore label is 0 
+			'instance_mask': labels['instance_mask'],
+			'image_info': labels['image_info'],
+			}
+			# Output from postprocessing will convert the binary masks to category and instance masks with non-contigious ids
+			output_category_mask, output_instance_mask = self._postprocess_outputs(outputs, [1280, 1280])
+			pq_metric_outputs = {
+			'category_mask': output_category_mask,
+			'instance_mask': output_instance_mask,
+			}
 			
-		# 	pq_metric_labels = {
-		# 	'category_mask': labels['category_mask'], # ignore label is 0 
-		# 	'instance_mask': labels['instance_mask'],
-		# 	'image_info': labels['image_info'],
-		# 	}
-		# 	# Output from postprocessing will convert the binary masks to category and instance masks with non-contigious ids
-		# 	output_category_mask, output_instance_mask = self._postprocess_outputs(outputs, [1280, 1280])
-		# 	pq_metric_outputs = {
-		# 	'category_mask': output_category_mask,
-		# 	'instance_mask': output_instance_mask,
-		# 	}
-			
-		# 	self.panoptic_quality_metric.update_state(
-		#   	pq_metric_labels, pq_metric_outputs
-	  	# 	)
+			self.panoptic_quality_metric.update_state(
+		  	pq_metric_labels, pq_metric_outputs
+	  		)
 		if metrics:
 			for m in metrics:
 				m.update_state(all_losses[m.name])

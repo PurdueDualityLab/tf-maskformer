@@ -15,7 +15,7 @@ export BASE_LR=0.00005
 export NO_OBJ_CLS_WEIGHT=0.1
 export IMG_SIZE=640
 export PRINT_OUTPUTS=True
-export OVERRIDES="runtime.distribution_strategy=one_device,runtime.num_gpus=1,runtime.mixed_precision_dtype=float32,\
+export OVERRIDES="runtime.distribution_strategy=c,runtime.num_gpus=1,runtime.mixed_precision_dtype=float32,\
 task.train_data.global_batch_size=$train_bsize,\
 task.model.which_pixel_decoder=transformer_fpn,\
 task.init_checkpoint=$RESNET_CKPT"

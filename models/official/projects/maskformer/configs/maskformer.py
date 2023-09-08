@@ -171,8 +171,9 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
               parser = Parser(
                     output_size = [image_size,image_size],
                     pad_output = True,
-                    seed = 4096,
-                    dtype = 'float32',
+                    seed = 2045,
+                    ignore_label = 0,
+                    dtype = 'bfloat16' if SET_DATA_BFLOAT16 else 'float32',
                 )
               
           )),
