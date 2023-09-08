@@ -46,6 +46,7 @@ class MaskFormerTransformer(tf.keras.layers.Layer):
         
         self._input_proj = tf.keras.layers.Conv2D(
             self._hidden_size, 1, name="detr/conv2d")
+        super(MaskFormerTransformer).build(input_shape)
 
     def _generate_image_mask(self, features: tf.Tensor) -> tf.Tensor:
         """Generates image mask from input image."""

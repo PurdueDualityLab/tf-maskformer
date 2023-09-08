@@ -1,9 +1,9 @@
 #!/bin/bash
-train_bsize=16
+train_bsize=2
 eval_bsize=2
 export PYTHONPATH=$PYTHONPATH:/depot/qqiu/data/vishal/tf-maskformer/models
 export MODEL_DIR="./"
-export MASKFORMER_CKPT="/depot/qqiu/data/vishal/tf-maskformer/EXP13_v128/ckpt-37884"
+export MASKFORMER_CKPT="/depot/qqiu/data/vishal/tf-maskformer/EXP18_v128/ckpt-28644"
 export TFRECORDS_DIR="/depot/davisjam/data/vishal/datasets/coco/tfrecords"
 export TRAIN_BATCH_SIZE=$train_bsize
 export EVAL_BATCH_SIZE=$eval_bsize

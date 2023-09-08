@@ -74,7 +74,7 @@ class MaskFormer(tf.keras.Model):
 		self._backbone = backbone
 		self._backbone_endpoint = backbone_endpoint_name
 		
-	def build(self, image_shape):
+	def build(self, image_shape = None):
 		if self._pixel_decoder == 'transformer_fpn':
 			self.pixel_decoder = TransformerFPN(batch_size = self._batch_size,
 									fpn_feat_dims=self._fpn_feat_dims,

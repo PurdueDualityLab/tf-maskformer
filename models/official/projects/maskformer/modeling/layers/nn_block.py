@@ -32,6 +32,7 @@ class MLPHead(tf.keras.layers.Layer):
         # self.linear_classifier = tf.keras.layers.Dense(input_shape=hidden_dim, out_dim=num_classes + 1, activation=None)
 
         # self.dec_supervision = dec_supervision
+        super(MLPHead, self).build(input_shape)
 
     def call(self, inputs):
         per_pixel_embeddings = inputs['per_pixel_embeddings'] # mask feat

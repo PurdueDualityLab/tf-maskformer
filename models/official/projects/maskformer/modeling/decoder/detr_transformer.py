@@ -32,7 +32,7 @@ class DETRTransformer(tf.keras.layers.Layer):
         intermediate_dropout=self._dropout_rate,
         norm_first=False,
         num_layers=self._num_decoder_layers)
-    super().build(input_shape)
+    super(DETRTransformer, self).build(input_shape)
 
   def get_config(self):
     return {
