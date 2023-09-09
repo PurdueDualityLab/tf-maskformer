@@ -1,0 +1,324 @@
+2023-08-21 20:38:12.072399: I tensorflow/core/platform/cpu_feature_guard.cc:193] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 AVX512F AVX512_VNNI FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2023-08-21 20:38:12.212784: I tensorflow/core/util/port.cc:104] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2023-08-21 20:38:12.216267: W tensorflow/compiler/xla/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libcudart.so.11.0'; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory
+2023-08-21 20:38:12.216299: I tensorflow/compiler/xla/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+2023-08-21 20:38:12.970755: W tensorflow/compiler/xla/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libnvinfer.so.7'; dlerror: libnvinfer.so.7: cannot open shared object file: No such file or directory
+2023-08-21 20:38:12.970825: W tensorflow/compiler/xla/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libnvinfer_plugin.so.7'; dlerror: libnvinfer_plugin.so.7: cannot open shared object file: No such file or directory
+2023-08-21 20:38:12.970834: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Cannot dlopen some TensorRT libraries. If you would like to use Nvidia GPU with TensorRT, please make sure the missing libraries mentioned above are installed properly.
+/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow_addons/utils/tfa_eol_msg.py:23: UserWarning: 
+
+TensorFlow Addons (TFA) has ended development and introduction of new features.
+TFA has entered a minimal maintenance and release mode until a planned end of life in May 2024.
+Please modify downstream libraries to take dependencies from other repositories in our TensorFlow community (e.g. Keras, Keras-CV, and Keras-NLP). 
+
+For more information see: https://github.com/tensorflow/addons/issues/2807 
+
+  warnings.warn(
+2023-08-21 20:38:14.791897: W tensorflow/compiler/xla/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libcuda.so.1'; dlerror: libcuda.so.1: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /opt/conda/envs/maskformer/lib/python3.9/site-packages/cv2/../../lib64:
+2023-08-21 20:38:14.791935: W tensorflow/compiler/xla/stream_executor/cuda/cuda_driver.cc:265] failed call to cuInit: UNKNOWN ERROR (303)
+2023-08-21 20:38:14.791954: I tensorflow/compiler/xla/stream_executor/cuda/cuda_diagnostics.cc:156] kernel driver does not appear to be running on this host (compute-intensive-1): /proc/driver/nvidia/version does not exist
+I0821 20:38:14.802738 140686414976832 train_utils.py:359] Final experiment parameters:
+{'runtime': {'all_reduce_alg': None,
+             'batchnorm_spatial_persistent': False,
+             'dataset_num_private_threads': None,
+             'default_shard_dim': -1,
+             'distribution_strategy': 'tpu',
+             'enable_xla': False,
+             'gpu_thread_mode': None,
+             'loss_scale': None,
+             'mixed_precision_dtype': 'float32',
+             'num_cores_per_replica': 1,
+             'num_gpus': 0,
+             'num_packs': 1,
+             'per_gpu_thread_count': 0,
+             'run_eagerly': False,
+             'task_index': -1,
+             'tpu': 'tf-debug-11',
+             'tpu_enable_xla_dynamic_padder': None,
+             'worker_hosts': None},
+ 'task': {'allow_image_summary': False,
+          'annotation_file': 'gs://cam2-datasets/annotations/instances_val2017.json',
+          'differential_privacy_config': None,
+          'init_checkpoint': '',
+          'init_checkpoint_modules': 'backbone',
+          'losses': {'background_cls_weight': 0.1,
+                     'class_offset': 0,
+                     'l2_weight_decay': 0.0001,
+                     'lambda_box': 5.0,
+                     'lambda_cls': 1.0,
+                     'lambda_giou': 2.0},
+          'model': {'backbone': {'resnet': {'bn_trainable': False,
+                                            'depth_multiplier': 1.0,
+                                            'model_id': 50,
+                                            'replace_stem_max_pool': False,
+                                            'resnetd_shortcut': False,
+                                            'scale_stem': True,
+                                            'se_ratio': 0.0,
+                                            'stem_type': 'v0',
+                                            'stochastic_depth_drop_rate': 0.0},
+                                 'type': 'resnet'},
+                    'backbone_endpoint_name': '5',
+                    'hidden_size': 256,
+                    'input_size': [1333, 1333, 3],
+                    'norm_activation': {'activation': 'relu',
+                                        'norm_epsilon': 0.001,
+                                        'norm_momentum': 0.99,
+                                        'use_sync_bn': True},
+                    'num_classes': 91,
+                    'num_decoder_layers': 6,
+                    'num_encoder_layers': 6,
+                    'num_queries': 100},
+          'name': None,
+          'per_category_metrics': False,
+          'train_data': {'apply_tf_data_service_before_batching': False,
+                         'block_length': 1,
+                         'cache': False,
+                         'cycle_length': None,
+                         'decoder': {'simple_decoder': {'attribute_names': [],
+                                                        'mask_binarize_threshold': None,
+                                                        'regenerate_source_id': False},
+                                     'type': 'simple_decoder'},
+                         'deterministic': None,
+                         'drop_remainder': True,
+                         'dtype': 'bfloat16',
+                         'enable_shared_tf_data_service_between_parallel_trainers': False,
+                         'enable_tf_data_service': False,
+                         'file_type': 'tfrecord',
+                         'global_batch_size': 16,
+                         'input_path': 'gs://cam2-datasets/coco/train*',
+                         'is_training': True,
+                         'prefetch_buffer_size': None,
+                         'seed': None,
+                         'sharding': True,
+                         'shuffle_buffer_size': 1000,
+                         'tf_data_service_address': None,
+                         'tf_data_service_job_name': None,
+                         'tfds_as_supervised': False,
+                         'tfds_data_dir': '',
+                         'tfds_name': '',
+                         'tfds_skip_decoding_feature': '',
+                         'tfds_split': 'train',
+                         'trainer_id': None},
+          'validation_data': {'apply_tf_data_service_before_batching': False,
+                              'block_length': 1,
+                              'cache': False,
+                              'cycle_length': None,
+                              'decoder': {'simple_decoder': {'attribute_names': [],
+                                                             'mask_binarize_threshold': None,
+                                                             'regenerate_source_id': False},
+                                          'type': 'simple_decoder'},
+                              'deterministic': None,
+                              'drop_remainder': False,
+                              'dtype': 'bfloat16',
+                              'enable_shared_tf_data_service_between_parallel_trainers': False,
+                              'enable_tf_data_service': False,
+                              'file_type': 'tfrecord',
+                              'global_batch_size': 16,
+                              'input_path': 'gs://cam2-datasets/coco/val*',
+                              'is_training': False,
+                              'prefetch_buffer_size': None,
+                              'seed': None,
+                              'sharding': True,
+                              'shuffle_buffer_size': 10000,
+                              'tf_data_service_address': None,
+                              'tf_data_service_job_name': None,
+                              'tfds_as_supervised': False,
+                              'tfds_data_dir': '',
+                              'tfds_name': '',
+                              'tfds_skip_decoding_feature': '',
+                              'tfds_split': 'train',
+                              'trainer_id': None}},
+ 'trainer': {'allow_tpu_summary': False,
+             'best_checkpoint_eval_metric': 'AP',
+             'best_checkpoint_export_subdir': 'best_ckpt',
+             'best_checkpoint_metric_comp': 'higher',
+             'checkpoint_interval': 1848,
+             'continuous_eval_timeout': 3600,
+             'eval_tf_function': True,
+             'eval_tf_while_loop': False,
+             'loss_upper_bound': 1000000.0,
+             'max_to_keep': 1,
+             'optimizer_config': {'ema': None,
+                                  'learning_rate': {'stepwise': {'boundaries': [369600],
+                                                                 'name': 'PiecewiseConstantDecay',
+                                                                 'offset': 0,
+                                                                 'values': [0.0001,
+                                                                            1e-05]},
+                                                    'type': 'stepwise'},
+                                  'optimizer': {'detr_adamw': {'amsgrad': False,
+                                                               'beta_1': 0.9,
+                                                               'beta_2': 0.999,
+                                                               'clipnorm': None,
+                                                               'clipvalue': None,
+                                                               'epsilon': 1e-07,
+                                                               'exclude_from_weight_decay': None,
+                                                               'global_clipnorm': 0.1,
+                                                               'gradient_clip_norm': 0.0,
+                                                               'include_in_weight_decay': None,
+                                                               'name': 'AdamWeightDecay',
+                                                               'weight_decay_rate': 0.0001},
+                                                'type': 'detr_adamw'},
+                                  'warmup': {'type': None}},
+             'preemption_on_demand_checkpoint': True,
+             'recovery_begin_steps': 0,
+             'recovery_max_trials': 0,
+             'steps_per_loop': 1848,
+             'summary_interval': 1848,
+             'train_steps': 554400,
+             'train_tf_function': True,
+             'train_tf_while_loop': True,
+             'validation_interval': 9240,
+             'validation_steps': 78,
+             'validation_summary_subdir': 'validation'}}
+I0821 20:38:14.803078 140686414976832 train_utils.py:371] Saving experiment configuration to gs://cam2-models/detr_exp3/params.yaml
+I0821 20:38:15.039341 140686414976832 discovery.py:280] URL being requested: GET https://www.googleapis.com/discovery/v1/apis/tpu/v1/rest
+I0821 20:38:15.077669 140686414976832 discovery.py:911] URL being requested: GET https://tpu.googleapis.com/v1/projects/red-atlas-305317/locations/us-central1-f/nodes/tf-debug-11?alt=json
+I0821 20:38:15.077849 140686414976832 transport.py:157] Attempting refresh to obtain initial access_token
+I0821 20:38:15.144851 140686414976832 discovery.py:280] URL being requested: GET https://www.googleapis.com/discovery/v1/apis/tpu/v1/rest
+I0821 20:38:15.186481 140686414976832 discovery.py:911] URL being requested: GET https://tpu.googleapis.com/v1/projects/red-atlas-305317/locations/us-central1-f/nodes/tf-debug-11?alt=json
+I0821 20:38:15.186649 140686414976832 transport.py:157] Attempting refresh to obtain initial access_token
+I0821 20:38:15.253382 140686414976832 discovery.py:280] URL being requested: GET https://www.googleapis.com/discovery/v1/apis/tpu/v1/rest
+I0821 20:38:15.284364 140686414976832 discovery.py:911] URL being requested: GET https://tpu.googleapis.com/v1/projects/red-atlas-305317/locations/us-central1-f/nodes/tf-debug-11?alt=json
+I0821 20:38:15.284545 140686414976832 transport.py:157] Attempting refresh to obtain initial access_token
+I0821 20:38:15.346798 140686414976832 discovery.py:280] URL being requested: GET https://www.googleapis.com/discovery/v1/apis/tpu/v1/rest
+I0821 20:38:15.383243 140686414976832 discovery.py:911] URL being requested: GET https://tpu.googleapis.com/v1/projects/red-atlas-305317/locations/us-central1-f/nodes/tf-debug-11?alt=json
+I0821 20:38:15.383417 140686414976832 transport.py:157] Attempting refresh to obtain initial access_token
+I0821 20:38:15.425452 140686414976832 discovery.py:280] URL being requested: GET https://www.googleapis.com/discovery/v1/apis/tpu/v1/rest
+I0821 20:38:15.468013 140686414976832 discovery.py:911] URL being requested: GET https://tpu.googleapis.com/v1/projects/red-atlas-305317/locations/us-central1-f/nodes/tf-debug-11?alt=json
+I0821 20:38:15.468178 140686414976832 transport.py:157] Attempting refresh to obtain initial access_token
+2023-08-21 20:38:15.507956: I tensorflow/core/platform/cpu_feature_guard.cc:193] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 AVX512F AVX512_VNNI FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2023-08-21 20:38:15.538556: I tensorflow/core/distributed_runtime/rpc/grpc_server_lib.cc:447] Started server with target: grpc://localhost:45348
+I0821 20:38:15.539014 140686414976832 remote.py:239] Entering into master device scope: /job:worker/replica:0/task:0/device:CPU:0
+INFO:tensorflow:Deallocate tpu buffers before initializing tpu system.
+I0821 20:38:15.539237 140686414976832 tpu_strategy_util.py:57] Deallocate tpu buffers before initializing tpu system.
+INFO:tensorflow:Initializing the TPU system: tf-debug-11
+I0821 20:38:15.671828 140686414976832 tpu_strategy_util.py:81] Initializing the TPU system: tf-debug-11
+INFO:tensorflow:Finished initializing TPU system.
+I0821 20:38:45.846457 140686414976832 tpu_strategy_util.py:142] Finished initializing TPU system.
+I0821 20:38:45.847457 140686414976832 discovery.py:280] URL being requested: GET https://www.googleapis.com/discovery/v1/apis/tpu/v1/rest
+I0821 20:38:45.883614 140686414976832 discovery.py:911] URL being requested: GET https://tpu.googleapis.com/v1/projects/red-atlas-305317/locations/us-central1-f/nodes/tf-debug-11?alt=json
+I0821 20:38:45.883785 140686414976832 transport.py:157] Attempting refresh to obtain initial access_token
+I0821 20:38:45.933790 140686414976832 discovery.py:280] URL being requested: GET https://www.googleapis.com/discovery/v1/apis/tpu/v1/rest
+I0821 20:38:45.967948 140686414976832 discovery.py:911] URL being requested: GET https://tpu.googleapis.com/v1/projects/red-atlas-305317/locations/us-central1-f/nodes/tf-debug-11?alt=json
+I0821 20:38:45.968121 140686414976832 transport.py:157] Attempting refresh to obtain initial access_token
+INFO:tensorflow:Found TPU system:
+I0821 20:38:46.016106 140686414976832 tpu_system_metadata.py:155] Found TPU system:
+INFO:tensorflow:*** Num TPU Cores: 8
+I0821 20:38:46.016283 140686414976832 tpu_system_metadata.py:156] *** Num TPU Cores: 8
+INFO:tensorflow:*** Num TPU Workers: 1
+I0821 20:38:46.016524 140686414976832 tpu_system_metadata.py:157] *** Num TPU Workers: 1
+INFO:tensorflow:*** Num TPU Cores Per Worker: 8
+I0821 20:38:46.016564 140686414976832 tpu_system_metadata.py:158] *** Num TPU Cores Per Worker: 8
+INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:localhost/replica:0/task:0/device:CPU:0, CPU, 0, 0)
+I0821 20:38:46.016614 140686414976832 tpu_system_metadata.py:161] *** Available Device: _DeviceAttributes(/job:localhost/replica:0/task:0/device:CPU:0, CPU, 0, 0)
+INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:CPU:0, CPU, 0, 0)
+I0821 20:38:46.018208 140686414976832 tpu_system_metadata.py:161] *** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:CPU:0, CPU, 0, 0)
+INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:0, TPU, 0, 0)
+I0821 20:38:46.018254 140686414976832 tpu_system_metadata.py:161] *** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:0, TPU, 0, 0)
+INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:1, TPU, 0, 0)
+I0821 20:38:46.018289 140686414976832 tpu_system_metadata.py:161] *** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:1, TPU, 0, 0)
+INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:2, TPU, 0, 0)
+I0821 20:38:46.018322 140686414976832 tpu_system_metadata.py:161] *** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:2, TPU, 0, 0)
+INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:3, TPU, 0, 0)
+I0821 20:38:46.018362 140686414976832 tpu_system_metadata.py:161] *** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:3, TPU, 0, 0)
+INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:4, TPU, 0, 0)
+I0821 20:38:46.018403 140686414976832 tpu_system_metadata.py:161] *** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:4, TPU, 0, 0)
+INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:5, TPU, 0, 0)
+I0821 20:38:46.018436 140686414976832 tpu_system_metadata.py:161] *** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:5, TPU, 0, 0)
+INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:6, TPU, 0, 0)
+I0821 20:38:46.018470 140686414976832 tpu_system_metadata.py:161] *** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:6, TPU, 0, 0)
+INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:7, TPU, 0, 0)
+I0821 20:38:46.018501 140686414976832 tpu_system_metadata.py:161] *** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:7, TPU, 0, 0)
+INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU_SYSTEM:0, TPU_SYSTEM, 0, 0)
+I0821 20:38:46.018532 140686414976832 tpu_system_metadata.py:161] *** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU_SYSTEM:0, TPU_SYSTEM, 0, 0)
+INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:XLA_CPU:0, XLA_CPU, 0, 0)
+I0821 20:38:46.018563 140686414976832 tpu_system_metadata.py:161] *** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:XLA_CPU:0, XLA_CPU, 0, 0)
+I0821 20:38:46.173499 140686414976832 train_utils.py:98] Created the best checkpoint exporter. data_dir: gs://cam2-models/detr_exp3, export_subdir: best_ckpt, metric_name: AP
+I0821 20:38:46.174075 140686414976832 train_utils.py:245] Running default trainer.
+I0821 20:38:55.063426 140686414976832 legacy_adamw.py:56] AdamWeightDecay gradient_clip_norm=0.000000
+WARNING:tensorflow:From /opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/autograph/pyct/static_analysis/liveness.py:83: Analyzer.lamba_check (from tensorflow.python.autograph.pyct.static_analysis.liveness) is deprecated and will be removed after 2023-09-23.
+Instructions for updating:
+Lambda fuctions will be no more assumed to be used in the statement where they are used, or at least in the same block. https://github.com/tensorflow/tensorflow/issues/56089
+W0821 20:38:57.095191 140686414976832 deprecation.py:350] From /opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/autograph/pyct/static_analysis/liveness.py:83: Analyzer.lamba_check (from tensorflow.python.autograph.pyct.static_analysis.liveness) is deprecated and will be removed after 2023-09-23.
+Instructions for updating:
+Lambda fuctions will be no more assumed to be used in the statement where they are used, or at least in the same block. https://github.com/tensorflow/tensorflow/issues/56089
+I0821 20:38:59.372725 140686414976832 controller.py:431] restoring or initializing model...
+I0821 20:38:59.372933 140686414976832 train_lib.py:255] Starts to execute mode: train
+I0821 20:38:59.376561 140686414976832 controller.py:256] train | step:      0 | training until step 554400...
+restoring or initializing model...
+train | step:      0 | training until step 554400...
+Traceback (most recent call last):
+  File "/home/wenxinjiang/tf-maskformer/models/official/projects/detr/train.py", line 70, in <module>
+    app.run(main)
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/absl/app.py", line 308, in run
+    _run_main(main, args)
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/absl/app.py", line 254, in _run_main
+    sys.exit(main(argv))
+  File "/home/wenxinjiang/tf-maskformer/models/official/projects/detr/train.py", line 58, in main
+    train_lib.run_experiment(
+  File "/home/wenxinjiang/tf-maskformer/models/official/core/train_lib.py", line 357, in run_experiment
+    return runner.run()
+  File "/home/wenxinjiang/tf-maskformer/models/official/core/train_lib.py", line 258, in run
+    self.controller.train(steps=params.trainer.train_steps)
+  File "/home/wenxinjiang/tf-maskformer/models/orbit/controller.py", line 260, in train
+    self._train_n_steps(num_steps)
+  File "/home/wenxinjiang/tf-maskformer/models/orbit/controller.py", line 485, in _train_n_steps
+    train_output = self.trainer.train(num_steps_tensor)
+  File "/home/wenxinjiang/tf-maskformer/models/orbit/standard_runner.py", line 144, in train
+    self._train_iter = tf.nest.map_structure(iter, self.train_dataset)
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/util/nest.py", line 917, in map_structure
+    structure[0], [func(*x) for x in entries],
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/util/nest.py", line 917, in <listcomp>
+    structure[0], [func(*x) for x in entries],
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/distribute/input_lib.py", line 1431, in __iter__
+    iterators = _create_iterators_per_worker(
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/distribute/input_lib.py", line 1857, in _create_iterators_per_worker
+    iterator = _SingleWorkerOwnedDatasetIterator(
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/distribute/input_lib.py", line 1761, in __init__
+    super(_SingleWorkerOwnedDatasetIterator,
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/distribute/input_lib.py", line 1585, in __init__
+    self._make_iterator()
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/distribute/input_lib.py", line 1792, in _make_iterator
+    self._create_owned_multi_device_iterator()
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/distribute/input_lib.py", line 1783, in _create_owned_multi_device_iterator
+    self._iterator = multi_device_iterator_ops.OwnedMultiDeviceIterator(
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/data/ops/multi_device_iterator_ops.py", line 517, in __init__
+    ds = _PerDeviceGenerator(
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/data/ops/multi_device_iterator_ops.py", line 52, in __init__
+    init_func_concrete = _init_func.get_concrete_function()
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/eager/polymorphic_function/tracing_compiler.py", line 226, in get_concrete_function
+    concrete_function = self._get_concrete_function_garbage_collected(
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/eager/polymorphic_function/tracing_compiler.py", line 192, in _get_concrete_function_garbage_collected
+    concrete_function, _ = self._maybe_define_concrete_function(args, kwargs)
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/eager/polymorphic_function/tracing_compiler.py", line 157, in _maybe_define_concrete_function
+    return self._maybe_define_function(args, kwargs)
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/eager/polymorphic_function/tracing_compiler.py", line 360, in _maybe_define_function
+    concrete_function = self._create_concrete_function(args, kwargs)
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/eager/polymorphic_function/tracing_compiler.py", line 284, in _create_concrete_function
+    func_graph_module.func_graph_from_py_func(
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/framework/func_graph.py", line 1288, in func_graph_from_py_func
+    func_outputs = nest.map_structure(
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/util/nest.py", line 917, in map_structure
+    structure[0], [func(*x) for x in entries],
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/util/nest.py", line 917, in <listcomp>
+    structure[0], [func(*x) for x in entries],
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/framework/func_graph.py", line 1237, in convert
+    x = ops.convert_to_tensor_or_composite(x)
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/framework/ops.py", line 1763, in convert_to_tensor_or_composite
+    return internal_convert_to_tensor_or_composite(
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/framework/ops.py", line 1798, in internal_convert_to_tensor_or_composite
+    return convert_to_tensor(
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/profiler/trace.py", line 183, in wrapped
+    return func(*args, **kwargs)
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/framework/ops.py", line 1591, in convert_to_tensor
+    return graph.capture(value, name=name)
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/framework/func_graph.py", line 781, in capture
+    np.prod(tensor.shape) <= _EAGER_CONST_THRESHOLD):
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/framework/ops.py", line 1259, in shape
+    self._tensor_shape = tensor_shape.TensorShape(self._shape_tuple())
+tensorflow.python.framework.errors_impl.NotFoundError: 'AnonymousMultiDeviceIteratorV3' is neither a type of a primitive operation nor a name of a function registered in binary running on n-de2dd086-w-0. Make sure the operation or function is registered in the binary running in this process.
+2023-08-21 20:38:59.938149: W ./tensorflow/core/distributed_runtime/eager/destroy_tensor_handle_node.h:58] Ignoring an error encountered when deleting remote tensors handles: INVALID_ARGUMENT: Unable to find the relevant tensor remote_handle: Op ID: 10758, Output num: 0
+Additional GRPC error information from remote target /job:worker/replica:0/task:0:
+:{"created":"@1692650339.934755561","description":"Error received from peer ipv4:10.15.205.18:8470","file":"external/com_github_grpc_grpc/src/core/lib/surface/call.cc","file_line":1056,"grpc_message":"Unable to find the relevant tensor remote_handle: Op ID: 10758, Output num: 0","grpc_status":3}

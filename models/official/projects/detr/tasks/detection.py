@@ -34,6 +34,7 @@ from official.vision.evaluation import coco_evaluator
 from official.vision.modeling import backbones
 from official.vision.ops import box_ops
 
+from loguru import logger
 
 @task_factory.register_task_cls(detr_cfg.DetrTask)
 class DetectionTask(base_task.Task):
@@ -320,8 +321,29 @@ class DetectionTask(base_task.Task):
       A dictionary of logs.
     """
     features, labels = inputs
+    # tf.print("labels classes is", labels['classes'])
+    # tf.print("labels boxes is", labels['boxes'])
+    
+    # labels['boxes'].eval(session=tf.compat.v1.Session())
+    # labels['classes'].eval(session=tf.compat.v1.Session())
+    
+    # def log_tensor(tensor, msg):
+    #   def numpy_log(tensor, msg):
+    #     logger.debug(f"{msg} {tensor}")
+    #   tf.py_function(numpy_log, [tensor, msg], [])
+
+    # # Then you can use it in your code like this:
+
+    # log_tensor(labels['classes'], "labels classes is")
+    # log_tensor(labels['boxes'], "labels boxes is")
+
+    # logger.debug(f"labels classes is {labels['classes'].numpy()}")
+    # logger.debug(f"labels boxes is {labels['boxes'].numpy()}")
 
     outputs = model(features, training=False)[-1]
+    logger.critical(f"detection_classes: {outputs['cls_outputs']}")
+
+
     loss, cls_loss, box_loss, giou_loss = self.build_losses(
         outputs=outputs, labels=labels, aux_losses=model.losses)
 
@@ -362,6 +384,9 @@ class DetectionTask(base_task.Task):
           outputs['cls_outputs'][:, :, 1:], axis=-1) + 1
     else:
       detection_classes = outputs['detection_classes']
+    
+    logger.debug(f"detection_classes: {detection_classes.numpy()}")
+    logger.debug(f"detection_scores: {detection_scores.numpy()}")
 
     if 'num_detections' not in outputs:
       num_detections = tf.reduce_sum(

@@ -1,0 +1,11 @@
+# input_size=[640, 640, 3]
+runtime:
+  distribution_strategy: 'tpu'
+  mixed_precision_dtype: 'float32'
+task:
+  model:
+      input_size: [1333, 1333, 3]
+  train_data:
+   global_batch_size: 16
+  validation_data:
+    global_batch_size: 16

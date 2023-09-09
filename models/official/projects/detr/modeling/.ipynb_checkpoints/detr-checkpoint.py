@@ -19,8 +19,6 @@ This module does not support Keras de/serialization. Please use
 tf.train.Checkpoint for object based saving and loading and tf.saved_model.save
 for graph serializaiton.
 """
-
-import sys
 import math
 from typing import Any, List
 
@@ -30,8 +28,6 @@ from official.modeling import tf_utils
 from official.projects.detr.modeling import transformer
 from official.vision.ops import box_ops
 
-
-from loguru import logger
 
 def position_embedding_sine(attention_mask,
                             num_pos_features=256,
@@ -305,9 +301,6 @@ class DETRTransformer(tf.keras.layers.Layer):
   def call(self, inputs):
     sources = inputs["inputs"]
     targets = inputs["targets"]
-    # tf.print("targets is", targets)
-    # tf.print(targets, output_stream=sys.stderr)
-    # logger.debug(f"targets is {targets[0]}")
     pos_embed = inputs["pos_embed"]
     mask = inputs["mask"]
     input_shape = tf_utils.get_shape_list(sources)
@@ -320,7 +313,6 @@ class DETRTransformer(tf.keras.layers.Layer):
       memory = sources
 
     target_shape = tf_utils.get_shape_list(targets)
-    logger.debug(f"target_shape is {target_shape}")
     cross_attention_mask = tf.tile(
         tf.expand_dims(mask, axis=1), [1, target_shape[1], 1])
     target_shape = tf.shape(targets)

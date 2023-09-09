@@ -96,7 +96,6 @@ class TransformerEncoder(tf.keras.layers.Layer):
                   models.seq2seq_transformer.attention_initializer(
                       input_shape[2])),
               name=("layer_%d" % i)))
-      
     self.output_normalization = tf.keras.layers.LayerNormalization(
         epsilon=self._norm_epsilon, dtype="float32")
     super(TransformerEncoder, self).build(input_shape)
@@ -408,7 +407,6 @@ class TransformerEncoderBlock(tf.keras.layers.Layer):
     if self._norm_first:
       source_attention_output = attention_output
       attention_output = self._output_layer_norm(attention_output)
-      
     inner_output = self._intermediate_dense(attention_output)
     inner_output = self._intermediate_activation_layer(inner_output)
     inner_output = self._inner_dropout_layer(inner_output)
@@ -822,7 +820,14 @@ class TransformerDecoderBlock(tf.keras.layers.Layer):
       source_self_attention_output = self_attention_output
       self_attention_output = self.encdec_attention_layer_norm(
           self_attention_output)
-   
+    # Print all the input dtypes for debugging.
+    # tf.print("self_attention_output", tf.shape(self_attention_output), self_attention_output.dtype)
+    # print("memory", tf.shape(memory), memory.dtype)
+    # print("memory_pos_embed", tf.shape(memory_pos_embed), memory_pos_embed.dtype)
+    # tf.print("attention_mask", tf.shape(attention_mask), attention_mask.dtype)
+    # tf.print("input_pos_embed", tf.shape(input_pos_embed), input_pos_embed.dtype)
+    # tf.print("self_attention_mask", tf.shape(self_attention_mask), self_attention_mask.dtype)
+
     cross_attn_inputs = dict(
         query=self_attention_output + tf.cast(input_pos_embed, tf.float32),
         key=memory + memory_pos_embed,

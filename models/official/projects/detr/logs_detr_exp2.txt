@@ -1,0 +1,3470 @@
+2023-08-18 16:17:02.166923: I tensorflow/core/platform/cpu_feature_guard.cc:193] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 AVX512F AVX512_VNNI FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2023-08-18 16:17:02.307753: I tensorflow/core/util/port.cc:104] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2023-08-18 16:17:02.311297: W tensorflow/compiler/xla/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libcudart.so.11.0'; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory
+2023-08-18 16:17:02.311341: I tensorflow/compiler/xla/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+2023-08-18 16:17:03.068429: W tensorflow/compiler/xla/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libnvinfer.so.7'; dlerror: libnvinfer.so.7: cannot open shared object file: No such file or directory
+2023-08-18 16:17:03.068502: W tensorflow/compiler/xla/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libnvinfer_plugin.so.7'; dlerror: libnvinfer_plugin.so.7: cannot open shared object file: No such file or directory
+2023-08-18 16:17:03.068513: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Cannot dlopen some TensorRT libraries. If you would like to use Nvidia GPU with TensorRT, please make sure the missing libraries mentioned above are installed properly.
+/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow_addons/utils/tfa_eol_msg.py:23: UserWarning: 
+
+TensorFlow Addons (TFA) has ended development and introduction of new features.
+TFA has entered a minimal maintenance and release mode until a planned end of life in May 2024.
+Please modify downstream libraries to take dependencies from other repositories in our TensorFlow community (e.g. Keras, Keras-CV, and Keras-NLP). 
+
+For more information see: https://github.com/tensorflow/addons/issues/2807 
+
+  warnings.warn(
+2023-08-18 16:17:04.894072: W tensorflow/compiler/xla/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libcuda.so.1'; dlerror: libcuda.so.1: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /opt/conda/envs/maskformer/lib/python3.9/site-packages/cv2/../../lib64:
+2023-08-18 16:17:04.894115: W tensorflow/compiler/xla/stream_executor/cuda/cuda_driver.cc:265] failed call to cuInit: UNKNOWN ERROR (303)
+2023-08-18 16:17:04.894132: I tensorflow/compiler/xla/stream_executor/cuda/cuda_diagnostics.cc:156] kernel driver does not appear to be running on this host (compute-intensive-1): /proc/driver/nvidia/version does not exist
+I0818 16:17:04.904959 139858339583808 train_utils.py:359] Final experiment parameters:
+{'runtime': {'all_reduce_alg': None,
+             'batchnorm_spatial_persistent': False,
+             'dataset_num_private_threads': None,
+             'default_shard_dim': -1,
+             'distribution_strategy': 'tpu',
+             'enable_xla': False,
+             'gpu_thread_mode': None,
+             'loss_scale': None,
+             'mixed_precision_dtype': 'float32',
+             'num_cores_per_replica': 1,
+             'num_gpus': 0,
+             'num_packs': 1,
+             'per_gpu_thread_count': 0,
+             'run_eagerly': False,
+             'task_index': -1,
+             'tpu': 'tf-debug-3',
+             'tpu_enable_xla_dynamic_padder': None,
+             'worker_hosts': None},
+ 'task': {'allow_image_summary': False,
+          'annotation_file': 'gs://cam2-datasets/annotations/instances_val2017.json',
+          'differential_privacy_config': None,
+          'init_checkpoint': '',
+          'init_checkpoint_modules': 'backbone',
+          'losses': {'background_cls_weight': 0.1,
+                     'class_offset': 0,
+                     'l2_weight_decay': 0.0001,
+                     'lambda_box': 5.0,
+                     'lambda_cls': 1.0,
+                     'lambda_giou': 2.0},
+          'model': {'backbone': {'resnet': {'bn_trainable': False,
+                                            'depth_multiplier': 1.0,
+                                            'model_id': 50,
+                                            'replace_stem_max_pool': False,
+                                            'resnetd_shortcut': False,
+                                            'scale_stem': True,
+                                            'se_ratio': 0.0,
+                                            'stem_type': 'v0',
+                                            'stochastic_depth_drop_rate': 0.0},
+                                 'type': 'resnet'},
+                    'backbone_endpoint_name': '5',
+                    'hidden_size': 256,
+                    'input_size': [640, 640, 3],
+                    'norm_activation': {'activation': 'relu',
+                                        'norm_epsilon': 0.001,
+                                        'norm_momentum': 0.99,
+                                        'use_sync_bn': True},
+                    'num_classes': 91,
+                    'num_decoder_layers': 6,
+                    'num_encoder_layers': 6,
+                    'num_queries': 100},
+          'name': None,
+          'per_category_metrics': False,
+          'train_data': {'apply_tf_data_service_before_batching': False,
+                         'block_length': 1,
+                         'cache': False,
+                         'cycle_length': None,
+                         'decoder': {'simple_decoder': {'attribute_names': [],
+                                                        'mask_binarize_threshold': None,
+                                                        'regenerate_source_id': False},
+                                     'type': 'simple_decoder'},
+                         'deterministic': None,
+                         'drop_remainder': True,
+                         'dtype': 'bfloat16',
+                         'enable_shared_tf_data_service_between_parallel_trainers': False,
+                         'enable_tf_data_service': False,
+                         'file_type': 'tfrecord',
+                         'global_batch_size': 64,
+                         'input_path': 'gs://cam2-datasets/coco/train*',
+                         'is_training': True,
+                         'prefetch_buffer_size': None,
+                         'seed': None,
+                         'sharding': True,
+                         'shuffle_buffer_size': 1000,
+                         'tf_data_service_address': None,
+                         'tf_data_service_job_name': None,
+                         'tfds_as_supervised': False,
+                         'tfds_data_dir': '',
+                         'tfds_name': '',
+                         'tfds_skip_decoding_feature': '',
+                         'tfds_split': 'train',
+                         'trainer_id': None},
+          'validation_data': {'apply_tf_data_service_before_batching': False,
+                              'block_length': 1,
+                              'cache': False,
+                              'cycle_length': None,
+                              'decoder': {'simple_decoder': {'attribute_names': [],
+                                                             'mask_binarize_threshold': None,
+                                                             'regenerate_source_id': False},
+                                          'type': 'simple_decoder'},
+                              'deterministic': None,
+                              'drop_remainder': False,
+                              'dtype': 'bfloat16',
+                              'enable_shared_tf_data_service_between_parallel_trainers': False,
+                              'enable_tf_data_service': False,
+                              'file_type': 'tfrecord',
+                              'global_batch_size': 64,
+                              'input_path': 'gs://cam2-datasets/coco/val*',
+                              'is_training': False,
+                              'prefetch_buffer_size': None,
+                              'seed': None,
+                              'sharding': True,
+                              'shuffle_buffer_size': 10000,
+                              'tf_data_service_address': None,
+                              'tf_data_service_job_name': None,
+                              'tfds_as_supervised': False,
+                              'tfds_data_dir': '',
+                              'tfds_name': '',
+                              'tfds_skip_decoding_feature': '',
+                              'tfds_split': 'train',
+                              'trainer_id': None}},
+ 'trainer': {'allow_tpu_summary': False,
+             'best_checkpoint_eval_metric': 'AP',
+             'best_checkpoint_export_subdir': 'best_ckpt',
+             'best_checkpoint_metric_comp': 'higher',
+             'checkpoint_interval': 1848,
+             'continuous_eval_timeout': 3600,
+             'eval_tf_function': True,
+             'eval_tf_while_loop': False,
+             'loss_upper_bound': 1000000.0,
+             'max_to_keep': 1,
+             'optimizer_config': {'ema': None,
+                                  'learning_rate': {'stepwise': {'boundaries': [369600],
+                                                                 'name': 'PiecewiseConstantDecay',
+                                                                 'offset': 0,
+                                                                 'values': [0.0001,
+                                                                            1e-05]},
+                                                    'type': 'stepwise'},
+                                  'optimizer': {'detr_adamw': {'amsgrad': False,
+                                                               'beta_1': 0.9,
+                                                               'beta_2': 0.999,
+                                                               'clipnorm': None,
+                                                               'clipvalue': None,
+                                                               'epsilon': 1e-07,
+                                                               'exclude_from_weight_decay': None,
+                                                               'global_clipnorm': 0.1,
+                                                               'gradient_clip_norm': 0.0,
+                                                               'include_in_weight_decay': None,
+                                                               'name': 'AdamWeightDecay',
+                                                               'weight_decay_rate': 0.0001},
+                                                'type': 'detr_adamw'},
+                                  'warmup': {'type': None}},
+             'preemption_on_demand_checkpoint': True,
+             'recovery_begin_steps': 0,
+             'recovery_max_trials': 0,
+             'steps_per_loop': 1848,
+             'summary_interval': 1848,
+             'train_steps': 554400,
+             'train_tf_function': True,
+             'train_tf_while_loop': True,
+             'validation_interval': 9240,
+             'validation_steps': 78,
+             'validation_summary_subdir': 'validation'}}
+I0818 16:17:04.905308 139858339583808 train_utils.py:371] Saving experiment configuration to gs://cam2-models/detr_exp2/params.yaml
+I0818 16:17:05.130129 139858339583808 discovery.py:280] URL being requested: GET https://www.googleapis.com/discovery/v1/apis/tpu/v1/rest
+I0818 16:17:05.167991 139858339583808 discovery.py:911] URL being requested: GET https://tpu.googleapis.com/v1/projects/red-atlas-305317/locations/us-central1-a/nodes/tf-debug-3?alt=json
+I0818 16:17:05.168178 139858339583808 transport.py:157] Attempting refresh to obtain initial access_token
+I0818 16:17:05.234557 139858339583808 discovery.py:280] URL being requested: GET https://www.googleapis.com/discovery/v1/apis/tpu/v1/rest
+I0818 16:17:05.277983 139858339583808 discovery.py:911] URL being requested: GET https://tpu.googleapis.com/v1/projects/red-atlas-305317/locations/us-central1-a/nodes/tf-debug-3?alt=json
+I0818 16:17:05.278156 139858339583808 transport.py:157] Attempting refresh to obtain initial access_token
+I0818 16:17:05.339659 139858339583808 discovery.py:280] URL being requested: GET https://www.googleapis.com/discovery/v1/apis/tpu/v1/rest
+I0818 16:17:05.378919 139858339583808 discovery.py:911] URL being requested: GET https://tpu.googleapis.com/v1/projects/red-atlas-305317/locations/us-central1-a/nodes/tf-debug-3?alt=json
+I0818 16:17:05.379102 139858339583808 transport.py:157] Attempting refresh to obtain initial access_token
+I0818 16:17:05.421097 139858339583808 discovery.py:280] URL being requested: GET https://www.googleapis.com/discovery/v1/apis/tpu/v1/rest
+I0818 16:17:05.464157 139858339583808 discovery.py:911] URL being requested: GET https://tpu.googleapis.com/v1/projects/red-atlas-305317/locations/us-central1-a/nodes/tf-debug-3?alt=json
+I0818 16:17:05.464339 139858339583808 transport.py:157] Attempting refresh to obtain initial access_token
+I0818 16:17:05.533485 139858339583808 discovery.py:280] URL being requested: GET https://www.googleapis.com/discovery/v1/apis/tpu/v1/rest
+I0818 16:17:05.572350 139858339583808 discovery.py:911] URL being requested: GET https://tpu.googleapis.com/v1/projects/red-atlas-305317/locations/us-central1-a/nodes/tf-debug-3?alt=json
+I0818 16:17:05.572526 139858339583808 transport.py:157] Attempting refresh to obtain initial access_token
+2023-08-18 16:17:05.633092: I tensorflow/core/platform/cpu_feature_guard.cc:193] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 AVX512F AVX512_VNNI FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2023-08-18 16:17:05.665232: I tensorflow/core/distributed_runtime/rpc/grpc_server_lib.cc:447] Started server with target: grpc://localhost:34656
+I0818 16:17:05.665708 139858339583808 remote.py:239] Entering into master device scope: /job:worker/replica:0/task:0/device:CPU:0
+INFO:tensorflow:Deallocate tpu buffers before initializing tpu system.
+I0818 16:17:05.665958 139858339583808 tpu_strategy_util.py:57] Deallocate tpu buffers before initializing tpu system.
+INFO:tensorflow:Initializing the TPU system: tf-debug-3
+I0818 16:17:05.794315 139858339583808 tpu_strategy_util.py:81] Initializing the TPU system: tf-debug-3
+INFO:tensorflow:Finished initializing TPU system.
+I0818 16:17:10.503612 139858339583808 tpu_strategy_util.py:142] Finished initializing TPU system.
+I0818 16:17:10.504619 139858339583808 discovery.py:280] URL being requested: GET https://www.googleapis.com/discovery/v1/apis/tpu/v1/rest
+I0818 16:17:10.542378 139858339583808 discovery.py:911] URL being requested: GET https://tpu.googleapis.com/v1/projects/red-atlas-305317/locations/us-central1-a/nodes/tf-debug-3?alt=json
+I0818 16:17:10.542547 139858339583808 transport.py:157] Attempting refresh to obtain initial access_token
+I0818 16:17:10.585583 139858339583808 discovery.py:280] URL being requested: GET https://www.googleapis.com/discovery/v1/apis/tpu/v1/rest
+I0818 16:17:10.630783 139858339583808 discovery.py:911] URL being requested: GET https://tpu.googleapis.com/v1/projects/red-atlas-305317/locations/us-central1-a/nodes/tf-debug-3?alt=json
+I0818 16:17:10.630943 139858339583808 transport.py:157] Attempting refresh to obtain initial access_token
+INFO:tensorflow:Found TPU system:
+I0818 16:17:10.692272 139858339583808 tpu_system_metadata.py:155] Found TPU system:
+INFO:tensorflow:*** Num TPU Cores: 8
+I0818 16:17:10.692437 139858339583808 tpu_system_metadata.py:156] *** Num TPU Cores: 8
+INFO:tensorflow:*** Num TPU Workers: 1
+I0818 16:17:10.692674 139858339583808 tpu_system_metadata.py:157] *** Num TPU Workers: 1
+INFO:tensorflow:*** Num TPU Cores Per Worker: 8
+I0818 16:17:10.692710 139858339583808 tpu_system_metadata.py:158] *** Num TPU Cores Per Worker: 8
+INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:localhost/replica:0/task:0/device:CPU:0, CPU, 0, 0)
+I0818 16:17:10.692758 139858339583808 tpu_system_metadata.py:161] *** Available Device: _DeviceAttributes(/job:localhost/replica:0/task:0/device:CPU:0, CPU, 0, 0)
+INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:CPU:0, CPU, 0, 0)
+I0818 16:17:10.694375 139858339583808 tpu_system_metadata.py:161] *** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:CPU:0, CPU, 0, 0)
+INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:0, TPU, 0, 0)
+I0818 16:17:10.694420 139858339583808 tpu_system_metadata.py:161] *** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:0, TPU, 0, 0)
+INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:1, TPU, 0, 0)
+I0818 16:17:10.694456 139858339583808 tpu_system_metadata.py:161] *** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:1, TPU, 0, 0)
+INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:2, TPU, 0, 0)
+I0818 16:17:10.694489 139858339583808 tpu_system_metadata.py:161] *** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:2, TPU, 0, 0)
+INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:3, TPU, 0, 0)
+I0818 16:17:10.694522 139858339583808 tpu_system_metadata.py:161] *** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:3, TPU, 0, 0)
+INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:4, TPU, 0, 0)
+I0818 16:17:10.694561 139858339583808 tpu_system_metadata.py:161] *** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:4, TPU, 0, 0)
+INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:5, TPU, 0, 0)
+I0818 16:17:10.694593 139858339583808 tpu_system_metadata.py:161] *** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:5, TPU, 0, 0)
+INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:6, TPU, 0, 0)
+I0818 16:17:10.694624 139858339583808 tpu_system_metadata.py:161] *** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:6, TPU, 0, 0)
+INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:7, TPU, 0, 0)
+I0818 16:17:10.694655 139858339583808 tpu_system_metadata.py:161] *** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:7, TPU, 0, 0)
+INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU_SYSTEM:0, TPU_SYSTEM, 0, 0)
+I0818 16:17:10.694686 139858339583808 tpu_system_metadata.py:161] *** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU_SYSTEM:0, TPU_SYSTEM, 0, 0)
+INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:XLA_CPU:0, XLA_CPU, 0, 0)
+I0818 16:17:10.694718 139858339583808 tpu_system_metadata.py:161] *** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:XLA_CPU:0, XLA_CPU, 0, 0)
+I0818 16:17:10.822127 139858339583808 train_utils.py:98] Created the best checkpoint exporter. data_dir: gs://cam2-models/detr_exp2, export_subdir: best_ckpt, metric_name: AP
+I0818 16:17:10.823011 139858339583808 train_utils.py:245] Running default trainer.
+I0818 16:17:15.637462 139858339583808 legacy_adamw.py:56] AdamWeightDecay gradient_clip_norm=0.000000
+WARNING:tensorflow:From /opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/autograph/pyct/static_analysis/liveness.py:83: Analyzer.lamba_check (from tensorflow.python.autograph.pyct.static_analysis.liveness) is deprecated and will be removed after 2023-09-23.
+Instructions for updating:
+Lambda fuctions will be no more assumed to be used in the statement where they are used, or at least in the same block. https://github.com/tensorflow/tensorflow/issues/56089
+W0818 16:17:17.760172 139858339583808 deprecation.py:350] From /opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/autograph/pyct/static_analysis/liveness.py:83: Analyzer.lamba_check (from tensorflow.python.autograph.pyct.static_analysis.liveness) is deprecated and will be removed after 2023-09-23.
+Instructions for updating:
+Lambda fuctions will be no more assumed to be used in the statement where they are used, or at least in the same block. https://github.com/tensorflow/tensorflow/issues/56089
+I0818 16:17:20.130310 139858339583808 controller.py:431] restoring or initializing model...
+I0818 16:17:35.243902 139858339583808 controller.py:435] restored model from gs://cam2-models/detr_exp2/ckpt-9240.
+I0818 16:17:35.244076 139858339583808 controller.py:237] restored from checkpoint: gs://cam2-models/detr_exp2/ckpt-9240
+I0818 16:17:35.244128 139858339583808 train_lib.py:255] Starts to execute mode: train
+I0818 16:17:35.246347 139858339583808 controller.py:256] train | step:   9240 | training until step 554400...
+2023-08-18 16:17:53.545 | DEBUG    | tensorflow.python.autograph.operators.control_flow:_py_if_stmt:1416 - target_shape is [8, 100, 256]
+2023-08-18 16:18:18.032 | DEBUG    | tensorflow.python.autograph.operators.control_flow:_py_if_stmt:1416 - target_shape is [8, 100, 256]
+WARNING:tensorflow:From /opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/util/dispatch.py:1176: calling foldl_v2 (from tensorflow.python.ops.functional_ops) with back_prop=False is deprecated and will be removed in a future version.
+Instructions for updating:
+back_prop=False is deprecated. Consider using tf.stop_gradient instead.
+Instead of:
+results = tf.foldl(fn, elems, back_prop=False)
+Use:
+results = tf.nest.map_structure(tf.stop_gradient, tf.foldl(fn, elems))
+W0818 16:18:19.721729 139858339583808 deprecation.py:623] From /opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/util/dispatch.py:1176: calling foldl_v2 (from tensorflow.python.ops.functional_ops) with back_prop=False is deprecated and will be removed in a future version.
+Instructions for updating:
+back_prop=False is deprecated. Consider using tf.stop_gradient instead.
+Instead of:
+results = tf.foldl(fn, elems, back_prop=False)
+Use:
+results = tf.nest.map_structure(tf.stop_gradient, tf.foldl(fn, elems))
+WARNING:tensorflow:From /opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/autograph/impl/api.py:458: calling while_loop_v2 (from tensorflow.python.ops.control_flow_ops) with back_prop=False is deprecated and will be removed in a future version.
+Instructions for updating:
+back_prop=False is deprecated. Consider using tf.stop_gradient instead.
+Instead of:
+results = tf.while_loop(c, b, vars, back_prop=False)
+Use:
+results = tf.nest.map_structure(tf.stop_gradient, tf.while_loop(c, b, vars))
+W0818 16:18:20.170658 139858339583808 deprecation.py:623] From /opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/autograph/impl/api.py:458: calling while_loop_v2 (from tensorflow.python.ops.control_flow_ops) with back_prop=False is deprecated and will be removed in a future version.
+Instructions for updating:
+back_prop=False is deprecated. Consider using tf.stop_gradient instead.
+Instead of:
+results = tf.while_loop(c, b, vars, back_prop=False)
+Use:
+results = tf.nest.map_structure(tf.stop_gradient, tf.while_loop(c, b, vars))
+2023-08-18 16:18:35.211 | DEBUG    | tensorflow.python.autograph.operators.control_flow:_py_if_stmt:1416 - target_shape is [8, 100, 256]
+I0818 16:44:23.644407 139858339583808 controller.py:503] train | step:  11088 | steps/sec:    1.1 | output: 
+    {'box_loss': 6.216024,
+     'cls_loss': 9.609794,
+     'giou_loss': 8.950179,
+     'learning_rate': 1e-04,
+     'training_loss': 24.77604}
+I0818 16:44:35.970504 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-11088.
+I0818 17:08:50.346219 139858339583808 controller.py:503] train | step:  12936 | steps/sec:    1.3 | output: 
+    {'box_loss': 6.1276665,
+     'cls_loss': 9.49372,
+     'giou_loss': 8.888246,
+     'learning_rate': 1e-04,
+     'training_loss': 24.509604}
+I0818 17:09:04.413304 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-12936.
+I0818 17:33:09.445527 139858339583808 controller.py:503] train | step:  14784 | steps/sec:    1.3 | output: 
+    {'box_loss': 6.0393877,
+     'cls_loss': 9.359268,
+     'giou_loss': 8.826116,
+     'learning_rate': 1e-04,
+     'training_loss': 24.224777}
+I0818 17:33:21.652948 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-14784.
+I0818 17:57:14.126485 139858339583808 controller.py:503] train | step:  16632 | steps/sec:    1.3 | output: 
+    {'box_loss': 5.951749,
+     'cls_loss': 9.235412,
+     'giou_loss': 8.7519245,
+     'learning_rate': 1e-04,
+     'training_loss': 23.939104}
+I0818 17:57:26.269975 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-16632.
+I0818 18:21:14.148642 139858339583808 controller.py:503] train | step:  18480 | steps/sec:    1.3 | output: 
+    {'box_loss': 5.846046,
+     'cls_loss': 9.12698,
+     'giou_loss': 8.674772,
+     'learning_rate': 1e-04,
+     'training_loss': 23.647797}
+I0818 18:21:26.586598 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-18480.
+I0818 18:45:04.366175 139858339583808 controller.py:503] train | step:  20328 | steps/sec:    1.3 | output: 
+    {'box_loss': 5.753428,
+     'cls_loss': 9.006708,
+     'giou_loss': 8.599275,
+     'learning_rate': 1e-04,
+     'training_loss': 23.359392}
+I0818 18:45:15.617267 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-20328.
+I0818 19:08:39.530128 139858339583808 controller.py:503] train | step:  22176 | steps/sec:    1.3 | output: 
+    {'box_loss': 5.6484427,
+     'cls_loss': 8.894191,
+     'giou_loss': 8.515507,
+     'learning_rate': 1e-04,
+     'training_loss': 23.058151}
+I0818 19:08:51.888782 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-22176.
+I0818 19:32:06.244602 139858339583808 controller.py:503] train | step:  24024 | steps/sec:    1.3 | output: 
+    {'box_loss': 5.464317,
+     'cls_loss': 8.742058,
+     'giou_loss': 8.37388,
+     'learning_rate': 1e-04,
+     'training_loss': 22.58027}
+I0818 19:32:18.556046 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-24024.
+I0818 19:55:07.934138 139858339583808 controller.py:503] train | step:  25872 | steps/sec:    1.3 | output: 
+    {'box_loss': 5.202533,
+     'cls_loss': 8.551916,
+     'giou_loss': 8.165321,
+     'learning_rate': 1e-04,
+     'training_loss': 21.919779}
+I0818 19:55:20.660188 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-25872.
+I0818 20:17:55.622162 139858339583808 controller.py:503] train | step:  27720 | steps/sec:    1.4 | output: 
+    {'box_loss': 5.0000424,
+     'cls_loss': 8.378666,
+     'giou_loss': 7.9942765,
+     'learning_rate': 1e-04,
+     'training_loss': 21.372972}
+I0818 20:18:07.651613 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-27720.
+I0818 20:40:33.792654 139858339583808 controller.py:503] train | step:  29568 | steps/sec:    1.4 | output: 
+    {'box_loss': 4.835092,
+     'cls_loss': 8.189903,
+     'giou_loss': 7.847589,
+     'learning_rate': 1e-04,
+     'training_loss': 20.872591}
+I0818 20:40:46.646700 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-29568.
+I0818 21:03:03.091219 139858339583808 controller.py:503] train | step:  31416 | steps/sec:    1.4 | output: 
+    {'box_loss': 4.694214,
+     'cls_loss': 8.046223,
+     'giou_loss': 7.717542,
+     'learning_rate': 1e-04,
+     'training_loss': 20.457987}
+I0818 21:03:15.275084 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-31416.
+I0818 21:25:29.942754 139858339583808 controller.py:503] train | step:  33264 | steps/sec:    1.4 | output: 
+    {'box_loss': 4.5652366,
+     'cls_loss': 7.889297,
+     'giou_loss': 7.5982895,
+     'learning_rate': 1e-04,
+     'training_loss': 20.052826}
+I0818 21:25:43.082104 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-33264.
+I0818 21:47:51.617809 139858339583808 controller.py:503] train | step:  35112 | steps/sec:    1.4 | output: 
+    {'box_loss': 4.454328,
+     'cls_loss': 7.7407126,
+     'giou_loss': 7.500777,
+     'learning_rate': 1e-04,
+     'training_loss': 19.69584}
+I0818 21:48:03.831023 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-35112.
+I0818 22:10:16.241325 139858339583808 controller.py:503] train | step:  36960 | steps/sec:    1.4 | output: 
+    {'box_loss': 4.351196,
+     'cls_loss': 7.618511,
+     'giou_loss': 7.4028907,
+     'learning_rate': 1e-04,
+     'training_loss': 19.372602}
+I0818 22:10:29.205579 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-36960.
+I0818 22:32:31.943256 139858339583808 controller.py:503] train | step:  38808 | steps/sec:    1.4 | output: 
+    {'box_loss': 4.263114,
+     'cls_loss': 7.486742,
+     'giou_loss': 7.3214173,
+     'learning_rate': 1e-04,
+     'training_loss': 19.071291}
+I0818 22:32:43.773935 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-38808.
+I0818 22:54:42.687973 139858339583808 controller.py:503] train | step:  40656 | steps/sec:    1.4 | output: 
+    {'box_loss': 4.1746097,
+     'cls_loss': 7.3714128,
+     'giou_loss': 7.235139,
+     'learning_rate': 1e-04,
+     'training_loss': 18.781189}
+I0818 22:54:54.534508 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-40656.
+I0818 23:16:54.764425 139858339583808 controller.py:503] train | step:  42504 | steps/sec:    1.4 | output: 
+    {'box_loss': 4.1144986,
+     'cls_loss': 7.266827,
+     'giou_loss': 7.170395,
+     'learning_rate': 1e-04,
+     'training_loss': 18.5517}
+I0818 23:17:07.005963 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-42504.
+I0818 23:38:58.602213 139858339583808 controller.py:503] train | step:  44352 | steps/sec:    1.4 | output: 
+    {'box_loss': 4.0415626,
+     'cls_loss': 7.161603,
+     'giou_loss': 7.093034,
+     'learning_rate': 1e-04,
+     'training_loss': 18.296183}
+I0818 23:39:10.951429 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-44352.
+I0819 00:01:03.857614 139858339583808 controller.py:503] train | step:  46200 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.9884162,
+     'cls_loss': 7.070112,
+     'giou_loss': 7.0383873,
+     'learning_rate': 1e-04,
+     'training_loss': 18.096903}
+I0819 00:01:16.012340 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-46200.
+I0819 00:23:02.725851 139858339583808 controller.py:503] train | step:  48048 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.9218862,
+     'cls_loss': 6.974137,
+     'giou_loss': 6.984265,
+     'learning_rate': 1e-04,
+     'training_loss': 17.88031}
+I0819 00:23:15.184715 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-48048.
+I0819 00:45:01.963314 139858339583808 controller.py:503] train | step:  49896 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.8758473,
+     'cls_loss': 6.8961544,
+     'giou_loss': 6.935455,
+     'learning_rate': 1e-04,
+     'training_loss': 17.707453}
+I0819 00:45:13.965861 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-49896.
+I0819 01:06:58.516458 139858339583808 controller.py:503] train | step:  51744 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.8219597,
+     'cls_loss': 6.811098,
+     'giou_loss': 6.877213,
+     'learning_rate': 1e-04,
+     'training_loss': 17.51026}
+I0819 01:07:10.649732 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-51744.
+I0819 01:28:46.177410 139858339583808 controller.py:503] train | step:  53592 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.7751815,
+     'cls_loss': 6.735162,
+     'giou_loss': 6.8245735,
+     'learning_rate': 1e-04,
+     'training_loss': 17.334908}
+I0819 01:28:57.800192 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-53592.
+I0819 01:50:32.901249 139858339583808 controller.py:503] train | step:  55440 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.7325194,
+     'cls_loss': 6.6483793,
+     'giou_loss': 6.784576,
+     'learning_rate': 1e-04,
+     'training_loss': 17.165482}
+I0819 01:50:45.392432 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-55440.
+I0819 02:12:20.461167 139858339583808 controller.py:503] train | step:  57288 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.6957886,
+     'cls_loss': 6.576665,
+     'giou_loss': 6.73515,
+     'learning_rate': 1e-04,
+     'training_loss': 17.007612}
+I0819 02:12:32.612249 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-57288.
+I0819 02:34:00.625403 139858339583808 controller.py:503] train | step:  59136 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.6481698,
+     'cls_loss': 6.5101023,
+     'giou_loss': 6.700766,
+     'learning_rate': 1e-04,
+     'training_loss': 16.859026}
+I0819 02:34:14.746776 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-59136.
+I0819 02:55:45.253715 139858339583808 controller.py:503] train | step:  60984 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.6158564,
+     'cls_loss': 6.4532294,
+     'giou_loss': 6.6606894,
+     'learning_rate': 1e-04,
+     'training_loss': 16.729761}
+I0819 02:55:57.959553 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-60984.
+I0819 03:17:21.801806 139858339583808 controller.py:503] train | step:  62832 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.5803025,
+     'cls_loss': 6.382,
+     'giou_loss': 6.621652,
+     'learning_rate': 1e-04,
+     'training_loss': 16.583973}
+I0819 03:17:34.965603 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-62832.
+I0819 03:38:56.918793 139858339583808 controller.py:503] train | step:  64680 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.5444443,
+     'cls_loss': 6.3202868,
+     'giou_loss': 6.5887895,
+     'learning_rate': 1e-04,
+     'training_loss': 16.453514}
+I0819 03:39:09.017747 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-64680.
+I0819 04:00:24.847549 139858339583808 controller.py:503] train | step:  66528 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.5171673,
+     'cls_loss': 6.267867,
+     'giou_loss': 6.544051,
+     'learning_rate': 1e-04,
+     'training_loss': 16.329092}
+I0819 04:00:37.094515 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-66528.
+I0819 04:21:57.646001 139858339583808 controller.py:503] train | step:  68376 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.4838016,
+     'cls_loss': 6.2029014,
+     'giou_loss': 6.513891,
+     'learning_rate': 1e-04,
+     'training_loss': 16.200592}
+restoring or initializing model...
+restored model from gs://cam2-models/detr_exp2/ckpt-9240.
+restored from checkpoint: gs://cam2-models/detr_exp2/ckpt-9240
+train | step:   9240 | training until step 554400...
+train | step:  11088 | steps/sec:    1.1 | output: 
+    {'box_loss': 6.216024,
+     'cls_loss': 9.609794,
+     'giou_loss': 8.950179,
+     'learning_rate': 1e-04,
+     'training_loss': 24.77604}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-11088.
+train | step:  12936 | steps/sec:    1.3 | output: 
+    {'box_loss': 6.1276665,
+     'cls_loss': 9.49372,
+     'giou_loss': 8.888246,
+     'learning_rate': 1e-04,
+     'training_loss': 24.509604}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-12936.
+train | step:  14784 | steps/sec:    1.3 | output: 
+    {'box_loss': 6.0393877,
+     'cls_loss': 9.359268,
+     'giou_loss': 8.826116,
+     'learning_rate': 1e-04,
+     'training_loss': 24.224777}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-14784.
+train | step:  16632 | steps/sec:    1.3 | output: 
+    {'box_loss': 5.951749,
+     'cls_loss': 9.235412,
+     'giou_loss': 8.7519245,
+     'learning_rate': 1e-04,
+     'training_loss': 23.939104}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-16632.
+train | step:  18480 | steps/sec:    1.3 | output: 
+    {'box_loss': 5.846046,
+     'cls_loss': 9.12698,
+     'giou_loss': 8.674772,
+     'learning_rate': 1e-04,
+     'training_loss': 23.647797}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-18480.
+train | step:  20328 | steps/sec:    1.3 | output: 
+    {'box_loss': 5.753428,
+     'cls_loss': 9.006708,
+     'giou_loss': 8.599275,
+     'learning_rate': 1e-04,
+     'training_loss': 23.359392}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-20328.
+train | step:  22176 | steps/sec:    1.3 | output: 
+    {'box_loss': 5.6484427,
+     'cls_loss': 8.894191,
+     'giou_loss': 8.515507,
+     'learning_rate': 1e-04,
+     'training_loss': 23.058151}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-22176.
+train | step:  24024 | steps/sec:    1.3 | output: 
+    {'box_loss': 5.464317,
+     'cls_loss': 8.742058,
+     'giou_loss': 8.37388,
+     'learning_rate': 1e-04,
+     'training_loss': 22.58027}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-24024.
+train | step:  25872 | steps/sec:    1.3 | output: 
+    {'box_loss': 5.202533,
+     'cls_loss': 8.551916,
+     'giou_loss': 8.165321,
+     'learning_rate': 1e-04,
+     'training_loss': 21.919779}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-25872.
+train | step:  27720 | steps/sec:    1.4 | output: 
+    {'box_loss': 5.0000424,
+     'cls_loss': 8.378666,
+     'giou_loss': 7.9942765,
+     'learning_rate': 1e-04,
+     'training_loss': 21.372972}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-27720.
+train | step:  29568 | steps/sec:    1.4 | output: 
+    {'box_loss': 4.835092,
+     'cls_loss': 8.189903,
+     'giou_loss': 7.847589,
+     'learning_rate': 1e-04,
+     'training_loss': 20.872591}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-29568.
+train | step:  31416 | steps/sec:    1.4 | output: 
+    {'box_loss': 4.694214,
+     'cls_loss': 8.046223,
+     'giou_loss': 7.717542,
+     'learning_rate': 1e-04,
+     'training_loss': 20.457987}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-31416.
+train | step:  33264 | steps/sec:    1.4 | output: 
+    {'box_loss': 4.5652366,
+     'cls_loss': 7.889297,
+     'giou_loss': 7.5982895,
+     'learning_rate': 1e-04,
+     'training_loss': 20.052826}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-33264.
+train | step:  35112 | steps/sec:    1.4 | output: 
+    {'box_loss': 4.454328,
+     'cls_loss': 7.7407126,
+     'giou_loss': 7.500777,
+     'learning_rate': 1e-04,
+     'training_loss': 19.69584}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-35112.
+train | step:  36960 | steps/sec:    1.4 | output: 
+    {'box_loss': 4.351196,
+     'cls_loss': 7.618511,
+     'giou_loss': 7.4028907,
+     'learning_rate': 1e-04,
+     'training_loss': 19.372602}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-36960.
+train | step:  38808 | steps/sec:    1.4 | output: 
+    {'box_loss': 4.263114,
+     'cls_loss': 7.486742,
+     'giou_loss': 7.3214173,
+     'learning_rate': 1e-04,
+     'training_loss': 19.071291}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-38808.
+train | step:  40656 | steps/sec:    1.4 | output: 
+    {'box_loss': 4.1746097,
+     'cls_loss': 7.3714128,
+     'giou_loss': 7.235139,
+     'learning_rate': 1e-04,
+     'training_loss': 18.781189}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-40656.
+train | step:  42504 | steps/sec:    1.4 | output: 
+    {'box_loss': 4.1144986,
+     'cls_loss': 7.266827,
+     'giou_loss': 7.170395,
+     'learning_rate': 1e-04,
+     'training_loss': 18.5517}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-42504.
+train | step:  44352 | steps/sec:    1.4 | output: 
+    {'box_loss': 4.0415626,
+     'cls_loss': 7.161603,
+     'giou_loss': 7.093034,
+     'learning_rate': 1e-04,
+     'training_loss': 18.296183}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-44352.
+train | step:  46200 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.9884162,
+     'cls_loss': 7.070112,
+     'giou_loss': 7.0383873,
+     'learning_rate': 1e-04,
+     'training_loss': 18.096903}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-46200.
+train | step:  48048 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.9218862,
+     'cls_loss': 6.974137,
+     'giou_loss': 6.984265,
+     'learning_rate': 1e-04,
+     'training_loss': 17.88031}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-48048.
+train | step:  49896 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.8758473,
+     'cls_loss': 6.8961544,
+     'giou_loss': 6.935455,
+     'learning_rate': 1e-04,
+     'training_loss': 17.707453}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-49896.
+train | step:  51744 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.8219597,
+     'cls_loss': 6.811098,
+     'giou_loss': 6.877213,
+     'learning_rate': 1e-04,
+     'training_loss': 17.51026}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-51744.
+train | step:  53592 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.7751815,
+     'cls_loss': 6.735162,
+     'giou_loss': 6.8245735,
+     'learning_rate': 1e-04,
+     'training_loss': 17.334908}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-53592.
+train | step:  55440 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.7325194,
+     'cls_loss': 6.6483793,
+     'giou_loss': 6.784576,
+     'learning_rate': 1e-04,
+     'training_loss': 17.165482}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-55440.
+train | step:  57288 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.6957886,
+     'cls_loss': 6.576665,
+     'giou_loss': 6.73515,
+     'learning_rate': 1e-04,
+     'training_loss': 17.007612}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-57288.
+train | step:  59136 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.6481698,
+     'cls_loss': 6.5101023,
+     'giou_loss': 6.700766,
+     'learning_rate': 1e-04,
+     'training_loss': 16.859026}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-59136.
+train | step:  60984 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.6158564,
+     'cls_loss': 6.4532294,
+     'giou_loss': 6.6606894,
+     'learning_rate': 1e-04,
+     'training_loss': 16.729761}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-60984.
+train | step:  62832 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.5803025,
+     'cls_loss': 6.382,
+     'giou_loss': 6.621652,
+     'learning_rate': 1e-04,
+     'training_loss': 16.583973}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-62832.
+train | step:  64680 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.5444443,
+     'cls_loss': 6.3202868,
+     'giou_loss': 6.5887895,
+     'learning_rate': 1e-04,
+     'training_loss': 16.453514}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-64680.
+train | step:  66528 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.5171673,
+     'cls_loss': 6.267867,
+     'giou_loss': 6.544051,
+     'learning_rate': 1e-04,
+     'training_loss': 16.329092}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-66528.
+I0819 04:22:09.174382 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-68376.
+I0819 04:43:25.848281 139858339583808 controller.py:503] train | step:  70224 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.4594824,
+     'cls_loss': 6.14369,
+     'giou_loss': 6.484031,
+     'learning_rate': 1e-04,
+     'training_loss': 16.087214}
+I0819 04:43:37.888173 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-70224.
+I0819 05:04:49.781982 139858339583808 controller.py:503] train | step:  72072 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.4221365,
+     'cls_loss': 6.0853934,
+     'giou_loss': 6.4512806,
+     'learning_rate': 1e-04,
+     'training_loss': 15.958817}
+I0819 05:05:01.978566 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-72072.
+I0819 05:26:07.765850 139858339583808 controller.py:503] train | step:  73920 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.400568,
+     'cls_loss': 6.0253663,
+     'giou_loss': 6.4175353,
+     'learning_rate': 1e-04,
+     'training_loss': 15.843456}
+I0819 05:26:18.896630 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-73920.
+I0819 05:47:23.958024 139858339583808 controller.py:503] train | step:  75768 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.3766973,
+     'cls_loss': 5.990992,
+     'giou_loss': 6.3949795,
+     'learning_rate': 1e-04,
+     'training_loss': 15.762668}
+I0819 05:47:37.036965 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-75768.
+I0819 06:08:41.017320 139858339583808 controller.py:503] train | step:  77616 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.3480299,
+     'cls_loss': 5.9396195,
+     'giou_loss': 6.357857,
+     'learning_rate': 1e-04,
+     'training_loss': 15.645508}
+I0819 06:08:54.299630 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-77616.
+I0819 06:29:58.476556 139858339583808 controller.py:503] train | step:  79464 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.320873,
+     'cls_loss': 5.891215,
+     'giou_loss': 6.3327966,
+     'learning_rate': 1e-04,
+     'training_loss': 15.544894}
+I0819 06:30:11.685830 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-79464.
+I0819 06:51:17.024319 139858339583808 controller.py:503] train | step:  81312 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.2958834,
+     'cls_loss': 5.864708,
+     'giou_loss': 6.3032355,
+     'learning_rate': 1e-04,
+     'training_loss': 15.463843}
+I0819 06:51:28.973073 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-81312.
+I0819 07:12:23.934998 139858339583808 controller.py:503] train | step:  83160 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.2750177,
+     'cls_loss': 5.816204,
+     'giou_loss': 6.2814054,
+     'learning_rate': 1e-04,
+     'training_loss': 15.37264}
+I0819 07:12:35.747136 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-83160.
+I0819 07:33:30.748276 139858339583808 controller.py:503] train | step:  85008 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.257823,
+     'cls_loss': 5.7754493,
+     'giou_loss': 6.2609944,
+     'learning_rate': 1e-04,
+     'training_loss': 15.294262}
+I0819 07:33:42.809786 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-85008.
+I0819 07:54:37.012822 139858339583808 controller.py:503] train | step:  86856 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.2365851,
+     'cls_loss': 5.7210417,
+     'giou_loss': 6.2328367,
+     'learning_rate': 1e-04,
+     'training_loss': 15.190468}
+I0819 07:54:48.979972 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-86856.
+I0819 08:15:41.591840 139858339583808 controller.py:503] train | step:  88704 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.216006,
+     'cls_loss': 5.681813,
+     'giou_loss': 6.2239327,
+     'learning_rate': 1e-04,
+     'training_loss': 15.121741}
+I0819 08:15:55.782548 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-88704.
+I0819 08:36:43.299014 139858339583808 controller.py:503] train | step:  90552 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.1894243,
+     'cls_loss': 5.6350145,
+     'giou_loss': 6.1847625,
+     'learning_rate': 1e-04,
+     'training_loss': 15.009197}
+I0819 08:36:54.900720 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-90552.
+I0819 08:57:47.298501 139858339583808 controller.py:503] train | step:  92400 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.1762602,
+     'cls_loss': 5.617977,
+     'giou_loss': 6.1666093,
+     'learning_rate': 1e-04,
+     'training_loss': 14.96084}
+I0819 08:58:00.030064 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-92400.
+I0819 09:18:55.028195 139858339583808 controller.py:503] train | step:  94248 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.1516433,
+     'cls_loss': 5.5597644,
+     'giou_loss': 6.143507,
+     'learning_rate': 1e-04,
+     'training_loss': 14.85489}
+I0819 09:19:07.177759 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-94248.
+I0819 09:39:49.079045 139858339583808 controller.py:503] train | step:  96096 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.136241,
+     'cls_loss': 5.536048,
+     'giou_loss': 6.1200995,
+     'learning_rate': 1e-04,
+     'training_loss': 14.792373}
+I0819 09:40:00.889890 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-96096.
+I0819 10:00:40.601442 139858339583808 controller.py:503] train | step:  97944 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.1288466,
+     'cls_loss': 5.5008187,
+     'giou_loss': 6.109242,
+     'learning_rate': 1e-04,
+     'training_loss': 14.738888}
+I0819 10:00:52.868635 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-97944.
+I0819 10:21:28.032761 139858339583808 controller.py:503] train | step:  99792 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.1045969,
+     'cls_loss': 5.4591217,
+     'giou_loss': 6.0692167,
+     'learning_rate': 1e-04,
+     'training_loss': 14.632918}
+I0819 10:21:40.107977 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-99792.
+I0819 10:42:23.125375 139858339583808 controller.py:503] train | step:  101640 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.0879433,
+     'cls_loss': 5.4318094,
+     'giou_loss': 6.0677996,
+     'learning_rate': 1e-04,
+     'training_loss': 14.587556}
+I0819 10:42:35.528885 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-101640.
+I0819 11:03:11.312292 139858339583808 controller.py:503] train | step:  103488 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.0695956,
+     'cls_loss': 5.3851185,
+     'giou_loss': 6.0413876,
+     'learning_rate': 1e-04,
+     'training_loss': 14.496105}
+I0819 11:03:23.426675 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-103488.
+I0819 11:23:57.845885 139858339583808 controller.py:503] train | step:  105336 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.057167,
+     'cls_loss': 5.366331,
+     'giou_loss': 6.029074,
+     'learning_rate': 1e-04,
+     'training_loss': 14.45257}
+I0819 11:24:10.350245 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-105336.
+I0819 11:44:36.205867 139858339583808 controller.py:503] train | step:  107184 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.0397758,
+     'cls_loss': 5.3168,
+     'giou_loss': 5.9896173,
+     'learning_rate': 1e-04,
+     'training_loss': 14.346193}
+I0819 11:44:48.820146 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-107184.
+I0819 12:05:20.402982 139858339583808 controller.py:503] train | step:  109032 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.0206883,
+     'cls_loss': 5.3045115,
+     'giou_loss': 5.9866276,
+     'learning_rate': 1e-04,
+     'training_loss': 14.311825}
+I0819 12:05:32.336474 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-109032.
+I0819 12:26:04.235272 139858339583808 controller.py:503] train | step:  110880 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.0088403,
+     'cls_loss': 5.274769,
+     'giou_loss': 5.978237,
+     'learning_rate': 1e-04,
+     'training_loss': 14.261842}
+I0819 12:26:16.899074 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-110880.
+I0819 12:46:44.851078 139858339583808 controller.py:503] train | step:  112728 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.9980276,
+     'cls_loss': 5.2529707,
+     'giou_loss': 5.9593997,
+     'learning_rate': 1e-04,
+     'training_loss': 14.210393}
+I0819 12:46:56.719020 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-112728.
+I0819 13:07:20.871896 139858339583808 controller.py:503] train | step:  114576 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.9856362,
+     'cls_loss': 5.2076206,
+     'giou_loss': 5.934357,
+     'learning_rate': 1e-04,
+     'training_loss': 14.127618}
+I0819 13:07:33.229891 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-114576.
+I0819 13:27:59.445233 139858339583808 controller.py:503] train | step:  116424 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.9720168,
+     'cls_loss': 5.1857147,
+     'giou_loss': 5.9192724,
+     'learning_rate': 1e-04,
+     'training_loss': 14.077012}
+I0819 13:28:11.558354 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-116424.
+I0819 13:48:35.000412 139858339583808 controller.py:503] train | step:  118272 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.9526298,
+     'cls_loss': 5.1454253,
+     'giou_loss': 5.9036264,
+     'learning_rate': 1e-04,
+     'training_loss': 14.001685}
+I0819 13:48:46.910944 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-118272.
+I0819 14:09:09.503399 139858339583808 controller.py:503] train | step:  120120 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.944684,
+     'cls_loss': 5.1350737,
+     'giou_loss': 5.9041443,
+     'learning_rate': 1e-04,
+     'training_loss': 13.983906}
+I0819 14:09:21.971336 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-120120.
+I0819 14:29:44.348639 139858339583808 controller.py:503] train | step:  121968 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.932375,
+     'cls_loss': 5.1039004,
+     'giou_loss': 5.874591,
+     'learning_rate': 1e-04,
+     'training_loss': 13.910881}
+I0819 14:29:56.103859 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-121968.
+I0819 14:50:16.835639 139858339583808 controller.py:503] train | step:  123816 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.918659,
+     'cls_loss': 5.0829496,
+     'giou_loss': 5.8570576,
+     'learning_rate': 1e-04,
+     'training_loss': 13.858678}
+I0819 14:50:28.990017 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-123816.
+I0819 15:10:46.709784 139858339583808 controller.py:503] train | step:  125664 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.9120653,
+     'cls_loss': 5.074086,
+     'giou_loss': 5.853795,
+     'learning_rate': 1e-04,
+     'training_loss': 13.839955}
+I0819 15:10:59.093108 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-125664.
+train | step:  68376 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.4838016,
+     'cls_loss': 6.2029014,
+     'giou_loss': 6.513891,
+     'learning_rate': 1e-04,
+     'training_loss': 16.200592}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-68376.
+train | step:  70224 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.4594824,
+     'cls_loss': 6.14369,
+     'giou_loss': 6.484031,
+     'learning_rate': 1e-04,
+     'training_loss': 16.087214}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-70224.
+train | step:  72072 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.4221365,
+     'cls_loss': 6.0853934,
+     'giou_loss': 6.4512806,
+     'learning_rate': 1e-04,
+     'training_loss': 15.958817}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-72072.
+train | step:  73920 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.400568,
+     'cls_loss': 6.0253663,
+     'giou_loss': 6.4175353,
+     'learning_rate': 1e-04,
+     'training_loss': 15.843456}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-73920.
+train | step:  75768 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.3766973,
+     'cls_loss': 5.990992,
+     'giou_loss': 6.3949795,
+     'learning_rate': 1e-04,
+     'training_loss': 15.762668}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-75768.
+train | step:  77616 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.3480299,
+     'cls_loss': 5.9396195,
+     'giou_loss': 6.357857,
+     'learning_rate': 1e-04,
+     'training_loss': 15.645508}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-77616.
+train | step:  79464 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.320873,
+     'cls_loss': 5.891215,
+     'giou_loss': 6.3327966,
+     'learning_rate': 1e-04,
+     'training_loss': 15.544894}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-79464.
+train | step:  81312 | steps/sec:    1.4 | output: 
+    {'box_loss': 3.2958834,
+     'cls_loss': 5.864708,
+     'giou_loss': 6.3032355,
+     'learning_rate': 1e-04,
+     'training_loss': 15.463843}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-81312.
+train | step:  83160 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.2750177,
+     'cls_loss': 5.816204,
+     'giou_loss': 6.2814054,
+     'learning_rate': 1e-04,
+     'training_loss': 15.37264}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-83160.
+train | step:  85008 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.257823,
+     'cls_loss': 5.7754493,
+     'giou_loss': 6.2609944,
+     'learning_rate': 1e-04,
+     'training_loss': 15.294262}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-85008.
+train | step:  86856 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.2365851,
+     'cls_loss': 5.7210417,
+     'giou_loss': 6.2328367,
+     'learning_rate': 1e-04,
+     'training_loss': 15.190468}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-86856.
+train | step:  88704 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.216006,
+     'cls_loss': 5.681813,
+     'giou_loss': 6.2239327,
+     'learning_rate': 1e-04,
+     'training_loss': 15.121741}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-88704.
+train | step:  90552 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.1894243,
+     'cls_loss': 5.6350145,
+     'giou_loss': 6.1847625,
+     'learning_rate': 1e-04,
+     'training_loss': 15.009197}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-90552.
+train | step:  92400 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.1762602,
+     'cls_loss': 5.617977,
+     'giou_loss': 6.1666093,
+     'learning_rate': 1e-04,
+     'training_loss': 14.96084}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-92400.
+train | step:  94248 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.1516433,
+     'cls_loss': 5.5597644,
+     'giou_loss': 6.143507,
+     'learning_rate': 1e-04,
+     'training_loss': 14.85489}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-94248.
+train | step:  96096 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.136241,
+     'cls_loss': 5.536048,
+     'giou_loss': 6.1200995,
+     'learning_rate': 1e-04,
+     'training_loss': 14.792373}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-96096.
+train | step:  97944 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.1288466,
+     'cls_loss': 5.5008187,
+     'giou_loss': 6.109242,
+     'learning_rate': 1e-04,
+     'training_loss': 14.738888}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-97944.
+train | step:  99792 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.1045969,
+     'cls_loss': 5.4591217,
+     'giou_loss': 6.0692167,
+     'learning_rate': 1e-04,
+     'training_loss': 14.632918}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-99792.
+train | step:  101640 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.0879433,
+     'cls_loss': 5.4318094,
+     'giou_loss': 6.0677996,
+     'learning_rate': 1e-04,
+     'training_loss': 14.587556}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-101640.
+train | step:  103488 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.0695956,
+     'cls_loss': 5.3851185,
+     'giou_loss': 6.0413876,
+     'learning_rate': 1e-04,
+     'training_loss': 14.496105}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-103488.
+train | step:  105336 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.057167,
+     'cls_loss': 5.366331,
+     'giou_loss': 6.029074,
+     'learning_rate': 1e-04,
+     'training_loss': 14.45257}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-105336.
+train | step:  107184 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.0397758,
+     'cls_loss': 5.3168,
+     'giou_loss': 5.9896173,
+     'learning_rate': 1e-04,
+     'training_loss': 14.346193}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-107184.
+train | step:  109032 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.0206883,
+     'cls_loss': 5.3045115,
+     'giou_loss': 5.9866276,
+     'learning_rate': 1e-04,
+     'training_loss': 14.311825}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-109032.
+train | step:  110880 | steps/sec:    1.5 | output: 
+    {'box_loss': 3.0088403,
+     'cls_loss': 5.274769,
+     'giou_loss': 5.978237,
+     'learning_rate': 1e-04,
+     'training_loss': 14.261842}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-110880.
+train | step:  112728 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.9980276,
+     'cls_loss': 5.2529707,
+     'giou_loss': 5.9593997,
+     'learning_rate': 1e-04,
+     'training_loss': 14.210393}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-112728.
+train | step:  114576 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.9856362,
+     'cls_loss': 5.2076206,
+     'giou_loss': 5.934357,
+     'learning_rate': 1e-04,
+     'training_loss': 14.127618}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-114576.
+train | step:  116424 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.9720168,
+     'cls_loss': 5.1857147,
+     'giou_loss': 5.9192724,
+     'learning_rate': 1e-04,
+     'training_loss': 14.077012}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-116424.
+train | step:  118272 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.9526298,
+     'cls_loss': 5.1454253,
+     'giou_loss': 5.9036264,
+     'learning_rate': 1e-04,
+     'training_loss': 14.001685}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-118272.
+train | step:  120120 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.944684,
+     'cls_loss': 5.1350737,
+     'giou_loss': 5.9041443,
+     'learning_rate': 1e-04,
+     'training_loss': 13.983906}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-120120.
+train | step:  121968 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.932375,
+     'cls_loss': 5.1039004,
+     'giou_loss': 5.874591,
+     'learning_rate': 1e-04,
+     'training_loss': 13.910881}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-121968.
+train | step:  123816 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.918659,
+     'cls_loss': 5.0829496,
+     'giou_loss': 5.8570576,
+     'learning_rate': 1e-04,
+     'training_loss': 13.858678}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-123816.
+train | step:  125664 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.9120653,
+     'cls_loss': 5.074086,
+     'giou_loss': 5.853795,
+     'learning_rate': 1e-04,
+     'training_loss': 13.839955}
+I0819 15:31:14.414494 139858339583808 controller.py:503] train | step:  127512 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.8948634,
+     'cls_loss': 5.0315084,
+     'giou_loss': 5.832774,
+     'learning_rate': 1e-04,
+     'training_loss': 13.75915}
+I0819 15:31:26.563317 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-127512.
+I0819 15:51:46.900771 139858339583808 controller.py:503] train | step:  129360 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.8881202,
+     'cls_loss': 5.016535,
+     'giou_loss': 5.8168163,
+     'learning_rate': 1e-04,
+     'training_loss': 13.721478}
+I0819 15:51:58.864853 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-129360.
+I0819 16:12:15.074779 139858339583808 controller.py:503] train | step:  131208 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.8683975,
+     'cls_loss': 4.9912443,
+     'giou_loss': 5.8077793,
+     'learning_rate': 1e-04,
+     'training_loss': 13.66742}
+I0819 16:12:27.396833 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-131208.
+I0819 16:32:42.928343 139858339583808 controller.py:503] train | step:  133056 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.8673372,
+     'cls_loss': 4.9732265,
+     'giou_loss': 5.798208,
+     'learning_rate': 1e-04,
+     'training_loss': 13.638787}
+I0819 16:32:54.841647 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-133056.
+I0819 16:53:05.477494 139858339583808 controller.py:503] train | step:  134904 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.8495755,
+     'cls_loss': 4.9277773,
+     'giou_loss': 5.780089,
+     'learning_rate': 1e-04,
+     'training_loss': 13.55744}
+I0819 16:53:20.296933 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-134904.
+I0819 17:13:29.918850 139858339583808 controller.py:503] train | step:  136752 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.8385792,
+     'cls_loss': 4.9085298,
+     'giou_loss': 5.7555876,
+     'learning_rate': 1e-04,
+     'training_loss': 13.502691}
+I0819 17:13:44.865209 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-136752.
+I0819 17:33:59.868781 139858339583808 controller.py:503] train | step:  138600 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.8314989,
+     'cls_loss': 4.8932796,
+     'giou_loss': 5.7551947,
+     'learning_rate': 1e-04,
+     'training_loss': 13.479964}
+I0819 17:34:12.438426 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-138600.
+I0819 17:54:26.658225 139858339583808 controller.py:503] train | step:  140448 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.8197412,
+     'cls_loss': 4.874806,
+     'giou_loss': 5.736131,
+     'learning_rate': 1e-04,
+     'training_loss': 13.430682}
+I0819 17:54:41.812592 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-140448.
+I0819 18:14:46.070447 139858339583808 controller.py:503] train | step:  142296 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.8108068,
+     'cls_loss': 4.8642254,
+     'giou_loss': 5.7383146,
+     'learning_rate': 1e-04,
+     'training_loss': 13.413346}
+I0819 18:15:00.197285 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-142296.
+I0819 18:35:03.345841 139858339583808 controller.py:503] train | step:  144144 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.801486,
+     'cls_loss': 4.8396535,
+     'giou_loss': 5.7072363,
+     'learning_rate': 1e-04,
+     'training_loss': 13.348385}
+I0819 18:35:15.517093 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-144144.
+I0819 18:55:21.356431 139858339583808 controller.py:503] train | step:  145992 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.7851837,
+     'cls_loss': 4.8087234,
+     'giou_loss': 5.7071347,
+     'learning_rate': 1e-04,
+     'training_loss': 13.301032}
+I0819 18:55:33.638230 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-145992.
+I0819 19:15:36.772048 139858339583808 controller.py:503] train | step:  147840 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.7860985,
+     'cls_loss': 4.788398,
+     'giou_loss': 5.694649,
+     'learning_rate': 1e-04,
+     'training_loss': 13.269149}
+I0819 19:15:48.781834 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-147840.
+I0819 19:35:50.066613 139858339583808 controller.py:503] train | step:  149688 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.7703304,
+     'cls_loss': 4.7659464,
+     'giou_loss': 5.675829,
+     'learning_rate': 1e-04,
+     'training_loss': 13.2121}
+I0819 19:36:02.654691 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-149688.
+I0819 19:56:04.842524 139858339583808 controller.py:503] train | step:  151536 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.764565,
+     'cls_loss': 4.7638097,
+     'giou_loss': 5.671681,
+     'learning_rate': 1e-04,
+     'training_loss': 13.2000475}
+I0819 19:56:16.442590 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-151536.
+I0819 20:16:16.203767 139858339583808 controller.py:503] train | step:  153384 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.7539206,
+     'cls_loss': 4.741675,
+     'giou_loss': 5.662973,
+     'learning_rate': 1e-04,
+     'training_loss': 13.158552}
+I0819 20:16:28.105837 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-153384.
+I0819 20:36:27.576736 139858339583808 controller.py:503] train | step:  155232 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.7448661,
+     'cls_loss': 4.7158823,
+     'giou_loss': 5.646481,
+     'learning_rate': 1e-04,
+     'training_loss': 13.10722}
+I0819 20:36:39.625542 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-155232.
+I0819 20:56:35.149280 139858339583808 controller.py:503] train | step:  157080 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.7392147,
+     'cls_loss': 4.718418,
+     'giou_loss': 5.631827,
+     'learning_rate': 1e-04,
+     'training_loss': 13.089451}
+I0819 20:56:47.211378 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-157080.
+I0819 21:16:41.287210 139858339583808 controller.py:503] train | step:  158928 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.7272396,
+     'cls_loss': 4.6659036,
+     'giou_loss': 5.6170444,
+     'learning_rate': 1e-04,
+     'training_loss': 13.010173}
+I0819 21:16:55.168548 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-158928.
+I0819 21:36:50.022432 139858339583808 controller.py:503] train | step:  160776 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.7222896,
+     'cls_loss': 4.676805,
+     'giou_loss': 5.6117244,
+     'learning_rate': 1e-04,
+     'training_loss': 13.010822}
+I0819 21:37:02.216161 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-160776.
+I0819 21:56:55.165573 139858339583808 controller.py:503] train | step:  162624 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.7171392,
+     'cls_loss': 4.6432753,
+     'giou_loss': 5.604875,
+     'learning_rate': 1e-04,
+     'training_loss': 12.965281}
+I0819 21:57:06.868250 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-162624.
+I0819 22:17:07.114425 139858339583808 controller.py:503] train | step:  164472 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.7090242,
+     'cls_loss': 4.6378508,
+     'giou_loss': 5.6115665,
+     'learning_rate': 1e-04,
+     'training_loss': 12.958446}
+I0819 22:17:18.731723 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-164472.
+I0819 22:37:11.940007 139858339583808 controller.py:503] train | step:  166320 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.6959164,
+     'cls_loss': 4.5983734,
+     'giou_loss': 5.5826902,
+     'learning_rate': 1e-04,
+     'training_loss': 12.876991}
+I0819 22:37:23.796430 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-166320.
+I0819 22:57:14.173829 139858339583808 controller.py:503] train | step:  168168 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.6851947,
+     'cls_loss': 4.583803,
+     'giou_loss': 5.573835,
+     'learning_rate': 1e-04,
+     'training_loss': 12.842839}
+I0819 22:57:25.515259 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-168168.
+I0819 23:17:17.465232 139858339583808 controller.py:503] train | step:  170016 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.6745028,
+     'cls_loss': 4.574383,
+     'giou_loss': 5.563159,
+     'learning_rate': 1e-04,
+     'training_loss': 12.812054}
+I0819 23:17:29.553530 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-170016.
+I0819 23:37:23.384506 139858339583808 controller.py:503] train | step:  171864 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.6811757,
+     'cls_loss': 4.569663,
+     'giou_loss': 5.5494375,
+     'learning_rate': 1e-04,
+     'training_loss': 12.80028}
+I0819 23:37:35.053738 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-171864.
+I0819 23:57:27.456111 139858339583808 controller.py:503] train | step:  173712 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.6677413,
+     'cls_loss': 4.536928,
+     'giou_loss': 5.5533266,
+     'learning_rate': 1e-04,
+     'training_loss': 12.7579975}
+I0819 23:57:39.938399 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-173712.
+I0820 00:17:31.970706 139858339583808 controller.py:503] train | step:  175560 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.657034,
+     'cls_loss': 4.5364223,
+     'giou_loss': 5.538634,
+     'learning_rate': 1e-04,
+     'training_loss': 12.732105}
+I0820 00:17:44.159915 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-175560.
+I0820 00:37:38.411637 139858339583808 controller.py:503] train | step:  177408 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.6559172,
+     'cls_loss': 4.5205626,
+     'giou_loss': 5.5248766,
+     'learning_rate': 1e-04,
+     'training_loss': 12.701358}
+I0820 00:37:50.625211 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-177408.
+I0820 00:57:42.518764 139858339583808 controller.py:503] train | step:  179256 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.6408978,
+     'cls_loss': 4.4958243,
+     'giou_loss': 5.5257764,
+     'learning_rate': 1e-04,
+     'training_loss': 12.662508}
+I0820 00:57:54.241498 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-179256.
+I0820 01:17:45.649271 139858339583808 controller.py:503] train | step:  181104 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.642643,
+     'cls_loss': 4.491702,
+     'giou_loss': 5.5089765,
+     'learning_rate': 1e-04,
+     'training_loss': 12.643322}
+I0820 01:17:57.458554 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-181104.
+I0820 01:37:43.591434 139858339583808 controller.py:503] train | step:  182952 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.6305573,
+     'cls_loss': 4.465154,
+     'giou_loss': 5.4986267,
+     'learning_rate': 1e-04,
+     'training_loss': 12.594332}
+I0820 01:37:55.663484 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-182952.
+I0820 01:57:46.563181 139858339583808 controller.py:503] train | step:  184800 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.6290398,
+     'cls_loss': 4.49054,
+     'giou_loss': 5.5043845,
+     'learning_rate': 1e-04,
+     'training_loss': 12.6239605}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-125664.
+train | step:  127512 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.8948634,
+     'cls_loss': 5.0315084,
+     'giou_loss': 5.832774,
+     'learning_rate': 1e-04,
+     'training_loss': 13.75915}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-127512.
+train | step:  129360 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.8881202,
+     'cls_loss': 5.016535,
+     'giou_loss': 5.8168163,
+     'learning_rate': 1e-04,
+     'training_loss': 13.721478}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-129360.
+train | step:  131208 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.8683975,
+     'cls_loss': 4.9912443,
+     'giou_loss': 5.8077793,
+     'learning_rate': 1e-04,
+     'training_loss': 13.66742}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-131208.
+train | step:  133056 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.8673372,
+     'cls_loss': 4.9732265,
+     'giou_loss': 5.798208,
+     'learning_rate': 1e-04,
+     'training_loss': 13.638787}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-133056.
+train | step:  134904 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.8495755,
+     'cls_loss': 4.9277773,
+     'giou_loss': 5.780089,
+     'learning_rate': 1e-04,
+     'training_loss': 13.55744}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-134904.
+train | step:  136752 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.8385792,
+     'cls_loss': 4.9085298,
+     'giou_loss': 5.7555876,
+     'learning_rate': 1e-04,
+     'training_loss': 13.502691}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-136752.
+train | step:  138600 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.8314989,
+     'cls_loss': 4.8932796,
+     'giou_loss': 5.7551947,
+     'learning_rate': 1e-04,
+     'training_loss': 13.479964}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-138600.
+train | step:  140448 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.8197412,
+     'cls_loss': 4.874806,
+     'giou_loss': 5.736131,
+     'learning_rate': 1e-04,
+     'training_loss': 13.430682}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-140448.
+train | step:  142296 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.8108068,
+     'cls_loss': 4.8642254,
+     'giou_loss': 5.7383146,
+     'learning_rate': 1e-04,
+     'training_loss': 13.413346}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-142296.
+train | step:  144144 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.801486,
+     'cls_loss': 4.8396535,
+     'giou_loss': 5.7072363,
+     'learning_rate': 1e-04,
+     'training_loss': 13.348385}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-144144.
+train | step:  145992 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.7851837,
+     'cls_loss': 4.8087234,
+     'giou_loss': 5.7071347,
+     'learning_rate': 1e-04,
+     'training_loss': 13.301032}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-145992.
+train | step:  147840 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.7860985,
+     'cls_loss': 4.788398,
+     'giou_loss': 5.694649,
+     'learning_rate': 1e-04,
+     'training_loss': 13.269149}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-147840.
+train | step:  149688 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.7703304,
+     'cls_loss': 4.7659464,
+     'giou_loss': 5.675829,
+     'learning_rate': 1e-04,
+     'training_loss': 13.2121}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-149688.
+train | step:  151536 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.764565,
+     'cls_loss': 4.7638097,
+     'giou_loss': 5.671681,
+     'learning_rate': 1e-04,
+     'training_loss': 13.2000475}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-151536.
+train | step:  153384 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.7539206,
+     'cls_loss': 4.741675,
+     'giou_loss': 5.662973,
+     'learning_rate': 1e-04,
+     'training_loss': 13.158552}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-153384.
+train | step:  155232 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.7448661,
+     'cls_loss': 4.7158823,
+     'giou_loss': 5.646481,
+     'learning_rate': 1e-04,
+     'training_loss': 13.10722}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-155232.
+train | step:  157080 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.7392147,
+     'cls_loss': 4.718418,
+     'giou_loss': 5.631827,
+     'learning_rate': 1e-04,
+     'training_loss': 13.089451}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-157080.
+train | step:  158928 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.7272396,
+     'cls_loss': 4.6659036,
+     'giou_loss': 5.6170444,
+     'learning_rate': 1e-04,
+     'training_loss': 13.010173}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-158928.
+train | step:  160776 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.7222896,
+     'cls_loss': 4.676805,
+     'giou_loss': 5.6117244,
+     'learning_rate': 1e-04,
+     'training_loss': 13.010822}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-160776.
+train | step:  162624 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.7171392,
+     'cls_loss': 4.6432753,
+     'giou_loss': 5.604875,
+     'learning_rate': 1e-04,
+     'training_loss': 12.965281}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-162624.
+train | step:  164472 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.7090242,
+     'cls_loss': 4.6378508,
+     'giou_loss': 5.6115665,
+     'learning_rate': 1e-04,
+     'training_loss': 12.958446}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-164472.
+train | step:  166320 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.6959164,
+     'cls_loss': 4.5983734,
+     'giou_loss': 5.5826902,
+     'learning_rate': 1e-04,
+     'training_loss': 12.876991}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-166320.
+train | step:  168168 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.6851947,
+     'cls_loss': 4.583803,
+     'giou_loss': 5.573835,
+     'learning_rate': 1e-04,
+     'training_loss': 12.842839}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-168168.
+train | step:  170016 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.6745028,
+     'cls_loss': 4.574383,
+     'giou_loss': 5.563159,
+     'learning_rate': 1e-04,
+     'training_loss': 12.812054}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-170016.
+train | step:  171864 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.6811757,
+     'cls_loss': 4.569663,
+     'giou_loss': 5.5494375,
+     'learning_rate': 1e-04,
+     'training_loss': 12.80028}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-171864.
+train | step:  173712 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.6677413,
+     'cls_loss': 4.536928,
+     'giou_loss': 5.5533266,
+     'learning_rate': 1e-04,
+     'training_loss': 12.7579975}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-173712.
+train | step:  175560 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.657034,
+     'cls_loss': 4.5364223,
+     'giou_loss': 5.538634,
+     'learning_rate': 1e-04,
+     'training_loss': 12.732105}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-175560.
+train | step:  177408 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.6559172,
+     'cls_loss': 4.5205626,
+     'giou_loss': 5.5248766,
+     'learning_rate': 1e-04,
+     'training_loss': 12.701358}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-177408.
+train | step:  179256 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.6408978,
+     'cls_loss': 4.4958243,
+     'giou_loss': 5.5257764,
+     'learning_rate': 1e-04,
+     'training_loss': 12.662508}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-179256.
+train | step:  181104 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.642643,
+     'cls_loss': 4.491702,
+     'giou_loss': 5.5089765,
+     'learning_rate': 1e-04,
+     'training_loss': 12.643322}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-181104.
+train | step:  182952 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.6305573,
+     'cls_loss': 4.465154,
+     'giou_loss': 5.4986267,
+     'learning_rate': 1e-04,
+     'training_loss': 12.594332}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-182952.
+I0820 01:57:58.190595 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-184800.
+I0820 02:17:41.500491 139858339583808 controller.py:503] train | step:  186648 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.6132095,
+     'cls_loss': 4.435272,
+     'giou_loss': 5.469665,
+     'learning_rate': 1e-04,
+     'training_loss': 12.518124}
+I0820 02:17:53.525326 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-186648.
+I0820 02:37:40.478937 139858339583808 controller.py:503] train | step:  188496 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.614694,
+     'cls_loss': 4.4337945,
+     'giou_loss': 5.481447,
+     'learning_rate': 1e-04,
+     'training_loss': 12.529935}
+I0820 02:37:52.347595 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-188496.
+I0820 02:57:38.865596 139858339583808 controller.py:503] train | step:  190344 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.5974374,
+     'cls_loss': 4.401978,
+     'giou_loss': 5.462094,
+     'learning_rate': 1e-04,
+     'training_loss': 12.461523}
+I0820 02:57:50.576147 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-190344.
+I0820 03:17:34.984169 139858339583808 controller.py:503] train | step:  192192 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.599885,
+     'cls_loss': 4.426359,
+     'giou_loss': 5.469837,
+     'learning_rate': 1e-04,
+     'training_loss': 12.496086}
+I0820 03:17:47.870587 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-192192.
+I0820 03:37:26.717697 139858339583808 controller.py:503] train | step:  194040 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.5880795,
+     'cls_loss': 4.373292,
+     'giou_loss': 5.4363594,
+     'learning_rate': 1e-04,
+     'training_loss': 12.397712}
+I0820 03:37:38.620591 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-194040.
+I0820 03:57:22.721262 139858339583808 controller.py:503] train | step:  195888 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.5865915,
+     'cls_loss': 4.390681,
+     'giou_loss': 5.449103,
+     'learning_rate': 1e-04,
+     'training_loss': 12.426381}
+I0820 03:57:34.939872 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-195888.
+I0820 04:17:16.586257 139858339583808 controller.py:503] train | step:  197736 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.5741205,
+     'cls_loss': 4.3433566,
+     'giou_loss': 5.430789,
+     'learning_rate': 1e-04,
+     'training_loss': 12.348261}
+I0820 04:17:28.691184 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-197736.
+I0820 04:37:05.981076 139858339583808 controller.py:503] train | step:  199584 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.5723405,
+     'cls_loss': 4.351914,
+     'giou_loss': 5.423441,
+     'learning_rate': 1e-04,
+     'training_loss': 12.347727}
+I0820 04:37:17.915467 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-199584.
+I0820 04:56:59.056330 139858339583808 controller.py:503] train | step:  201432 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.56914,
+     'cls_loss': 4.334171,
+     'giou_loss': 5.4206104,
+     'learning_rate': 1e-04,
+     'training_loss': 12.3239155}
+I0820 04:57:11.439085 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-201432.
+I0820 05:16:48.677798 139858339583808 controller.py:503] train | step:  203280 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.5564923,
+     'cls_loss': 4.3154507,
+     'giou_loss': 5.41706,
+     'learning_rate': 1e-04,
+     'training_loss': 12.288993}
+I0820 05:17:00.718719 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-203280.
+I0820 05:36:44.028376 139858339583808 controller.py:503] train | step:  205128 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.5612407,
+     'cls_loss': 4.3297434,
+     'giou_loss': 5.4146333,
+     'learning_rate': 1e-04,
+     'training_loss': 12.305605}
+I0820 05:36:55.287952 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-205128.
+I0820 05:56:32.531404 139858339583808 controller.py:503] train | step:  206976 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.5493016,
+     'cls_loss': 4.284792,
+     'giou_loss': 5.3805957,
+     'learning_rate': 1e-04,
+     'training_loss': 12.214688}
+I0820 05:56:44.249998 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-206976.
+I0820 06:16:17.529612 139858339583808 controller.py:503] train | step:  208824 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.5397143,
+     'cls_loss': 4.2761784,
+     'giou_loss': 5.3890243,
+     'learning_rate': 1e-04,
+     'training_loss': 12.204905}
+I0820 06:16:29.697157 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-208824.
+I0820 06:36:02.712365 139858339583808 controller.py:503] train | step:  210672 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.542312,
+     'cls_loss': 4.273863,
+     'giou_loss': 5.3854036,
+     'learning_rate': 1e-04,
+     'training_loss': 12.201574}
+I0820 06:36:14.298839 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-210672.
+I0820 06:55:50.620341 139858339583808 controller.py:503] train | step:  212520 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.5358222,
+     'cls_loss': 4.257863,
+     'giou_loss': 5.373301,
+     'learning_rate': 1e-04,
+     'training_loss': 12.166985}
+I0820 06:56:11.212251 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-212520.
+I0820 07:15:46.404962 139858339583808 controller.py:503] train | step:  214368 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.5242066,
+     'cls_loss': 4.226554,
+     'giou_loss': 5.3621006,
+     'learning_rate': 1e-04,
+     'training_loss': 12.112871}
+I0820 07:15:58.460279 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-214368.
+I0820 07:35:32.671410 139858339583808 controller.py:503] train | step:  216216 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.516755,
+     'cls_loss': 4.220605,
+     'giou_loss': 5.3538713,
+     'learning_rate': 1e-04,
+     'training_loss': 12.091241}
+I0820 07:35:44.398931 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-216216.
+I0820 07:55:21.554626 139858339583808 controller.py:503] train | step:  218064 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.5136387,
+     'cls_loss': 4.223495,
+     'giou_loss': 5.3583145,
+     'learning_rate': 1e-04,
+     'training_loss': 12.095452}
+I0820 07:55:33.453507 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-218064.
+I0820 08:15:09.995877 139858339583808 controller.py:503] train | step:  219912 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.5138369,
+     'cls_loss': 4.2140055,
+     'giou_loss': 5.343478,
+     'learning_rate': 1e-04,
+     'training_loss': 12.071326}
+I0820 08:15:22.322843 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-219912.
+I0820 08:34:56.913301 139858339583808 controller.py:503] train | step:  221760 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.505851,
+     'cls_loss': 4.205539,
+     'giou_loss': 5.341769,
+     'learning_rate': 1e-04,
+     'training_loss': 12.053166}
+I0820 08:35:09.439122 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-221760.
+I0820 08:54:44.059764 139858339583808 controller.py:503] train | step:  223608 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.49904,
+     'cls_loss': 4.1909685,
+     'giou_loss': 5.324668,
+     'learning_rate': 1e-04,
+     'training_loss': 12.014684}
+I0820 08:54:56.165482 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-223608.
+I0820 09:14:30.852736 139858339583808 controller.py:503] train | step:  225456 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.5037575,
+     'cls_loss': 4.1921687,
+     'giou_loss': 5.3367987,
+     'learning_rate': 1e-04,
+     'training_loss': 12.032727}
+I0820 09:14:44.784982 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-225456.
+I0820 09:34:15.318240 139858339583808 controller.py:503] train | step:  227304 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.492691,
+     'cls_loss': 4.1664653,
+     'giou_loss': 5.3191385,
+     'learning_rate': 1e-04,
+     'training_loss': 11.978301}
+I0820 09:34:26.846116 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-227304.
+I0820 09:53:59.722374 139858339583808 controller.py:503] train | step:  229152 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4853787,
+     'cls_loss': 4.169693,
+     'giou_loss': 5.317028,
+     'learning_rate': 1e-04,
+     'training_loss': 11.972105}
+I0820 09:54:11.524013 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-229152.
+I0820 10:13:39.761644 139858339583808 controller.py:503] train | step:  231000 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.472422,
+     'cls_loss': 4.1197233,
+     'giou_loss': 5.293657,
+     'learning_rate': 1e-04,
+     'training_loss': 11.885801}
+I0820 10:13:51.783174 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-231000.
+I0820 10:33:22.639858 139858339583808 controller.py:503] train | step:  232848 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4820347,
+     'cls_loss': 4.1370616,
+     'giou_loss': 5.3088,
+     'learning_rate': 1e-04,
+     'training_loss': 11.927909}
+I0820 10:33:35.611673 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-232848.
+I0820 10:53:03.247096 139858339583808 controller.py:503] train | step:  234696 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4670525,
+     'cls_loss': 4.1142755,
+     'giou_loss': 5.292586,
+     'learning_rate': 1e-04,
+     'training_loss': 11.873903}
+I0820 10:53:15.406934 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-234696.
+I0820 11:12:42.240375 139858339583808 controller.py:503] train | step:  236544 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4684107,
+     'cls_loss': 4.1106343,
+     'giou_loss': 5.2842865,
+     'learning_rate': 1e-04,
+     'training_loss': 11.863336}
+I0820 11:12:54.093418 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-236544.
+I0820 11:32:25.567326 139858339583808 controller.py:503] train | step:  238392 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4563699,
+     'cls_loss': 4.0874968,
+     'giou_loss': 5.278238,
+     'learning_rate': 1e-04,
+     'training_loss': 11.822097}
+I0820 11:32:37.234817 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-238392.
+I0820 11:52:06.078234 139858339583808 controller.py:503] train | step:  240240 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4580595,
+     'cls_loss': 4.0941176,
+     'giou_loss': 5.2795663,
+     'learning_rate': 1e-04,
+     'training_loss': 11.831728}
+I0820 11:52:17.762555 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-240240.
+I0820 12:11:44.552351 139858339583808 controller.py:503] train | step:  242088 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4516606,
+     'cls_loss': 4.087279,
+     'giou_loss': 5.2736473,
+     'learning_rate': 1e-04,
+     'training_loss': 11.812559}
+train | step:  184800 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.6290398,
+     'cls_loss': 4.49054,
+     'giou_loss': 5.5043845,
+     'learning_rate': 1e-04,
+     'training_loss': 12.6239605}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-184800.
+train | step:  186648 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.6132095,
+     'cls_loss': 4.435272,
+     'giou_loss': 5.469665,
+     'learning_rate': 1e-04,
+     'training_loss': 12.518124}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-186648.
+train | step:  188496 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.614694,
+     'cls_loss': 4.4337945,
+     'giou_loss': 5.481447,
+     'learning_rate': 1e-04,
+     'training_loss': 12.529935}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-188496.
+train | step:  190344 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.5974374,
+     'cls_loss': 4.401978,
+     'giou_loss': 5.462094,
+     'learning_rate': 1e-04,
+     'training_loss': 12.461523}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-190344.
+train | step:  192192 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.599885,
+     'cls_loss': 4.426359,
+     'giou_loss': 5.469837,
+     'learning_rate': 1e-04,
+     'training_loss': 12.496086}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-192192.
+train | step:  194040 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.5880795,
+     'cls_loss': 4.373292,
+     'giou_loss': 5.4363594,
+     'learning_rate': 1e-04,
+     'training_loss': 12.397712}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-194040.
+train | step:  195888 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.5865915,
+     'cls_loss': 4.390681,
+     'giou_loss': 5.449103,
+     'learning_rate': 1e-04,
+     'training_loss': 12.426381}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-195888.
+train | step:  197736 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.5741205,
+     'cls_loss': 4.3433566,
+     'giou_loss': 5.430789,
+     'learning_rate': 1e-04,
+     'training_loss': 12.348261}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-197736.
+train | step:  199584 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.5723405,
+     'cls_loss': 4.351914,
+     'giou_loss': 5.423441,
+     'learning_rate': 1e-04,
+     'training_loss': 12.347727}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-199584.
+train | step:  201432 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.56914,
+     'cls_loss': 4.334171,
+     'giou_loss': 5.4206104,
+     'learning_rate': 1e-04,
+     'training_loss': 12.3239155}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-201432.
+train | step:  203280 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.5564923,
+     'cls_loss': 4.3154507,
+     'giou_loss': 5.41706,
+     'learning_rate': 1e-04,
+     'training_loss': 12.288993}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-203280.
+train | step:  205128 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.5612407,
+     'cls_loss': 4.3297434,
+     'giou_loss': 5.4146333,
+     'learning_rate': 1e-04,
+     'training_loss': 12.305605}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-205128.
+train | step:  206976 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.5493016,
+     'cls_loss': 4.284792,
+     'giou_loss': 5.3805957,
+     'learning_rate': 1e-04,
+     'training_loss': 12.214688}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-206976.
+train | step:  208824 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.5397143,
+     'cls_loss': 4.2761784,
+     'giou_loss': 5.3890243,
+     'learning_rate': 1e-04,
+     'training_loss': 12.204905}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-208824.
+train | step:  210672 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.542312,
+     'cls_loss': 4.273863,
+     'giou_loss': 5.3854036,
+     'learning_rate': 1e-04,
+     'training_loss': 12.201574}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-210672.
+train | step:  212520 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.5358222,
+     'cls_loss': 4.257863,
+     'giou_loss': 5.373301,
+     'learning_rate': 1e-04,
+     'training_loss': 12.166985}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-212520.
+train | step:  214368 | steps/sec:    1.5 | output: 
+    {'box_loss': 2.5242066,
+     'cls_loss': 4.226554,
+     'giou_loss': 5.3621006,
+     'learning_rate': 1e-04,
+     'training_loss': 12.112871}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-214368.
+train | step:  216216 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.516755,
+     'cls_loss': 4.220605,
+     'giou_loss': 5.3538713,
+     'learning_rate': 1e-04,
+     'training_loss': 12.091241}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-216216.
+train | step:  218064 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.5136387,
+     'cls_loss': 4.223495,
+     'giou_loss': 5.3583145,
+     'learning_rate': 1e-04,
+     'training_loss': 12.095452}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-218064.
+train | step:  219912 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.5138369,
+     'cls_loss': 4.2140055,
+     'giou_loss': 5.343478,
+     'learning_rate': 1e-04,
+     'training_loss': 12.071326}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-219912.
+train | step:  221760 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.505851,
+     'cls_loss': 4.205539,
+     'giou_loss': 5.341769,
+     'learning_rate': 1e-04,
+     'training_loss': 12.053166}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-221760.
+train | step:  223608 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.49904,
+     'cls_loss': 4.1909685,
+     'giou_loss': 5.324668,
+     'learning_rate': 1e-04,
+     'training_loss': 12.014684}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-223608.
+train | step:  225456 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.5037575,
+     'cls_loss': 4.1921687,
+     'giou_loss': 5.3367987,
+     'learning_rate': 1e-04,
+     'training_loss': 12.032727}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-225456.
+train | step:  227304 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.492691,
+     'cls_loss': 4.1664653,
+     'giou_loss': 5.3191385,
+     'learning_rate': 1e-04,
+     'training_loss': 11.978301}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-227304.
+train | step:  229152 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4853787,
+     'cls_loss': 4.169693,
+     'giou_loss': 5.317028,
+     'learning_rate': 1e-04,
+     'training_loss': 11.972105}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-229152.
+train | step:  231000 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.472422,
+     'cls_loss': 4.1197233,
+     'giou_loss': 5.293657,
+     'learning_rate': 1e-04,
+     'training_loss': 11.885801}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-231000.
+train | step:  232848 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4820347,
+     'cls_loss': 4.1370616,
+     'giou_loss': 5.3088,
+     'learning_rate': 1e-04,
+     'training_loss': 11.927909}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-232848.
+train | step:  234696 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4670525,
+     'cls_loss': 4.1142755,
+     'giou_loss': 5.292586,
+     'learning_rate': 1e-04,
+     'training_loss': 11.873903}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-234696.
+train | step:  236544 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4684107,
+     'cls_loss': 4.1106343,
+     'giou_loss': 5.2842865,
+     'learning_rate': 1e-04,
+     'training_loss': 11.863336}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-236544.
+train | step:  238392 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4563699,
+     'cls_loss': 4.0874968,
+     'giou_loss': 5.278238,
+     'learning_rate': 1e-04,
+     'training_loss': 11.822097}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-238392.
+train | step:  240240 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4580595,
+     'cls_loss': 4.0941176,
+     'giou_loss': 5.2795663,
+     'learning_rate': 1e-04,
+     'training_loss': 11.831728}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-240240.
+I0820 12:11:56.809117 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-242088.
+I0820 12:31:22.647561 139858339583808 controller.py:503] train | step:  243936 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.448962,
+     'cls_loss': 4.075438,
+     'giou_loss': 5.2561345,
+     'learning_rate': 1e-04,
+     'training_loss': 11.780523}
+I0820 12:31:34.507134 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-243936.
+I0820 12:51:00.645564 139858339583808 controller.py:503] train | step:  245784 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4423995,
+     'cls_loss': 4.0618463,
+     'giou_loss': 5.258352,
+     'learning_rate': 1e-04,
+     'training_loss': 11.7625885}
+I0820 12:51:12.908545 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-245784.
+I0820 13:10:37.323571 139858339583808 controller.py:503] train | step:  247632 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4435465,
+     'cls_loss': 4.065221,
+     'giou_loss': 5.2523766,
+     'learning_rate': 1e-04,
+     'training_loss': 11.761144}
+I0820 13:10:49.674507 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-247632.
+I0820 13:30:10.190121 139858339583808 controller.py:503] train | step:  249480 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4381878,
+     'cls_loss': 4.045739,
+     'giou_loss': 5.248018,
+     'learning_rate': 1e-04,
+     'training_loss': 11.731947}
+I0820 13:30:22.355365 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-249480.
+I0820 13:49:43.521333 139858339583808 controller.py:503] train | step:  251328 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4291313,
+     'cls_loss': 4.0441937,
+     'giou_loss': 5.23695,
+     'learning_rate': 1e-04,
+     'training_loss': 11.710276}
+I0820 13:49:55.669656 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-251328.
+I0820 14:09:14.276359 139858339583808 controller.py:503] train | step:  253176 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4296627,
+     'cls_loss': 4.0241942,
+     'giou_loss': 5.2327933,
+     'learning_rate': 1e-04,
+     'training_loss': 11.686666}
+I0820 14:09:26.426545 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-253176.
+I0820 14:28:46.537580 139858339583808 controller.py:503] train | step:  255024 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4215207,
+     'cls_loss': 4.0220337,
+     'giou_loss': 5.222463,
+     'learning_rate': 1e-04,
+     'training_loss': 11.666017}
+I0820 14:28:57.934395 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-255024.
+I0820 14:48:17.772401 139858339583808 controller.py:503] train | step:  256872 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4217453,
+     'cls_loss': 4.006175,
+     'giou_loss': 5.235207,
+     'learning_rate': 1e-04,
+     'training_loss': 11.663119}
+I0820 14:48:29.858977 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-256872.
+I0820 15:07:50.666674 139858339583808 controller.py:503] train | step:  258720 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.415454,
+     'cls_loss': 3.9862669,
+     'giou_loss': 5.2047153,
+     'learning_rate': 1e-04,
+     'training_loss': 11.606439}
+I0820 15:08:02.620172 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-258720.
+I0820 15:27:23.594393 139858339583808 controller.py:503] train | step:  260568 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4109676,
+     'cls_loss': 4.000959,
+     'giou_loss': 5.2284493,
+     'learning_rate': 1e-04,
+     'training_loss': 11.640368}
+I0820 15:27:35.886735 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-260568.
+I0820 15:46:52.821213 139858339583808 controller.py:503] train | step:  262416 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4076362,
+     'cls_loss': 3.9749246,
+     'giou_loss': 5.1931405,
+     'learning_rate': 1e-04,
+     'training_loss': 11.575689}
+I0820 15:47:04.971501 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-262416.
+I0820 16:06:24.421473 139858339583808 controller.py:503] train | step:  264264 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.405616,
+     'cls_loss': 3.9812918,
+     'giou_loss': 5.2095804,
+     'learning_rate': 1e-04,
+     'training_loss': 11.596473}
+I0820 16:06:36.641685 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-264264.
+I0820 16:25:58.780980 139858339583808 controller.py:503] train | step:  266112 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3990107,
+     'cls_loss': 3.9710052,
+     'giou_loss': 5.200119,
+     'learning_rate': 1e-04,
+     'training_loss': 11.570137}
+I0820 16:26:11.764736 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-266112.
+I0820 16:45:31.448994 139858339583808 controller.py:503] train | step:  267960 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.396612,
+     'cls_loss': 3.933632,
+     'giou_loss': 5.182777,
+     'learning_rate': 1e-04,
+     'training_loss': 11.5130415}
+I0820 16:45:43.828878 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-267960.
+I0820 17:05:04.596138 139858339583808 controller.py:503] train | step:  269808 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3920918,
+     'cls_loss': 3.9435596,
+     'giou_loss': 5.1882668,
+     'learning_rate': 1e-04,
+     'training_loss': 11.523917}
+I0820 17:05:17.434100 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-269808.
+I0820 17:24:42.048261 139858339583808 controller.py:503] train | step:  271656 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3793287,
+     'cls_loss': 3.932975,
+     'giou_loss': 5.176358,
+     'learning_rate': 1e-04,
+     'training_loss': 11.488668}
+I0820 17:24:53.946024 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-271656.
+I0820 17:44:14.549467 139858339583808 controller.py:503] train | step:  273504 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3830826,
+     'cls_loss': 3.9227684,
+     'giou_loss': 5.167626,
+     'learning_rate': 1e-04,
+     'training_loss': 11.473469}
+I0820 17:44:26.486400 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-273504.
+I0820 18:03:42.706650 139858339583808 controller.py:503] train | step:  275352 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3745801,
+     'cls_loss': 3.9027734,
+     'giou_loss': 5.167418,
+     'learning_rate': 1e-04,
+     'training_loss': 11.444759}
+I0820 18:03:55.187204 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-275352.
+I0820 18:23:09.775383 139858339583808 controller.py:503] train | step:  277200 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3714523,
+     'cls_loss': 3.9149191,
+     'giou_loss': 5.1601477,
+     'learning_rate': 1e-04,
+     'training_loss': 11.446511}
+I0820 18:23:21.882017 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-277200.
+I0820 18:42:42.134051 139858339583808 controller.py:503] train | step:  279048 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3691902,
+     'cls_loss': 3.8989475,
+     'giou_loss': 5.1554036,
+     'learning_rate': 1e-04,
+     'training_loss': 11.423534}
+I0820 18:42:55.423963 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-279048.
+I0820 19:02:15.301980 139858339583808 controller.py:503] train | step:  280896 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3696458,
+     'cls_loss': 3.9081075,
+     'giou_loss': 5.1623282,
+     'learning_rate': 1e-04,
+     'training_loss': 11.440071}
+I0820 19:02:27.390100 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-280896.
+I0820 19:21:43.885855 139858339583808 controller.py:503] train | step:  282744 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3595605,
+     'cls_loss': 3.8791606,
+     'giou_loss': 5.14514,
+     'learning_rate': 1e-04,
+     'training_loss': 11.383873}
+I0820 19:21:55.854395 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-282744.
+I0820 19:41:11.856225 139858339583808 controller.py:503] train | step:  284592 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3638182,
+     'cls_loss': 3.9014833,
+     'giou_loss': 5.1428623,
+     'learning_rate': 1e-04,
+     'training_loss': 11.408165}
+I0820 19:41:24.324450 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-284592.
+I0820 20:00:41.527108 139858339583808 controller.py:503] train | step:  286440 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3557017,
+     'cls_loss': 3.8591292,
+     'giou_loss': 5.1348915,
+     'learning_rate': 1e-04,
+     'training_loss': 11.349725}
+I0820 20:00:55.420706 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-286440.
+I0820 20:20:11.396113 139858339583808 controller.py:503] train | step:  288288 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3511608,
+     'cls_loss': 3.8570848,
+     'giou_loss': 5.139469,
+     'learning_rate': 1e-04,
+     'training_loss': 11.347726}
+I0820 20:20:23.351022 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-288288.
+I0820 20:39:41.741745 139858339583808 controller.py:503] train | step:  290136 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3503888,
+     'cls_loss': 3.8526416,
+     'giou_loss': 5.126902,
+     'learning_rate': 1e-04,
+     'training_loss': 11.329932}
+I0820 20:39:53.604180 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-290136.
+I0820 20:59:08.196317 139858339583808 controller.py:503] train | step:  291984 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3455548,
+     'cls_loss': 3.8392277,
+     'giou_loss': 5.127505,
+     'learning_rate': 1e-04,
+     'training_loss': 11.312289}
+I0820 20:59:20.256566 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-291984.
+I0820 21:18:34.844259 139858339583808 controller.py:503] train | step:  293832 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.341754,
+     'cls_loss': 3.8282838,
+     'giou_loss': 5.0995135,
+     'learning_rate': 1e-04,
+     'training_loss': 11.269545}
+I0820 21:18:46.908235 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-293832.
+I0820 21:38:00.874737 139858339583808 controller.py:503] train | step:  295680 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3351517,
+     'cls_loss': 3.81561,
+     'giou_loss': 5.112931,
+     'learning_rate': 1e-04,
+     'training_loss': 11.263696}
+I0820 21:38:12.509361 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-295680.
+I0820 21:57:20.374027 139858339583808 controller.py:503] train | step:  297528 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3323188,
+     'cls_loss': 3.8082724,
+     'giou_loss': 5.1042805,
+     'learning_rate': 1e-04,
+     'training_loss': 11.24486}
+I0820 21:57:32.839002 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-297528.
+I0820 22:16:47.229497 139858339583808 controller.py:503] train | step:  299376 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3357918,
+     'cls_loss': 3.8441424,
+     'giou_loss': 5.1162424,
+     'learning_rate': 1e-04,
+     'training_loss': 11.296163}
+train | step:  242088 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4516606,
+     'cls_loss': 4.087279,
+     'giou_loss': 5.2736473,
+     'learning_rate': 1e-04,
+     'training_loss': 11.812559}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-242088.
+train | step:  243936 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.448962,
+     'cls_loss': 4.075438,
+     'giou_loss': 5.2561345,
+     'learning_rate': 1e-04,
+     'training_loss': 11.780523}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-243936.
+train | step:  245784 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4423995,
+     'cls_loss': 4.0618463,
+     'giou_loss': 5.258352,
+     'learning_rate': 1e-04,
+     'training_loss': 11.7625885}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-245784.
+train | step:  247632 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4435465,
+     'cls_loss': 4.065221,
+     'giou_loss': 5.2523766,
+     'learning_rate': 1e-04,
+     'training_loss': 11.761144}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-247632.
+train | step:  249480 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4381878,
+     'cls_loss': 4.045739,
+     'giou_loss': 5.248018,
+     'learning_rate': 1e-04,
+     'training_loss': 11.731947}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-249480.
+train | step:  251328 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4291313,
+     'cls_loss': 4.0441937,
+     'giou_loss': 5.23695,
+     'learning_rate': 1e-04,
+     'training_loss': 11.710276}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-251328.
+train | step:  253176 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4296627,
+     'cls_loss': 4.0241942,
+     'giou_loss': 5.2327933,
+     'learning_rate': 1e-04,
+     'training_loss': 11.686666}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-253176.
+train | step:  255024 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4215207,
+     'cls_loss': 4.0220337,
+     'giou_loss': 5.222463,
+     'learning_rate': 1e-04,
+     'training_loss': 11.666017}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-255024.
+train | step:  256872 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4217453,
+     'cls_loss': 4.006175,
+     'giou_loss': 5.235207,
+     'learning_rate': 1e-04,
+     'training_loss': 11.663119}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-256872.
+train | step:  258720 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.415454,
+     'cls_loss': 3.9862669,
+     'giou_loss': 5.2047153,
+     'learning_rate': 1e-04,
+     'training_loss': 11.606439}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-258720.
+train | step:  260568 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4109676,
+     'cls_loss': 4.000959,
+     'giou_loss': 5.2284493,
+     'learning_rate': 1e-04,
+     'training_loss': 11.640368}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-260568.
+train | step:  262416 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.4076362,
+     'cls_loss': 3.9749246,
+     'giou_loss': 5.1931405,
+     'learning_rate': 1e-04,
+     'training_loss': 11.575689}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-262416.
+train | step:  264264 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.405616,
+     'cls_loss': 3.9812918,
+     'giou_loss': 5.2095804,
+     'learning_rate': 1e-04,
+     'training_loss': 11.596473}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-264264.
+train | step:  266112 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3990107,
+     'cls_loss': 3.9710052,
+     'giou_loss': 5.200119,
+     'learning_rate': 1e-04,
+     'training_loss': 11.570137}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-266112.
+train | step:  267960 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.396612,
+     'cls_loss': 3.933632,
+     'giou_loss': 5.182777,
+     'learning_rate': 1e-04,
+     'training_loss': 11.5130415}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-267960.
+train | step:  269808 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3920918,
+     'cls_loss': 3.9435596,
+     'giou_loss': 5.1882668,
+     'learning_rate': 1e-04,
+     'training_loss': 11.523917}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-269808.
+train | step:  271656 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3793287,
+     'cls_loss': 3.932975,
+     'giou_loss': 5.176358,
+     'learning_rate': 1e-04,
+     'training_loss': 11.488668}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-271656.
+train | step:  273504 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3830826,
+     'cls_loss': 3.9227684,
+     'giou_loss': 5.167626,
+     'learning_rate': 1e-04,
+     'training_loss': 11.473469}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-273504.
+train | step:  275352 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3745801,
+     'cls_loss': 3.9027734,
+     'giou_loss': 5.167418,
+     'learning_rate': 1e-04,
+     'training_loss': 11.444759}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-275352.
+train | step:  277200 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3714523,
+     'cls_loss': 3.9149191,
+     'giou_loss': 5.1601477,
+     'learning_rate': 1e-04,
+     'training_loss': 11.446511}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-277200.
+train | step:  279048 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3691902,
+     'cls_loss': 3.8989475,
+     'giou_loss': 5.1554036,
+     'learning_rate': 1e-04,
+     'training_loss': 11.423534}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-279048.
+train | step:  280896 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3696458,
+     'cls_loss': 3.9081075,
+     'giou_loss': 5.1623282,
+     'learning_rate': 1e-04,
+     'training_loss': 11.440071}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-280896.
+train | step:  282744 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3595605,
+     'cls_loss': 3.8791606,
+     'giou_loss': 5.14514,
+     'learning_rate': 1e-04,
+     'training_loss': 11.383873}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-282744.
+train | step:  284592 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3638182,
+     'cls_loss': 3.9014833,
+     'giou_loss': 5.1428623,
+     'learning_rate': 1e-04,
+     'training_loss': 11.408165}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-284592.
+train | step:  286440 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3557017,
+     'cls_loss': 3.8591292,
+     'giou_loss': 5.1348915,
+     'learning_rate': 1e-04,
+     'training_loss': 11.349725}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-286440.
+train | step:  288288 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3511608,
+     'cls_loss': 3.8570848,
+     'giou_loss': 5.139469,
+     'learning_rate': 1e-04,
+     'training_loss': 11.347726}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-288288.
+train | step:  290136 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3503888,
+     'cls_loss': 3.8526416,
+     'giou_loss': 5.126902,
+     'learning_rate': 1e-04,
+     'training_loss': 11.329932}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-290136.
+train | step:  291984 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3455548,
+     'cls_loss': 3.8392277,
+     'giou_loss': 5.127505,
+     'learning_rate': 1e-04,
+     'training_loss': 11.312289}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-291984.
+train | step:  293832 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.341754,
+     'cls_loss': 3.8282838,
+     'giou_loss': 5.0995135,
+     'learning_rate': 1e-04,
+     'training_loss': 11.269545}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-293832.
+train | step:  295680 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3351517,
+     'cls_loss': 3.81561,
+     'giou_loss': 5.112931,
+     'learning_rate': 1e-04,
+     'training_loss': 11.263696}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-295680.
+train | step:  297528 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3323188,
+     'cls_loss': 3.8082724,
+     'giou_loss': 5.1042805,
+     'learning_rate': 1e-04,
+     'training_loss': 11.24486}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-297528.
+I0820 22:16:59.939102 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-299376.
+I0820 22:36:16.226536 139858339583808 controller.py:503] train | step:  301224 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3278677,
+     'cls_loss': 3.806372,
+     'giou_loss': 5.1014843,
+     'learning_rate': 1e-04,
+     'training_loss': 11.235722}
+I0820 22:36:28.382104 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-301224.
+I0820 22:55:41.115974 139858339583808 controller.py:503] train | step:  303072 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3323438,
+     'cls_loss': 3.7992706,
+     'giou_loss': 5.0802274,
+     'learning_rate': 1e-04,
+     'training_loss': 11.211855}
+I0820 22:55:54.391896 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-303072.
+I0820 23:15:11.196745 139858339583808 controller.py:503] train | step:  304920 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3242888,
+     'cls_loss': 3.8021855,
+     'giou_loss': 5.094089,
+     'learning_rate': 1e-04,
+     'training_loss': 11.220586}
+I0820 23:15:23.306861 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-304920.
+I0820 23:34:35.318406 139858339583808 controller.py:503] train | step:  306768 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3110838,
+     'cls_loss': 3.7655435,
+     'giou_loss': 5.0851884,
+     'learning_rate': 1e-04,
+     'training_loss': 11.161825}
+I0820 23:34:47.211424 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-306768.
+I0820 23:53:54.788300 139858339583808 controller.py:503] train | step:  308616 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.318459,
+     'cls_loss': 3.794582,
+     'giou_loss': 5.0784802,
+     'learning_rate': 1e-04,
+     'training_loss': 11.191523}
+I0820 23:54:06.794448 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-308616.
+I0821 00:13:19.314443 139858339583808 controller.py:503] train | step:  310464 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3114052,
+     'cls_loss': 3.7753034,
+     'giou_loss': 5.0759025,
+     'learning_rate': 1e-04,
+     'training_loss': 11.162595}
+I0821 00:13:32.088582 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-310464.
+I0821 00:32:43.163441 139858339583808 controller.py:503] train | step:  312312 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3031807,
+     'cls_loss': 3.7465863,
+     'giou_loss': 5.0633054,
+     'learning_rate': 1e-04,
+     'training_loss': 11.113065}
+I0821 00:32:56.041470 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-312312.
+I0821 00:52:07.177953 139858339583808 controller.py:503] train | step:  314160 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.305922,
+     'cls_loss': 3.7579443,
+     'giou_loss': 5.073316,
+     'learning_rate': 1e-04,
+     'training_loss': 11.137178}
+I0821 00:52:18.696602 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-314160.
+I0821 01:11:29.037359 139858339583808 controller.py:503] train | step:  316008 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2969537,
+     'cls_loss': 3.7332973,
+     'giou_loss': 5.059336,
+     'learning_rate': 1e-04,
+     'training_loss': 11.089594}
+I0821 01:11:41.046332 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-316008.
+I0821 01:30:47.747180 139858339583808 controller.py:503] train | step:  317856 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2976203,
+     'cls_loss': 3.736824,
+     'giou_loss': 5.0642934,
+     'learning_rate': 1e-04,
+     'training_loss': 11.098751}
+I0821 01:30:59.318977 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-317856.
+I0821 01:50:06.951175 139858339583808 controller.py:503] train | step:  319704 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2960615,
+     'cls_loss': 3.7276797,
+     'giou_loss': 5.046832,
+     'learning_rate': 1e-04,
+     'training_loss': 11.070566}
+I0821 01:50:19.679154 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-319704.
+I0821 02:09:25.788671 139858339583808 controller.py:503] train | step:  321552 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2914762,
+     'cls_loss': 3.7151651,
+     'giou_loss': 5.0501566,
+     'learning_rate': 1e-04,
+     'training_loss': 11.056795}
+I0821 02:09:37.833319 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-321552.
+I0821 02:28:47.560378 139858339583808 controller.py:503] train | step:  323400 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.285038,
+     'cls_loss': 3.7002873,
+     'giou_loss': 5.037042,
+     'learning_rate': 1e-04,
+     'training_loss': 11.022362}
+I0821 02:28:59.107471 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-323400.
+I0821 02:48:05.785057 139858339583808 controller.py:503] train | step:  325248 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.281099,
+     'cls_loss': 3.7011847,
+     'giou_loss': 5.050659,
+     'learning_rate': 1e-04,
+     'training_loss': 11.032927}
+I0821 02:48:17.803237 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-325248.
+I0821 03:07:25.339849 139858339583808 controller.py:503] train | step:  327096 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2854588,
+     'cls_loss': 3.6984088,
+     'giou_loss': 5.0316854,
+     'learning_rate': 1e-04,
+     'training_loss': 11.015558}
+I0821 03:07:36.748099 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-327096.
+I0821 03:26:45.643352 139858339583808 controller.py:503] train | step:  328944 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.283059,
+     'cls_loss': 3.7142262,
+     'giou_loss': 5.0293884,
+     'learning_rate': 1e-04,
+     'training_loss': 11.026683}
+I0821 03:26:57.619824 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-328944.
+I0821 03:46:04.268135 139858339583808 controller.py:503] train | step:  330792 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2678795,
+     'cls_loss': 3.674943,
+     'giou_loss': 5.0265336,
+     'learning_rate': 1e-04,
+     'training_loss': 10.969361}
+I0821 03:46:15.975022 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-330792.
+I0821 04:05:25.857857 139858339583808 controller.py:503] train | step:  332640 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2739239,
+     'cls_loss': 3.6863248,
+     'giou_loss': 5.0257916,
+     'learning_rate': 1e-04,
+     'training_loss': 10.98603}
+I0821 04:05:39.047224 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-332640.
+I0821 04:24:45.459050 139858339583808 controller.py:503] train | step:  334488 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2665184,
+     'cls_loss': 3.679207,
+     'giou_loss': 5.014051,
+     'learning_rate': 1e-04,
+     'training_loss': 10.959784}
+I0821 04:24:59.368563 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-334488.
+I0821 04:44:05.212630 139858339583808 controller.py:503] train | step:  336336 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2644143,
+     'cls_loss': 3.6797843,
+     'giou_loss': 5.025018,
+     'learning_rate': 1e-04,
+     'training_loss': 10.969221}
+I0821 04:44:17.424925 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-336336.
+I0821 05:03:22.784433 139858339583808 controller.py:503] train | step:  338184 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2592335,
+     'cls_loss': 3.64606,
+     'giou_loss': 4.9969444,
+     'learning_rate': 1e-04,
+     'training_loss': 10.902226}
+I0821 05:03:34.153165 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-338184.
+I0821 05:22:36.569451 139858339583808 controller.py:503] train | step:  340032 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2546139,
+     'cls_loss': 3.6618073,
+     'giou_loss': 5.0104294,
+     'learning_rate': 1e-04,
+     'training_loss': 10.926852}
+I0821 05:22:48.014690 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-340032.
+I0821 05:41:51.802867 139858339583808 controller.py:503] train | step:  341880 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.252641,
+     'cls_loss': 3.653088,
+     'giou_loss': 5.001905,
+     'learning_rate': 1e-04,
+     'training_loss': 10.907636}
+I0821 05:42:04.886819 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-341880.
+I0821 06:01:10.828201 139858339583808 controller.py:503] train | step:  343728 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2628784,
+     'cls_loss': 3.6617692,
+     'giou_loss': 4.9947667,
+     'learning_rate': 1e-04,
+     'training_loss': 10.919431}
+I0821 06:01:23.319199 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-343728.
+I0821 06:20:26.653816 139858339583808 controller.py:503] train | step:  345576 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2599525,
+     'cls_loss': 3.6378822,
+     'giou_loss': 4.995765,
+     'learning_rate': 1e-04,
+     'training_loss': 10.893597}
+I0821 06:20:39.402056 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-345576.
+I0821 06:39:42.880883 139858339583808 controller.py:503] train | step:  347424 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2478242,
+     'cls_loss': 3.626348,
+     'giou_loss': 4.9889073,
+     'learning_rate': 1e-04,
+     'training_loss': 10.863072}
+I0821 06:39:54.813267 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-347424.
+I0821 06:58:54.766007 139858339583808 controller.py:503] train | step:  349272 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2490962,
+     'cls_loss': 3.6211953,
+     'giou_loss': 4.986798,
+     'learning_rate': 1e-04,
+     'training_loss': 10.857112}
+I0821 06:59:06.620428 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-349272.
+I0821 07:18:07.602839 139858339583808 controller.py:503] train | step:  351120 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2458284,
+     'cls_loss': 3.6236959,
+     'giou_loss': 4.9694514,
+     'learning_rate': 1e-04,
+     'training_loss': 10.838969}
+I0821 07:18:19.789781 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-351120.
+I0821 07:37:22.297905 139858339583808 controller.py:503] train | step:  352968 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2383733,
+     'cls_loss': 3.6185124,
+     'giou_loss': 4.986356,
+     'learning_rate': 1e-04,
+     'training_loss': 10.843248}
+I0821 07:37:34.902835 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-352968.
+I0821 07:56:39.496728 139858339583808 controller.py:503] train | step:  354816 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.240621,
+     'cls_loss': 3.6023383,
+     'giou_loss': 4.987216,
+     'learning_rate': 1e-04,
+     'training_loss': 10.830168}
+I0821 07:56:51.845240 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-354816.
+I0821 08:15:50.120768 139858339583808 controller.py:503] train | step:  356664 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2284417,
+     'cls_loss': 3.5810308,
+     'giou_loss': 4.9655066,
+     'learning_rate': 1e-04,
+     'training_loss': 10.774974}
+train | step:  299376 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3357918,
+     'cls_loss': 3.8441424,
+     'giou_loss': 5.1162424,
+     'learning_rate': 1e-04,
+     'training_loss': 11.296163}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-299376.
+train | step:  301224 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3278677,
+     'cls_loss': 3.806372,
+     'giou_loss': 5.1014843,
+     'learning_rate': 1e-04,
+     'training_loss': 11.235722}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-301224.
+train | step:  303072 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3323438,
+     'cls_loss': 3.7992706,
+     'giou_loss': 5.0802274,
+     'learning_rate': 1e-04,
+     'training_loss': 11.211855}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-303072.
+train | step:  304920 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3242888,
+     'cls_loss': 3.8021855,
+     'giou_loss': 5.094089,
+     'learning_rate': 1e-04,
+     'training_loss': 11.220586}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-304920.
+train | step:  306768 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3110838,
+     'cls_loss': 3.7655435,
+     'giou_loss': 5.0851884,
+     'learning_rate': 1e-04,
+     'training_loss': 11.161825}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-306768.
+train | step:  308616 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.318459,
+     'cls_loss': 3.794582,
+     'giou_loss': 5.0784802,
+     'learning_rate': 1e-04,
+     'training_loss': 11.191523}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-308616.
+train | step:  310464 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3114052,
+     'cls_loss': 3.7753034,
+     'giou_loss': 5.0759025,
+     'learning_rate': 1e-04,
+     'training_loss': 11.162595}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-310464.
+train | step:  312312 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.3031807,
+     'cls_loss': 3.7465863,
+     'giou_loss': 5.0633054,
+     'learning_rate': 1e-04,
+     'training_loss': 11.113065}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-312312.
+train | step:  314160 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.305922,
+     'cls_loss': 3.7579443,
+     'giou_loss': 5.073316,
+     'learning_rate': 1e-04,
+     'training_loss': 11.137178}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-314160.
+train | step:  316008 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2969537,
+     'cls_loss': 3.7332973,
+     'giou_loss': 5.059336,
+     'learning_rate': 1e-04,
+     'training_loss': 11.089594}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-316008.
+train | step:  317856 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2976203,
+     'cls_loss': 3.736824,
+     'giou_loss': 5.0642934,
+     'learning_rate': 1e-04,
+     'training_loss': 11.098751}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-317856.
+train | step:  319704 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2960615,
+     'cls_loss': 3.7276797,
+     'giou_loss': 5.046832,
+     'learning_rate': 1e-04,
+     'training_loss': 11.070566}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-319704.
+train | step:  321552 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2914762,
+     'cls_loss': 3.7151651,
+     'giou_loss': 5.0501566,
+     'learning_rate': 1e-04,
+     'training_loss': 11.056795}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-321552.
+train | step:  323400 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.285038,
+     'cls_loss': 3.7002873,
+     'giou_loss': 5.037042,
+     'learning_rate': 1e-04,
+     'training_loss': 11.022362}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-323400.
+train | step:  325248 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.281099,
+     'cls_loss': 3.7011847,
+     'giou_loss': 5.050659,
+     'learning_rate': 1e-04,
+     'training_loss': 11.032927}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-325248.
+train | step:  327096 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2854588,
+     'cls_loss': 3.6984088,
+     'giou_loss': 5.0316854,
+     'learning_rate': 1e-04,
+     'training_loss': 11.015558}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-327096.
+train | step:  328944 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.283059,
+     'cls_loss': 3.7142262,
+     'giou_loss': 5.0293884,
+     'learning_rate': 1e-04,
+     'training_loss': 11.026683}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-328944.
+train | step:  330792 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2678795,
+     'cls_loss': 3.674943,
+     'giou_loss': 5.0265336,
+     'learning_rate': 1e-04,
+     'training_loss': 10.969361}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-330792.
+train | step:  332640 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2739239,
+     'cls_loss': 3.6863248,
+     'giou_loss': 5.0257916,
+     'learning_rate': 1e-04,
+     'training_loss': 10.98603}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-332640.
+train | step:  334488 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2665184,
+     'cls_loss': 3.679207,
+     'giou_loss': 5.014051,
+     'learning_rate': 1e-04,
+     'training_loss': 10.959784}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-334488.
+train | step:  336336 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2644143,
+     'cls_loss': 3.6797843,
+     'giou_loss': 5.025018,
+     'learning_rate': 1e-04,
+     'training_loss': 10.969221}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-336336.
+train | step:  338184 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2592335,
+     'cls_loss': 3.64606,
+     'giou_loss': 4.9969444,
+     'learning_rate': 1e-04,
+     'training_loss': 10.902226}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-338184.
+train | step:  340032 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2546139,
+     'cls_loss': 3.6618073,
+     'giou_loss': 5.0104294,
+     'learning_rate': 1e-04,
+     'training_loss': 10.926852}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-340032.
+train | step:  341880 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.252641,
+     'cls_loss': 3.653088,
+     'giou_loss': 5.001905,
+     'learning_rate': 1e-04,
+     'training_loss': 10.907636}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-341880.
+train | step:  343728 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2628784,
+     'cls_loss': 3.6617692,
+     'giou_loss': 4.9947667,
+     'learning_rate': 1e-04,
+     'training_loss': 10.919431}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-343728.
+train | step:  345576 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2599525,
+     'cls_loss': 3.6378822,
+     'giou_loss': 4.995765,
+     'learning_rate': 1e-04,
+     'training_loss': 10.893597}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-345576.
+train | step:  347424 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2478242,
+     'cls_loss': 3.626348,
+     'giou_loss': 4.9889073,
+     'learning_rate': 1e-04,
+     'training_loss': 10.863072}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-347424.
+train | step:  349272 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2490962,
+     'cls_loss': 3.6211953,
+     'giou_loss': 4.986798,
+     'learning_rate': 1e-04,
+     'training_loss': 10.857112}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-349272.
+train | step:  351120 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2458284,
+     'cls_loss': 3.6236959,
+     'giou_loss': 4.9694514,
+     'learning_rate': 1e-04,
+     'training_loss': 10.838969}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-351120.
+train | step:  352968 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2383733,
+     'cls_loss': 3.6185124,
+     'giou_loss': 4.986356,
+     'learning_rate': 1e-04,
+     'training_loss': 10.843248}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-352968.
+train | step:  354816 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.240621,
+     'cls_loss': 3.6023383,
+     'giou_loss': 4.987216,
+     'learning_rate': 1e-04,
+     'training_loss': 10.830168}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-354816.
+I0821 08:16:02.273527 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-356664.
+I0821 08:35:04.312540 139858339583808 controller.py:503] train | step:  358512 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2364058,
+     'cls_loss': 3.5942945,
+     'giou_loss': 4.951968,
+     'learning_rate': 1e-04,
+     'training_loss': 10.782666}
+I0821 08:35:16.767145 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-358512.
+I0821 08:54:16.882179 139858339583808 controller.py:503] train | step:  360360 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.229455,
+     'cls_loss': 3.5989797,
+     'giou_loss': 4.969638,
+     'learning_rate': 1e-04,
+     'training_loss': 10.798063}
+I0821 08:54:29.259161 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-360360.
+I0821 09:13:27.645524 139858339583808 controller.py:503] train | step:  362208 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2283666,
+     'cls_loss': 3.5795362,
+     'giou_loss': 4.946398,
+     'learning_rate': 1e-04,
+     'training_loss': 10.754293}
+I0821 09:13:39.860175 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-362208.
+I0821 09:32:43.048603 139858339583808 controller.py:503] train | step:  364056 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2184112,
+     'cls_loss': 3.5810912,
+     'giou_loss': 4.96755,
+     'learning_rate': 1e-04,
+     'training_loss': 10.767059}
+I0821 09:32:55.254699 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-364056.
+I0821 09:51:53.478908 139858339583808 controller.py:503] train | step:  365904 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2181685,
+     'cls_loss': 3.5571873,
+     'giou_loss': 4.9367313,
+     'learning_rate': 1e-04,
+     'training_loss': 10.712087}
+I0821 09:52:05.486740 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-365904.
+I0821 10:11:06.489257 139858339583808 controller.py:503] train | step:  367752 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2122126,
+     'cls_loss': 3.5611417,
+     'giou_loss': 4.952757,
+     'learning_rate': 1e-04,
+     'training_loss': 10.72612}
+I0821 10:11:19.393229 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-367752.
+I0821 10:30:20.621314 139858339583808 controller.py:503] train | step:  369600 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2169328,
+     'cls_loss': 3.5576148,
+     'giou_loss': 4.9594326,
+     'learning_rate': 1e-04,
+     'training_loss': 10.733992}
+I0821 10:30:32.976195 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-369600.
+I0821 10:49:19.963073 139858339583808 controller.py:503] train | step:  371448 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.121536,
+     'cls_loss': 3.3605027,
+     'giou_loss': 4.796215,
+     'learning_rate': 1e-05,
+     'training_loss': 10.27825}
+I0821 10:49:32.464423 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-371448.
+I0821 11:08:07.711128 139858339583808 controller.py:503] train | step:  373296 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.0843923,
+     'cls_loss': 3.2869222,
+     'giou_loss': 4.748097,
+     'learning_rate': 1e-05,
+     'training_loss': 10.11942}
+I0821 11:08:20.635030 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-373296.
+I0821 11:26:50.552626 139858339583808 controller.py:503] train | step:  375144 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.0674665,
+     'cls_loss': 3.2460587,
+     'giou_loss': 4.71955,
+     'learning_rate': 1e-05,
+     'training_loss': 10.033093}
+I0821 11:27:02.589661 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-375144.
+I0821 11:45:35.208837 139858339583808 controller.py:503] train | step:  376992 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.0626707,
+     'cls_loss': 3.23678,
+     'giou_loss': 4.716014,
+     'learning_rate': 1e-05,
+     'training_loss': 10.015468}
+I0821 11:45:47.450231 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-376992.
+I0821 12:04:18.424152 139858339583808 controller.py:503] train | step:  378840 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.0559118,
+     'cls_loss': 3.2223995,
+     'giou_loss': 4.7139716,
+     'learning_rate': 1e-05,
+     'training_loss': 9.992295}
+I0821 12:04:30.412548 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-378840.
+I0821 12:22:57.482462 139858339583808 controller.py:503] train | step:  380688 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.042107,
+     'cls_loss': 3.208622,
+     'giou_loss': 4.6861444,
+     'learning_rate': 1e-05,
+     'training_loss': 9.93687}
+I0821 12:23:09.339639 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-380688.
+I0821 12:41:38.943778 139858339583808 controller.py:503] train | step:  382536 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.0421085,
+     'cls_loss': 3.1892452,
+     'giou_loss': 4.698222,
+     'learning_rate': 1e-05,
+     'training_loss': 9.929564}
+I0821 12:41:51.149320 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-382536.
+I0821 13:00:17.796439 139858339583808 controller.py:503] train | step:  384384 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.0406961,
+     'cls_loss': 3.1912541,
+     'giou_loss': 4.677666,
+     'learning_rate': 1e-05,
+     'training_loss': 9.909608}
+I0821 13:00:30.348448 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-384384.
+I0821 13:18:54.893593 139858339583808 controller.py:503] train | step:  386232 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.033991,
+     'cls_loss': 3.1772308,
+     'giou_loss': 4.6762276,
+     'learning_rate': 1e-05,
+     'training_loss': 9.887457}
+I0821 13:19:07.414528 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-386232.
+I0821 13:37:32.988390 139858339583808 controller.py:503] train | step:  388080 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.0319097,
+     'cls_loss': 3.1799028,
+     'giou_loss': 4.6753182,
+     'learning_rate': 1e-05,
+     'training_loss': 9.887131}
+I0821 13:37:45.071026 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-388080.
+I0821 13:56:09.543247 139858339583808 controller.py:503] train | step:  389928 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.0283682,
+     'cls_loss': 3.1652372,
+     'giou_loss': 4.668344,
+     'learning_rate': 1e-05,
+     'training_loss': 9.861944}
+I0821 13:56:22.523914 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-389928.
+I0821 14:14:40.583291 139858339583808 controller.py:503] train | step:  391776 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.015753,
+     'cls_loss': 3.1430779,
+     'giou_loss': 4.6442666,
+     'learning_rate': 1e-05,
+     'training_loss': 9.803104}
+I0821 14:14:53.709464 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-391776.
+I0821 14:33:18.520864 139858339583808 controller.py:503] train | step:  393624 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.0203435,
+     'cls_loss': 3.1585422,
+     'giou_loss': 4.669201,
+     'learning_rate': 1e-05,
+     'training_loss': 9.848067}
+I0821 14:33:31.297410 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-393624.
+I0821 14:51:53.811368 139858339583808 controller.py:503] train | step:  395472 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.020122,
+     'cls_loss': 3.1429071,
+     'giou_loss': 4.647532,
+     'learning_rate': 1e-05,
+     'training_loss': 9.810558}
+I0821 14:52:06.231620 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-395472.
+I0821 15:10:29.425553 139858339583808 controller.py:503] train | step:  397320 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.0165732,
+     'cls_loss': 3.1366563,
+     'giou_loss': 4.6592607,
+     'learning_rate': 1e-05,
+     'training_loss': 9.812503}
+I0821 15:10:42.537302 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-397320.
+I0821 15:29:04.833823 139858339583808 controller.py:503] train | step:  399168 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.011695,
+     'cls_loss': 3.1393852,
+     'giou_loss': 4.6456037,
+     'learning_rate': 1e-05,
+     'training_loss': 9.796685}
+I0821 15:29:17.004830 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-399168.
+I0821 15:47:35.611984 139858339583808 controller.py:503] train | step:  401016 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.0076964,
+     'cls_loss': 3.131077,
+     'giou_loss': 4.6388245,
+     'learning_rate': 1e-05,
+     'training_loss': 9.777606}
+I0821 15:47:48.211425 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-401016.
+I0821 16:06:08.908845 139858339583808 controller.py:503] train | step:  402864 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.0092812,
+     'cls_loss': 3.1291714,
+     'giou_loss': 4.632655,
+     'learning_rate': 1e-05,
+     'training_loss': 9.771102}
+I0821 16:06:21.423083 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-402864.
+I0821 16:24:37.727837 139858339583808 controller.py:503] train | step:  404712 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.0082521,
+     'cls_loss': 3.1282063,
+     'giou_loss': 4.6241083,
+     'learning_rate': 1e-05,
+     'training_loss': 9.760576}
+I0821 16:24:50.411778 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-404712.
+I0821 16:43:10.176465 139858339583808 controller.py:503] train | step:  406560 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.001026,
+     'cls_loss': 3.1088858,
+     'giou_loss': 4.631855,
+     'learning_rate': 1e-05,
+     'training_loss': 9.741765}
+I0821 16:43:22.585554 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-406560.
+I0821 17:01:44.323924 139858339583808 controller.py:503] train | step:  408408 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.0025067,
+     'cls_loss': 3.1140738,
+     'giou_loss': 4.6381073,
+     'learning_rate': 1e-05,
+     'training_loss': 9.754686}
+I0821 17:01:57.002928 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-408408.
+I0821 17:20:14.091107 139858339583808 controller.py:503] train | step:  410256 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.0000463,
+     'cls_loss': 3.1070082,
+     'giou_loss': 4.613168,
+     'learning_rate': 1e-05,
+     'training_loss': 9.720219}
+I0821 17:20:27.402219 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-410256.
+I0821 17:38:45.074484 139858339583808 controller.py:503] train | step:  412104 | steps/sec:    1.7 | output: 
+    {'box_loss': 1.9971807,
+     'cls_loss': 3.0933015,
+     'giou_loss': 4.620499,
+     'learning_rate': 1e-05,
+     'training_loss': 9.710975}
+I0821 17:38:57.627811 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-412104.
+I0821 17:57:16.569553 139858339583808 controller.py:503] train | step:  413952 | steps/sec:    1.7 | output: 
+    {'box_loss': 1.9884927,
+     'cls_loss': 3.084462,
+     'giou_loss': 4.622609,
+     'learning_rate': 1e-05,
+     'training_loss': 9.6955595}
+train | step:  356664 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2284417,
+     'cls_loss': 3.5810308,
+     'giou_loss': 4.9655066,
+     'learning_rate': 1e-04,
+     'training_loss': 10.774974}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-356664.
+train | step:  358512 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2364058,
+     'cls_loss': 3.5942945,
+     'giou_loss': 4.951968,
+     'learning_rate': 1e-04,
+     'training_loss': 10.782666}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-358512.
+train | step:  360360 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.229455,
+     'cls_loss': 3.5989797,
+     'giou_loss': 4.969638,
+     'learning_rate': 1e-04,
+     'training_loss': 10.798063}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-360360.
+train | step:  362208 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2283666,
+     'cls_loss': 3.5795362,
+     'giou_loss': 4.946398,
+     'learning_rate': 1e-04,
+     'training_loss': 10.754293}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-362208.
+train | step:  364056 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2184112,
+     'cls_loss': 3.5810912,
+     'giou_loss': 4.96755,
+     'learning_rate': 1e-04,
+     'training_loss': 10.767059}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-364056.
+train | step:  365904 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2181685,
+     'cls_loss': 3.5571873,
+     'giou_loss': 4.9367313,
+     'learning_rate': 1e-04,
+     'training_loss': 10.712087}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-365904.
+train | step:  367752 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2122126,
+     'cls_loss': 3.5611417,
+     'giou_loss': 4.952757,
+     'learning_rate': 1e-04,
+     'training_loss': 10.72612}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-367752.
+train | step:  369600 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.2169328,
+     'cls_loss': 3.5576148,
+     'giou_loss': 4.9594326,
+     'learning_rate': 1e-04,
+     'training_loss': 10.733992}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-369600.
+train | step:  371448 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.121536,
+     'cls_loss': 3.3605027,
+     'giou_loss': 4.796215,
+     'learning_rate': 1e-05,
+     'training_loss': 10.27825}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-371448.
+train | step:  373296 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.0843923,
+     'cls_loss': 3.2869222,
+     'giou_loss': 4.748097,
+     'learning_rate': 1e-05,
+     'training_loss': 10.11942}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-373296.
+train | step:  375144 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.0674665,
+     'cls_loss': 3.2460587,
+     'giou_loss': 4.71955,
+     'learning_rate': 1e-05,
+     'training_loss': 10.033093}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-375144.
+train | step:  376992 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.0626707,
+     'cls_loss': 3.23678,
+     'giou_loss': 4.716014,
+     'learning_rate': 1e-05,
+     'training_loss': 10.015468}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-376992.
+train | step:  378840 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.0559118,
+     'cls_loss': 3.2223995,
+     'giou_loss': 4.7139716,
+     'learning_rate': 1e-05,
+     'training_loss': 9.992295}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-378840.
+train | step:  380688 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.042107,
+     'cls_loss': 3.208622,
+     'giou_loss': 4.6861444,
+     'learning_rate': 1e-05,
+     'training_loss': 9.93687}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-380688.
+train | step:  382536 | steps/sec:    1.6 | output: 
+    {'box_loss': 2.0421085,
+     'cls_loss': 3.1892452,
+     'giou_loss': 4.698222,
+     'learning_rate': 1e-05,
+     'training_loss': 9.929564}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-382536.
+train | step:  384384 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.0406961,
+     'cls_loss': 3.1912541,
+     'giou_loss': 4.677666,
+     'learning_rate': 1e-05,
+     'training_loss': 9.909608}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-384384.
+train | step:  386232 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.033991,
+     'cls_loss': 3.1772308,
+     'giou_loss': 4.6762276,
+     'learning_rate': 1e-05,
+     'training_loss': 9.887457}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-386232.
+train | step:  388080 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.0319097,
+     'cls_loss': 3.1799028,
+     'giou_loss': 4.6753182,
+     'learning_rate': 1e-05,
+     'training_loss': 9.887131}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-388080.
+train | step:  389928 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.0283682,
+     'cls_loss': 3.1652372,
+     'giou_loss': 4.668344,
+     'learning_rate': 1e-05,
+     'training_loss': 9.861944}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-389928.
+train | step:  391776 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.015753,
+     'cls_loss': 3.1430779,
+     'giou_loss': 4.6442666,
+     'learning_rate': 1e-05,
+     'training_loss': 9.803104}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-391776.
+train | step:  393624 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.0203435,
+     'cls_loss': 3.1585422,
+     'giou_loss': 4.669201,
+     'learning_rate': 1e-05,
+     'training_loss': 9.848067}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-393624.
+train | step:  395472 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.020122,
+     'cls_loss': 3.1429071,
+     'giou_loss': 4.647532,
+     'learning_rate': 1e-05,
+     'training_loss': 9.810558}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-395472.
+train | step:  397320 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.0165732,
+     'cls_loss': 3.1366563,
+     'giou_loss': 4.6592607,
+     'learning_rate': 1e-05,
+     'training_loss': 9.812503}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-397320.
+train | step:  399168 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.011695,
+     'cls_loss': 3.1393852,
+     'giou_loss': 4.6456037,
+     'learning_rate': 1e-05,
+     'training_loss': 9.796685}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-399168.
+train | step:  401016 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.0076964,
+     'cls_loss': 3.131077,
+     'giou_loss': 4.6388245,
+     'learning_rate': 1e-05,
+     'training_loss': 9.777606}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-401016.
+train | step:  402864 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.0092812,
+     'cls_loss': 3.1291714,
+     'giou_loss': 4.632655,
+     'learning_rate': 1e-05,
+     'training_loss': 9.771102}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-402864.
+train | step:  404712 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.0082521,
+     'cls_loss': 3.1282063,
+     'giou_loss': 4.6241083,
+     'learning_rate': 1e-05,
+     'training_loss': 9.760576}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-404712.
+train | step:  406560 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.001026,
+     'cls_loss': 3.1088858,
+     'giou_loss': 4.631855,
+     'learning_rate': 1e-05,
+     'training_loss': 9.741765}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-406560.
+train | step:  408408 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.0025067,
+     'cls_loss': 3.1140738,
+     'giou_loss': 4.6381073,
+     'learning_rate': 1e-05,
+     'training_loss': 9.754686}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-408408.
+train | step:  410256 | steps/sec:    1.7 | output: 
+    {'box_loss': 2.0000463,
+     'cls_loss': 3.1070082,
+     'giou_loss': 4.613168,
+     'learning_rate': 1e-05,
+     'training_loss': 9.720219}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-410256.
+train | step:  412104 | steps/sec:    1.7 | output: 
+    {'box_loss': 1.9971807,
+     'cls_loss': 3.0933015,
+     'giou_loss': 4.620499,
+     'learning_rate': 1e-05,
+     'training_loss': 9.710975}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-412104.
+I0821 17:57:28.458833 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-413952.
+I0821 18:15:51.535673 139858339583808 controller.py:503] train | step:  415800 | steps/sec:    1.7 | output: 
+    {'box_loss': 1.9958676,
+     'cls_loss': 3.1175845,
+     'giou_loss': 4.632812,
+     'learning_rate': 1e-05,
+     'training_loss': 9.746266}
+I0821 18:16:03.632364 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-415800.
+I0821 18:34:19.920484 139858339583808 controller.py:503] train | step:  417648 | steps/sec:    1.7 | output: 
+    {'box_loss': 1.9911461,
+     'cls_loss': 3.0791059,
+     'giou_loss': 4.607589,
+     'learning_rate': 1e-05,
+     'training_loss': 9.67784}
+I0821 18:34:32.720744 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-417648.
+I0821 18:52:51.110780 139858339583808 controller.py:503] train | step:  419496 | steps/sec:    1.7 | output: 
+    {'box_loss': 1.9896517,
+     'cls_loss': 3.0794702,
+     'giou_loss': 4.611138,
+     'learning_rate': 1e-05,
+     'training_loss': 9.680257}
+I0821 18:53:03.660872 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-419496.
+I0821 19:11:25.098695 139858339583808 controller.py:503] train | step:  421344 | steps/sec:    1.7 | output: 
+    {'box_loss': 1.9910634,
+     'cls_loss': 3.090113,
+     'giou_loss': 4.6203365,
+     'learning_rate': 1e-05,
+     'training_loss': 9.701509}
+I0821 19:11:41.622290 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-421344.
+I0821 19:29:59.725927 139858339583808 controller.py:503] train | step:  423192 | steps/sec:    1.7 | output: 
+    {'box_loss': 1.9871999,
+     'cls_loss': 3.0809164,
+     'giou_loss': 4.6086526,
+     'learning_rate': 1e-05,
+     'training_loss': 9.676757}
+I0821 19:30:13.195879 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-423192.
+I0821 19:48:31.025332 139858339583808 controller.py:503] train | step:  425040 | steps/sec:    1.7 | output: 
+    {'box_loss': 1.9899402,
+     'cls_loss': 3.068578,
+     'giou_loss': 4.599792,
+     'learning_rate': 1e-05,
+     'training_loss': 9.658312}
+I0821 19:48:43.421380 139858339583808 controller.py:532] saved checkpoint to gs://cam2-models/detr_exp2/ckpt-425040.
+train | step:  413952 | steps/sec:    1.7 | output: 
+    {'box_loss': 1.9884927,
+     'cls_loss': 3.084462,
+     'giou_loss': 4.622609,
+     'learning_rate': 1e-05,
+     'training_loss': 9.6955595}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-413952.
+train | step:  415800 | steps/sec:    1.7 | output: 
+    {'box_loss': 1.9958676,
+     'cls_loss': 3.1175845,
+     'giou_loss': 4.632812,
+     'learning_rate': 1e-05,
+     'training_loss': 9.746266}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-415800.
+train | step:  417648 | steps/sec:    1.7 | output: 
+    {'box_loss': 1.9911461,
+     'cls_loss': 3.0791059,
+     'giou_loss': 4.607589,
+     'learning_rate': 1e-05,
+     'training_loss': 9.67784}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-417648.
+train | step:  419496 | steps/sec:    1.7 | output: 
+    {'box_loss': 1.9896517,
+     'cls_loss': 3.0794702,
+     'giou_loss': 4.611138,
+     'learning_rate': 1e-05,
+     'training_loss': 9.680257}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-419496.
+train | step:  421344 | steps/sec:    1.7 | output: 
+    {'box_loss': 1.9910634,
+     'cls_loss': 3.090113,
+     'giou_loss': 4.6203365,
+     'learning_rate': 1e-05,
+     'training_loss': 9.701509}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-421344.
+train | step:  423192 | steps/sec:    1.7 | output: 
+    {'box_loss': 1.9871999,
+     'cls_loss': 3.0809164,
+     'giou_loss': 4.6086526,
+     'learning_rate': 1e-05,
+     'training_loss': 9.676757}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-423192.
+train | step:  425040 | steps/sec:    1.7 | output: 
+    {'box_loss': 1.9899402,
+     'cls_loss': 3.068578,
+     'giou_loss': 4.599792,
+     'learning_rate': 1e-05,
+     'training_loss': 9.658312}
+saved checkpoint to gs://cam2-models/detr_exp2/ckpt-425040.
+Traceback (most recent call last):
+  File "/home/wenxinjiang/tf-maskformer/models/official/projects/detr/train.py", line 70, in <module>
+    app.run(main)
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/absl/app.py", line 308, in run
+    _run_main(main, args)
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/absl/app.py", line 254, in _run_main
+    sys.exit(main(argv))
+  File "/home/wenxinjiang/tf-maskformer/models/official/projects/detr/train.py", line 58, in main
+    train_lib.run_experiment(
+  File "/home/wenxinjiang/tf-maskformer/models/official/core/train_lib.py", line 357, in run_experiment
+    return runner.run()
+  File "/home/wenxinjiang/tf-maskformer/models/official/core/train_lib.py", line 258, in run
+    self.controller.train(steps=params.trainer.train_steps)
+  File "/home/wenxinjiang/tf-maskformer/models/orbit/controller.py", line 260, in train
+    self._train_n_steps(num_steps)
+  File "/home/wenxinjiang/tf-maskformer/models/orbit/controller.py", line 485, in _train_n_steps
+    train_output = self.trainer.train(num_steps_tensor)
+  File "/home/wenxinjiang/tf-maskformer/models/orbit/standard_runner.py", line 147, in train
+    return self.train_loop_end()
+  File "/home/wenxinjiang/tf-maskformer/models/official/core/base_trainer.py", line 339, in train_loop_end
+    logs["learning_rate"] = self.optimizer.learning_rate(
+  File "/home/wenxinjiang/tf-maskformer/models/official/modeling/optimization/lr_schedule.py", line 68, in offset_learning_rate_call
+    return base_lr_class.__call__(self, step)
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/keras/optimizers/schedules/learning_rate_schedule.py", line 304, in __call__
+    return tf.case(pred_fn_pairs, default, exclusive=True)
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/util/traceback_utils.py", line 153, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/framework/ops.py", line 1259, in shape
+    self._tensor_shape = tensor_shape.TensorShape(self._shape_tuple())
+tensorflow.python.framework.errors_impl.FailedPreconditionError: SharedMemoryAddress expired.
+2023-08-21 20:07:08.238438: W tensorflow/core/distributed_runtime/eager/remote_tensor_handle_data.cc:77] Unable to destroy remote tensor handles. If you are running a tf.function, it usually indicates some op in the graph gets an error: SharedMemoryAddress expired.
+2023-08-21 20:07:08.239322: W ./tensorflow/core/distributed_runtime/eager/destroy_tensor_handle_node.h:58] Ignoring an error encountered when deleting remote tensors handles: INVALID_ARGUMENT: Unable to find the relevant tensor remote_handle: Op ID: 2597839, Output num: 0
+Additional GRPC error information from remote target /job:worker/replica:0/task:0:
+:{"created":"@1692648428.236477955","description":"Error received from peer ipv4:10.20.41.90:8470","file":"external/com_github_grpc_grpc/src/core/lib/surface/call.cc","file_line":1056,"grpc_message":"Unable to find the relevant tensor remote_handle: Op ID: 2597839, Output num: 0","grpc_status":3} [type.googleapis.com/tensorflow.core.platform.ErrorSourceProto='\x08\x05']
