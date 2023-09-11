@@ -233,7 +233,7 @@ class DetectionTask(base_task.Task):
       metrics.append(tf.keras.metrics.Mean(name, dtype=tf.float32))
 
     if not training:
-      print(self._task_config.annotation_file)
+      logger.critical(self._task_config.annotation_file)
       self.coco_metric = coco_evaluator.COCOEvaluator(
           annotation_file=self._task_config.annotation_file,
           include_mask=False,
