@@ -15,11 +15,8 @@ export CONFIG_FILE="configs/detr_tpu_v3_640.yaml"
 # # task.validation_data.global_batch_size=2,task.model.which_pixel_decoder=transformer_fpn,\
 # # task.init_checkpoint_modules=all,\
 # # task.init_checkpoint=$MODEL_DIR"
-nohup python3 train.py \
+python3 train.py \
 	--experiment detr_coco_tfrecord\
 	--mode eval\
 	--model_dir $MODEL_DIR \
-	--config_file $CONFIG_FILE \
-	> logs_detr_exp2_eval.txt &
-
-	# --tpu $TPU_NAME \
+	--config_file $CONFIG_FILE 
