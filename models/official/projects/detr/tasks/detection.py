@@ -231,10 +231,9 @@ class DetectionTask(base_task.Task):
     metric_names = ['cls_loss', 'box_loss', 'giou_loss']
     for name in metric_names:
       metrics.append(tf.keras.metrics.Mean(name, dtype=tf.float32))
-    print("//////////////////////////////////////////////////////////////")
+    
     if not training:
-      print("//////////////////////////////////////////////////////////////")
-      print(self._task_config.annotation_file)
+      
       self.coco_metric = coco_evaluator.COCOEvaluator(
           annotation_file=self._task_config.annotation_file,
           include_mask=False,

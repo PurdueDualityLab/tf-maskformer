@@ -80,7 +80,7 @@ class DetrTask(cfg.TaskConfig):
 
 
 COCO_INPUT_PATH_BASE = 'gs://cam2-datasets/coco'
-COCO_ANNOTATION_PATH_BASE = 'gs://cam2-datasets/annotations'
+COCO_ANNOTATION_PATH_BASE = '/home/vishalpurohit55595/wexin_detr/tf-maskformer/annotations'
 COCO_TRAIN_EXAMPLES = 118287
 COCO_VAL_EXAMPLES = 5000
 
