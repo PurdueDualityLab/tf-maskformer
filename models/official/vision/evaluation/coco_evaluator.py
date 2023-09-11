@@ -87,6 +87,7 @@ class COCOEvaluator(object):
         atexit.register(tf.io.gfile.remove, local_val_json)
       else:
         local_val_json = annotation_file
+      local_val_json = "/home/vishalpurohit55595/wexin_detr/tf-maskformer/annotations/instances_val2017.json"
       self._coco_gt = coco_utils.COCOWrapper(
           eval_type=('mask' if include_mask else 'box'),
           annotation_file=local_val_json)
