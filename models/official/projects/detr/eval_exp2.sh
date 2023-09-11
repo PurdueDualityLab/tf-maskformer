@@ -15,7 +15,7 @@ export CONFIG_FILE="configs/detr_tpu_v3_640.yaml"
 # # task.validation_data.global_batch_size=2,task.model.which_pixel_decoder=transformer_fpn,\
 # # task.init_checkpoint_modules=all,\
 # # task.init_checkpoint=$MODEL_DIR"
-python3 /home/vishalpurohit55595/wexin_detr/tf-maskformer/train.py \
+python3 models/official/projects/detr/train.py \
 	--experiment detr_coco_tfrecord\
 	--mode eval\
 	--model_dir $MODEL_DIR \
