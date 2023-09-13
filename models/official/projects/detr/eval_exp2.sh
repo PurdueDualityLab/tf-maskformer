@@ -10,16 +10,13 @@ export TPU_NAME="tf-debug-4"
 export TPU_SOFTWARE="2.12.0"
 export TPU_PROJECT="red-atlas-305317"
 export TPU_ZONE="us-central1-a"
-export CONFIG_FILE="configs/detr_tpu_v3_640.yaml"
+export CONFIG_FILE="models/official/projects/detr/configs/detr_tpu_v3_640.yaml"
 # export OVERRIDES="runtime.distribution_strategy=tpu,runtime.mixed_precision_dtype=float32,\
 # # task.validation_data.global_batch_size=2,task.model.which_pixel_decoder=transformer_fpn,\
 # # task.init_checkpoint_modules=all,\
 # # task.init_checkpoint=$MODEL_DIR"
-nohup python3 train.py \
+python3 models/official/projects/detr/train.py \
 	--experiment detr_coco_tfrecord\
 	--mode eval\
 	--model_dir $MODEL_DIR \
-	--config_file $CONFIG_FILE \
-	> logs_detr_exp2_eval.txt &
-
-	# --tpu $TPU_NAME \
+	--config_file $CONFIG_FILE 
