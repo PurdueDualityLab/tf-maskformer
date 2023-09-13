@@ -1,11 +1,11 @@
-2023-08-26 17:48:14.145485: I tensorflow/core/platform/cpu_feature_guard.cc:193] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 AVX512F AVX512_VNNI FMA
+2023-09-11 18:18:25.606088: I tensorflow/core/platform/cpu_feature_guard.cc:193] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 AVX512F AVX512_VNNI FMA
 To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
-2023-08-26 17:48:14.269809: I tensorflow/core/util/port.cc:104] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
-2023-08-26 17:48:14.273135: W tensorflow/compiler/xla/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libcudart.so.11.0'; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory
-2023-08-26 17:48:14.273162: I tensorflow/compiler/xla/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
-2023-08-26 17:48:14.983146: W tensorflow/compiler/xla/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libnvinfer.so.7'; dlerror: libnvinfer.so.7: cannot open shared object file: No such file or directory
-2023-08-26 17:48:14.983215: W tensorflow/compiler/xla/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libnvinfer_plugin.so.7'; dlerror: libnvinfer_plugin.so.7: cannot open shared object file: No such file or directory
-2023-08-26 17:48:14.983226: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Cannot dlopen some TensorRT libraries. If you would like to use Nvidia GPU with TensorRT, please make sure the missing libraries mentioned above are installed properly.
+2023-09-11 18:18:25.730844: I tensorflow/core/util/port.cc:104] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2023-09-11 18:18:25.734319: W tensorflow/compiler/xla/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libcudart.so.11.0'; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory
+2023-09-11 18:18:25.734347: I tensorflow/compiler/xla/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+2023-09-11 18:18:26.428871: W tensorflow/compiler/xla/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libnvinfer.so.7'; dlerror: libnvinfer.so.7: cannot open shared object file: No such file or directory
+2023-09-11 18:18:26.428940: W tensorflow/compiler/xla/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libnvinfer_plugin.so.7'; dlerror: libnvinfer_plugin.so.7: cannot open shared object file: No such file or directory
+2023-09-11 18:18:26.428949: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Cannot dlopen some TensorRT libraries. If you would like to use Nvidia GPU with TensorRT, please make sure the missing libraries mentioned above are installed properly.
 /opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow_addons/utils/tfa_eol_msg.py:23: UserWarning: 
 
 TensorFlow Addons (TFA) has ended development and introduction of new features.
@@ -15,10 +15,10 @@ Please modify downstream libraries to take dependencies from other repositories 
 For more information see: https://github.com/tensorflow/addons/issues/2807 
 
   warnings.warn(
-2023-08-26 17:48:16.704845: W tensorflow/compiler/xla/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libcuda.so.1'; dlerror: libcuda.so.1: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /opt/conda/envs/maskformer/lib/python3.9/site-packages/cv2/../../lib64:
-2023-08-26 17:48:16.704888: W tensorflow/compiler/xla/stream_executor/cuda/cuda_driver.cc:265] failed call to cuInit: UNKNOWN ERROR (303)
-2023-08-26 17:48:16.704908: I tensorflow/compiler/xla/stream_executor/cuda/cuda_diagnostics.cc:156] kernel driver does not appear to be running on this host (compute-intensive-1): /proc/driver/nvidia/version does not exist
-I0826 17:48:16.715639 139727077353280 train_utils.py:359] Final experiment parameters:
+2023-09-11 18:18:28.139027: W tensorflow/compiler/xla/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libcuda.so.1'; dlerror: libcuda.so.1: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /opt/conda/envs/maskformer/lib/python3.9/site-packages/cv2/../../lib64:
+2023-09-11 18:18:28.139065: W tensorflow/compiler/xla/stream_executor/cuda/cuda_driver.cc:265] failed call to cuInit: UNKNOWN ERROR (303)
+2023-09-11 18:18:28.139080: I tensorflow/compiler/xla/stream_executor/cuda/cuda_diagnostics.cc:156] kernel driver does not appear to be running on this host (compute-intensive-1): /proc/driver/nvidia/version does not exist
+I0911 18:18:28.149674 140509984384832 train_utils.py:359] Final experiment parameters:
 {'runtime': {'all_reduce_alg': None,
              'batchnorm_spatial_persistent': False,
              'dataset_num_private_threads': None,
@@ -171,26 +171,26 @@ I0826 17:48:16.715639 139727077353280 train_utils.py:359] Final experiment param
              'validation_interval': 9240,
              'validation_steps': 78,
              'validation_summary_subdir': 'validation'}}
-2023-08-26 17:48:16.716381: I tensorflow/core/platform/cpu_feature_guard.cc:193] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 AVX512F AVX512_VNNI FMA
+2023-09-11 18:18:28.150415: I tensorflow/core/platform/cpu_feature_guard.cc:193] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 AVX512F AVX512_VNNI FMA
 To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
-I0826 17:48:16.953228 139727077353280 train_utils.py:98] Created the best checkpoint exporter. data_dir: gs://cam2-models/detr_exp2, export_subdir: best_ckpt, metric_name: AP
-I0826 17:48:16.953700 139727077353280 train_utils.py:245] Running default trainer.
-I0826 17:48:18.067675 139727077353280 legacy_adamw.py:56] AdamWeightDecay gradient_clip_norm=0.000000
+I0911 18:18:28.333553 140509984384832 train_utils.py:98] Created the best checkpoint exporter. data_dir: gs://cam2-models/detr_exp2, export_subdir: best_ckpt, metric_name: AP
+I0911 18:18:28.334074 140509984384832 train_utils.py:245] Running default trainer.
+I0911 18:18:29.464532 140509984384832 legacy_adamw.py:56] AdamWeightDecay gradient_clip_norm=0.000000
 WARNING:tensorflow:From /opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/autograph/pyct/static_analysis/liveness.py:83: Analyzer.lamba_check (from tensorflow.python.autograph.pyct.static_analysis.liveness) is deprecated and will be removed after 2023-09-23.
 Instructions for updating:
 Lambda fuctions will be no more assumed to be used in the statement where they are used, or at least in the same block. https://github.com/tensorflow/tensorflow/issues/56089
-W0826 17:48:21.033293 139727077353280 deprecation.py:350] From /opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/autograph/pyct/static_analysis/liveness.py:83: Analyzer.lamba_check (from tensorflow.python.autograph.pyct.static_analysis.liveness) is deprecated and will be removed after 2023-09-23.
+W0911 18:18:32.608095 140509984384832 deprecation.py:350] From /opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/autograph/pyct/static_analysis/liveness.py:83: Analyzer.lamba_check (from tensorflow.python.autograph.pyct.static_analysis.liveness) is deprecated and will be removed after 2023-09-23.
 Instructions for updating:
 Lambda fuctions will be no more assumed to be used in the statement where they are used, or at least in the same block. https://github.com/tensorflow/tensorflow/issues/56089
-I0826 17:48:22.664493 139727077353280 controller.py:431] restoring or initializing model...
-I0826 17:49:31.455604 139727077353280 controller.py:435] restored model from gs://cam2-models/detr_exp2/ckpt-425040.
-I0826 17:49:31.455779 139727077353280 controller.py:237] restored from checkpoint: gs://cam2-models/detr_exp2/ckpt-425040
-I0826 17:49:31.455829 139727077353280 train_lib.py:255] Starts to execute mode: eval
-I0826 17:49:31.456191 139727077353280 controller.py:297]  eval | step:  425040 | running 78 steps of evaluation...
-2023-08-26 17:49:31.904543: W tensorflow/core/framework/dataset.cc:769] Input of GeneratorDatasetOp::Dataset will not be optimized because the dataset does not implement the AsGraphDefInternal() method needed to apply optimizations.
-2023-08-26 17:51:45.378 | DEBUG    | tensorflow.python.autograph.operators.control_flow:_py_if_stmt:1416 - target_shape is [<tf.Tensor 'detr_transformer/strided_slice_2:0' shape=() dtype=int32>, 100, 256]
-2023-08-26 17:55:12.371 | DEBUG    | tensorflow.python.autograph.operators.control_flow:_py_if_stmt:1416 - target_shape is [<tf.Tensor 'detr/detr_transformer/strided_slice_2:0' shape=() dtype=int32>, 100, 256]
-2023-08-26 17:55:13.634 | CRITICAL | tensorflow.python.autograph.operators.control_flow:_py_if_stmt:1416 - detection_classes: Tensor("detr/detr/cls_dense/BiasAdd_5:0", shape=(None, 100, 91), dtype=float32, device=/job:localhost/replica:0/task:0/device:CPU:0)
+I0911 18:18:34.296783 140509984384832 controller.py:431] restoring or initializing model...
+I0911 18:19:50.236497 140509984384832 controller.py:435] restored model from gs://cam2-models/detr_exp2/ckpt-425040.
+I0911 18:19:50.236683 140509984384832 controller.py:237] restored from checkpoint: gs://cam2-models/detr_exp2/ckpt-425040
+I0911 18:19:50.236736 140509984384832 train_lib.py:255] Starts to execute mode: eval
+I0911 18:19:50.237111 140509984384832 controller.py:297]  eval | step:  425040 | running 78 steps of evaluation...
+2023-09-11 18:19:50.708655: W tensorflow/core/framework/dataset.cc:769] Input of GeneratorDatasetOp::Dataset will not be optimized because the dataset does not implement the AsGraphDefInternal() method needed to apply optimizations.
+2023-09-11 18:22:19.979 | DEBUG    | tensorflow.python.autograph.operators.control_flow:_py_if_stmt:1416 - target_shape is [<tf.Tensor 'detr_transformer/strided_slice_2:0' shape=() dtype=int32>, 100, 256]
+2023-09-11 18:25:43.121 | DEBUG    | tensorflow.python.autograph.operators.control_flow:_py_if_stmt:1416 - target_shape is [<tf.Tensor 'detr/detr_transformer/strided_slice_2:0' shape=() dtype=int32>, 100, 256]
+2023-09-11 18:25:44.404 | CRITICAL | tensorflow.python.autograph.operators.control_flow:_py_if_stmt:1416 - detection_classes: Tensor("detr/detr/cls_dense/BiasAdd_5:0", shape=(None, 100, 91), dtype=float32, device=/job:localhost/replica:0/task:0/device:CPU:0)
 WARNING:tensorflow:From /opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/util/dispatch.py:1176: calling foldl_v2 (from tensorflow.python.ops.functional_ops) with back_prop=False is deprecated and will be removed in a future version.
 Instructions for updating:
 back_prop=False is deprecated. Consider using tf.stop_gradient instead.
@@ -198,7 +198,7 @@ Instead of:
 results = tf.foldl(fn, elems, back_prop=False)
 Use:
 results = tf.nest.map_structure(tf.stop_gradient, tf.foldl(fn, elems))
-W0826 17:55:14.450469 139727077353280 deprecation.py:623] From /opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/util/dispatch.py:1176: calling foldl_v2 (from tensorflow.python.ops.functional_ops) with back_prop=False is deprecated and will be removed in a future version.
+W0911 18:25:45.253289 140509984384832 deprecation.py:623] From /opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/util/dispatch.py:1176: calling foldl_v2 (from tensorflow.python.ops.functional_ops) with back_prop=False is deprecated and will be removed in a future version.
 Instructions for updating:
 back_prop=False is deprecated. Consider using tf.stop_gradient instead.
 Instead of:
@@ -212,64 +212,405 @@ Instead of:
 results = tf.while_loop(c, b, vars, back_prop=False)
 Use:
 results = tf.nest.map_structure(tf.stop_gradient, tf.while_loop(c, b, vars))
-W0826 17:55:14.691813 139727077353280 deprecation.py:623] From /opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/autograph/impl/api.py:458: calling while_loop_v2 (from tensorflow.python.ops.control_flow_ops) with back_prop=False is deprecated and will be removed in a future version.
+W0911 18:25:45.496492 140509984384832 deprecation.py:623] From /opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/autograph/impl/api.py:458: calling while_loop_v2 (from tensorflow.python.ops.control_flow_ops) with back_prop=False is deprecated and will be removed in a future version.
 Instructions for updating:
 back_prop=False is deprecated. Consider using tf.stop_gradient instead.
 Instead of:
 results = tf.while_loop(c, b, vars, back_prop=False)
 Use:
 results = tf.nest.map_structure(tf.stop_gradient, tf.while_loop(c, b, vars))
+2023-09-11 18:25:47.298 | DEBUG    | tensorflow.python.autograph.operators.control_flow:_py_if_stmt:1416 - target_shape is [<tf.Tensor 'detr/detr_transformer/strided_slice_2:0' shape=() dtype=int32>, 100, 256]
+2023-09-11 18:25:48.447 | CRITICAL | tensorflow.python.autograph.operators.control_flow:_py_if_stmt:1416 - detection_classes: Tensor("detr/detr/cls_dense/BiasAdd_5:0", shape=(None, 100, 91), dtype=float32, device=/job:localhost/replica:0/task:0/device:CPU:0)
+detection_classes: [[50 50 79 ... 51 50 50]
+ [62 81 62 ... 67 78 82]]
+detection_scores: [[0.325647295 0.612766862 0.89211756 ... 0.0386463925 0.122320913 0.29678598]
+ [0.0723826066 0.632941484 0.733474314 ... 0.545253754 0.0964812711 0.0620334372]]
+detection_classes: [[1 1 1 ... 42 42 31]
+ [37 37 37 ... 1 28 1]]
+detection_scores: [[0.0607412718 0.015185195 0.0214726813 ... 0.0075002173 0.0426099934 0.0897421911]
+ [0.23665379 0.078730084 0.192194968 ... 0.4628447 0.0936894491 0.298562676]]
+detection_classes: [[8 10 3 ... 2 10 1]
+ [70 47 70 ... 70 44 89]]
+detection_scores: [[0.00212529814 0.205155149 0.983040571 ... 0.05056943 0.123070851 0.159443438]
+ [0.00643473445 0.018000884 0.00178018911 ... 0.00115164358 0.0327566 0.0236091688]]
+detection_classes: [[63 1 63 ... 1 75 84]
+ [5 5 5 ... 5 5 5]]
+detection_scores: [[0.358620107 0.551505327 0.197915286 ... 0.26346004 0.116289169 0.247798145]
+ [0.000782867 0.000682934246 0.000154369729 ... 0.0006104965 0.00534176687 0.0550086908]]
+detection_classes: [[5 5 5 ... 5 5 5]
+ [8 8 8 ... 5 1 8]]
+detection_scores: [[0.000342267071 0.186582536 0.00162126031 ... 0.00133304438 0.0334517322 0.045924142]
+ [0.0420557559 0.158405378 0.120270297 ... 0.174724445 0.0372578 0.11333584]]
+detection_classes: [[1 5 5 ... 5 5 5]
+ [5 5 5 ... 5 5 1]]
+detection_scores: [[0.00168960029 0.00167503289 0.00122994848 ... 0.00166516076 0.000745246 0.00703104632]
+ [1.69825871e-05 0.01550401 3.08365634e-05 ... 0.00939364452 0.0856611207 0.00960579887]]
+detection_classes: [[33 1 33 ... 8 1 1]
+ [3 3 3 ... 8 2 3]]
+detection_scores: [[0.126822397 0.940027297 0.155256033 ... 0.927633643 0.369897872 0.361762017]
+ [0.000598850893 0.0579975508 0.0283395238 ... 0.00242198561 0.0139497723 0.061717961]]
+detection_classes: [[65 1 65 ... 1 77 1]
+ [15 15 31 ... 7 31 72]]
+detection_scores: [[0.0093305381 0.00702567771 0.0195349269 ... 0.982506 0.0149407201 0.081239827]
+ [0.0326153301 0.0952991918 0.0236386657 ... 0.00334896403 0.606741726 0.0800816938]]
+detection_classes: [[9 9 9 ... 9 9 9]
+ [3 13 3 ... 7 10 3]]
+detection_scores: [[0.10360001 0.100797996 0.064603433 ... 0.323611796 0.0319782048 0.108219653]
+ [0.294049829 0.0360348858 0.969539642 ... 0.0302124247 0.110187873 0.463190079]]
+detection_classes: [[15 9 15 ... 15 51 1]
+ [3 10 10 ... 10 10 64]]
+detection_scores: [[0.00705746934 0.331836343 0.0156462211 ... 0.0334583409 0.0159229357 0.0270537548]
+ [0.00271141692 0.0121634994 0.00288022775 ... 0.0778024346 0.0218496434 0.167063192]]
+detection_classes: [[15 47 15 ... 15 20 20]
+ [3 3 15 ... 15 8 3]]
+detection_scores: [[0.346571296 0.275333703 0.868439257 ... 0.00615980942 0.0399692878 0.0158336014]
+ [0.0565515123 0.0408316 0.000169011299 ... 0.0120456936 0.0408432744 0.00832085777]]
+detection_classes: [[31 3 15 ... 15 3 27]
+ [10 10 10 ... 10 10 10]]
+detection_scores: [[0.021423962 0.276069105 0.679683208 ... 0.0799741149 0.276806742 0.093748711]
+ [0.00218764436 0.001757683 0.00227787322 ... 0.00213016546 0.00143075641 0.00297872233]]
+detection_classes: [[20 20 20 ... 20 20 20]
+ [3 1 1 ... 6 10 10]]
+detection_scores: [[0.0772074759 0.164390042 0.494593769 ... 0.840771139 0.0880051628 0.260053128]
+ [0.433764815 0.0737166256 0.00869860128 ... 0.0243252218 0.605094314 0.878297746]]
+detection_classes: [[85 13 11 ... 11 14 64]
+ [1 1 3 ... 6 1 1]]
+detection_scores: [[0.000289716234 0.00115147559 0.00015427373 ... 0.00187163742 0.00212058285 0.000542397785]
+ [0.00471278606 0.0113309063 0.983373106 ... 0.079204008 0.0636588 0.13558498]]
+detection_classes: [[1 10 3 ... 3 3 1]
+ [15 3 8 ... 3 6 1]]
+detection_scores: [[0.0529941395 0.469324827 0.84962821 ... 0.015748 0.0357810371 0.224951953]
+ [0.0333617814 0.129080579 0.0670411438 ... 0.00355184986 0.163816705 0.128040269]]
+detection_classes: [[1 85 1 ... 85 85 85]
+ [19 19 19 ... 19 19 19]]
+detection_scores: [[0.000983247883 0.0647078082 0.00117466832 ... 0.000246458629 0.0199828707 0.0100867609]
+ [0.0225272253 0.00442752847 0.0411748439 ... 0.0100672143 0.049830649 0.0466587692]]
+detection_classes: [[84 63 84 ... 67 55 84]
+ [37 23 15 ... 18 1 20]]
+detection_scores: [[0.215761915 0.213580236 0.40080747 ... 0.0521771573 0.0338393748 0.771969616]
+ [0.000861342 0.274255306 0.00132251775 ... 0.0110527929 0.00453586597 0.00359161338]]
+detection_classes: [[53 55 53 ... 53 53 53]
+ [1 5 5 ... 5 5 5]]
+detection_scores: [[0.00339478627 0.982364833 0.95989722 ... 0.358651042 0.0026086 0.00619724113]
+ [0.00564074889 0.00519087072 0.0116019491 ... 0.0202419572 0.098014541 0.00557533698]]
+detection_classes: [[17 13 17 ... 65 13 13]
+ [15 44 15 ... 15 31 44]]
+detection_scores: [[3.26442278e-05 0.000553876685 4.24307291e-05 ... 0.0299210884 0.00472111534 0.00269430038]
+ [0.049770169 0.0636807 0.0179534294 ... 0.0213338342 0.0189779829 0.1155072]]
+detection_classes: [[1 16 25 ... 25 16 16]
+ [1 10 3 ... 14 1 1]]
+detection_scores: [[0.000155696762 0.00366871431 0.000877037121 ... 0.00929728616 0.00119974569 0.00154201034]
+ [0.00205130968 0.0180385336 0.000316375634 ... 0.0133602703 0.0577642657 0.0894732922]]
+detection_classes: [[25 25 25 ... 25 25 25]
+ [1 1 62 ... 3 2 3]]
+detection_scores: [[0.100474387 0.00043479458 0.0240360796 ... 0.0126325777 0.000840551453 0.0126093235]
+ [0.0319184624 0.0743867233 0.0264135655 ... 0.0147673702 0.0699541047 0.0595596805]]
+detection_classes: [[1 86 1 ... 70 70 70]
+ [1 18 21 ... 4 2 27]]
+detection_scores: [[0.000941383303 0.00166514225 0.0148697114 ... 0.12387421 0.000390002242 0.00447231438]
+ [0.011420683 0.0226372294 0.0166584868 ... 0.344468832 0.00170953281 0.0107109798]]
+detection_classes: [[17 86 18 ... 81 70 70]
+ [84 1 77 ... 73 1 1]]
+detection_scores: [[0.00429467205 0.0109111359 0.0221531782 ... 0.00220259721 0.000601785548 0.0035938588]
+ [0.0889433846 0.159497663 0.651312172 ... 0.264705271 0.943752229 0.158668861]]
+detection_classes: [[44 1 4 ... 4 44 1]
+ [1 85 1 ... 13 10 10]]
+detection_scores: [[0.000207646081 0.0031474682 0.00423739431 ... 0.0418056548 0.000740466232 0.00177580945]
+ [0.0116198156 0.00393666327 0.0169680603 ... 0.00106378784 0.0833831728 0.0168195516]]
+detection_classes: [[44 72 81 ... 79 72 47]
+ [70 44 70 ... 70 51 81]]
+detection_scores: [[0.0399833061 0.127722219 0.0358308405 ... 0.0484344 0.00355116953 0.00300917588]
+ [0.00140219624 0.0141201913 0.00416824874 ... 0.00292528584 0.0111350529 0.000140151984]]
+detection_classes: [[1 36 3 ... 3 3 1]
+ [70 90 81 ... 70 32 31]]
+detection_scores: [[0.644084513 0.0685705766 0.581522107 ... 0.0206306018 0.225172177 0.396113276]
+ [0.0111654708 0.128721595 0.0243226178 ... 0.000641889055 0.0259472746 0.0147833852]]
+detection_classes: [[1 1 1 ... 1 31 1]
+ [1 1 1 ... 70 81 81]]
+detection_scores: [[0.164100677 0.00200306159 0.100410588 ... 0.012573556 0.0138347326 0.0410424806]
+ [0.142205358 0.0037377181 0.0365470648 ... 0.00573336752 0.00142245297 0.000904084533]]
+detection_classes: [[15 17 15 ... 15 17 15]
+ [16 17 15 ... 15 18 44]]
+detection_scores: [[0.00183658104 0.00155015802 0.0229072068 ... 0.0121678356 3.5236033e-05 0.00143391057]
+ [1.34659231e-05 0.000121881196 0.000210705562 ... 0.00778894126 0.0124446144 0.000537894084]]
+detection_classes: [[15 15 15 ... 15 84 15]
+ [1 1 6 ... 8 50 1]]
+detection_scores: [[0.0313830934 0.0100323129 0.17886506 ... 0.0204605423 0.024803156 0.0361361876]
+ [0.216053441 0.0497887172 0.00964361895 ... 0.0108854752 0.0450419746 0.06016206]]
+detection_classes: [[15 1 15 ... 1 1 1]
+ [16 16 16 ... 25 25 16]]
+detection_scores: [[0.201944441 0.532283843 0.663772643 ... 0.213409677 0.40374431 0.648632526]
+ [0.00864168629 0.0152325192 0.018062925 ... 0.015788652 0.00630132901 0.0168304779]]
+detection_classes: [[15 18 15 ... 1 1 85]
+ [3 3 3 ... 8 1 1]]
+detection_scores: [[0.000572829158 0.00150231307 0.000520613161 ... 0.0167621579 0.00171932054 0.0017675308]
+ [0.891984344 0.0515919067 0.203065977 ... 0.03290217 0.00313668861 0.0276518613]]
+detection_classes: [[25 1 25 ... 25 25 25]
+ [27 77 15 ... 6 77 31]]
+detection_scores: [[0.00511881476 0.0391318537 0.0484304726 ... 0.587544143 0.0643357933 0.0923125744]
+ [0.0823577866 0.0525319092 0.0150092561 ... 0.0891779289 0.0853316411 0.06495139]]
+detection_classes: [[15 1 15 ... 15 77 31]
+ [3 11 11 ... 11 14 1]]
+detection_scores: [[0.145147011 0.191075802 0.176657587 ... 0.0743974522 0.194589093 0.734958649]
+ [0.000393243216 0.00533239264 0.00531814 ... 0.0872045383 0.0412658751 0.0649478287]]
+detection_classes: [[1 1 35 ... 35 10 10]
+ [1 1 1 ... 5 1 31]]
+detection_scores: [[0.00112158037 0.00270360964 0.00178698904 ... 0.0175395608 0.000698326621 0.00610693358]
+ [0.523757935 0.251093417 0.926813722 ... 0.985138476 0.152307808 0.104953118]]
+detection_classes: [[16 25 25 ... 15 16 44]
+ [51 25 24 ... 25 25 25]]
+detection_scores: [[0.00190881966 0.00262339367 0.00555095915 ... 0.125935212 0.00218550442 0.000371849863]
+ [0.00203081174 0.000351852883 0.00537497643 ... 0.00556575274 0.000402306759 0.000136378352]]
+detection_classes: [[25 8 25 ... 25 8 8]
+ [2 3 2 ... 3 6 1]]
+detection_scores: [[0.00737727154 0.00644645421 0.0219238959 ... 0.0238066744 0.0249916855 0.292678177]
+ [0.00164430053 0.0151722319 0.00666365586 ... 0.301826775 0.0540166572 0.0504600108]]
+detection_classes: [[84 84 84 ... 84 75 46]
+ [77 70 70 ... 1 77 77]]
+detection_scores: [[0.626664579 0.807230413 0.855418265 ... 0.653627694 0.0145763364 0.0652316064]
+ [0.0388636142 0.00529424101 0.00305272848 ... 0.103378408 0.00475565763 0.134761676]]
+detection_classes: [[81 44 81 ... 1 44 31]
+ [1 3 1 ... 4 27 27]]
+detection_scores: [[0.120119594 0.77107805 0.320417076 ... 0.0261167791 0.0228865743 0.0134194791]
+ [0.0729239 0.484951526 0.0504424646 ... 0.0666332692 0.247741759 0.0461384431]]
+detection_classes: [[1 1 1 ... 1 1 1]
+ [15 27 15 ... 15 77 31]]
+detection_scores: [[0.475266695 0.729884684 0.868134081 ... 0.397669107 0.717313051 0.867531598]
+ [0.000173704146 0.00377261499 0.000547142175 ... 0.00430715876 0.00769245392 0.01478073]]
+detection_classes: [[16 1 9 ... 1 84 44]
+ [70 70 70 ... 81 90 44]]
+detection_scores: [[0.00681678811 0.0145852007 0.118727461 ... 0.00234170724 0.0624539331 0.0354349501]
+ [0.0207453147 0.0261173192 0.00905662775 ... 0.0051286458 0.0444053 0.104626767]]
+detection_classes: [[2 27 2 ... 2 27 1]
+ [70 47 70 ... 70 44 1]]
+detection_scores: [[0.00205251598 0.00765848905 0.0177669208 ... 0.00680109765 0.0256903935 0.092075184]
+ [0.00475431746 0.00202264893 0.0029834907 ... 0.0199222509 0.0180931706 0.0354514048]]
+detection_classes: [[81 44 81 ... 65 62 86]
+ [62 1 62 ... 15 44 44]]
+detection_scores: [[0.151305154 0.135357946 0.148890793 ... 0.0204647221 0.0423279256 0.0116802072]
+ [0.14400667 0.436377555 0.0164223593 ... 0.00635859324 0.284376 0.118238375]]
+detection_classes: [[47 57 51 ... 67 47 47]
+ [62 64 62 ... 62 18 3]]
+detection_scores: [[0.420707494 0.742312789 0.825564086 ... 0.989441276 0.876176119 0.211673588]
+ [0.0995563343 0.543333888 0.829464555 ... 0.0291967653 0.0167694166 0.0209385734]]
+detection_classes: [[48 50 57 ... 67 48 56]
+ [82 44 79 ... 44 44 44]]
+detection_scores: [[0.0361512043 0.0756879821 0.29452157 ... 0.0948532671 0.156263322 0.448978812]
+ [0.0510157794 0.834431946 0.683168352 ... 0.0763001293 0.965923 0.529240191]]
+detection_classes: [[82 44 82 ... 79 50 50]
+ [79 51 79 ... 79 47 81]]
+detection_scores: [[0.0178870764 0.0532461107 0.0276639201 ... 0.0558938906 0.504735529 0.2516554]
+ [0.0125473486 0.0109513598 0.07315889 ... 0.000865534646 0.00593367638 0.0115084471]]
+detection_classes: [[3 3 3 ... 3 10 3]
+ [1 9 1 ... 5 1 9]]
+detection_scores: [[0.157161266 0.177164271 0.323471546 ... 0.0747471824 0.0488592684 0.898211837]
+ [0.0502813272 0.0908093899 0.562142074 ... 0.0183188301 0.0139564 0.0141857034]]
+detection_classes: [[1 1 1 ... 5 1 5]
+ [3 10 13 ... 3 10 10]]
+detection_scores: [[0.78553921 0.160785452 0.895350516 ... 0.934578776 0.237765372 0.177092239]
+ [0.00268184114 0.14582254 0.033451397 ... 0.00704794656 0.0675751567 0.0923892856]]
+detection_classes: [[15 1 1 ... 25 1 62]
+ [15 16 15 ... 1 16 16]]
+detection_scores: [[0.154904813 0.176336989 0.827166557 ... 0.0444136187 0.110175811 0.0603469424]
+ [0.0151105747 0.0711460337 0.929646552 ... 0.00612451276 0.012270214 0.0213344954]]
+detection_classes: [[20 1 20 ... 20 20 20]
+ [62 32 62 ... 1 32 32]]
+detection_scores: [[0.448817164 0.276505649 0.260716408 ... 0.0256586839 0.00621035695 0.0100307651]
+ [0.000260188826 9.0934358e-05 0.000184011078 ... 0.0319450237 0.000259314984 0.000485024357]]
+detection_classes: [[2 10 2 ... 64 85 13]
+ [10 13 13 ... 13 13 13]]
+detection_scores: [[0.0302391667 0.0209276564 0.0232280586 ... 0.000280370674 0.00975917093 0.0169322081]
+ [0.000646915287 0.00021620703 0.00905326195 ... 0.000463494129 3.76728858e-05 0.000683579245]]
+detection_classes: [[3 1 3 ... 4 3 3]
+ [21 21 21 ... 21 1 1]]
+detection_scores: [[0.0459112376 0.00586585421 0.08324413 ... 0.71363163 0.145670205 0.485867769]
+ [0.00304071303 0.00647677621 0.0100405524 ... 7.03520709e-05 0.00154244166 0.00949868]]
+detection_classes: [[35 9 1 ... 9 9 9]
+ [9 9 9 ... 9 1 9]]
+detection_scores: [[0.13934806 0.376523703 0.344707608 ... 0.0973065645 0.149952188 0.409671158]
+ [0.00900340639 0.00258330186 0.0246200431 ... 0.0418701619 0.00980475172 0.00401529]]
+detection_classes: [[62 32 32 ... 1 90 32]
+ [62 84 15 ... 1 32 62]]
+detection_scores: [[0.000918669626 0.0945362374 0.0169151928 ... 0.129299611 0.0338160321 0.118353657]
+ [0.0138329873 0.10425175 0.201086804 ... 0.097619 0.011077987 0.0117839547]]
+detection_classes: [[16 22 22 ... 22 16 16]
+ [47 32 32 ... 1 47 46]]
+detection_scores: [[0.000130275817 8.92404296e-06 0.000723541889 ... 0.000375047646 1.28799684e-05 2.83141781e-05]
+ [0.024681434 0.138944909 0.0704370886 ... 0.99669379 0.00162209931 0.00104833022]]
+detection_classes: [[52 52 52 ... 52 16 52]
+ [35 1 35 ... 1 1 1]]
+detection_scores: [[0.0317626558 0.395339608 0.00763716502 ... 0.210200369 0.022672331 0.164935395]
+ [0.590032 0.221694469 0.544503808 ... 0.00235657976 0.148950547 0.0911489576]]
+detection_classes: [[1 1 1 ... 1 35 1]
+ [1 40 1 ... 1 40 37]]
+detection_scores: [[0.600536585 0.441263467 0.556261957 ... 0.0244656689 0.0462488867 0.0509659536]
+ [0.000676514755 0.0289682485 0.0026594582 ... 0.00564034 0.053984873 0.00305717275]]
+detection_classes: [[27 27 35 ... 35 27 27]
+ [35 27 35 ... 1 1 1]]
+detection_scores: [[0.827613533 0.525879562 0.0789225101 ... 0.108032539 0.781081498 0.537425041]
+ [0.855205357 0.67717 0.784713686 ... 0.655999124 0.457838953 0.377096146]]
+detection_classes: [[52 52 52 ... 52 52 52]
+ [44 1 44 ... 1 55 55]]
+detection_scores: [[0.262643 0.634637654 0.0158339757 ... 0.127511427 0.855354965 0.657737255]
+ [0.147242263 0.753091812 0.0633945167 ... 0.20522137 0.417701244 0.790009379]]
+detection_classes: [[62 1 62 ... 67 1 1]
+ [35 27 35 ... 35 27 27]]
+detection_scores: [[0.109756261 0.948414326 0.912642658 ... 0.0732817128 0.473173648 0.190173194]
+ [0.0360833667 0.135693222 0.124984428 ... 0.0108515285 0.435169637 0.413845062]]
+detection_classes: [[55 57 51 ... 67 57 58]
+ [67 44 62 ... 67 62 62]]
+detection_scores: [[0.00334138633 0.883640349 0.00306522 ... 0.782412887 0.454762757 0.0170092117]
+ [0.0364615209 0.0710242242 0.990266919 ... 0.0182570778 0.00244641211 0.202681541]]
+detection_classes: [[81 70 70 ... 70 70 81]
+ [1 5 1 ... 5 1 1]]
+detection_scores: [[0.00616052654 0.000526449061 0.0605570599 ... 0.00552834524 0.011540697 0.0659529269]
+ [0.449379504 0.105034873 0.487687111 ... 0.154043883 0.407570332 0.589371383]]
+detection_classes: [[70 70 70 ... 70 44 70]
+ [44 81 70 ... 70 47 44]]
+detection_scores: [[0.0322033539 0.26565668 0.0158732515 ... 0.075948 0.00542032393 0.0389502309]
+ [0.0010591374 0.00829714537 0.000203583084 ... 0.49290365 0.0100424672 0.00047811176]]
+detection_classes: [[3 1 4 ... 1 1 1]
+ [84 84 84 ... 84 44 85]]
+detection_scores: [[0.882168055 0.453812748 0.296909362 ... 0.0470885076 0.387173533 0.826021373]
+ [0.90176934 0.901648641 0.887048602 ... 0.894262254 0.0765318722 0.278645575]]
+detection_classes: [[3 38 1 ... 64 64 3]
+ [1 10 1 ... 1 1 1]]
+detection_scores: [[0.0642303824 0.0463885702 0.0317876749 ... 0.000822258065 0.00161611708 0.00166058727]
+ [0.615637 0.946990907 0.862694621 ... 0.618979394 0.765201926 0.454741985]]
+detection_classes: [[28 62 62 ... 28 28 28]
+ [31 1 1 ... 7 1 1]]
+detection_scores: [[0.00279501732 0.0204820987 0.00408932101 ... 0.0239285734 0.0153608043 0.0148899714]
+ [0.430353016 0.168361306 0.748924911 ... 0.324752957 0.169510111 0.0530682318]]
+detection_classes: [[31 1 1 ... 8 3 1]
+ [3 10 3 ... 11 10 3]]
+detection_scores: [[0.28867507 0.526422262 0.882226944 ... 0.23651965 0.437053174 0.174907684]
+ [0.0313141048 0.240261689 0.283839822 ... 0.00809025485 0.403075248 0.117608964]]
+detection_classes: [[15 77 31 ... 7 10 1]
+ [3 10 4 ... 3 3 4]]
+detection_scores: [[0.233556554 0.0613538288 0.0607043803 ... 0.0233359616 0.179243416 0.173220277]
+ [0.0617687665 0.0217756536 0.0907034874 ... 0.287755609 0.00914385915 0.00286935945]]
+detection_classes: [[3 2 1 ... 13 14 10]
+ [1 1 6 ... 8 1 1]]
+detection_scores: [[0.0438395627 0.0413784161 0.021474041 ... 0.00110483554 0.00561548769 0.0128690628]
+ [0.0532172062 0.054691121 0.155295521 ... 0.240760237 0.00261387764 0.0407833718]]
+detection_classes: [[1 1 1 ... 1 1 1]
+ [13 1 3 ... 8 1 1]]
+detection_scores: [[0.359386593 0.700527847 0.936814666 ... 0.376203209 0.358801454 0.486278564]
+ [0.003083674 0.00214118231 0.00295559247 ... 0.00407710345 0.00057210162 7.81277631e-05]]
+detection_classes: [[15 32 15 ... 15 15 84]
+ [3 10 3 ... 8 1 1]]
+detection_scores: [[0.00650721323 0.0322397873 0.0396452062 ... 0.0335284472 0.0239818748 0.0806428194]
+ [0.314409107 0.944693 0.225630283 ... 0.09156432 0.0293182246 0.0335170962]]
+detection_classes: [[62 3 1 ... 9 84 31]
+ [15 10 62 ... 15 10 14]]
+detection_scores: [[0.0157510415 0.0681850538 0.363095582 ... 0.106787011 0.0218329299 0.00892849453]
+ [0.00792084355 0.0057268166 0.038706325 ... 0.143530056 0.0231460594 0.00488571497]]
+detection_classes: [[3 1 3 ... 8 1 3]
+ [3 1 3 ... 7 1 1]]
+detection_scores: [[0.00651243469 0.120036431 0.00232267659 ... 0.162425101 0.0181166865 0.0315368772]
+ [0.0384918749 0.010915244 0.00968082435 ... 0.014256103 0.0389528163 0.0019195613]]
+detection_classes: [[64 14 64 ... 8 10 8]
+ [25 25 25 ... 25 25 25]]
+detection_scores: [[0.0214108601 0.0173251964 0.0475181602 ... 0.00479860837 0.0285093449 0.00362379267]
+ [0.0229602121 0.092139408 0.0615494214 ... 0.174749032 0.0040395367 0.0154238064]]
+detection_classes: [[1 1 8 ... 8 1 1]
+ [85 85 85 ... 85 85 16]]
+detection_scores: [[0.114341371 0.156400517 0.00853880122 ... 0.199380979 0.113250069 0.0658699572]
+ [0.00179245975 0.000223889 0.00606061658 ... 0.000290519471 4.07482476e-05 3.6400008e-05]]
+detection_classes: [[3 10 3 ... 13 13 13]
+ [3 1 8 ... 10 10 1]]
+detection_scores: [[0.173162341 0.186108306 0.0274866913 ... 0.00633418 0.198764786 0.0992945358]
+ [0.510240376 0.403880715 0.537077 ... 0.00846288074 0.434789449 0.256036818]]
+detection_classes: [[62 1 62 ... 5 62 77]
+ [1 1 1 ... 7 1 1]]
+detection_scores: [[0.0524608046 0.0582550466 0.521327317 ... 0.0209501162 0.052327238 0.018469492]
+ [0.0616334975 0.0264825411 0.0479025617 ... 0.462959021 0.323055506 0.110198848]]
+detection_classes: [[2 64 2 ... 15 1 1]
+ [25 25 25 ... 25 25 25]]
+detection_scores: [[0.000942974235 0.000350414281 0.00263090944 ... 0.0144807426 0.000983193167 0.00190137059]
+ [0.00487021264 0.0649497882 0.0832102597 ... 0.0352846347 0.0121869193 0.00455195876]]
+detection_classes: [[15 15 15 ... 28 3 3]
+ [15 28 15 ... 28 28 28]]
+detection_scores: [[0.463052243 0.0508431345 0.84414345 ... 0.0223978478 0.496747434 0.600742042]
+ [0.2336732 0.0739535093 0.0563387163 ... 0.0631936714 0.0348286331 0.00291893492]]
+I0911 18:26:29.614686 140509984384832 coco_evaluator.py:166] Using annotation file: gs://cam2-datasets/annotations/instances_val2017.json
+I0911 18:26:31.772578 140509984384832 train_utils.py:151] [BestCheckpointExporter] received eval_logs: {'cls_loss': <tf.Tensor: shape=(), dtype=float32, numpy=0.8448729>, 'box_loss': <tf.Tensor: shape=(), dtype=float32, numpy=0.34913465>, 'giou_loss': <tf.Tensor: shape=(), dtype=float32, numpy=0.72377604>, 'validation_loss': <tf.Tensor: shape=(), dtype=float32, numpy=1.9177841>, 'AP': 0.0, 'AP50': 0.0, 'AP75': 0.0, 'APs': 0.0, 'APm': 0.0, 'APl': 0.0, 'ARmax1': 0.0, 'ARmax10': 0.0, 'ARmax100': 0.0, 'ARs': 0.0, 'ARm': 0.0, 'ARl': 0.0}, at step: 425040
+I0911 18:26:31.772855 140509984384832 train_utils.py:177] [BestCheckpointExporter] comparing results. old: 0.000000, new: 0.000000
+I0911 18:26:31.787829 140509984384832 controller.py:318]  eval | step:  425040 | steps/sec:    0.2 | eval time:  401.5 sec | output: 
+    {'AP': 0.0,
+     'AP50': 0.0,
+     'AP75': 0.0,
+     'APl': 0.0,
+     'APm': 0.0,
+     'APs': 0.0,
+     'ARl': 0.0,
+     'ARm': 0.0,
+     'ARmax1': 0.0,
+     'ARmax10': 0.0,
+     'ARmax100': 0.0,
+     'ARs': 0.0,
+     'best_AP': 0.0,
+     'box_loss': 0.34913465,
+     'cls_loss': 0.8448729,
+     'giou_loss': 0.72377604,
+     'steps_per_second': 0.19424729776489852,
+     'validation_loss': 1.9177841}
+I0911 18:26:34.857127 140509984384832 train_lib.py:282] Number of trainable params in model: 41.612831 Millions.
+I0911 18:26:34.857566 140509984384832 train_utils.py:534] Failed to count model FLOPs with error tensorflow.python.eager.polymorphic_function.polymorphic_function.Function.get_concrete_function() argument after ** must be a mapping, not NoneType, because the build() methods in keras layers were not called. This is probably because the model was not feed any input, e.g., the max train step already reached before this run.
+I0911 18:26:34.859136 140509984384832 train_utils.py:380] Saving gin configurations to gs://cam2-models/detr_exp2/operative_config.eval.gin
 loading annotations into memory...
-Done (t=0.67s)
+Done (t=0.69s)
 creating index...
 index created!
 restoring or initializing model...
 restored model from gs://cam2-models/detr_exp2/ckpt-425040.
 restored from checkpoint: gs://cam2-models/detr_exp2/ckpt-425040
  eval | step:  425040 | running 78 steps of evaluation...
-Traceback (most recent call last):
-  File "/home/wenxinjiang/tf-maskformer/models/official/projects/detr/train.py", line 70, in <module>
-    app.run(main)
-  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/absl/app.py", line 308, in run
-    _run_main(main, args)
-  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/absl/app.py", line 254, in _run_main
-    sys.exit(main(argv))
-  File "/home/wenxinjiang/tf-maskformer/models/official/projects/detr/train.py", line 58, in main
-    train_lib.run_experiment(
-  File "/home/wenxinjiang/tf-maskformer/models/official/core/train_lib.py", line 357, in run_experiment
-    return runner.run()
-  File "/home/wenxinjiang/tf-maskformer/models/official/core/train_lib.py", line 265, in run
-    self.controller.evaluate(steps=params.trainer.validation_steps)
-  File "/home/wenxinjiang/tf-maskformer/models/orbit/controller.py", line 302, in evaluate
-    eval_output = self.evaluator.evaluate(steps_tensor)
-  File "/home/wenxinjiang/tf-maskformer/models/orbit/standard_runner.py", line 346, in evaluate
-    outputs = self._eval_loop_fn(
-  File "/home/wenxinjiang/tf-maskformer/models/orbit/utils/loop_fns.py", line 75, in loop_fn
-    outputs = step_fn(iterator)
-  File "/opt/conda/envs/maskformer/lib/python3.9/site-packages/tensorflow/python/util/traceback_utils.py", line 153, in error_handler
-    raise e.with_traceback(filtered_tb) from None
-  File "/var/tmp/__autograph_generated_filefsjcwkin.py", line 39, in tf__eval_step
-    distributed_outputs = ag__.converted_call(ag__.ld(self).strategy.run, (ag__.ld(step_fn),), dict(args=(ag__.ld(inputs),)), fscope)
-  File "/var/tmp/__autograph_generated_filefsjcwkin.py", line 17, in step_fn
-    logs = ag__.converted_call(ag__.ld(self).task.validation_step, (ag__.ld(inputs),), dict(model=ag__.ld(self).model, metrics=ag__.ld(self).validation_metrics), fscope_1)
-  File "/var/tmp/__autograph_generated_fileli0trk3b.py", line 69, in tf__validation_step
-    ag__.converted_call(ag__.ld(logger).debug, (f'detection_classes: {ag__.converted_call(ag__.ld(detection_classes).numpy, (), None, fscope)}',), None, fscope)
-AttributeError: in user code:
-
-    File "/home/wenxinjiang/tf-maskformer/models/official/core/base_trainer.py", line 420, in step_fn  *
-        logs = self.task.validation_step(
-    File "/home/wenxinjiang/tf-maskformer/models/official/projects/detr/tasks/detection.py", line 388, in validation_step  *
-        logger.debug(f"detection_classes: {detection_classes.numpy()}")
-
-    AttributeError: 'Tensor' object has no attribute 'numpy'
-
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=1.38s).
+Accumulating evaluation results...
+DONE (t=0.34s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.000
+ eval | step:  425040 | steps/sec:    0.2 | eval time:  401.5 sec | output: 
+    {'AP': 0.0,
+     'AP50': 0.0,
+     'AP75': 0.0,
+     'APl': 0.0,
+     'APm': 0.0,
+     'APs': 0.0,
+     'ARl': 0.0,
+     'ARm': 0.0,
+     'ARmax1': 0.0,
+     'ARmax10': 0.0,
+     'ARmax100': 0.0,
+     'ARs': 0.0,
+     'best_AP': 0.0,
+     'box_loss': 0.34913465,
+     'cls_loss': 0.8448729,
+     'giou_loss': 0.72377604,
+     'steps_per_second': 0.19424729776489852,
+     'validation_loss': 1.9177841}
 WARNING:tensorflow:Detecting that an object or model or tf.train.Checkpoint is being deleted with unrestored values. See the following logs for the specific values in question. To silence these warnings, use `status.expect_partial()`. See https://www.tensorflow.org/api_docs/python/tf/train/Checkpoint#restorefor details about the status object returned by the restore function.
-W0826 17:55:16.110168 139727077353280 checkpoint.py:205] Detecting that an object or model or tf.train.Checkpoint is being deleted with unrestored values. See the following logs for the specific values in question. To silence these warnings, use `status.expect_partial()`. See https://www.tensorflow.org/api_docs/python/tf/train/Checkpoint#restorefor details about the status object returned by the restore function.
+W0911 18:26:35.308911 140509984384832 checkpoint.py:205] Detecting that an object or model or tf.train.Checkpoint is being deleted with unrestored values. See the following logs for the specific values in question. To silence these warnings, use `status.expect_partial()`. See https://www.tensorflow.org/api_docs/python/tf/train/Checkpoint#restorefor details about the status object returned by the restore function.
 WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer.iter
-W0826 17:55:16.110378 139727077353280 checkpoint.py:214] Value in checkpoint could not be found in the restored object: (root).optimizer.iter
+W0911 18:26:35.309116 140509984384832 checkpoint.py:214] Value in checkpoint could not be found in the restored object: (root).optimizer.iter
 WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer.beta_1
-W0826 17:55:16.110421 139727077353280 checkpoint.py:214] Value in checkpoint could not be found in the restored object: (root).optimizer.beta_1
+W0911 18:26:35.309181 140509984384832 checkpoint.py:214] Value in checkpoint could not be found in the restored object: (root).optimizer.beta_1
 WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer.beta_2
-W0826 17:55:16.110453 139727077353280 checkpoint.py:214] Value in checkpoint could not be found in the restored object: (root).optimizer.beta_2
+W0911 18:26:35.309216 140509984384832 checkpoint.py:214] Value in checkpoint could not be found in the restored object: (root).optimizer.beta_2
 WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer.decay
-W0826 17:55:16.110485 139727077353280 checkpoint.py:214] Value in checkpoint could not be found in the restored object: (root).optimizer.decay
+W0911 18:26:35.309247 140509984384832 checkpoint.py:214] Value in checkpoint could not be found in the restored object: (root).optimizer.decay

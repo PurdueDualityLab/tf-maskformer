@@ -385,8 +385,10 @@ class DetectionTask(base_task.Task):
     else:
       detection_classes = outputs['detection_classes']
     
-    logger.debug(f"detection_classes: {detection_classes.numpy()}")
-    logger.debug(f"detection_scores: {detection_scores.numpy()}")
+    tf.print("detection_classes:", detection_classes)
+    tf.print("detection_scores:", detection_scores)
+    # logger.debug(f"detection_classes: {detection_classes.numpy()}")
+    # logger.debug(f"detection_scores: {detection_scores.numpy()}")
 
     if 'num_detections' not in outputs:
       num_detections = tf.reduce_sum(
@@ -406,6 +408,7 @@ class DetectionTask(base_task.Task):
         'source_id': labels['id'],
         'image_info': labels['image_info']
     }
+    
 
     ground_truths = {
         'source_id': labels['id'],
