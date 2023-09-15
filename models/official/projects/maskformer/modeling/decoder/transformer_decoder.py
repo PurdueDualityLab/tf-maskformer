@@ -5,7 +5,6 @@ from official.projects.maskformer.modeling.decoder.detr_transformer import DETRT
   
 class MaskFormerTransformer(tf.keras.layers.Layer):
     def __init__(self,
-               backbone_endpoint_name,
                num_queries,
                hidden_size,
                num_encoder_layers=0,
@@ -13,8 +12,6 @@ class MaskFormerTransformer(tf.keras.layers.Layer):
                dropout_rate=0.1,
                **kwargs):
         super().__init__(**kwargs)
-        
-        self._backbone_endpoint_name = backbone_endpoint_name
         
         # Embeddings parameters.
         self._num_queries = num_queries
@@ -83,7 +80,6 @@ class MaskFormerTransformer(tf.keras.layers.Layer):
     
     def get_config(self):
         return {
-            "backbone_endpoint_name": self._backbone_endpoint_name,
             "num_queries": self._num_queries,
             "hidden_size": self._hidden_size,
             "num_encoder_layers": self._num_encoder_layers,

@@ -52,6 +52,7 @@ class PanopticTask(base_task.Task):
 							bfloat16=self._task_config.bfloat16, 
 							which_pixel_decoder=self._task_config.model.which_pixel_decoder,)
 		logging.info('Maskformer model build successful.')
+		
 		return model
 
 	def initialize(self, model: tf.keras.Model) -> None:
@@ -69,7 +70,7 @@ class PanopticTask(base_task.Task):
 			ckpt_dir_or_file = tf.train.latest_checkpoint(ckpt_dir_or_file)
 
 		if self._task_config.init_checkpoint_modules == 'all':
-			ckpt = tf.train.Checkpoint(model)
+			ckpt = tf.train.Checkpoint(**model.checkpoint_items)
 			status = ckpt.restore(ckpt_dir_or_file)
 			status.assert_consumed()
 			logging.info('Loaded whole model from %s',ckpt_dir_or_file)

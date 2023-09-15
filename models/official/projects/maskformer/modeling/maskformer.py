@@ -1,11 +1,10 @@
 import tensorflow as tf
 
-from official.vision.modeling.backbones import resnet
 from official.projects.maskformer.modeling.decoder.transformer_decoder import MaskFormerTransformer
 from official.projects.maskformer.modeling.layers.nn_block import MLPHead
 from official.projects.maskformer.modeling.decoder.transformer_pixel_decoder import TransformerFPN
 from official.projects.maskformer.modeling.decoder.pixel_decoder import CNNFPN
-import numpy as np
+from typing import Any, Dict, List, Mapping, Optional, Tuple, Union
 
 class MaskFormer(tf.keras.Model):
 	"""Maskformer"""
@@ -99,9 +98,7 @@ class MaskFormer(tf.keras.Model):
 		else:
 			raise ValueError("Invalid Pixel Decoder: ", self._pixel_decoder)
 		
-		self.transformer = MaskFormerTransformer(backbone_endpoint_name=self._backbone_endpoint,
-												batch_size=self._batch_size,
-												num_queries=self._num_queries,
+		self.transformer = MaskFormerTransformer(num_queries=self._num_queries,
 												hidden_size=self._hidden_size,
 												num_encoder_layers=self._detr_encoder_layers,
 												num_decoder_layers=self._num_decoder_layers,
@@ -116,6 +113,16 @@ class MaskFormer(tf.keras.Model):
 	@property
 	def backbone(self) -> tf.keras.Model:
 		return self._backbone
+	
+	@property
+	def checkpoint_items(
+		self) -> Mapping[str, Union[tf.keras.Model, tf.keras.layers.Layer]]:
+		"""Returns a dictionary of items to be additionally checkpointed."""
+		items = dict(backbone=self._backbone,
+					pixel_decoder=self.pixel_decoder,
+					transformer=self.transformer,
+					head=self.head)
+		return items
 	
 	def get_config(self):
 		return {
@@ -140,22 +147,14 @@ class MaskFormer(tf.keras.Model):
 		return new_dict
 
 	def call(self, image, training = False):
-		
 		backbone_feature_maps = self._backbone(image)
 		backbone_feature_maps_procesed = self.process_feature_maps(backbone_feature_maps)
-
 		if self._pixel_decoder == 'fpn':
 			mask_features = self.pixel_decoder(backbone_feature_maps_procesed)
 			transformer_enc_feat = backbone_feature_maps_procesed['5']
-
 		elif self._pixel_decoder == 'transformer_fpn':
 			mask_features, transformer_enc_feat = self.pixel_decoder(backbone_feature_maps_procesed)
-	
-		
 		transformer_features = self.transformer({"features": transformer_enc_feat})
-
-		
 		seg_pred = self.head({"per_pixel_embeddings" : mask_features,
 							"per_segment_embeddings": transformer_features})
-	
 		return seg_pred
