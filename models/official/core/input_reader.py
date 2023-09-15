@@ -45,6 +45,8 @@ def match_files(input_path: Union[Sequence[str], str]) -> List[str]:
            '"a,b,c", or (3) a list of str, each of which is a file '
            'path/pattern or multiple file paths/patterns separated by '
            'comma, but got: %s')
+  print("input_path: ", input_path)
+  exit()
   if isinstance(input_path, str):
     input_path_list = [input_path]
   elif isinstance(input_path, (list, tuple)):
