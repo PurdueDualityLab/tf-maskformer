@@ -5,7 +5,7 @@ fusermount -u ~/models
 gcsfuse --implicit-dirs cam2-datasets ~/datasets
 gcsfuse cam2-models ~/models
 export PYTHONPATH=$PYTHONPATH:~/tf-maskformer/models
-export MODEL_DIR="gs://cam2-models/detr_exp2"
+export MODEL_DIR="gs://cam2-models/detr_vishal_exps"
 export TPU_NAME="tf-debug-3"
 export TPU_SOFTWARE="2.12.0"
 export TPU_PROJECT="red-atlas-305317"
@@ -21,4 +21,4 @@ nohup python3 train.py \
 	--model_dir $MODEL_DIR \
 	--config_file $CONFIG_FILE \
     --tpu $TPU_NAME \
-	> logs_detr_exp2.txt &
+	> logs_detr_exp4.txt &
