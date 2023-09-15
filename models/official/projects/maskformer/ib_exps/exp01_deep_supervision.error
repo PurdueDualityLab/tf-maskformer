@@ -1,0 +1,269 @@
+2023-09-12 18:09:55.631351: I tensorflow/core/platform/cpu_feature_guard.cc:193] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2023-09-12 18:09:56.822292: W tensorflow/compiler/xla/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libnvinfer.so.7'; dlerror: libnvinfer.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /apps/spack/gilbreth/apps/gcc/6.3.0-gcc-4.8.5-234aoxy/lib64:/apps/spack/gilbreth/apps/gcc/6.3.0-gcc-4.8.5-234aoxy/lib:/apps/spack/gilbreth/apps/zlib/1.2.11-gcc-6.3.0-sweeczz/lib:/apps/spack/gilbreth/apps/mpc/1.1.0-gcc-4.8.5-eogmmao/lib:/apps/spack/gilbreth/apps/mpfr/3.1.6-gcc-4.8.5-nsgsjfy/lib:/apps/spack/gilbreth/apps/gmp/6.1.2-gcc-4.8.5-zn55wh7/lib:/apps/gilbreth/cudnn/cuda11.7/8.6.0/lib:/apps/gilbreth/cuda-toolkit/cuda-11.7.0/extras/CUPTI/lib64:/apps/gilbreth/cuda-toolkit/cuda-11.7.0/lib64:/apps/spack/gilbreth/apps/anaconda/2020.11-py38-gcc-4.8.5-djkvkvk/lib/python3.8/site-packages:/apps/spack/gilbreth/apps/anaconda/2020.11-py38-gcc-4.8.5-djkvkvk/lib/python3.8:/apps/spack/gilbreth/apps/anaconda/2020.11-py38-gcc-4.8.5-djkvkvk/lib:/usr/lib64
+2023-09-12 18:09:56.822917: W tensorflow/compiler/xla/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libnvinfer_plugin.so.7'; dlerror: libnvinfer_plugin.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /apps/spack/gilbreth/apps/gcc/6.3.0-gcc-4.8.5-234aoxy/lib64:/apps/spack/gilbreth/apps/gcc/6.3.0-gcc-4.8.5-234aoxy/lib:/apps/spack/gilbreth/apps/zlib/1.2.11-gcc-6.3.0-sweeczz/lib:/apps/spack/gilbreth/apps/mpc/1.1.0-gcc-4.8.5-eogmmao/lib:/apps/spack/gilbreth/apps/mpfr/3.1.6-gcc-4.8.5-nsgsjfy/lib:/apps/spack/gilbreth/apps/gmp/6.1.2-gcc-4.8.5-zn55wh7/lib:/apps/gilbreth/cudnn/cuda11.7/8.6.0/lib:/apps/gilbreth/cuda-toolkit/cuda-11.7.0/extras/CUPTI/lib64:/apps/gilbreth/cuda-toolkit/cuda-11.7.0/lib64:/apps/spack/gilbreth/apps/anaconda/2020.11-py38-gcc-4.8.5-djkvkvk/lib/python3.8/site-packages:/apps/spack/gilbreth/apps/anaconda/2020.11-py38-gcc-4.8.5-djkvkvk/lib/python3.8:/apps/spack/gilbreth/apps/anaconda/2020.11-py38-gcc-4.8.5-djkvkvk/lib:/usr/lib64
+2023-09-12 18:09:56.822927: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Cannot dlopen some TensorRT libraries. If you would like to use Nvidia GPU with TensorRT, please make sure the missing libraries mentioned above are installed properly.
+/home/isaeed/.conda/envs/cent7/2020.11-py38/tfvenv/lib/python3.9/site-packages/tensorflow_addons/utils/tfa_eol_msg.py:23: UserWarning: 
+
+TensorFlow Addons (TFA) has ended development and introduction of new features.
+TFA has entered a minimal maintenance and release mode until a planned end of life in May 2024.
+Please modify downstream libraries to take dependencies from other repositories in our TensorFlow community (e.g. Keras, Keras-CV, and Keras-NLP). 
+
+For more information see: https://github.com/tensorflow/addons/issues/2807 
+
+  warnings.warn(
+I0912 18:09:59.583483 47279777629248 train_utils.py:360] Final experiment parameters:
+{'runtime': {'all_reduce_alg': None,
+             'batchnorm_spatial_persistent': False,
+             'dataset_num_private_threads': None,
+             'default_shard_dim': -1,
+             'distribution_strategy': 'one_device',
+             'enable_xla': False,
+             'gpu_thread_mode': None,
+             'loss_scale': None,
+             'mixed_precision_dtype': 'float32',
+             'num_cores_per_replica': 1,
+             'num_gpus': 1,
+             'num_packs': 1,
+             'per_gpu_thread_count': 0,
+             'run_eagerly': False,
+             'task_index': -1,
+             'tpu': None,
+             'tpu_enable_xla_dynamic_padder': None,
+             'worker_hosts': None},
+ 'task': {'allow_image_summary': False,
+          'bfloat16': False,
+          'differential_privacy_config': None,
+          'init_checkpoint': '/depot/davisjam/data/vishal/pretrained_ckpts/tfmg_resnet50/ckpt-62400',
+          'init_checkpoint_modules': 'backbone',
+          'losses': {'background_cls_weight': 0.1,
+                     'class_offset': 0,
+                     'l2_weight_decay': 0.0001},
+          'model': {'backbone': {'resnet': {'bn_trainable': False,
+                                            'depth_multiplier': 1.0,
+                                            'model_id': 50,
+                                            'replace_stem_max_pool': False,
+                                            'resnetd_shortcut': False,
+                                            'scale_stem': True,
+                                            'se_ratio': 0.0,
+                                            'stem_type': 'v0',
+                                            'stochastic_depth_drop_rate': 0.0},
+                                 'type': 'resnet'},
+                    'backbone_endpoint_name': '5',
+                    'deep_supervision': True,
+                    'detr_encoder_layers': 0,
+                    'fpn_encoder_layers': 6,
+                    'hidden_size': 256,
+                    'input_size': [640, 640, 3],
+                    'norm_activation': {'activation': 'relu',
+                                        'norm_epsilon': 0.001,
+                                        'norm_momentum': 0.99,
+                                        'use_sync_bn': True},
+                    'num_classes': 133,
+                    'num_decoder_layers': 6,
+                    'num_queries': 100,
+                    'which_pixel_decoder': 'transformer_fpn'},
+          'name': None,
+          'panoptic_quality_evaluator': {'ignored_label': 0,
+                                         'is_thing': None,
+                                         'num_categories': 133,
+                                         'rescale_predictions': False},
+          'per_category_metrics': False,
+          'train_data': {'apply_tf_data_service_before_batching': False,
+                         'block_length': 1,
+                         'cache': False,
+                         'cycle_length': None,
+                         'decoder': {'simple_decoder': {'attribute_names': [],
+                                                        'mask_binarize_threshold': None,
+                                                        'regenerate_source_id': False},
+                                     'type': 'simple_decoder'},
+                         'deterministic': None,
+                         'drop_remainder': True,
+                         'dtype': 'bfloat16',
+                         'enable_shared_tf_data_service_between_parallel_trainers': False,
+                         'enable_tf_data_service': False,
+                         'file_type': 'tfrecord',
+                         'global_batch_size': 1,
+                         'input_path': '/depot/davisjam/data/vishal/datasets/coco/tfrecords/train*',
+                         'is_training': True,
+                         'parser': {'aspect_ratio_range': (0.5, 2.0),
+                                    'aug_rand_hflip': True,
+                                    'aug_scale_max': 1.0,
+                                    'aug_scale_min': 1.0,
+                                    'dtype': 'bfloat16',
+                                    'groundtruth_padded_size': [640, 640],
+                                    'ignore_label': 0,
+                                    'max_retry': 50,
+                                    'min_overlap_params': (0.0, 1.4, 0.2, 0.1),
+                                    'min_scale': 0.3,
+                                    'output_size': [640, 640],
+                                    'pad_output': True,
+                                    'resize_eval_groundtruth': True,
+                                    'seed': 2045},
+                         'prefetch_buffer_size': None,
+                         'regenerate_source_id': False,
+                         'seed': None,
+                         'sharding': True,
+                         'shuffle_buffer_size': 1000,
+                         'tf_data_service_address': None,
+                         'tf_data_service_job_name': None,
+                         'tfds_as_supervised': False,
+                         'tfds_data_dir': '',
+                         'tfds_name': '',
+                         'tfds_skip_decoding_feature': '',
+                         'tfds_split': 'train',
+                         'trainer_id': None},
+          'validation_data': {'apply_tf_data_service_before_batching': False,
+                              'block_length': 1,
+                              'cache': False,
+                              'cycle_length': None,
+                              'decoder': {'simple_decoder': {'attribute_names': [],
+                                                             'mask_binarize_threshold': None,
+                                                             'regenerate_source_id': False},
+                                          'type': 'simple_decoder'},
+                              'deterministic': None,
+                              'drop_remainder': False,
+                              'dtype': 'float32',
+                              'enable_shared_tf_data_service_between_parallel_trainers': False,
+                              'enable_tf_data_service': False,
+                              'file_type': 'tfrecord',
+                              'global_batch_size': 1,
+                              'input_path': '/depot/davisjam/data/vishal/datasets/coco/tfrecords/val*',
+                              'is_training': False,
+                              'parser': {'aspect_ratio_range': (0.5, 2.0),
+                                         'aug_rand_hflip': True,
+                                         'aug_scale_max': 1.0,
+                                         'aug_scale_min': 1.0,
+                                         'dtype': 'float32',
+                                         'groundtruth_padded_size': (1280,
+                                                                     1280),
+                                         'ignore_label': 0,
+                                         'max_retry': 50,
+                                         'min_overlap_params': (0.0,
+                                                                1.4,
+                                                                0.2,
+                                                                0.1),
+                                         'min_scale': 0.3,
+                                         'output_size': [640, 640],
+                                         'pad_output': True,
+                                         'resize_eval_groundtruth': True,
+                                         'seed': 4096},
+                              'prefetch_buffer_size': None,
+                              'regenerate_source_id': False,
+                              'seed': None,
+                              'sharding': True,
+                              'shuffle_buffer_size': 10000,
+                              'tf_data_service_address': None,
+                              'tf_data_service_job_name': None,
+                              'tfds_as_supervised': False,
+                              'tfds_data_dir': '',
+                              'tfds_name': '',
+                              'tfds_skip_decoding_feature': '',
+                              'tfds_split': 'train',
+                              'trainer_id': None}},
+ 'trainer': {'allow_tpu_summary': False,
+             'best_checkpoint_eval_metric': '',
+             'best_checkpoint_export_subdir': 'best_ckpt',
+             'best_checkpoint_metric_comp': 'higher',
+             'checkpoint_interval': 1182870,
+             'continuous_eval_timeout': 3600,
+             'eval_tf_function': True,
+             'eval_tf_while_loop': False,
+             'loss_upper_bound': 1000000.0,
+             'max_to_keep': 3,
+             'optimizer_config': {'ema': None,
+                                  'learning_rate': {'stepwise': {'boundaries': [23657400],
+                                                                 'name': 'PiecewiseConstantDecay',
+                                                                 'offset': 0,
+                                                                 'values': [5e-05,
+                                                                            5e-06]},
+                                                    'type': 'stepwise'},
+                                  'optimizer': {'maskformer_adamw': {'amsgrad': False,
+                                                                     'beta_1': 0.9,
+                                                                     'beta_2': 0.999,
+                                                                     'clipnorm': None,
+                                                                     'clipvalue': None,
+                                                                     'epsilon': 1e-07,
+                                                                     'exclude_from_weight_decay': ['LayerNorm',
+                                                                                                   'layer_norm',
+                                                                                                   'bias'],
+                                                                     'global_clipnorm': 0.1,
+                                                                     'gradient_clip_norm': 0.01,
+                                                                     'include_in_weight_decay': None,
+                                                                     'name': 'AdamWeightDecay',
+                                                                     'weight_decay_rate': 0.0001},
+                                                'type': 'maskformer_adamw'},
+                                  'warmup': {'linear': {'name': 'linear',
+                                                        'warmup_learning_rate': 0.0,
+                                                        'warmup_steps': 640},
+                                             'type': 'linear'}},
+             'preemption_on_demand_checkpoint': True,
+             'recovery_begin_steps': 0,
+             'recovery_max_trials': 0,
+             'steps_per_loop': 118287,
+             'summary_interval': 1182870,
+             'train_steps': 35486100,
+             'train_tf_function': True,
+             'train_tf_while_loop': True,
+             'validation_interval': 118287,
+             'validation_steps': 5000,
+             'validation_summary_subdir': 'validation'}}
+I0912 18:09:59.583720 47279777629248 train_utils.py:372] Saving experiment configuration to ./params.yaml
+2023-09-12 18:09:59.597616: I tensorflow/core/platform/cpu_feature_guard.cc:193] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2023-09-12 18:10:00.189838: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1613] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 78957 MB memory:  -> device: 0, name: NVIDIA A100 80GB PCIe, pci bus id: 0000:81:00.0, compute capability: 8.0
+I0912 18:10:00.191597 47279777629248 train_utils.py:245] Running default trainer.
+I0912 18:10:00.191710 47279777629248 panoptic_maskformer.py:39] Building MaskFormer model.
+I0912 18:10:01.264033 47279777629248 panoptic_maskformer.py:45] Backbone build successful.
+I0912 18:10:01.266275 47279777629248 panoptic_maskformer.py:57] Maskformer model build successful.
+I0912 18:10:01.283222 47279777629248 legacy_adamw.py:56] AdamWeightDecay gradient_clip_norm=0.010000
+I0912 18:10:01.295515 47279777629248 panoptic_maskformer.py:94] Building panoptic segmentation dataset.
+/home/isaeed/.conda/envs/cent7/2020.11-py38/tfvenv/lib/python3.9/site-packages/tensorflow/python/data/ops/structured_function.py:256: UserWarning: Even though the `tf.config.experimental_run_functions_eagerly` option is set, this option does not apply to tf.data functions. To force eager execution of tf.data functions, please use `tf.data.experimental.enable_debug_mode()`.
+  warnings.warn(
+WARNING:tensorflow:From /home/isaeed/.conda/envs/cent7/2020.11-py38/tfvenv/lib/python3.9/site-packages/tensorflow/python/autograph/pyct/static_analysis/liveness.py:83: Analyzer.lamba_check (from tensorflow.python.autograph.pyct.static_analysis.liveness) is deprecated and will be removed after 2023-09-23.
+Instructions for updating:
+Lambda fuctions will be no more assumed to be used in the statement where they are used, or at least in the same block. https://github.com/tensorflow/tensorflow/issues/56089
+W0912 18:10:01.508260 47279777629248 deprecation.py:350] From /home/isaeed/.conda/envs/cent7/2020.11-py38/tfvenv/lib/python3.9/site-packages/tensorflow/python/autograph/pyct/static_analysis/liveness.py:83: Analyzer.lamba_check (from tensorflow.python.autograph.pyct.static_analysis.liveness) is deprecated and will be removed after 2023-09-23.
+Instructions for updating:
+Lambda fuctions will be no more assumed to be used in the statement where they are used, or at least in the same block. https://github.com/tensorflow/tensorflow/issues/56089
+WARNING:tensorflow:From /home/isaeed/.conda/envs/cent7/2020.11-py38/tfvenv/lib/python3.9/site-packages/tensorflow/python/util/deprecation.py:629: calling map_fn_v2 (from tensorflow.python.ops.map_fn) with dtype is deprecated and will be removed in a future version.
+Instructions for updating:
+Use fn_output_signature instead
+W0912 18:10:01.938866 47279777629248 deprecation.py:554] From /home/isaeed/.conda/envs/cent7/2020.11-py38/tfvenv/lib/python3.9/site-packages/tensorflow/python/util/deprecation.py:629: calling map_fn_v2 (from tensorflow.python.ops.map_fn) with dtype is deprecated and will be removed in a future version.
+Instructions for updating:
+Use fn_output_signature instead
+I0912 18:10:03.444900 47279777629248 controller.py:432] restoring or initializing model...
+I0912 18:10:03.445020 47279777629248 panoptic_maskformer.py:64] Initializing model from checkpoint: /depot/davisjam/data/vishal/pretrained_ckpts/tfmg_resnet50/ckpt-62400
+I0912 18:10:05.460265 47279777629248 panoptic_maskformer.py:83] Finished loading backbone checkpoint from /depot/davisjam/data/vishal/pretrained_ckpts/tfmg_resnet50/ckpt-62400
+I0912 18:10:05.460954 47279777629248 train_lib.py:261] Starts to execute mode: train
+I0912 18:10:05.462097 47279777629248 controller.py:257] train | step:      0 | training until step 35486100...
+Traceback (most recent call last):
+  File "/home/isaeed/tf-maskformer/models/official/projects/maskformer/train.py", line 83, in <module>
+    app.run(main)
+  File "/home/isaeed/.conda/envs/cent7/2020.11-py38/tfvenv/lib/python3.9/site-packages/absl/app.py", line 308, in run
+    _run_main(main, args)
+  File "/home/isaeed/.conda/envs/cent7/2020.11-py38/tfvenv/lib/python3.9/site-packages/absl/app.py", line 254, in _run_main
+    sys.exit(main(argv))
+  File "/home/isaeed/tf-maskformer/models/official/projects/maskformer/train.py", line 72, in main
+    train_lib.run_experiment(distribution_strategy=distribution_strategy,
+  File "/home/isaeed/tf-maskformer/models/official/core/train_lib.py", line 364, in run_experiment
+    return runner.run()
+  File "/home/isaeed/tf-maskformer/models/official/core/train_lib.py", line 264, in run
+    self.controller.train(steps=params.trainer.train_steps)
+  File "/home/isaeed/tf-maskformer/models/orbit/controller.py", line 261, in train
+    self._train_n_steps(num_steps)
+  File "/home/isaeed/tf-maskformer/models/orbit/controller.py", line 486, in _train_n_steps
+    train_output = self.trainer.train(num_steps_tensor)
+  File "/home/isaeed/tf-maskformer/models/orbit/standard_runner.py", line 146, in train
+    self._train_loop_fn(self._train_iter, num_steps)
+  File "/home/isaeed/.conda/envs/cent7/2020.11-py38/tfvenv/lib/python3.9/site-packages/tensorflow/python/util/traceback_utils.py", line 153, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "/home/isaeed/tf-maskformer/models/orbit/utils/loop_fns.py", line 120, in loop_fn
+    step_fn(iterator)
+  File "/home/isaeed/tf-maskformer/models/official/core/base_trainer.py", line 383, in train_step
+    self.strategy.run(step_fn, args=(inputs,), options=self._runtime_options)
+  File "/home/isaeed/tf-maskformer/models/official/core/base_trainer.py", line 374, in step_fn
+    logs = task_train_step(
+  File "/home/isaeed/tf-maskformer/models/official/projects/maskformer/tasks/panoptic_maskformer.py", line 226, in train_step
+    for k, v in features.items():
+AttributeError: 'tensorflow.python.framework.ops.EagerTensor' object has no attribute 'items'

@@ -11,6 +11,7 @@ class MaskFormerTransformer(tf.keras.layers.Layer):
                num_encoder_layers=0,
                num_decoder_layers=6,
                dropout_rate=0.1,
+               deep_supervision=False,
                **kwargs):
         super().__init__(**kwargs)
         
@@ -27,6 +28,7 @@ class MaskFormerTransformer(tf.keras.layers.Layer):
         self._num_encoder_layers = num_encoder_layers
         self._num_decoder_layers = num_decoder_layers
         self._dropout_rate = dropout_rate
+        self._deep_supervision = deep_supervision
   
 
 
@@ -34,7 +36,8 @@ class MaskFormerTransformer(tf.keras.layers.Layer):
 
         self._transformer = DETRTransformer(num_encoder_layers=self._num_encoder_layers,
                                             num_decoder_layers=self._num_decoder_layers,
-                                            dropout_rate=self._dropout_rate)
+                                            dropout_rate=self._dropout_rate,
+                                            deep_supervision=self._deep_supervision)
 
         self._query_embeddings = self.add_weight(
             "detr/query_embeddings",

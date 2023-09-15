@@ -23,6 +23,7 @@ from official.projects.maskformer.losses.inference import PanopticInference
 from official.vision.modeling import backbones
 import numpy as np
 
+import pickle
 
 @task_factory.register_task_cls(maskformer_cfg.MaskFormerTask)
 class PanopticTask(base_task.Task):
@@ -50,7 +51,8 @@ class PanopticTask(base_task.Task):
 							num_decoder_layers=self._task_config.model.num_decoder_layers,
 							num_classes=self._task_config.model.num_classes,
 							bfloat16=self._task_config.bfloat16, 
-							which_pixel_decoder=self._task_config.model.which_pixel_decoder,)
+							which_pixel_decoder=self._task_config.model.which_pixel_decoder,
+							deep_supervision=self._task_config.model.deep_supervision,)
 		logging.info('Maskformer model build successful.')
 		return model
 
@@ -120,9 +122,23 @@ class PanopticTask(base_task.Task):
 		return dataset
 
 
-	def build_losses(self, output, labels, aux_outputs=None):
-		# TODO : Auxilary outputs
-		outputs = {"pred_logits": output["class_prob_predictions"], "pred_masks": output["mask_prob_predictions"]}
+	def build_losses(self, output, labels, with_aux_outputs=False):		
+		outputs = {"pred_logits": output["class_prob_predictions"],
+				   "pred_masks": output["mask_prob_predictions"]}
+
+		if with_aux_outputs:
+			outputs["pred_masks"] = output["mask_prob_predictions"][-1]
+			outputs["pred_logits"] = output["class_prob_predictions"][-1]
+
+			formatted_aux_output = [
+					{"pred_logits": a, "pred_masks": b}
+					for a, b in zip(output["class_prob_predictions"][:-1], output["mask_prob_predictions"][:-1])
+				]
+			
+
+			outputs.update({"aux_decoder_outputs": formatted_aux_output})
+		
+		
 		targets = labels
 
 		matcher = hungarian_matching
@@ -143,12 +159,14 @@ class PanopticTask(base_task.Task):
 		weighted_dice = calculated_losses['loss_dice']
 		weighted_focal = calculated_losses['loss_focal']
 
+
+		aux_outputs = output.get('aux_decoder_outputs')
 		# Not implemented auxilary outputs
-		# if aux_outputs is not None:
-		#       total_aux_loss = 0.0
-		#       for i in range(4): #4 number of auxilary outputs
-		#               total_aux_loss += calculated_losses['loss_ce_'+str(i)] + calculated_losses['loss_dice_'+str(i)] + calculated_losses['loss_focal_'+str(i)]
-		#       total_loss = total_loss + total_aux_loss
+		if aux_outputs is not None:
+			total_aux_loss = 0.0
+			for i in range(len(aux_outputs)): #4 number of auxilary outputs
+				total_aux_loss += calculated_losses['loss_ce_'+str(i)] + calculated_losses['loss_dice_'+str(i)] + calculated_losses['loss_focal_'+str(i)]
+			total_loss = total_loss + total_aux_loss
 		
 
 		return total_loss, weighted_ce, weighted_focal, weighted_dice
@@ -190,44 +208,34 @@ class PanopticTask(base_task.Task):
 		Returns:
 		A dictionary of logs.
 		"""
-						
+		main_pth = "/home/isaeed/tf-maskformer/models/official/projects/maskformer/losses/tf_tensors/"
 		features, labels = inputs
+		# for k, v in features.items():
+		# 	np.save(os.path.join(main_pth, "features_"+str(k)+".npy"), v.numpy())
+		# for k, v in labels.items():
+		# 	np.save(os.path.join(main_pth, "labels_"+str(k)+".npy"), v.numpy())
+
 		with tf.GradientTape() as tape:
 			outputs = model(features, training=True)
-			##########################################################
-			# FIXME : This loop must be used for auxilary outputs
+			
 			loss = 0.0
 			cls_loss = 0.0
 			focal_loss = 0.0
 			dice_loss = 0.0
 			
-			# for output in outputs:
-			#       # Computes per-replica loss.	
-			#       total_loss, cls_loss_, focal_loss_, dice_loss_ = self.build_losses(
-			#               output=output, labels=labels)
-			#       loss += total_loss
-			#       cls_loss += cls_loss_
-			#       focal_loss += focal_loss_
-			#       dice_loss += dice_loss_
-			
-			#       scaled_loss = loss
-			#       # For mixed_precision policy, when LossScaleOptimizer is used, loss is
-			#       # scaled for numerical stability.
-			
-			##########################################################################
-			
 			# TODO : Add auxiallary losses
-			total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels)
+			total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels, with_aux_outputs=model._deep_supervision)
 			scaled_loss = total_loss
 			if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
 				total_loss = optimizer.get_scaled_loss(scaled_loss)
-					
+									
 		grads = tape.gradient(scaled_loss, model.trainable_variables)
 
 		if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
 			grads = optimizer.get_unscaled_gradients(grads)
 		optimizer.apply_gradients(list(zip(grads,  model.trainable_variables)))
 		
+	
 		if os.environ.get('PRINT_OUTPUTS') == 'True':
 			probs = tf.keras.activations.softmax(outputs["class_prob_predictions"], axis=-1)
 			pred_labels = tf.argmax(probs, axis=-1)
@@ -250,7 +258,8 @@ class PanopticTask(base_task.Task):
 			'cls_loss': cls_loss,
 			'focal_loss': focal_loss,
 			'dice_loss': dice_loss,}
-		
+		# pickle.dump(all_losses, open(os.path.join(main_pth, "all_losses.pkl"), "wb"))
+
 		if metrics:
 			for m in metrics:
 				m.update_state(all_losses[m.name])
@@ -302,7 +311,7 @@ class PanopticTask(base_task.Task):
 			
 		# 	self.panoptic_quality_metric.update_state(
 		#   	pq_metric_labels, pq_metric_outputs
-	  	# 	)
+		  # 	)
 		if metrics:
 			for m in metrics:
 				m.update_state(all_losses[m.name])

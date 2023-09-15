@@ -106,6 +106,7 @@ class Loss:
         with tf.device(out_mask.device):
             tgt_mask = y_true["individual_masks"]
         
+
         cost_class = tf.gather(-tf.nn.softmax(outputs["pred_logits"]), tgt_ids, batch_dims=1, axis=-1)
         
         tgt_mask = tf.cast(tgt_mask, dtype=tf.float32)
@@ -121,8 +122,7 @@ class Loss:
         
         cost_focal = FocalLossMod().batch(tgt_mask_permuted, out_mask)
         cost_dice = DiceLoss().batch(tgt_mask_permuted, out_mask)
-       
-        
+
         total_cost = (
                 self.cost_focal * cost_focal
                 + self.cost_class * cost_class
@@ -156,7 +156,7 @@ class Loss:
         cls_outputs = outputs["pred_logits"] # [batchsize, num_queries, num_classes] [1,100,134]
         cls_masks = outputs["pred_masks"]# [batchsize,num_queries, h, w]
         individual_masks = y_true["individual_masks"] # [batchsize, num_gt_objects, h, w,]
-        valid_masks = y_true["valid_mask"] # [batchsize, h, w,]
+        # valid_masks = y_true["valid_mask"] # [batchsize, h, w,]
         
         
         cls_assigned = tf.gather(cls_outputs, target_index, batch_dims=1, axis=1)
@@ -221,11 +221,13 @@ class Loss:
              y_true: list of dicts, such that len(y_true) == batch_size.
                      The expected keys in each dict depends on the losses applied, see each loss' doc
         """
-        outputs_without_aux = {k: v for k, v in outputs.items() if k != "aux_outputs"}
+        outputs_without_aux = {k: v for k, v in outputs.items() if k != "aux_decoder_outputs"}
         
         # NOTE : Change shape of pred and target masks to [batch_size, num_queries, h, w]
         outputs_without_aux["pred_masks"] = tf.transpose(outputs["pred_masks"], perm=[0,3,1,2])
         y_true["individual_masks"] = tf.squeeze(y_true["individual_masks"], axis=-1)
+
+
         indices = self.memory_efficient_matcher(outputs_without_aux, y_true) # (batchsize, num_queries, num_queries)
             
         losses = {}
@@ -238,16 +240,18 @@ class Loss:
                     "loss_dice": self.cost_dice*dice_loss_final})
         
         # FIXME : check if we need to add aux_outputs
-        # if "aux_outputs" in outputs and outputs["aux_outputs"] is not None:
-        #     for i, aux_outputs in enumerate(outputs["aux_outputs"]):
-        #         indices = self.memory_efficient_matcher(aux_outputs, y_true)
-        #         # for loss in self.losses:
-        #         cls_loss_, focal_loss_, dice_loss_ = self.get_loss(batch_size, aux_outputs, y_true, indices)
+        if "aux_decoder_outputs" in outputs and outputs["aux_decoder_outputs"] is not None:
+            for i, aux_output in enumerate(outputs["aux_decoder_outputs"]):
+                aux_output["pred_masks"] = tf.transpose(aux_output["pred_masks"], perm=[0,3,1,2])
                 
-        #         l_dict = {"loss_ce" + f"_{i}": self.cost_class * cls_loss_,
-        #                    "loss_focal" + f"_{i}": self.cost_focal *focal_loss_,
-        #                    "loss_dice" + f"_{i}": self.cost_dice * dice_loss_}
-        #         losses.update(l_dict)
+                indices = self.memory_efficient_matcher(aux_output, y_true)
+                # for loss in self.losses:
+                cls_loss_, focal_loss_, dice_loss_ = self.get_loss(aux_output, y_true, indices)
+                
+                l_dict = {"loss_ce" + f"_{i}": self.cost_class * cls_loss_,
+                           "loss_focal" + f"_{i}": self.cost_focal *focal_loss_,
+                           "loss_dice" + f"_{i}": self.cost_dice * dice_loss_}
+                losses.update(l_dict)
         
         return losses
     

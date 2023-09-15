@@ -17,13 +17,14 @@ class MLPHead(tf.keras.layers.Layer):
     def __init__(self,
                  num_classes: int,
                  hidden_dim: int,
-                 #  dec_supervision: bool,
+                 deep_supervision: bool,
                  mask_dim: int):
         super().__init__()
 
         self._num_classes = num_classes
         self._hidden_dim = hidden_dim
         self._mask_dim = mask_dim
+        self._deep_supervision = deep_supervision
 
     def build(self, input_shape):
         self._mlp = MLP(self._hidden_dim, self._hidden_dim, self._mask_dim, 3)
@@ -39,9 +40,14 @@ class MLPHead(tf.keras.layers.Layer):
        
         class_prob_prediction = self._linear_classifier(per_segment_embeddings)
         mask_embedding = self._mlp(per_segment_embeddings)
-        mask_prob_prediction = tf.einsum(
-            "bqc,bhwc->bhwq", mask_embedding, per_pixel_embeddings)
-        
+
+        if self._deep_supervision:
+            # mask embedding: [l, batch_size, num_queries, hidden_dim]
+            mask_prob_prediction = tf.einsum("lbqc,bhwc->lbhwq", mask_embedding, per_pixel_embeddings)
+        else:
+            # mask embedding: [batch_size, num_queries, hidden_dim]
+            mask_prob_prediction = tf.einsum("bqc,bhwc->bhwq", mask_embedding, per_pixel_embeddings)
+            
         return {'class_prob_predictions': class_prob_prediction,'mask_prob_predictions': mask_prob_prediction}
 
 

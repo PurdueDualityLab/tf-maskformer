@@ -41,6 +41,7 @@ task:
         stochastic_depth_drop_rate: 0.0
       type: resnet
     backbone_endpoint_name: '5'
+    deep_supervision: true
     detr_encoder_layers: 0
     fpn_encoder_layers: 6
     hidden_size: 256
@@ -78,7 +79,7 @@ task:
     enable_shared_tf_data_service_between_parallel_trainers: false
     enable_tf_data_service: false
     file_type: tfrecord
-    global_batch_size: 2
+    global_batch_size: 1
     input_path: /depot/davisjam/data/vishal/datasets/coco/tfrecords/train*
     is_training: true
     parser:
@@ -176,7 +177,7 @@ trainer:
   best_checkpoint_eval_metric: ''
   best_checkpoint_export_subdir: best_ckpt
   best_checkpoint_metric_comp: higher
-  checkpoint_interval: 591430
+  checkpoint_interval: 1182870
   continuous_eval_timeout: 3600
   eval_tf_function: true
   eval_tf_while_loop: false
@@ -186,7 +187,7 @@ trainer:
     ema: null
     learning_rate:
       stepwise:
-        boundaries: [11828600]
+        boundaries: [23657400]
         name: PiecewiseConstantDecay
         offset: 0
         values: [5.0e-05, 5.0e-06]
@@ -215,11 +216,11 @@ trainer:
   preemption_on_demand_checkpoint: true
   recovery_begin_steps: 0
   recovery_max_trials: 0
-  steps_per_loop: 59143
-  summary_interval: 591430
-  train_steps: 17742900
+  steps_per_loop: 118287
+  summary_interval: 1182870
+  train_steps: 35486100
   train_tf_function: true
   train_tf_while_loop: true
-  validation_interval: 59143
+  validation_interval: 118287
   validation_steps: 5000
   validation_summary_subdir: validation
