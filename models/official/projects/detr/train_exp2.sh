@@ -20,5 +20,4 @@ nohup python3 train.py \
 	--mode train \
 	--model_dir $MODEL_DIR \
 	--config_file $CONFIG_FILE \
-    --tpu $TPU_NAME \
-	> logs_detr_exp4.txt &
+    --tpu $TPU_NAME 
