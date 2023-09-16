@@ -59,7 +59,7 @@ class PanopticTask(base_task.Task):
 		"""
 		Used to initialize the models with checkpoint
 		"""
-		# pass
+		
 		logging.info('Initializing model from checkpoint: %s', self._task_config.init_checkpoint)
 		if not self._task_config.init_checkpoint:
 			return

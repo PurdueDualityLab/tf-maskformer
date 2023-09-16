@@ -1,0 +1,11 @@
+runtime:
+  distribution_strategy: 'tpu'
+  mixed_precision_dtype: 'float32'
+task:
+  model:
+      input_size: [640, 640, 3]
+  train_data:
+   global_batch_size: 64
+  validation_data:
+    global_batch_size: 2
+  init_checkpoint:"gs://cam2-models/maskformer_vishal_exps/resnet50_pretrained/tfmg/ckpt-62400"
