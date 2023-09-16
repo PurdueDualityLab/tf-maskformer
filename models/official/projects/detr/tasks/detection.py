@@ -88,6 +88,7 @@ class DetectionTask(base_task.Task):
 
     logging.info('Finished loading pretrained checkpoint from %s',
                  ckpt_dir_or_file)
+    logging.info("Model items :", model.checkpoint_items)
 
   def build_inputs(self,
                    params,
