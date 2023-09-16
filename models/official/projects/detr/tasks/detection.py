@@ -62,6 +62,8 @@ class DetectionTask(base_task.Task):
                       self._task_config.model.num_classes,
                       self._task_config.model.num_encoder_layers,
                       self._task_config.model.num_decoder_layers)
+    print("Model creation done....................................")
+    exit()
     return model
 
   def initialize(self, model: tf.keras.Model):
