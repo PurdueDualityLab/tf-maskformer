@@ -72,8 +72,8 @@ class DetectionTask(base_task.Task):
     ckpt_dir_or_file = self._task_config.init_checkpoint
 
     # Restoring checkpoint.
-    print("Model items :", model.checkpoint_items)
-    exit()
+    # print("Model items :", model.checkpoint_items)
+    # exit()
     if tf.io.gfile.isdir(ckpt_dir_or_file):
       ckpt_dir_or_file = tf.train.latest_checkpoint(ckpt_dir_or_file)
 
@@ -254,6 +254,8 @@ class DetectionTask(base_task.Task):
       A dictionary of logs.
     """
     features, labels = inputs
+    print("Model items :", model.checkpoint_items)
+    exit()
     with tf.GradientTape() as tape:
       outputs = model(features, training=True)
 
