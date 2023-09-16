@@ -11,4 +11,4 @@ task:
     global_batch_size: 2
     input_path: 'gs://cam2-datasets/coco/val*'
   init_checkpoint: 'gs://cam2-models/maskformer_vishal_exps/resnet50_pretrained/tfmg/ckpt-62400'
-  annotation_file: ''gs://cam2-datasets/annotations/instances_val2017.json'
+  annotation_file: 'gs://cam2-datasets/annotations/instances_val2017.json'
