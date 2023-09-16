@@ -79,8 +79,8 @@ class DetrTask(cfg.TaskConfig):
   per_category_metrics: bool = False
 
 
-# COCO_INPUT_PATH_BASE = 'gs://cam2-datasets/coco'
-# COCO_ANNOTATION_PATH_BASE = 'gs://cam2-datasets/annotations'
+COCO_INPUT_PATH_BASE = 'gs://cam2-datasets/coco'
+COCO_ANNOTATION_PATH_BASE = 'gs://cam2-datasets/annotations'
 COCO_TRAIN_EXAMPLES = 118287
 COCO_VAL_EXAMPLES = 5000
 
@@ -162,20 +162,20 @@ def detr_coco_tfrecord() -> cfg.ExperimentConfig:
       task=DetrTask(
           init_checkpoint='',
           init_checkpoint_modules='backbone',
-          annotation_file=os.path.join('gs://cam2-datasets/annotations',
+          annotation_file=os.path.join(COCO_ANNOTATION_PATH_BASE,
                                        'instances_val2017.json'),
           model=Detr(
               input_size=[1333, 1333, 3],
               norm_activation=common.NormActivation()),
           losses=Losses(),
           train_data=DataConfig(
-              input_path=os.path.join('gs://cam2-datasets/coco', 'train*'),
+              input_path=os.path.join(COCO_INPUT_PATH_BASE, 'train*'),
               is_training=True,
               global_batch_size=train_batch_size,
               shuffle_buffer_size=1000,
           ),
           validation_data=DataConfig(
-              input_path=os.path.join('gs://cam2-datasets/coco', 'val*'),
+              input_path=os.path.join(COCO_INPUT_PATH_BASE, 'val*'),
               is_training=False,
               global_batch_size=eval_batch_size,
               drop_remainder=False,
