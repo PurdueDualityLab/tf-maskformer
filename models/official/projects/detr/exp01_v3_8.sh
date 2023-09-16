@@ -15,7 +15,7 @@ export EVAL_BATCH_SIZE=$eval_bsize
 # task.model.which_pixel_decoder=transformer_fpn,\
 # task.init_checkpoint=$RESNET_CKPT"
 export CONFIG_FILE="models/official/projects/detr/configs/detr_tpu_v3_640_train.yaml"
-python3 models/official/projects/maskformer/train.py \
+python3 models/official/projects/detr/train.py \
   --experiment detr_coco_tfrecord \
   --mode train_and_eval \
   --model_dir $MODEL_DIR \
