@@ -39,6 +39,8 @@ def match_files(input_path: Union[Sequence[str], str]) -> List[str]:
   """Matches files from an input_path."""
   matched_files = []
   # Read dataset from files.
+  print("Input path:", input_path)
+  exit()
   usage = ('`input_path` should be either (1) a str indicating a file '
            'path/pattern, or (2) a str indicating multiple file '
            'paths/patterns separated by comma (e.g "a, b, c" or no spaces '
