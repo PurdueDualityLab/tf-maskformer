@@ -86,9 +86,10 @@ class DetectionTask(base_task.Task):
       status = ckpt.restore(ckpt_dir_or_file)
       status.expect_partial().assert_existing_objects_matched()
 
+    logging.info("Model items :", model.checkpoint_items)
     logging.info('Finished loading pretrained checkpoint from %s',
                  ckpt_dir_or_file)
-    logging.info("Model items :", model.checkpoint_items)
+    
 
   def build_inputs(self,
                    params,

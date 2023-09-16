@@ -18,5 +18,4 @@ python3 models/official/projects/detr/train.py \
   --experiment detr_coco_tfrecord \
   --mode train_and_eval \
   --model_dir $MODEL_DIR \
-  --tpu $TPU_NAME \
   --config_file $CONFIG_FILE 
