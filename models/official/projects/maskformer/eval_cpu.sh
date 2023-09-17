@@ -9,7 +9,7 @@ export TFRECORDS_DIR="gs://cam2-datasets/coco_panoptic/tfrecords"
 export TRAIN_BATCH_SIZE=$train_bsize
 export EVAL_BATCH_SIZE=$eval_bsize
 export BASE_LR=0.0001
-export IMG_SIZE=1280
+export IMG_SIZE=640
 export NO_OBJ_CLS_WEIGHT=0.1
 export PRINT_OUTPUTS=True
 export OVERRIDES="runtime.distribution_strategy=one_device,runtime.mixed_precision_dtype=float32,\
