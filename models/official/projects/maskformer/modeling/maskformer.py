@@ -36,8 +36,7 @@ class MaskFormer(tf.keras.Model):
 			   batch_size=1,
 			   bfloat16=False,
 			   which_pixel_decoder='fpn',
-			   backbone_config=None,
-			   norm_activation_config=None,
+			   
 			   **kwargs):
 		super(MaskFormer, self).__init__(**kwargs)
 		self._backbone = backbone
