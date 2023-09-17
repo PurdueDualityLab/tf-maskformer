@@ -54,7 +54,7 @@ class PanopticTask(base_task.Task):
 		logging.info('Maskformer model build successful.')
 		inputs = tf.keras.Input(shape=input_specs.shape[1:])
 		model(inputs)
-		train_utils.write_model_params(model, "./maskformer_params_eval.txt")
+		train_utils.write_model_params(model, "./maskformer_params_train.txt")
 		exit()
 		return model
 
