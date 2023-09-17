@@ -62,8 +62,7 @@ class DetectionTask(base_task.Task):
                       self._task_config.model.num_classes,
                       self._task_config.model.num_encoder_layers,
                       self._task_config.model.num_decoder_layers)
-    print("Model items :", model.checkpoint_items)
-    exit()
+    
     return model
 
   def initialize(self, model: tf.keras.Model):
@@ -84,6 +83,8 @@ class DetectionTask(base_task.Task):
       status = ckpt.restore(ckpt_dir_or_file)
       status.assert_consumed()
     elif self._task_config.init_checkpoint_modules == 'backbone':
+      print("Model items :", model.checkpoint_items)
+      exit()
       ckpt = tf.train.Checkpoint(backbone=model.backbone)
       status = ckpt.restore(ckpt_dir_or_file)
       status.expect_partial().assert_existing_objects_matched()
