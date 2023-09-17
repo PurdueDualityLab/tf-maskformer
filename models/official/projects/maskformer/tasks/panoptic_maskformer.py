@@ -20,8 +20,7 @@ from official.projects.maskformer.losses.maskformer_losses import Loss
 
 from official.vision.evaluation import panoptic_quality
 from official.projects.maskformer.losses.inference import PanopticInference
-from official.vision.modeling import backbones
-import numpy as np
+
 
 
 @task_factory.register_task_cls(maskformer_cfg.MaskFormerTask)
@@ -37,11 +36,11 @@ class PanopticTask(base_task.Task):
 		logging.info('Building MaskFormer model.')
 		input_specs = tf.keras.layers.InputSpec(shape=[None] + self._task_config.model.input_size)
 		
-		backbone = backbones.factory.build_backbone(input_specs=input_specs,
-					backbone_config=self._task_config.model.backbone,
-					norm_activation_config=self._task_config.model.norm_activation)
+		# backbone = backbones.factory.build_backbone(input_specs=input_specs,
+		# 			backbone_config=self._task_config.model.backbone,
+		# 			norm_activation_config=self._task_config.model.norm_activation)
 		logging.info('Backbone build successful.')
-		model = MaskFormer(backbone=backbone, input_specs= input_specs,
+		model = MaskFormer(input_specs= input_specs,
 							num_queries=self._task_config.model.num_queries,
 							hidden_size=self._task_config.model.hidden_size,
 							backbone_endpoint_name=self._task_config.model.backbone_endpoint_name,
@@ -50,7 +49,9 @@ class PanopticTask(base_task.Task):
 							num_decoder_layers=self._task_config.model.num_decoder_layers,
 							num_classes=self._task_config.model.num_classes,
 							bfloat16=self._task_config.bfloat16, 
-							which_pixel_decoder=self._task_config.model.which_pixel_decoder,)
+							which_pixel_decoder=self._task_config.model.which_pixel_decoder,
+							backbone_config=self._task_config.model.backbone,
+							norm_activation_config=self._task_config.model.norm_activation,)
 		logging.info('Maskformer model build successful.')
 		
 		return model

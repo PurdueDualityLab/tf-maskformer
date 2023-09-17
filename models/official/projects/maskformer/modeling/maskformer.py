@@ -5,11 +5,11 @@ from official.projects.maskformer.modeling.layers.nn_block import MLPHead
 from official.projects.maskformer.modeling.decoder.transformer_pixel_decoder import TransformerFPN
 from official.projects.maskformer.modeling.decoder.pixel_decoder import CNNFPN
 from typing import Any, Dict, List, Mapping, Optional, Tuple, Union
+from official.vision.modeling import backbones
 
 class MaskFormer(tf.keras.Model):
 	"""Maskformer"""
 	def __init__(self,
-	      		backbone,
 			   input_specs,
 			   fpn_feat_dims=256,
 			   data_format=None,
@@ -35,6 +35,8 @@ class MaskFormer(tf.keras.Model):
 			   batch_size=1,
 			   bfloat16=False,
 			   which_pixel_decoder='fpn',
+			   backbone_config=None,
+			   norm_activation_config=None,
 			   **kwargs):
 		super(MaskFormer, self).__init__(**kwargs)
 		
@@ -70,10 +72,15 @@ class MaskFormer(tf.keras.Model):
 		self._pixel_decoder = which_pixel_decoder
 		
 		# Backbone feature extractor.
-		self._backbone = backbone
+		self.backbone_config = backbone_config
 		self._backbone_endpoint = backbone_endpoint_name
+		self.norm_activation_config = norm_activation_config
 		
 	def build(self, image_shape = None):
+		self._backbone = backbones.factory.build_backbone(input_specs=self.input_specs,
+					backbone_config=self.backbone_config,
+					norm_activation_config=self.norm_activation_config)
+		
 		if self._pixel_decoder == 'transformer_fpn':
 			self.pixel_decoder = TransformerFPN(batch_size = self._batch_size,
 									fpn_feat_dims=self._fpn_feat_dims,
