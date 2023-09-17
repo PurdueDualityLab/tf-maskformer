@@ -57,8 +57,7 @@ def main(_):
   with distribution_strategy.scope():
     task = task_factory.get_task(params.task, logging_dir=model_dir)
 
-  print("Task: ", task)
-  exit()
+  
   train_lib.run_experiment(
       distribution_strategy=distribution_strategy,
       task=task,
