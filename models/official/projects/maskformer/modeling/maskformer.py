@@ -5,11 +5,12 @@ from official.projects.maskformer.modeling.layers.nn_block import MLPHead
 from official.projects.maskformer.modeling.decoder.transformer_pixel_decoder import TransformerFPN
 from official.projects.maskformer.modeling.decoder.pixel_decoder import CNNFPN
 from typing import Any, Dict, List, Mapping, Optional, Tuple, Union
-from official.vision.modeling import backbones
+
 
 class MaskFormer(tf.keras.Model):
 	"""Maskformer"""
 	def __init__(self,
+			  backbone,
 			   input_specs,
 			   fpn_feat_dims=256,
 			   data_format=None,
@@ -39,7 +40,7 @@ class MaskFormer(tf.keras.Model):
 			   norm_activation_config=None,
 			   **kwargs):
 		super(MaskFormer, self).__init__(**kwargs)
-		
+		self._backbone = backbone
 		self._input_specs = input_specs
 		self._batch_size = batch_size
 		self._num_classes = num_classes
@@ -72,15 +73,10 @@ class MaskFormer(tf.keras.Model):
 		self._pixel_decoder = which_pixel_decoder
 		
 		# Backbone feature extractor.
-		self.backbone_config = backbone_config
 		self._backbone_endpoint = backbone_endpoint_name
-		self.norm_activation_config = norm_activation_config
+		
 		
 	def build(self, image_shape = None):
-		self._backbone = backbones.factory.build_backbone(input_specs=self.input_specs,
-					backbone_config=self.backbone_config,
-					norm_activation_config=self.norm_activation_config)
-		
 		if self._pixel_decoder == 'transformer_fpn':
 			self.pixel_decoder = TransformerFPN(batch_size = self._batch_size,
 									fpn_feat_dims=self._fpn_feat_dims,
@@ -121,15 +117,14 @@ class MaskFormer(tf.keras.Model):
 	def backbone(self) -> tf.keras.Model:
 		return self._backbone
 	
-	# @property
-	# def checkpoint_items(
-	# 	self) -> Mapping[str, Union[tf.keras.Model, tf.keras.layers.Layer]]:
-	# 	"""Returns a dictionary of items to be additionally checkpointed."""
-	# 	items = dict(backbone=self._backbone,
-	# 				pixel_decoder=self.pixel_decoder,
-	# 				transformer=self.transformer,
-	# 				head=self.head)
-	# 	return items
+	@property
+	def checkpoint_items(self):
+		"""Returns a dictionary of items to be additionally checkpointed."""
+		items = dict(backbone=self._backbone,
+					pixel_decoder=self.pixel_decoder,
+					transformer=self.transformer,
+					head=self.head)
+		return items
 	
 	def get_config(self):
 		return {
