@@ -62,7 +62,7 @@ class DetectionTask(base_task.Task):
                       self._task_config.model.num_classes,
                       self._task_config.model.num_encoder_layers,
                       self._task_config.model.num_decoder_layers)
-    print("Model creation done....................................")
+    print("Model items :", model.checkpoint_items)
     exit()
     return model
 
