@@ -361,4 +361,6 @@ def run_experiment(
       summary_manager=summary_manager,
       eval_summary_manager=eval_summary_manager,
   )
+  print("runner :", runner)
+  exit()
   return runner.run()

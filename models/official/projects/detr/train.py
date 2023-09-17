@@ -53,9 +53,7 @@ def main(_):
       num_gpus=params.runtime.num_gpus,
       tpu_address=params.runtime.tpu)
   
-  if FLAGS.tpu == None:
-    tf.config.run_functions_eagerly(True)
-        
+  
   with distribution_strategy.scope():
     task = task_factory.get_task(params.task, logging_dir=model_dir)
 

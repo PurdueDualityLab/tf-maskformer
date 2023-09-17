@@ -12,15 +12,15 @@ export TPU_PROJECT="red-atlas-305317"
 export TPU_ZONE="us-central1-a"
 export TRAIN_BATCH_SIZE=$train_bsize
 export EVAL_BATCH_SIZE=$eval_bsize
-export OVERRIDES="runtime.distribution_strategy=one_device,runtime.mixed_precision_dtype=float32,\
-task.train_data.global_batch_size=$TRAIN_BATCH_SIZE,\
-task.init_checkpoint=$RESNET_CKPT,\
-task.train_data.input_path=$TFRECORDS_DIR,\
-task.validation_data.input_path=$TFRECORDS_DIR,\
-task.annotation_file=$ANNOTATION_FILE"
-# export CONFIG_FILE="models/official/projects/detr/configs/detr_tpu_v3_640_train_cpu.yaml"
+# export OVERRIDES="runtime.distribution_strategy=one_device,runtime.mixed_precision_dtype=float32,\
+# task.train_data.global_batch_size=$TRAIN_BATCH_SIZE,\
+# task.init_checkpoint=$RESNET_CKPT,\
+# task.train_data.input_path=$TFRECORDS_DIR,\
+# task.validation_data.input_path=$TFRECORDS_DIR,\
+# task.annotation_file=$ANNOTATION_FILE"
+export CONFIG_FILE="models/official/projects/detr/configs/detr_tpu_v3_640_train_cpu.yaml"
 python3 models/official/projects/detr/train.py \
   --experiment detr_coco_tfrecord \
   --mode train_and_eval \
   --model_dir $MODEL_DIR \
-  --params_override=$OVERRIDES
+  --config_file $CONFIG_FILE 
