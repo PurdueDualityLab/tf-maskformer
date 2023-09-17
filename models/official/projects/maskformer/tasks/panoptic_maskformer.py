@@ -23,6 +23,8 @@ from official.vision.evaluation import panoptic_quality
 from official.projects.maskformer.losses.inference import PanopticInference
 from official.vision.modeling import backbones
 
+import numpy as np
+
 @task_factory.register_task_cls(maskformer_cfg.MaskFormerTask)
 class PanopticTask(base_task.Task):
 	"""A single-replica view of training procedure.
@@ -107,6 +109,17 @@ class PanopticTask(base_task.Task):
 		  parser_fn=parser.parse_fn(params.is_training))
 		
 		dataset = reader.read(input_context=input_context)
+		for sample in dataset.take(1):
+			# print(f"unique idsin dataset take : {sample[1]['unique_ids']}")
+			# print("individual masks :", sample[1]["individual_masks"].shape)
+			# np.save("contigious_mask.npy", sample[1]["contigious_mask"].numpy())
+			# print(f"image shape : {sample[0].shape}")
+			# np.save("individual_masks.npy", sample[1]["individual_masks"].numpy())
+			# np.save("unique_ids.npy", sample[1]["unique_ids"].numpy())
+			np.save("images.npy", sample[0].numpy())
+			np.save("category_mask.npy", sample[1]["category_mask"].numpy())	
+			np.save("instance_mask.npy", sample[1]["instance_mask"].numpy())
+			exit()
 		return dataset
 
 
