@@ -4,7 +4,7 @@ from official.projects.maskformer.losses.mapper import _get_contigious_to_origin
 
 class PanopticInference:
     """Panoptic Inference"""
-    def __init__(self, num_classes=134, background_class_id=133, object_mask_threshold=0.25, class_score_threshold=0.25):
+    def __init__(self, num_classes=134, background_class_id=0, object_mask_threshold=0.25, class_score_threshold=0.25):
 
         self.num_classes = num_classes
         self.background_class_id = background_class_id
@@ -14,11 +14,11 @@ class PanopticInference:
     def __call__(self, pred_logits, mask_pred, image_shape):
         
         cat_id_map, is_thing_dict = _get_contigious_to_original() # maps from contiguous category id to original category id
-        # Apply softmax and sigmoid on the predictions and predicted masks
+       
         instance_masks = []
         category_masks = []
 
-        for each_batch in range(pred_logits.shape[0]):
+        for each_batch in range(tf.shape(pred_logits)[0]):
             mask_pred_b = mask_pred[each_batch]
             pred_logits_b = pred_logits[each_batch]
             mask_pred_b_resized =  tf.image.resize(mask_pred_b, (image_shape[1], image_shape[2]), method=tf.image.ResizeMethod.BILINEAR)

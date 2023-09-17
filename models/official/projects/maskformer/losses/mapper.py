@@ -140,7 +140,11 @@ COCO_CATEGORIES = [
 
 
 def _get_contigious_to_original():
-    contigious_id = 0
+    """
+    contiguous id starts from : 0(background class) to 133 (last class in COCO dataset)
+    original id starts from : 1 to 200
+    """
+    contigious_id = 1 # since 0 is reserved for background class
     contigious_to_original = {}
     contigious_to_original_thing = {}
     for each_category in COCO_CATEGORIES:
