@@ -114,15 +114,15 @@ class MaskFormer(tf.keras.Model):
 	def backbone(self) -> tf.keras.Model:
 		return self._backbone
 	
-	@property
-	def checkpoint_items(
-		self) -> Mapping[str, Union[tf.keras.Model, tf.keras.layers.Layer]]:
-		"""Returns a dictionary of items to be additionally checkpointed."""
-		items = dict(backbone=self._backbone,
-					pixel_decoder=self.pixel_decoder,
-					transformer=self.transformer,
-					head=self.head)
-		return items
+	# @property
+	# def checkpoint_items(
+	# 	self) -> Mapping[str, Union[tf.keras.Model, tf.keras.layers.Layer]]:
+	# 	"""Returns a dictionary of items to be additionally checkpointed."""
+	# 	items = dict(backbone=self._backbone,
+	# 				pixel_decoder=self.pixel_decoder,
+	# 				transformer=self.transformer,
+	# 				head=self.head)
+	# 	return items
 	
 	def get_config(self):
 		return {
