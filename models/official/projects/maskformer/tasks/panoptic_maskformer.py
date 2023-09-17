@@ -49,8 +49,7 @@ class PanopticTask(base_task.Task):
 							num_classes=self._task_config.model.num_classes,
 							bfloat16=self._task_config.bfloat16, 
 							which_pixel_decoder=self._task_config.model.which_pixel_decoder,
-							backbone_config=self._task_config.model.backbone,
-							norm_activation_config=self._task_config.model.norm_activation,)
+							)
 		logging.info('Maskformer model build successful.')
 		inputs = tf.keras.Input(shape=input_specs.shape[1:])
 		model(inputs)
