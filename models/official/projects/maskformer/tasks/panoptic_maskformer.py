@@ -4,6 +4,7 @@ import tensorflow as tf
 
 from official.core import base_task
 from official.core import task_factory
+from official.core import train_utils
 from typing import Any, Dict, List, Mapping, Optional, Tuple
 
 from official.projects.maskformer.dataloaders import input_reader
@@ -53,6 +54,8 @@ class PanopticTask(base_task.Task):
 		logging.info('Maskformer model build successful.')
 		inputs = tf.keras.Input(shape=input_specs.shape[1:])
 		model(inputs)
+		train_utils.write_model_params(model, "./maskformer_params_eval.txt")
+		exit()
 		return model
 
 	def initialize(self, model: tf.keras.Model) -> None:
@@ -70,11 +73,10 @@ class PanopticTask(base_task.Task):
 			ckpt_dir_or_file = tf.train.latest_checkpoint(ckpt_dir_or_file)
 
 		if self._task_config.init_checkpoint_modules == 'all':
-			pass
-			# ckpt = tf.train.Checkpoint(**model.checkpoint_items)
-			# status = ckpt.restore(ckpt_dir_or_file)
-			# status.expect_partial()
-			# logging.info('Loaded whole model from %s',ckpt_dir_or_file)
+			ckpt = tf.train.Checkpoint(**model.checkpoint_items)
+			status = ckpt.restore(ckpt_dir_or_file)
+			status.expect_partial().assert_existing_objects_matched()
+			logging.info('Loaded whole model from %s',ckpt_dir_or_file)
 			
 		elif self._task_config.init_checkpoint_modules == 'backbone':
 			ckpt = tf.train.Checkpoint(backbone=model.backbone)
