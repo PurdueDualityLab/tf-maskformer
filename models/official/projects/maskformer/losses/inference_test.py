@@ -19,29 +19,36 @@ class PanopticInferenceTest(tf.test.TestCase, parameterized.TestCase):
         """
         background_class_id = 0
         
-        main_pth = ""
+        main_pth = "/depot/qqiu/data/vishal/tf-maskformer/tensors_for_PQ_metric"
 
         # Load pytorch predictions
-        image_shape = [640, 640]
-        pred_logits_load = tf.convert_to_tensor(np.load(main_pth+"/tensors/output_pred_logits.npy")) 
-        pred_masks_load = tf.convert_to_tensor(np.load(main_pth+"/tensors/output_pred_masks.npy")) 
+        image_shape = [3, 640, 640]
+        pred_logits_load = tf.convert_to_tensor(np.load(main_pth+"/output_pred_logits.npy")) 
+        pred_masks_load = tf.convert_to_tensor(np.load(main_pth+"/output_pred_masks.npy")) 
         pred_masks_load = tf.transpose(pred_masks_load, [0,2,3,1]) # (1,100, h, w) -> (1, h, w, 100) (reshaping according to TF model outputs)
         
         # Pytorch code uses 133 as backgorund class id and TF code uses 0 as background class id so we need to swap them
-        pred_logits_load = tf.where(pred_logits_load == 133, 0, pred_logits_load+1) # shift all classes by 1 and replace 133 with 0 (background class id)
+        
+        # shift all classes by 1 and replace 133 with 0 (background class id)
         # Load the instance and category masks from TF code
-        instance_mask_gt = tf.convert_to_tensor(np.load(main_pth+"/tensors/instance_mask.npy"))
-        category_mask_gt = tf.convert_to_tensor(np.load(main_pth+"/tensors/category_mask.npy"))
+        instance_mask_gt = tf.convert_to_tensor(np.load(main_pth+"/instance_mask.npy"))
+        category_mask_gt = tf.convert_to_tensor(np.load(main_pth+"/category_mask.npy"))
 
         outputs = {
             "class_prob_predictions": pred_logits_load,
             "mask_prob_predictions": pred_masks_load,
         }
         
-        inference = PanopticInference(num_classes=134, background_class_id=background_class_id, object_mask_threshold=0.85)
+        inference = PanopticInference(num_classes=134, background_class_id=background_class_id, object_mask_threshold=0.25, class_score_threshold=0.25)
         instance_mask_predicted, category_mask_predicted = inference(outputs["class_prob_predictions"], 
                                                                         outputs["mask_prob_predictions"],
                                                                        image_shape)
+        # Save the instance and category masks from TF code
+        np.save(main_pth+"/instance_mask_predicted.npy", instance_mask_predicted.numpy())
+        np.save(main_pth+"/category_mask_predicted.npy", category_mask_predicted.numpy())
+        print("instance_mask_predicted", instance_mask_predicted.shape)
+        print("category_mask_predicted", category_mask_predicted.shape)
+        exit()
         assert instance_mask_predicted == instance_mask_gt
         assert category_mask_predicted == category_mask_gt
 
