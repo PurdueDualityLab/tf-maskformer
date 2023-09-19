@@ -42,7 +42,7 @@ import tensorflow as tf
 #       print(v2_file_error_template.format(proposed_file))
 
 # ckpt_reader = tf.train.load_checkpoint('gs://cam2-models/maskformer_vishal_exps/EXP19_v8/ckpt-1848')
-ckpt_reader = tf.train.load_checkpoint('gs://cam2-models/detr_exp2/best_ckpt')
+ckpt_reader = tf.train.load_checkpoint('gs://cam2-models/detr_exp2/best_ckpt/ckpt-425040')
 print(ckpt_reader.get_variable_to_shape_map())
 
 # latest_ckp = tf.train.latest_checkpoint('gs://cam2-models/maskformer_vishal_exps/EXP19_v8')
