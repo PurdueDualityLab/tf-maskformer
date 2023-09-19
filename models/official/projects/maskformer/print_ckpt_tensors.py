@@ -43,4 +43,5 @@ inspect checkpoint --file_name = {}"""
 
 
 latest_ckp = tf.train.latest_checkpoint('gs://cam2-models/maskformer_vishal_exps/EXP19_v8')
-print_tensors_in_checkpoint_file(latest_ckp, all_tensors=True, all_tensor_names =True, print_values=False,  tensor_name='')
+print(tf.train.list_variables("gs://cam2-models/maskformer_vishal_exps/EXP19_v8/ckpt-1848"))
+# print_tensors_in_checkpoint_file(latest_ckp, all_tensors=True, all_tensor_names =True, print_values=False,  tensor_name='')
