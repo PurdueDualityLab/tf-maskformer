@@ -127,6 +127,7 @@ class mask_former_parser(parser.Parser):
         """
         
         # general settings
+        self.num_images = 0 
         self._output_size = params.output_size
         self._mask_null = 0
         self._dtype = params.dtype
@@ -210,6 +211,8 @@ class mask_former_parser(parser.Parser):
             dtype=tf.float32)
         class_ids = tf.sparse.to_dense(data['groundtruth_panoptic_class_ids'], default_value=0)
         instance_ids = tf.sparse.to_dense(data['groundtruth_panoptic_instance_ids'], default_value=0)
+
+
         class_ids = tf.cast(class_ids, dtype=tf.float32)
         instance_ids = tf.cast(instance_ids, dtype=tf.float32)
         
@@ -297,6 +300,7 @@ class mask_former_parser(parser.Parser):
         instance_mask = tf.image.pad_to_bounding_box(instance_mask, 0, 0, self._output_size[0], self._output_size[1])
         contigious_mask = tf.image.pad_to_bounding_box(contigious_mask, 0, 0, self._output_size[0], self._output_size[1])
         category_mask = tf.image.pad_to_bounding_box(category_mask, 0, 0, self._output_size[0], self._output_size[1])
+
         individual_masks, classes = self._get_individual_masks(
                 class_ids=class_ids,contig_instance_mask=contigious_mask, instance_id = instance_ids, instance_mask=instance_mask)
 
@@ -323,6 +327,7 @@ class mask_former_parser(parser.Parser):
         return image, labels
     
     def _parse_eval_data(self, data):
+        raise ValueError('started eval')
         # print("////////////////////////// Inside Eval Function ///////////////////////////")
         image = data['image']
     
@@ -364,8 +369,25 @@ class mask_former_parser(parser.Parser):
         contigious_mask = masks[1]
         category_mask = masks[2]
         instance_mask = tf.image.pad_to_bounding_box(instance_mask, 0, 0, self._output_size[0], self._output_size[1])
+
+
         contigious_mask = tf.image.pad_to_bounding_box(contigious_mask, 0, 0, self._output_size[0], self._output_size[1])
         category_mask = tf.image.pad_to_bounding_box(category_mask, 0, 0, self._output_size[0], self._output_size[1])
+
+        # with open('/depot/davisjam/data/akshath/exps/tf/testing/mask_compare/num_images.txt', 'r') as f: 
+        #     curr = int(file.read())
+
+        # with open(f'/depot/davisjam/data/akshath/exps/tf/testing/mask_compare/category_mask_{curr+1}.npy', 'wb') as f:
+        #     np.save(f, category_mask.numpy())
+
+        # with open(f'/depot/davisjam/data/akshath/exps/tf/testing/mask_compare/contigious_mask_{curr+1}.npy', 'wb') as f:
+        #     np.save(f, contigious_mask.numpy())
+
+        # with open('/depot/davisjam/data/akshath/exps/tf/testing/mask_compare/num_images.txt', 'w') as f: 
+        #     file.write(str(curr + 1))   
+
+        # exit()
+        
         individual_masks, classes = self._get_individual_masks(
                 class_ids=class_ids,contig_instance_mask=contigious_mask, instance_id = instance_ids, instance_mask=instance_mask)
 

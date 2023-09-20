@@ -22,7 +22,8 @@ from official.vision.evaluation import panoptic_quality
 from official.projects.maskformer.losses.inference import PanopticInference
 from official.vision.modeling import backbones
 import numpy as np
-
+import pysnooper
+import os
 
 @task_factory.register_task_cls(maskformer_cfg.MaskFormerTask)
 class PanopticTask(base_task.Task):
@@ -35,6 +36,7 @@ class PanopticTask(base_task.Task):
 	def build_model(self)-> tf.keras.Model:
 		"""Builds MaskFormer Model."""
 		logging.info('Building MaskFormer model.')
+		
 		input_specs = tf.keras.layers.InputSpec(shape=[None] + self._task_config.model.input_size)
 		
 		backbone = backbones.factory.build_backbone(input_specs=input_specs,
@@ -58,6 +60,19 @@ class PanopticTask(base_task.Task):
 		"""
 		Used to initialize the models with checkpoint
 		"""
+
+		# Akshath
+		self.num_images = 0
+		self.counts = {} 	
+		with open('/depot/davisjam/data/akshath/exps/tf/instance_counting/counts.txt', 'w') as f: 
+			pass
+		with open('/depot/davisjam/data/akshath/exps/tf/instance_counting/num_images.txt', 'w') as f: 
+			pass
+		with open('/depot/davisjam/data/akshath/exps/tf/instance_counting/check_cat_cont.txt', 'w') as f: 
+			pass
+		with open('/depot/davisjam/data/akshath/exps/tf/instance_counting/mismatched_background_masks.txt', 'w') as f: 
+			pass
+			
 		# pass
 		logging.info('Initializing model from checkpoint: %s', self._task_config.init_checkpoint)
 		if not self._task_config.init_checkpoint:
@@ -163,7 +178,7 @@ class PanopticTask(base_task.Task):
 		return metrics
 		
 		
-		
+	# @pysnooper.snoop('/depot/davisjam/data/akshath/exps/tf/traces/sample.log')
 	def train_step(self, inputs: Tuple[Any, Any],model: tf.keras.Model, optimizer: tf.keras.optimizers.Optimizer, metrics: Optional[List[Any]] = None) -> Dict[str, Any]:
 		"""
 		Does forward and backward.
@@ -179,6 +194,65 @@ class PanopticTask(base_task.Task):
 		"""
 						
 		features, labels = inputs
+		
+		# Akshath
+		mapping_dict  = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 13: 12, 14: 13, 15: 14, 16: 15, 17: 16, 18: 17, 19: 18, 20: 19, 21: 20, 22: 21, 23: 22, 24: 23, 25: 24, 27: 25, 28: 26, 31: 27, 32: 28, 33: 29, 34: 30, 35: 31, 36: 32, 37: 33, 38: 34, 39: 35, 40: 36, 41: 37, 42: 38, 43: 39, 44: 40, 46: 41, 47: 42, 48: 43, 49: 44, 50: 45, 51: 46, 52: 47, 53: 48, 54: 49, 55: 50, 56: 51, 57: 52, 58: 53, 59: 54, 60: 55, 61: 56, 62: 57, 63: 58, 64: 59, 65: 60, 67: 61, 70: 62, 72: 63, 73: 64, 74: 65, 75: 66, 76: 67, 77: 68, 78: 69, 79: 70, 80: 71, 81: 72, 82: 73, 84: 74, 85: 75, 86: 76, 87: 77, 88: 78, 89: 79, 90: 80, 92: 81, 93: 82, 95: 83, 100: 84, 107: 85, 109: 86, 112: 87, 118: 88, 119: 89, 122: 90, 125: 91, 128: 92, 130: 93, 133: 94, 138: 95, 141: 96, 144: 97, 145: 98, 147: 99, 148: 100, 149: 101, 151: 102, 154: 103, 155: 104, 156: 105, 159: 106, 161: 107, 166: 108, 168: 109, 171: 110, 175: 111, 176: 112, 177: 113, 178: 114, 180: 115, 181: 116, 184: 117, 185: 118, 186: 119, 187: 120, 188: 121, 189: 122, 190: 123, 191: 124, 192: 125, 193: 126, 194: 127, 195: 128, 196: 129, 197: 130, 198: 131, 199: 132, 200: 133}
+		count_backgrounds_in_labels = 0
+		# Images 
+		self.num_images += 1
+		with open('/depot/davisjam/data/akshath/exps/tf/instance_counting/num_images.txt', 'w') as f: 
+				f.write(str(self.num_images)) 
+		# IDs 
+		labels_list = labels["unique_ids"]._numpy().tolist()
+		for la in labels_list[0]:
+			if la == 0: 
+					count_backgrounds_in_labels += 1
+			if la in self.counts: 
+				self.counts[la] += 1
+			else: 
+				self.counts[la] = 1
+			
+		with open('/depot/davisjam/data/akshath/exps/tf/instance_counting/counts.txt', 'w') as f: 
+			f.write(str(self.counts))
+
+	  # Check masks
+		cat = labels["category_mask"]._numpy()[0]
+		cont = labels["contigious_mask"]._numpy()[0, :, :, 0]
+		mapped_cat = np.array([[mapping_dict.get(int(x), int(x)) for x in row] for row in cat])
+		are_equal = np.array_equal(mapped_cat, cont)
+		if not are_equal: 
+			np.save(f'/depot/davisjam/data/akshath/exps/tf/testing/mask_compare/cat{self.num_images}.npy', cat) 
+			np.save(f'/depot/davisjam/data/akshath/exps/tf/testing/mask_compare/mapped_cat{self.num_images}.npy', mapped_cat) 
+			np.save(f'/depot/davisjam/data/akshath/exps/tf/testing/mask_compare/cont{self.num_images}.npy', cont) 
+		with open('/depot/davisjam/data/akshath/exps/tf/instance_counting/check_cat_cont.txt', 'a') as f: 
+			f.write(str(are_equal) + '\n') 
+		# Checking number of background masks
+		count_total_background_masks = 0
+		induvidual_masks = labels["individual_masks"]._numpy()
+		subset1k = induvidual_masks[0, :, :, :]
+		result = np.any(subset1k != 0, axis=(1, 2))
+		np.save(f'/depot/davisjam/data/akshath/exps/tf/testing/mask_compare/subset1k.npy', subset1k) 
+
+		zero_mask = np.zeros((640, 640), dtype=subset1k.dtype)
+		for i, has_non_zero in enumerate(result):
+				if not has_non_zero:
+					count_total_background_masks += 1
+				else: 
+					if i > (len(labels_list[0]) - 1): 
+						subset1k[i] = zero_mask
+		del zero_mask
+		labels["individual_masks"] = np.expand_dims(subset1k, axis=0)
+
+		num_extra = count_total_background_masks - count_backgrounds_in_labels
+		with open('/depot/davisjam/data/akshath/exps/tf/instance_counting/mismatched_background_masks.txt', 'a') as f: 
+				f.write(str(num_extra) + '\n') 		
+		
+		print('--------------------------')
+		print(self.num_images)
+		print('Are Equal:', are_equal)	
+		print('Extra:', num_extra)
+		print('--------------------------')
+
 		with tf.GradientTape() as tape:
 			outputs = model(features, training=True)
 			##########################################################
@@ -208,7 +282,6 @@ class PanopticTask(base_task.Task):
 			scaled_loss = total_loss
 			if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
 				total_loss = optimizer.get_scaled_loss(scaled_loss)
-					
 		grads = tape.gradient(scaled_loss, model.trainable_variables)
 
 		if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
@@ -218,13 +291,14 @@ class PanopticTask(base_task.Task):
 		if os.environ.get('PRINT_OUTPUTS') == 'True':
 			probs = tf.keras.activations.softmax(outputs["class_prob_predictions"], axis=-1)
 			pred_labels = tf.argmax(probs, axis=-1)
-			print("Target labels :", labels["unique_ids"])
-			print("Output labels :", pred_labels)
+			# print("Target labels :", labels["unique_ids"])
+			# print("Output labels :", pred_labels)
 		
 		# # Multiply for logging.
 		# # Since we expect the gradient replica sum to happen in the optimizer,
 		# # the loss is scaled with global num_boxes and weights.
 		# # To have it more interpretable/comparable we scale it back when logging.
+
 		num_replicas_in_sync = tf.distribute.get_strategy().num_replicas_in_sync
 		total_loss *= num_replicas_in_sync
 		cls_loss *= num_replicas_in_sync
@@ -241,6 +315,7 @@ class PanopticTask(base_task.Task):
 		if metrics:
 			for m in metrics:
 				m.update_state(all_losses[m.name])
+
 		return logs
 		
 	def _postprocess_outputs(self, outputs: Dict[str, Any], image_shapes):
