@@ -204,14 +204,14 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
                       'values': [float(os.environ.get('BASE_LR')), float(os.environ.get('BASE_LR'))/10]
                   }
               },
-              # 'warmup': {
-              #     'type': 'linear',
-              #       'linear': {
-              #       'warmup_learning_rate': 0.0,
-              #       'warmup_steps': int(os.environ.get('WARMUP_STEPS', 640)),
-              #       }
+              'warmup': {
+                  'type': 'linear',
+                    'linear': {
+                    'warmup_learning_rate': 0.0,
+                    'warmup_steps': int(os.environ.get('WARMUP_STEPS', 640)),
+                    }
 
-              # } 
+              } 
           })),
       restrictions=[
           'task.train_data.is_training != None',
