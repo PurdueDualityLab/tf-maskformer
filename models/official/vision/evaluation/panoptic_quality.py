@@ -419,10 +419,10 @@ class PanopticQualityV2(tf.keras.metrics.Metric):
   def update_state(
       self, y_true: Dict[str, tf.Tensor], y_pred: Dict[str, tf.Tensor]
   ):
-    category_mask = tf.convert_to_tensor(y_pred['category_mask'], tf.int32)
-    instance_mask = tf.convert_to_tensor(y_pred['instance_mask'], tf.int32)
-    gt_category_mask = tf.convert_to_tensor(y_true['category_mask'], tf.int32)
-    gt_instance_mask = tf.convert_to_tensor(y_true['instance_mask'], tf.int32)
+    category_mask = tf.cast(y_pred['category_mask'], tf.int32)
+    instance_mask = tf.cast(y_pred['instance_mask'], tf.int32)
+    gt_category_mask = tf.cast(y_true['category_mask'], tf.int32)
+    gt_instance_mask = tf.cast(y_true['instance_mask'], tf.int32)
 
     if self._rescale_predictions:
       _, height, width = gt_category_mask.get_shape().as_list()
@@ -492,6 +492,7 @@ class PanopticQualityV2(tf.keras.metrics.Metric):
         on_value=True,
         off_value=False,
     )
+    
     # (batch_size, height, width, num_gts + 1)
     gt_instance_binary_masks = tf.one_hot(
         tf.where(gt_instance_mask > 0, gt_instance_mask, -1),
@@ -500,14 +501,15 @@ class PanopticQualityV2(tf.keras.metrics.Metric):
         off_value=False,
     )
 
-    # (batch_size, height * width, num_detections + 1)
+    # (batch_size, height * width, num_detections + 1∂)
+    valid_mask = tf.expand_dims(valid_mask, axis=-1)
     flattened_binary_masks = tf.reshape(
-        instance_binary_masks & valid_mask[..., tf.newaxis],
+        instance_binary_masks & valid_mask,
         [-1, height * width, self._max_num_instances + 1],
     )
     # (batch_size, height * width, num_gts + 1)
     flattened_gt_binary_masks = tf.reshape(
-        gt_instance_binary_masks & valid_mask[..., tf.newaxis],
+        gt_instance_binary_masks & valid_mask,
         [-1, height * width, self._max_num_instances + 1],
     )
     # (batch_size, num_detections + 1, height * width)

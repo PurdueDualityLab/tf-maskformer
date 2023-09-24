@@ -4,12 +4,14 @@ from official.projects.maskformer.losses.mapper import _get_contigious_to_origin
 
 class PanopticInference:
     """Panoptic Inference"""
-    def __init__(self, num_classes=134, background_class_id=0, object_mask_threshold=0.25, class_score_threshold=0.25):
+    def __init__(self, num_classes=134, background_class_id=0, object_mask_threshold=0.25, class_score_threshold=0.25, overlap_threshold=0.25):
 
         self.num_classes = num_classes
         self.background_class_id = background_class_id
         self.object_mask_threshold = object_mask_threshold
         self.class_score_threshold = class_score_threshold
+        self.cat_id_map, self.is_thing_dict = _get_contigious_to_original()
+        self.overlap_threshold = overlap_threshold
 
     def __call__(self, pred_logits, mask_pred, image_shape):
         """
@@ -17,7 +19,7 @@ class PanopticInference:
         pred_logits: (batch, num_predictions, num_classes)
         """
         
-        cat_id_map, is_thing_dict = _get_contigious_to_original() # maps from contiguous category id to original category id
+         # maps from contiguous category id to original category id
         
         instance_masks = []
         category_masks = []
@@ -34,7 +36,7 @@ class PanopticInference:
             ################################################## Only for testing instance and category mask ##################################################
             # Replace '133' with '0' (background class id) and increment all other classes by 1
             # print("Labels  before :", labels)
-            labels = tf.where(tf.math.equal(labels, 133), 0, labels+1)
+            # labels = tf.where(tf.math.equal(labels, 133), 0, labels+1)
             # print("Labels  after :", labels)
             # exit()
             ################################################## Only for testing instance and category mask ##################################################
@@ -46,7 +48,7 @@ class PanopticInference:
             curr_masks = tf.boolean_mask(mask_pred_b_sigmoid, keep) # (num_predictions, height, width)
             curr_classes = tf.boolean_mask(labels, keep) # (num_predictions)
             curr_scores = tf.boolean_mask(scores, keep) # (num_predictions)
-            cur_prob_masks = curr_scores.view(-1, 1, 1) * curr_masks
+            cur_prob_masks = tf.reshape(curr_scores,(-1, 1, 1)) * curr_masks
             
 
             height, width = tf.shape(curr_masks)[1], tf.shape(curr_masks)[2]
@@ -63,22 +65,34 @@ class PanopticInference:
                 stuff_memory_list = {}
                 _VOID_INSTANCE_ID = 0
                 instance_id = 0
-                cur_mask_ids = cur_prob_masks.argmax(0)
+                cur_mask_ids = tf.argmax(cur_prob_masks, 0)
+                
                 for k in range(curr_classes.shape[0]):
-                    binary_mask = curr_masks[k] >= self.object_mask_threshold
-                    mask_area = binary_mask.sum().item()
-
+                    pred_class = curr_classes[k].numpy()
+                    
+                    isthing = self.is_thing_dict[self.cat_id_map[int(pred_class)]]
+                    binary_mask = cur_mask_ids == k 
+                    # >= self.object_mask_threshold
+                    binary_mask = tf.cast(binary_mask, tf.int32)
+                    
+                    mask_area = tf.math.reduce_sum(binary_mask)
+                    original_area = tf.math.reduce_sum(tf.cast(curr_masks[k] >= 0.5, tf.int32))
                     pred_class = curr_classes[k].numpy()
                     class_score = curr_scores[k].numpy()
-                    if class_score >= self.class_score_threshold:
-                        category_id = cat_id_map[pred_class]
+
+                    if mask_area > 0 and original_area > 0:
+                        if mask_area / original_area < self.overlap_threshold:
+                            continue
+                        category_id = self.cat_id_map[pred_class]
+                        binary_mask = tf.cast(binary_mask, tf.bool)
                         category_mask = tf.where(binary_mask, category_id, category_mask)
-                        if is_thing_dict[category_id]:
-                            # FIXME : Instance id issue need to be fixed
+                        if self.is_thing_dict[category_id]:
+                            stuff_memory_list[category_id] = instance_id
+                            instance_mask = tf.where(binary_mask, instance_id, instance_mask)
                             instance_id += 1
                         else:
-                            instance_mask = tf.where(binary_mask, instance_id, instance_mask)
-                            instance_id = _VOID_INSTANCE_ID
+                            instance_mask = tf.where(binary_mask, _VOID_INSTANCE_ID, instance_mask)
+                            
             instance_masks.append(instance_mask)
             category_masks.append(category_mask)
 

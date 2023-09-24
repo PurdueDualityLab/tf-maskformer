@@ -23,6 +23,8 @@ from official.vision.evaluation import panoptic_quality
 from official.projects.maskformer.losses.inference import PanopticInference
 from official.vision.modeling import backbones
 
+from official.projects.maskformer.losses.mapper import _get_contigious_to_original, _get_original_to_contigious
+
 import numpy as np
 
 @task_factory.register_task_cls(maskformer_cfg.MaskFormerTask)
@@ -33,7 +35,7 @@ class PanopticTask(base_task.Task):
 	loading/iterating over Datasets, initializing the model, calculating the loss,
 	post-processing, and customized metrics with reduction.
 	"""
-	def build_model(self)-> tf.keras.Model:
+	def build_model(self):
 		"""Builds MaskFormer Model."""
 		logging.info('Building MaskFormer model.')
 		input_specs = tf.keras.layers.InputSpec(shape=[None] + self._task_config.model.input_size)
@@ -76,7 +78,7 @@ class PanopticTask(base_task.Task):
 		if self._task_config.init_checkpoint_modules == 'all':
 			ckpt = tf.train.Checkpoint(**model.checkpoint_items)
 			status = ckpt.restore(ckpt_dir_or_file)
-			status.expect_partial().assert_existing_objects_matched()
+			status.assert_consumed()
 			logging.info('Loaded whole model from %s',ckpt_dir_or_file)
 			
 		elif self._task_config.init_checkpoint_modules == 'backbone':
@@ -166,11 +168,14 @@ class PanopticTask(base_task.Task):
 		# TODO : Need panoptic quality metric for evaluation
 		if not training:
 			print("[INFO] Building panoptic quality metric ")
+			self.cat_id_map, self.is_thing_dict = _get_contigious_to_original()
+			self.is_thing_dict_bool = tf.cast(list(self.is_thing_dict.values()), dtype=tf.bool)
 			pq_config = self._task_config.panoptic_quality_evaluator
 			self.panoptic_quality_metric = panoptic_quality.PanopticQualityV2(
 				num_categories=pq_config.num_categories,
-				is_thing=pq_config.is_thing,
+				is_thing=self.is_thing_dict_bool,
 				ignored_label=pq_config.ignored_label,
+				max_num_instances=pq_config.max_num_instances,
 				rescale_predictions=pq_config.rescale_predictions,
 			)
 			self.panoptic_inference = PanopticInference(
@@ -225,12 +230,12 @@ class PanopticTask(base_task.Task):
 			scaled_loss = total_loss
 			if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
 				total_loss = optimizer.get_scaled_loss(scaled_loss)
-					
-		grads = tape.gradient(scaled_loss, model.trainable_variables)
+		tvars = model.trainable_variables	
+		grads = tape.gradient(scaled_loss,tvars)
 
 		if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
 			grads = optimizer.get_unscaled_gradients(grads)
-		optimizer.apply_gradients(list(zip(grads,  model.trainable_variables)))
+		optimizer.apply_gradients(list(zip(grads, tvars)))
 		
 		if os.environ.get('PRINT_OUTPUTS') == 'True':
 			probs = tf.keras.activations.softmax(outputs["class_prob_predictions"], axis=-1)
@@ -300,7 +305,6 @@ class PanopticTask(base_task.Task):
 			pq_metric_labels = {
 			'category_mask': labels['category_mask'], # ignore label is 0 
 			'instance_mask': labels['instance_mask'],
-			'image_info': labels['image_info'],
 			}
 			# Output from postprocessing will convert the binary masks to category and instance masks with non-contigious ids
 			output_category_mask, output_instance_mask = self._postprocess_outputs(outputs, [640, 640])
@@ -370,9 +374,9 @@ class PanopticTask(base_task.Task):
 				tf.reduce_sum(metric_per_class * valid_stuff_classes),
 				num_stuff_categories,
 			)
-			if self.task_config.panoptic_quality_evaluator.report_per_class_metrics:
-				for i, is_valid in enumerate(valid_classes.numpy()):
-					if is_valid:
-						logs[f'panoptic_quality/{metric}/class_{i}'] = metric_per_class[i]
+			# if self.task_config.panoptic_quality_evaluator.report_per_class_metrics:
+			# 	for i, is_valid in enumerate(valid_classes.numpy()):
+			# 		if is_valid:
+			# 			logs[f'panoptic_quality/{metric}/class_{i}'] = metric_per_class[i]
 		
 	

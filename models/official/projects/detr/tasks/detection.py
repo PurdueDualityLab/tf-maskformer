@@ -87,7 +87,7 @@ class DetectionTask(base_task.Task):
       status = ckpt.restore(ckpt_dir_or_file)
       status.expect_partial().assert_existing_objects_matched()
 
-    logging.info("Model items :", model.checkpoint_items)
+    
     logging.info('Finished loading pretrained checkpoint from %s',
                  ckpt_dir_or_file)
     
@@ -257,11 +257,8 @@ class DetectionTask(base_task.Task):
       A dictionary of logs.
     """
     features, labels = inputs
-    tf.print("Model items :", model.checkpoint_items)
-    exit()
     with tf.GradientTape() as tape:
       outputs = model(features, training=True)
-
       loss = 0.0
       cls_loss = 0.0
       box_loss = 0.0
