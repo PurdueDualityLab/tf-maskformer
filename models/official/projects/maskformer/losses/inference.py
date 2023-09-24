@@ -27,7 +27,7 @@ class PanopticInference:
         for each_batch in range(tf.shape(pred_logits)[0]):
             mask_pred_b = mask_pred[each_batch]
             pred_logits_b = pred_logits[each_batch]
-            mask_pred_b_resized =  tf.image.resize(mask_pred_b, (image_shape[1], image_shape[2]), method=tf.image.ResizeMethod.BILINEAR)
+            mask_pred_b_resized =  tf.image.resize(mask_pred_b, (image_shape[0], image_shape[1]), method=tf.image.ResizeMethod.BILINEAR)
             mask_pred_b_sigmoid = tf.keras.activations.sigmoid(mask_pred_b_resized)
             probs = tf.keras.activations.softmax(pred_logits_b, axis=-1) # (num_predictions, num_classes) (2,100,134)
             scores = tf.reduce_max(probs, axis=-1) 
