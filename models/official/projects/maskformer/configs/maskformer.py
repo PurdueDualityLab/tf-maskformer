@@ -94,7 +94,7 @@ class PanopticQuality(hyperparams.Config):
   is_thing : List[bool] = None #FIXME : Make this a list of bools for each class
   ignored_label: int = 0
   rescale_predictions: bool = False
-  
+  max_num_instances: int = 100
 
 @dataclasses.dataclass
 class MaskFormerTask(cfg.TaskConfig):
@@ -181,8 +181,8 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
           train_steps=train_steps,
           validation_steps=COCO_VAL_EXAMPLES // eval_batch_size,
           steps_per_loop=steps_per_epoch,
-          summary_interval=ckpt_interval,
-          checkpoint_interval=10,
+          summary_interval=steps_per_epoch,
+          checkpoint_interval=steps_per_epoch,
           validation_interval=5*steps_per_epoch, # run validation after every epoch (not efficient, but we want to see the results)
           max_to_keep=3,
           best_checkpoint_export_subdir='best_ckpt',
@@ -193,7 +193,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
                   'maskformer_adamw': {
                       'weight_decay_rate': 1e-4,
                       'global_clipnorm': 0.1,
-                      'gradient_clip_norm': 0.01,
+                      'gradient_clip_norm': 0.0,
                       # 'exclude_from_weight_decay': ['LayerNorm', 'layer_norm', 'bias'],
                   }
               },
