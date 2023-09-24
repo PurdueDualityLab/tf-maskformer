@@ -90,7 +90,7 @@ class MaskFormer(hyperparams.Config):
 @dataclasses.dataclass
 class PanopticQuality(hyperparams.Config):
   """MaskFormer model pq evaluator config."""
-  num_categories: int = 134
+  num_categories: int = 133 #FIXME
   is_thing : List[bool] = None #FIXME : Make this a list of bools for each class
   ignored_label: int = 0
   rescale_predictions: bool = False
