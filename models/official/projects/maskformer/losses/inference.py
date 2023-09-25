@@ -87,7 +87,7 @@ class PanopticInference:
                         category_id = self.cat_id_map.lookup(tf.cast(pred_class, tf.int32))
                         binary_mask = tf.cast(binary_mask, tf.bool)
                         category_mask = tf.where(binary_mask, category_id, category_mask)
-                        if self.is_thing_dict.lookup(category_id):
+                        if tf.cast(self.is_thing_dict.lookup(category_id), tf.bool):
                             
                             instance_mask = tf.where(binary_mask, instance_id, instance_mask)
                             instance_id += 1
