@@ -32,7 +32,7 @@ class PanopticInference:
             probs = tf.keras.activations.softmax(pred_logits_b, axis=-1) # (num_predictions, num_classes) (2,100,134)
             scores = tf.reduce_max(probs, axis=-1) 
             labels = tf.argmax(probs, axis=-1)
-            
+            tf.print("Scores :", scores)
             ################################################## Only for testing instance and category mask ##################################################
             # Replace '133' with '0' (background class id) and increment all other classes by 1
             # print("Labels  before :", labels)
