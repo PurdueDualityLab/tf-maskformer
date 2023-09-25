@@ -77,11 +77,9 @@ class PanopticTask(base_task.Task):
 
 		if self._task_config.init_checkpoint_modules == 'all':
 			# ckpt = tf.train.Checkpoint(**model.checkpoint_items)
-			ckpt = tf.train.Checkpoint(model)
+			ckpt = tf.train.Checkpoint(model=model)
 			status = ckpt.restore(ckpt_dir_or_file)
-			# FIXME:
-			model.load_weights(tf.train.latest_checkpoint(ckpt_dir_or_file)).assert_existing_objects_matched()
-			# status.expect_partial().assert_existing_objects_matched()
+			status.expect_partial().assert_existing_objects_matched()
 			logging.info('Loaded whole model from %s',ckpt_dir_or_file)
 			
 		elif self._task_config.init_checkpoint_modules == 'backbone':
