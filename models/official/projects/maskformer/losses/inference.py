@@ -68,7 +68,7 @@ class PanopticInference:
                 cur_mask_ids = tf.argmax(cur_prob_masks, 0)
                 
                 for k in range(tf.shape(curr_classes)[0]):
-                    pred_class = curr_classes[k].numpy()
+                    pred_class = curr_classes[k]
                     
                     isthing = self.is_thing_dict[self.cat_id_map[int(pred_class)]]
                     binary_mask = cur_mask_ids == k 
@@ -77,8 +77,8 @@ class PanopticInference:
                     
                     mask_area = tf.math.reduce_sum(binary_mask)
                     original_area = tf.math.reduce_sum(tf.cast(curr_masks[k] >= 0.5, tf.int32))
-                    pred_class = curr_classes[k].numpy()
-                    class_score = curr_scores[k].numpy()
+                    pred_class = curr_classes[k]
+                    class_score = curr_scores[k]
 
                     if mask_area > 0 and original_area > 0:
                         if mask_area / original_area < self.overlap_threshold:
