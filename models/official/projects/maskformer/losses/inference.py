@@ -52,7 +52,7 @@ class PanopticInference:
             cur_prob_masks = tf.reshape(curr_scores,(-1, 1, 1)) * curr_masks
             
 
-            height, width = tf.shape(curr_masks)[1], tf.shape(curr_masks)[2]
+            height, width, num_masks = tf.shape(curr_masks)[1], tf.shape(curr_masks)[2], tf.shape(curr_masks)[0]
 
             # Create  category mask and instance mask
             # with tf.device(curr_masks.device):
@@ -60,7 +60,7 @@ class PanopticInference:
             instance_mask = tf.zeros((height, width), dtype=tf.int32)
 
             
-            if tf.equal(tf.shape(curr_masks)[0],0):
+            if tf.equal(num_masks,0):
                 continue
             else:
                 
