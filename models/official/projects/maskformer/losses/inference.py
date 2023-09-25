@@ -4,7 +4,7 @@ from official.projects.maskformer.losses.mapper import _get_contigious_to_origin
 
 class PanopticInference:
     """Panoptic Inference"""
-    def __init__(self, num_classes=134, background_class_id=0, object_mask_threshold=0.01, class_score_threshold=0.25, overlap_threshold=0.2):
+    def __init__(self, num_classes=134, background_class_id=0, object_mask_threshold=0.1, class_score_threshold=0.25, overlap_threshold=0.2):
 
         self.num_classes = num_classes
         self.background_class_id = background_class_id
@@ -67,7 +67,7 @@ class PanopticInference:
                 instance_id = 0
                 cur_mask_ids = tf.argmax(cur_prob_masks, 0)
                 
-                for k in range(curr_classes.shape[0]):
+                for k in range(tf.shape(curr_classes)[0]):
                     pred_class = curr_classes[k].numpy()
                     
                     isthing = self.is_thing_dict[self.cat_id_map[int(pred_class)]]
