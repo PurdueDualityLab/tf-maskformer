@@ -71,8 +71,8 @@ class PanopticInference:
                     pred_class = curr_classes[k]
                     
                     # isthing = self.is_thing_dict[self.cat_id_map[int(pred_class)]]
-                    binary_mask = cur_mask_ids == k 
-                   
+
+                    binary_mask = tf.math.equal(cur_mask_ids, k)
                     binary_mask = tf.cast(binary_mask, tf.int32)
                     
                     mask_area = tf.math.reduce_sum(binary_mask)
