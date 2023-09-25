@@ -148,6 +148,7 @@ def _get_contigious_to_original():
     contigious_id = 1 # since 0 is reserved for background class
     keys_tensor_1, vals_tensor_1 = [], []
     keys_tensor_2, vals_tensor_2 = [], []
+    thing_tensor_bool = []
     contigious_to_original = {}
     contigious_to_original_thing = {}
     for each_category in COCO_CATEGORIES:
@@ -155,13 +156,14 @@ def _get_contigious_to_original():
         vals_tensor_1.append(each_category["id"])
         keys_tensor_2.append(each_category["id"])
         vals_tensor_2.append(each_category["isthing"])
+        thing_tensor_bool.append(tf.cast(each_category["isthing"], tf.bool))
         contigious_id += 1
         
     contigious_to_original = tf.lookup.StaticHashTable(
     		tf.lookup.KeyValueTensorInitializer(tf.constant(keys_tensor_1), tf.constant(vals_tensor_1)), default_value=-1)
     contigious_to_original_thing = tf.lookup.StaticHashTable(
     		tf.lookup.KeyValueTensorInitializer(tf.constant(keys_tensor_2), tf.constant(vals_tensor_2)), default_value=-1)
-    return contigious_to_original, contigious_to_original_thing
+    return contigious_to_original, contigious_to_original_thing, thing_tensor_bool
 
 def _get_original_to_contigious():
     contigious_id = 0

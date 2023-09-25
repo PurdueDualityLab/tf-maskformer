@@ -10,7 +10,7 @@ class PanopticInference:
         self.background_class_id = background_class_id
         self.object_mask_threshold = object_mask_threshold
         self.class_score_threshold = class_score_threshold
-        self.cat_id_map, self.is_thing_dict = _get_contigious_to_original()
+        self.cat_id_map, self.is_thing_dict, _ = _get_contigious_to_original()
         self.overlap_threshold = overlap_threshold
 
 
