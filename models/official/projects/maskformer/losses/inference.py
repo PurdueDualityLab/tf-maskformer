@@ -60,39 +60,39 @@ class PanopticInference:
                 instance_mask = tf.zeros((height, width), dtype=tf.int32)
 
             
-            if tf.equal(tf.shape(curr_masks)[0],0):
-                continue
-            else:
+            # if tf.equal(tf.shape(curr_masks)[0],0):
+            #     continue
+            # else:
                 
-                _VOID_INSTANCE_ID = 0
-                instance_id = 0
-                cur_mask_ids = tf.argmax(cur_prob_masks, 0)
-            
-                for k in range(tf.shape(curr_classes)[0]):
-                    pred_class = curr_classes[k]
-                    
-                    # isthing = self.is_thing_dict[self.cat_id_map[int(pred_class)]]
+            _VOID_INSTANCE_ID = 0
+            instance_id = 0
+            cur_mask_ids = tf.argmax(cur_prob_masks, 0)
+        
+            for k in range(tf.shape(curr_classes)[0]):
+                pred_class = curr_classes[k]
+                
+                # isthing = self.is_thing_dict[self.cat_id_map[int(pred_class)]]
 
-                    binary_mask = tf.math.equal(cur_mask_ids, tf.cast(k, tf.int64))
-                    binary_mask = tf.cast(binary_mask, tf.int32)
-                    
-                    mask_area = tf.math.reduce_sum(binary_mask)
-                    original_area = tf.math.reduce_sum(tf.cast(curr_masks[k] >= 0.5, tf.int32))
-                    pred_class = curr_classes[k]
-                    class_score = curr_scores[k]
+                binary_mask = tf.math.equal(cur_mask_ids, tf.cast(k, tf.int64))
+                binary_mask = tf.cast(binary_mask, tf.int32)
+                
+                mask_area = tf.math.reduce_sum(binary_mask)
+                original_area = tf.math.reduce_sum(tf.cast(curr_masks[k] >= 0.5, tf.int32))
+                pred_class = curr_classes[k]
+                class_score = curr_scores[k]
 
-                    if mask_area > 0 and original_area > 0:
-                        if mask_area / original_area < self.overlap_threshold:
-                            continue
-                        category_id = self.cat_id_map.lookup(tf.cast(pred_class, tf.int32))
-                        binary_mask = tf.cast(binary_mask, tf.bool)
-                        category_mask = tf.where(binary_mask, category_id, category_mask)
-                        if tf.cast(self.is_thing_dict.lookup(category_id), tf.bool):
-                            
-                            instance_mask = tf.where(binary_mask, instance_id, instance_mask)
-                            instance_id += 1
-                        else:
-                            instance_mask = tf.where(binary_mask, _VOID_INSTANCE_ID, instance_mask)
+                if mask_area > 0 and original_area > 0:
+                    if mask_area / original_area < self.overlap_threshold:
+                        continue
+                    category_id = self.cat_id_map.lookup(tf.cast(pred_class, tf.int32))
+                    binary_mask = tf.cast(binary_mask, tf.bool)
+                    category_mask = tf.where(binary_mask, category_id, category_mask)
+                    if tf.cast(self.is_thing_dict.lookup(category_id), tf.bool):
+                        
+                        instance_mask = tf.where(binary_mask, instance_id, instance_mask)
+                        instance_id += 1
+                    else:
+                        instance_mask = tf.where(binary_mask, _VOID_INSTANCE_ID, instance_mask)
                             
             instance_masks.append(instance_mask)
             category_masks.append(category_mask)
