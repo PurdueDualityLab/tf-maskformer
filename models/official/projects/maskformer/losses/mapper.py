@@ -154,7 +154,7 @@ def _get_contigious_to_original():
         keys_tensor_1.append(contigious_id)
         vals_tensor_1.append(each_category["id"])
         keys_tensor_2.append(each_category["id"])
-        vals_tensor_2.append(each_category["isthing"])
+        vals_tensor_2.append(tf.cast(each_category["isthing"], tf.bool))
         contigious_id += 1
         
     contigious_to_original = tf.lookup.StaticHashTable(

@@ -171,7 +171,7 @@ class PanopticTask(base_task.Task):
 		if not training:
 			print("[INFO] Building panoptic quality metric ")
 			self.cat_id_map, self.is_thing_dict = _get_contigious_to_original()
-			self.is_thing_dict_bool = tf.cast(list(self.is_thing_dict.values()), dtype=tf.bool)
+			# self.is_thing_dict_bool = tf.cast(list(self.is_thing_dict.values()), dtype=tf.bool)
 			pq_config = self._task_config.panoptic_quality_evaluator
 			self.panoptic_quality_metric = panoptic_quality.PanopticQualityV2(
 				num_categories=pq_config.num_categories,
