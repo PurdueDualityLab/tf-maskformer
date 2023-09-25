@@ -13,6 +13,7 @@ class PanopticInference:
         self.cat_id_map, self.is_thing_dict = _get_contigious_to_original()
         self.overlap_threshold = overlap_threshold
 
+
     def __call__(self, pred_logits, mask_pred, image_shape):
         """
         mask_pred: (batch, height, width, num_predictions)
@@ -62,7 +63,7 @@ class PanopticInference:
             if tf.shape(curr_masks)[0] == 0:
                 continue
             else:
-                stuff_memory_list = {}
+                
                 _VOID_INSTANCE_ID = 0
                 instance_id = 0
                 cur_mask_ids = tf.argmax(cur_prob_masks, 0)
@@ -83,11 +84,11 @@ class PanopticInference:
                     if mask_area > 0 and original_area > 0:
                         if mask_area / original_area < self.overlap_threshold:
                             continue
-                        category_id = self.cat_id_map[pred_class.ref()]
+                        category_id = self.cat_id_map[pred_class]
                         binary_mask = tf.cast(binary_mask, tf.bool)
-                        category_mask = tf.where(binary_mask, category_id, category_mask)
-                        if self.is_thing_dict[category_id.ref()]:
-                            stuff_memory_list[category_id] = instance_id
+                        category_mask = tf.whepre(binary_mask, category_id, category_mask)
+                        if self.is_thing_dict[category_id]:
+                            
                             instance_mask = tf.where(binary_mask, instance_id, instance_mask)
                             instance_id += 1
                         else:
