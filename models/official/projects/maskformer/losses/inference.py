@@ -4,7 +4,7 @@ from official.projects.maskformer.losses.mapper import _get_contigious_to_origin
 
 class PanopticInference:
     """Panoptic Inference"""
-    def __init__(self, num_classes=134, background_class_id=0, object_mask_threshold=0.25, class_score_threshold=0.25, overlap_threshold=0.25):
+    def __init__(self, num_classes=134, background_class_id=0, object_mask_threshold=0.1, class_score_threshold=0.1, overlap_threshold=0.2):
 
         self.num_classes = num_classes
         self.background_class_id = background_class_id
