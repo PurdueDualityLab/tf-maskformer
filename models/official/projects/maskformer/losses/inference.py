@@ -55,9 +55,9 @@ class PanopticInference:
             height, width, num_masks = tf.shape(curr_masks)[1], tf.shape(curr_masks)[2], tf.shape(curr_masks)[0]
 
             # Create  category mask and instance mask
-            # with tf.device(curr_masks.device):
-            category_mask = tf.zeros((height, width), dtype=tf.int32)
-            instance_mask = tf.zeros((height, width), dtype=tf.int32)
+            with tf.device(curr_masks.device):
+                category_mask = tf.zeros((height, width), dtype=tf.int32)
+                instance_mask = tf.zeros((height, width), dtype=tf.int32)
 
             
             if tf.equal(num_masks,0):
