@@ -83,7 +83,7 @@ class PanopticInference:
                     if mask_area > 0 and original_area > 0:
                         if mask_area / original_area < self.overlap_threshold:
                             continue
-                        category_id = self.cat_id_map[pred_class]
+                        category_id = self.cat_id_map[pred_class.ref()]
                         binary_mask = tf.cast(binary_mask, tf.bool)
                         category_mask = tf.where(binary_mask, category_id, category_mask)
                         if self.is_thing_dict[category_id.ref()]:
