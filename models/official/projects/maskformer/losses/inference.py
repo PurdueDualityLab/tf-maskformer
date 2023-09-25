@@ -70,9 +70,9 @@ class PanopticInference:
                 for k in range(tf.shape(curr_classes)[0]):
                     pred_class = curr_classes[k]
                     
-                    isthing = self.is_thing_dict[self.cat_id_map[int(pred_class)]]
+                    # isthing = self.is_thing_dict[self.cat_id_map[int(pred_class)]]
                     binary_mask = cur_mask_ids == k 
-                    # >= self.object_mask_threshold
+                   
                     binary_mask = tf.cast(binary_mask, tf.int32)
                     
                     mask_area = tf.math.reduce_sum(binary_mask)
@@ -86,7 +86,7 @@ class PanopticInference:
                         category_id = self.cat_id_map[pred_class]
                         binary_mask = tf.cast(binary_mask, tf.bool)
                         category_mask = tf.where(binary_mask, category_id, category_mask)
-                        if self.is_thing_dict[category_id]:
+                        if self.is_thing_dict[category_id.ref()]:
                             stuff_memory_list[category_id] = instance_id
                             instance_mask = tf.where(binary_mask, instance_id, instance_mask)
                             instance_id += 1
