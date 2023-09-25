@@ -158,11 +158,9 @@ def _get_contigious_to_original():
         contigious_id += 1
         
     contigious_to_original = tf.lookup.StaticHashTable(
-    		tf.lookup.KeyValueTensorInitializer(tf.constant(keys_tensor_1), tf.constant(vals_tensor_1),
-    		default_value=-1))
+    		tf.lookup.KeyValueTensorInitializer(tf.constant(keys_tensor_1), tf.constant(vals_tensor_1)))
     contigious_to_original_thing = tf.lookup.StaticHashTable(
-    		tf.lookup.KeyValueTensorInitializer(tf.constant(keys_tensor_2), tf.constant(vals_tensor_2),
-    		default_value=-1))
+    		tf.lookup.KeyValueTensorInitializer(tf.constant(keys_tensor_2), tf.constant(vals_tensor_2)))
     return contigious_to_original, contigious_to_original_thing
 
 def _get_original_to_contigious():
