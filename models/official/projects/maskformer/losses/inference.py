@@ -60,14 +60,14 @@ class PanopticInference:
                 instance_mask = tf.zeros((height, width), dtype=tf.int32)
 
             
-            if tf.shape(curr_masks)[0] == 0:
+            if tf.equal(tf.shape(curr_masks)[0],0):
                 continue
             else:
                 
                 _VOID_INSTANCE_ID = 0
                 instance_id = 0
                 cur_mask_ids = tf.argmax(cur_prob_masks, 0)
-                
+            
                 for k in range(tf.shape(curr_classes)[0]):
                     pred_class = curr_classes[k]
                     
