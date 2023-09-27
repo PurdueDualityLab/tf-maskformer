@@ -468,6 +468,8 @@ class PanopticQualityV2(tf.keras.metrics.Metric):
     
     #FIXME: Default one caused error while executing eval on CPU
     # _, height, width = category_mask.get_shape().as_list()
+    print(tf.shape(category_mask))
+    exit()
     height, width = tf.shape(category_mask)[1], tf.shape(category_mask)[2]
     # (batch_size, num_detections + 1)
     instance_class_ids = _get_instance_class_ids(
