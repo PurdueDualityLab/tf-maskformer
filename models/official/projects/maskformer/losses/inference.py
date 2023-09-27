@@ -42,7 +42,7 @@ class PanopticInference:
             # exit()
             ################################################## Only for testing instance and category mask ##################################################
             keep = tf.math.logical_and(tf.math.not_equal(labels, self.background_class_id), scores > self.object_mask_threshold)
-            tf.print("labels :", labels)
+            print("labels :", labels)
             tf.print("background class:", self.background_class_id)
             tf.print("scores > threshold :", scores > self.object_mask_threshold)
             exit()
