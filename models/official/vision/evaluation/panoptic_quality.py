@@ -465,6 +465,7 @@ class PanopticQualityV2(tf.keras.metrics.Metric):
       gt_category_mask: tf.Tensor,
       gt_instance_mask: tf.Tensor,
   ):
+    print(category_mask.get_shape().as_list())
     _, height, width = category_mask.get_shape().as_list()
 
     # (batch_size, num_detections + 1)
