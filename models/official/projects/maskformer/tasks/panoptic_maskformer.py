@@ -112,6 +112,9 @@ class PanopticTask(base_task.Task):
 		
 		dataset = reader.read(input_context=input_context)
 		# print("Saving dataset")
+		for sample in dataset.take(-1):
+			print(f"unique idsin dataset take : {sample[1]['unique_ids']}")
+		exit()
 		# for sample in dataset.take(1):
 		# 	# print(f"unique idsin dataset take : {sample[1]['unique_ids']}")
 		# 	# print("individual masks :", sample[1]["individual_masks"].shape)
