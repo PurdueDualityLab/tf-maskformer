@@ -117,10 +117,11 @@ class PanopticTask(base_task.Task):
 		total_images = 0
 		for sample in dataset.take(-1):
 			for each_id in sample[1]['unique_ids']:
-				if each_id.numpy() in class_counts.keys():
-					class_counts[each_id.numpy()] += 1
-				else:
-					class_counts[each_id.numpy()] = 1
+				for each_id in each_id:
+					if each_id in class_counts.keys():
+						class_counts[each_id.numpy()] += 1
+					else:
+						class_counts[each_id.numpy()] = 1
 			total_images += 1
 		print("Total images :", total_images)
 		print("Class counts :", class_counts)
