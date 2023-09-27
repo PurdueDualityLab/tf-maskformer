@@ -112,8 +112,18 @@ class PanopticTask(base_task.Task):
 		
 		dataset = reader.read(input_context=input_context)
 		# print("Saving dataset")
+		class_counts = {}
+		class_counts[0] = 0
+		total_images = 0
 		for sample in dataset.take(-1):
-			print(f"unique idsin dataset take : {sample[1]['unique_ids']}")
+			for each_id in sample[1]['unique_ids']:
+				if each_id.numpy() in class_counts.keys():
+					class_counts[each_id.numpy()] += 1
+				else:
+					class_counts[each_id.numpy()] = 1
+			total_images += 1
+		print("Total images :", total_images)
+		print("Class counts :", class_counts)
 		exit()
 		# for sample in dataset.take(1):
 		# 	# print(f"unique idsin dataset take : {sample[1]['unique_ids']}")
