@@ -424,6 +424,11 @@ class PanopticQualityV2(tf.keras.metrics.Metric):
     gt_category_mask = tf.cast(y_true['category_mask'], tf.int32)
     gt_instance_mask = tf.cast(y_true['instance_mask'], tf.int32)
 
+    # print shapes of input tensors
+    print("category_mask shape :", category_mask.shape)
+    print("instance_mask shape :", instance_mask.shape)
+    print("gt_category_mask shape :", gt_category_mask.shape)
+    print("gt_instance_mask shape :", gt_instance_mask.shape)
     if self._rescale_predictions:
       _, height, width = gt_category_mask.get_shape().as_list()
       # Instead of cropping the masks to the original image shape (dynamic),
