@@ -37,6 +37,9 @@ class PanopticTask(base_task.Task):
 	"""
 	def build_model(self):
 		"""Builds MaskFormer Model."""
+
+		self.class_ids = {}
+
 		logging.info('Building MaskFormer model.')
 		input_specs = tf.keras.layers.InputSpec(shape=[None] + self._task_config.model.input_size)
 		
@@ -58,6 +61,8 @@ class PanopticTask(base_task.Task):
 		logging.info('Maskformer model build successful.')
 		inputs = tf.keras.Input(shape=input_specs.shape[1:])
 		model(inputs)
+
+
 		
 		return model
 
@@ -185,8 +190,87 @@ class PanopticTask(base_task.Task):
 			)
 		return metrics
 		
+	def _log_classes(self, labels: Dict[str, Any]) -> List[Dict[int, int]]:
+		""" 
+		Logs all the class IDs viewed during training and evaluation.
 		
+		Returns: 
+		A dictionary of class ids and their counts across all images in batch
+		"""
+
+		all_unique_ids = labels["unique_ids"]._numpy()
+		classes_in_batch = []
+		for size in range(all_unique_ids.shape[0]):
+			unique_ids = all_unique_ids[size, :]
+			classes_in_image = {}
+			for class_id in unique_ids: 
+				if class_id in classes_in_image: 
+					classes_in_image[class_id] += 1
+				else: 
+					classes_in_image[class_id] = 1
+			classes_in_batch.append(classes_in_image)
+
+			for class_id in unique_ids: 
+				if class_id in self.class_ids: 
+					self.class_ids[class_id] += 1
+				else: 
+					self.class_ids[class_id] = 1
+
+		return classes_in_batch
+
+	def _check_contigious_mask(self, labels: Dict[str, Any]):
+		"""	
+		Checks if all the contigious masks are mapped properly from the category masks 
+
+		Returns:
+		EagerTensor with correctly mapped contigious masks
+		"""
+		mapping_dict  = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 13: 12, 14: 13, 15: 14, 16: 15, 17: 16, 18: 17, \
+		19: 18, 20: 19, 21: 20, 22: 21, 23: 22, 24: 23, 25: 24, 27: 25, 28: 26, 31: 27, 32: 28, 33: 29, 34: 30, 35: 31, 36: 32, 37: 33, 38: 34, \
+		39: 35, 40: 36, 41: 37, 42: 38, 43: 39, 44: 40, 46: 41, 47: 42, 48: 43, 49: 44, 50: 45, 51: 46, 52: 47, 53: 48, 54: 49, 55: 50, 56: 51, 57: 52, \
+		58: 53, 59: 54, 60: 55, 61: 56, 62: 57, 63: 58, 64: 59, 65: 60, 67: 61, 70: 62, 72: 63, 73: 64, 74: 65, 75: 66, 76: 67, 77: 68, 78: 69, 79: 70, \
+		80: 71, 81: 72, 82: 73, 84: 74, 85: 75, 86: 76, 87: 77, 88: 78, 89: 79, 90: 80, 92: 81, 93: 82, 95: 83, 100: 84, 107: 85, 109: 86, 112: 87, \
+		118: 88, 119: 89, 122: 90, 125: 91, 128: 92, 130: 93, 133: 94, 138: 95, 141: 96, 144: 97, 145: 98, 147: 99, 148: 100, 149: 101, 151: 102, \
+		154: 103, 155: 104, 156: 105, 159: 106, 161: 107, 166: 108, 168: 109, 171: 110, 175: 111, 176: 112, 177: 113, 178: 114, 180: 115, 181: 116, \
+		184: 117, 185: 118, 186: 119, 187: 120, 188: 121, 189: 122, 190: 123, 191: 124, 192: 125, 193: 126, 194: 127, 195: 128, 196: 129, 197: 130, \
+		198: 131, 199: 132, 200: 133}
+
+		category_mask = labels["category_mask"]._numpy()
+		contigious_mask = labels["contigious_mask"]._numpy()
+
+		for size in range(category_mask.shape[0]):
+			cat = category_mask[size]
+			cont = contigious_mask[size, :, :, :]
+			mapped_cat = np.expand_dims(np.array([[mapping_dict.get(int(x), int(x)) for x in row] for row in cat]), axis=-1)
+			if not np.array_equal(mapped_cat, cont): 
+				raise ValueError('not equal')
+
+				contigious_mask[size, :, :, :] = mapped_cat
+			
+		return tf.convert_to_tensor(contigious_mask)
+
+	def _check_induvidual_masks(self, labels: Dict[str, Any], class_ids: List[Dict[int, int]]):
+		"""
+		Checks if all the induvidual masks are given the correct instance id
+
+		Returns:
+		EagerTensor with correctly mapped induvidual masks
+		"""
+
+		induvidual_masks = labels["individual_masks"]._numpy()
+		zero_mask = np.zeros((induvidual_masks.shape[2], induvidual_masks.shape[3]), dtype=induvidual_masks.dtype)
+
+		for size in range(len(class_ids)): 
+			result = np.any(induvidual_masks[size, :, :, :, :] != 0, axis=(1, 2))
+			for i, has_non_zero in enumerate(result):
+					if has_non_zero:
+						if i > (100-class_ids[size][0]-1): 
+							print('yes')
+							induvidual_masks[size, i, :, :, induvidual_masks.shape[4]] = zero_mask
 		
+		return tf.convert_to_tensor(induvidual_masks)
+
+
 	def train_step(self, inputs: Tuple[Any, Any],model: tf.keras.Model, optimizer: tf.keras.optimizers.Optimizer, metrics: Optional[List[Any]] = None) -> Dict[str, Any]:
 		"""
 		Does forward and backward.
@@ -202,6 +286,10 @@ class PanopticTask(base_task.Task):
 		"""
 						
 		features, labels = inputs
+
+		labels["individual_masks"] = self._check_induvidual_masks(labels, self._log_classes(labels))
+		labels["contigious_mask"] = self._check_contigious_mask(labels)
+
 		with tf.GradientTape() as tape:
 			outputs = model(features, training=True)
 			##########################################################
