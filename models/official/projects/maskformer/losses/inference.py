@@ -99,5 +99,8 @@ class PanopticInference:
 
         instance_masks_stacked = tf.stack(instance_masks, axis=0)
         category_masks_stacked = tf.stack(category_masks, axis=0)
+        tf.print("Instance Masks Stacked :", instance_masks_stacked)
+        tf.print("Category Masks Stacked :", category_masks_stacked)
+        exit()
         return instance_masks_stacked, category_masks_stacked
 
