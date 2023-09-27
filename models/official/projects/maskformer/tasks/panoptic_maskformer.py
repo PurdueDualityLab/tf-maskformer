@@ -117,9 +117,8 @@ class PanopticTask(base_task.Task):
 		total_images = 0
 		for sample in dataset.take(-1):
 			for each_id in sample[1]['unique_ids']:
-					print("Unique id :", each_id)
-					exit()
-					class_counts[each_id.numpy()] += 1
+					for ids in each_id.numpy():
+						class_counts[int(ids)] += 1
 					
 			total_images += 1
 		print("Total images :", total_images)
