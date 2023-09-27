@@ -465,9 +465,10 @@ class PanopticQualityV2(tf.keras.metrics.Metric):
       gt_category_mask: tf.Tensor,
       gt_instance_mask: tf.Tensor,
   ):
-    print(category_mask.get_shape().as_list())
-    _, height, width = category_mask.get_shape().as_list()
-
+    
+    #FIXME: Default one caused error while executing eval on CPU
+    # _, height, width = category_mask.get_shape().as_list()
+    height, width = tf.shape(category_mask)[1], tf.shape(category_mask)[2]
     # (batch_size, num_detections + 1)
     instance_class_ids = _get_instance_class_ids(
         category_mask,
