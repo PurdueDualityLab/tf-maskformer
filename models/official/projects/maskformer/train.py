@@ -26,7 +26,6 @@ from official.core import task_factory
 from official.core import train_lib
 from official.core import train_utils
 from official.modeling import performance
-from cloud_tpu_client import Client
 
 from official.projects.maskformer.configs import maskformer
 from official.projects.maskformer.tasks import panoptic_maskformer
@@ -35,10 +34,13 @@ FLAGS = flags.FLAGS
 def main(_):
 
 	if FLAGS.tpu:
+		from cloud_tpu_client import Client
 		# This is for configuring the TPU software version programatically
 		c = Client(os.environ['TPU_NAME'], zone=os.environ['TPU_ZONE'], project=os.environ['TPU_PROJECT'])
 		c.configure_tpu_version(os.environ["TPU_SOFTWARE"], restart_type='ifNeeded')
-		c.wait_for_healthy()
+		c.wait_for_healthy()	
+	else: 
+		os.environ['TF_GPU_ALLOCATOR'] = 'cuda_malloc_async'
 
 
 	gin.parse_config_files_and_bindings(FLAGS.gin_file, FLAGS.gin_params)

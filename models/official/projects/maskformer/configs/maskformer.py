@@ -114,6 +114,10 @@ COCO_VAL_EXAMPLES = 5000
 SET_MODEL_BFLOAT16 = False
 SET_DATA_BFLOAT16 = True
 
+if not os.environ.get('USE_BFLOAT16_DATA'): 
+  SET_DATA_BFLOAT16 = False
+  
+
 @exp_factory.register_config_factory('maskformer_coco_panoptic')
 def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
   """Config to get results that matches the paper."""
@@ -124,9 +128,22 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
   ckpt_interval = (COCO_TRAIN_EXAMPLES // train_batch_size) * 10 # Don't write ckpts frequently. Slows down the training
   image_size = int(os.environ.get('IMG_SIZE'))
 
-  steps_per_epoch = COCO_TRAIN_EXAMPLES // train_batch_size
-  train_steps = 300 * steps_per_epoch  # 300 epochs
-  decay_at = train_steps - 100 * steps_per_epoch  # 200 epochs
+  if os.environ.get('STEPS_PER_EPOCH'): 
+    steps_per_epoch = int(os.environ.get('STEPS_PER_EPOCH'))
+  else: 
+    steps_per_epoch = COCO_TRAIN_EXAMPLES // train_batch_size
+
+  if os.environ.get('NUM_EPOCH'):
+    train_steps = int(os.environ.get('NUM_EPOCH')) * steps_per_epoch
+    decay_at = int(2/3 * train_steps)  
+  else: 
+    train_steps = 300 * steps_per_epoch  # 300 epochs
+    decay_at = train_steps - 100 * steps_per_epoch  # 200 epochs
+
+  # steps_per_epoch = COCO_TRAIN_EXAMPLES // train_batch_size
+  # train_steps = 300 * steps_per_epoch  # 300 epochs
+  # decay_at = train_steps - 100 * steps_per_epoch  # 200 epochs
+
   config = cfg.ExperimentConfig(
   task = MaskFormerTask(
           init_checkpoint="",
@@ -179,7 +196,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
           )),
       trainer=cfg.TrainerConfig(
           train_steps=train_steps,
-          validation_steps=COCO_VAL_EXAMPLES // eval_batch_size,
+          validation_steps=COCO_VAL_EXAMPLES // eval_batch_size if not os.environ.get('VAL_STEPS') else int(os.environ.get('VAL_STEPS')),
           steps_per_loop=steps_per_epoch,
           summary_interval=steps_per_epoch,
           checkpoint_interval=steps_per_epoch,
