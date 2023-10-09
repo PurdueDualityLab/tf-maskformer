@@ -64,7 +64,6 @@ class DETRTransformer(tf.keras.layers.Layer):
     target_shape = tf.shape(targets)
     
     if mask is not None:
-      
       cross_attention_mask = tf.tile(
           tf.expand_dims(mask, axis=1), [1, target_shape[1], 1])
       self_attention_mask=tf.ones(

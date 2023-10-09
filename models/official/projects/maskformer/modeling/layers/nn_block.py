@@ -1,4 +1,7 @@
 import tensorflow as tf
+from official.modeling import tf_utils
+from official.nlp.modeling import layers
+from official.nlp.modeling import models
 
 '''
 Transformer Parameters:
@@ -74,6 +77,8 @@ class MLP(tf.keras.layers.Layer):
                 # Final Layer
                 self._layers.append(
                     tf.keras.layers.Dense(dim[1], activation=None))
+                    # kernel_initializer=tf_utils.clone_initializer(tf.keras.initializers.get('glorot_uniform')), 
+                    # bias_initializer=tf_utils.clone_initializer(tf.keras.initializers.get('glorot_uniform')))
 
     def call(self, x):
         for layer in self._layers:

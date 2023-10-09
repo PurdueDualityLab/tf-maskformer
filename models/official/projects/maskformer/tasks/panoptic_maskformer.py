@@ -1,7 +1,7 @@
 import os
 from absl import logging
 import tensorflow as tf
-
+import matplotlib.pyplot as plt
 from official.core import base_task
 from official.core import task_factory
 from official.core import train_utils
@@ -39,7 +39,33 @@ class PanopticTask(base_task.Task):
 		"""Builds MaskFormer Model."""
 
 		self.class_ids = {}
+		self.plot_collection = {} 
+		self.plot_collection_labels = {0:[]}
+		self.temp = 0	
+		self.background_empty_mask = {}
+		self.labelled_empty_mask = {}
+		self.background_non_empty_mask = {}
+		self.class_id_counts = {}
+		self.log_dir = os.environ.get('LOG_DIR')
+		self.run_number = os.environ.get('RUN_NUMBER')
 
+		if self.log_dir is None:
+			try: 
+				os.mkdir(self.log_dir)
+			except: 
+				pass 
+			os.mkdir(os.path.join(self.log_dir, self.run_number)) # If there is existing, then throw error
+			self.log_dir = os.path.join(self.log_dir, self.run_number)
+
+			with open(os.path.join(self.log_dir, 'checking_labels.txt'), 'w') as file:
+				pass
+			
+			with open(os.path.join(self.log_dir, 'settings.txt'), 'w') as file:
+				file.write("RUN: " + str(os.environ.get('RUN_NUMBER')) + '\n')
+				file.write("BSIZE: " + str(os.environ.get('TRAIN_BATCH_SIZE'))+ '\n')
+				file.write("BASE_LR: " + str(os.environ.get('BASE_LR'))+ '\n')
+				file.write("NO_OBJ_CLS_WEIGHT: " + str(os.environ.get('NO_OBJ_CLS_WEIGHT'))+ '\n')
+			
 		logging.info('Building MaskFormer model.')
 		input_specs = tf.keras.layers.InputSpec(shape=[None] + self._task_config.model.input_size)
 		
@@ -61,16 +87,14 @@ class PanopticTask(base_task.Task):
 		logging.info('Maskformer model build successful.')
 		inputs = tf.keras.Input(shape=input_specs.shape[1:])
 		model(inputs)
-
-
-		
+		model.summary() 
 		return model
 
 	def initialize(self, model: tf.keras.Model) -> None:
 		"""
 		Used to initialize the models with checkpoint
 		"""
-		
+
 		logging.info('Initializing model from checkpoint: %s', self._task_config.init_checkpoint)
 		if not self._task_config.init_checkpoint:
 			return
@@ -243,13 +267,11 @@ class PanopticTask(base_task.Task):
 			cont = contigious_mask[size, :, :, :]
 			mapped_cat = np.expand_dims(np.array([[mapping_dict.get(int(x), int(x)) for x in row] for row in cat]), axis=-1)
 			if not np.array_equal(mapped_cat, cont): 
-				raise ValueError('not equal')
-
 				contigious_mask[size, :, :, :] = mapped_cat
 			
 		return tf.convert_to_tensor(contigious_mask)
 
-	def _check_induvidual_masks(self, labels: Dict[str, Any], class_ids: List[Dict[int, int]]):
+	def _check_induvidual_masks(self, labels: Dict[str, Any], class_id_counts: List[Dict[int, int]]):
 		"""
 		Checks if all the induvidual masks are given the correct instance id
 
@@ -257,16 +279,70 @@ class PanopticTask(base_task.Task):
 		EagerTensor with correctly mapped induvidual masks
 		"""
 
+		# mapping_dict  = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 13: 12, 14: 13, 15: 14, 16: 15, 17: 16, 18: 17, \
+		# 19: 18, 20: 19, 21: 20, 22: 21, 23: 22, 24: 23, 25: 24, 27: 25, 28: 26, 31: 27, 32: 28, 33: 29, 34: 30, 35: 31, 36: 32, 37: 33, 38: 34, \
+		# 39: 35, 40: 36, 41: 37, 42: 38, 43: 39, 44: 40, 46: 41, 47: 42, 48: 43, 49: 44, 50: 45, 51: 46, 52: 47, 53: 48, 54: 49, 55: 50, 56: 51, 57: 52, \
+		# 58: 53, 59: 54, 60: 55, 61: 56, 62: 57, 63: 58, 64: 59, 65: 60, 67: 61, 70: 62, 72: 63, 73: 64, 74: 65, 75: 66, 76: 67, 77: 68, 78: 69, 79: 70, \
+		# 80: 71, 81: 72, 82: 73, 84: 74, 85: 75, 86: 76, 87: 77, 88: 78, 89: 79, 90: 80, 92: 81, 93: 82, 95: 83, 100: 84, 107: 85, 109: 86, 112: 87, \
+		# 118: 88, 119: 89, 122: 90, 125: 91, 128: 92, 130: 93, 133: 94, 138: 95, 141: 96, 144: 97, 145: 98, 147: 99, 148: 100, 149: 101, 151: 102, \
+		# 154: 103, 155: 104, 156: 105, 159: 106, 161: 107, 166: 108, 168: 109, 171: 110, 175: 111, 176: 112, 177: 113, 178: 114, 180: 115, 181: 116, \
+		# 184: 117, 185: 118, 186: 119, 187: 120, 188: 121, 189: 122, 190: 123, 191: 124, 192: 125, 193: 126, 194: 127, 195: 128, 196: 129, 197: 130, \
+		# 198: 131, 199: 132, 200: 133}
+
 		induvidual_masks = labels["individual_masks"]._numpy()
-		zero_mask = np.zeros((induvidual_masks.shape[2], induvidual_masks.shape[3]), dtype=induvidual_masks.dtype)
+		# contig_mask = labels["contigious_mask"]._numpy().copy()
+		# instance_mask = labels["instance_mask"]._numpy().copy()
+		# zero_mask = np.zeros((induvidual_masks.shape[2], induvidual_masks.shape[3]), dtype=induvidual_masks.dtype)
+		class_ids = labels["unique_ids"]._numpy().copy()
+
+			# induvidual_masks_in_image = induvidual_masks[size, :, :, :, :]
+			# instance_mask_in_image = instance_mask[size, :, :, :]
+			# contig_mask_in_image = contig_mask[size, :, :, :]
+			# combined_mask = np.array([[tuple((contig_mask_in_image[i, j], instance_mask_in_image[i, j])) for j in range(contig_mask_in_image.shape[1])] for i in range(contig_mask_in_image.shape[0])])
+			
+			# with open('/depot/davisjam/data/akshath/exps/tf/indu_masks/indu_masks.txt', 'w') as file: 
+			# 	file.write(str(combined_mask) + '\n')
+			# 	file.write(str(np.unique(combined_mask, axis=0)) + '\n')
+
+			# for a in np.unique(instance_mask_in_image): 
+			# 	plt.imshow(instance_mask_in_image == a)
+			# 	plt.savefig(f'/depot/davisjam/data/akshath/exps/tf/indu_masks/my_image__{size}_{a}.png')
+
+			# unique_ids = class_ids[size, :]
+			# # np.save('/depot/davisjam/data/akshath/exps/tf/indu_masks/instance.npy', instance_mask_in_image)
+			# return 
+			# for i, class_id in enumerate(unique_ids):
+			# 	if class_id != 0:
+			# 		print(class_id)		
+					# instance_mask_in_image[instance_mask_in_image == i]	
+					# if induvidual_masks_in_image[i,:,:,:]
+				# if not np.all((induvidual_masks_in_image[i,:,:,:] == 0) | (induvidual_masks_in_image[i,:,:,:] == mapped_id)):
+					# induvidual_masks_in_image[i, :, :, :] = np.array([[mapped_id for x in row] for row in induvidual_masks_in_image[i, :, :, :]])
 
 		for size in range(len(class_ids)): 
-			result = np.any(induvidual_masks[size, :, :, :, :] != 0, axis=(1, 2))
-			for i, has_non_zero in enumerate(result):
-					if has_non_zero:
-						if i > (100-class_ids[size][0]-1): 
-							print('yes')
-							induvidual_masks[size, i, :, :, induvidual_masks.shape[4]] = zero_mask
+
+			# background_non_empty_mask = 0 
+			labelled_empty_mask = 0 
+			# background_empty_mask = 0
+
+			for i, mask in enumerate(induvidual_masks[size, :, :, :, :]):
+				if class_ids[size][i] != 0:
+					if np.all(mask == 0): 
+						labelled_empty_mask += 1
+						class_ids[size][i] = 0						
+
+			self.labelled_empty_mask[self.temp] = labelled_empty_mask
+
+			with open(os.path.join(self.log_dir, 'background_empty_mask.txt'), 'w') as file: 
+				file.write(str(self.background_empty_mask) + '\n')
+			with open(os.path.join(self.log_dir, 'labelled_empty_mask.txt'), 'w') as file: 
+				file.write(str(self.labelled_empty_mask) + '\n')
+			with open(os.path.join(self.log_dir, 'background_non_empty_mask.txt'), 'w') as file: 
+				file.write(str(self.background_non_empty_mask) + '\n')
+			with open(os.path.join(self.log_dir, 'class_id_counts.txt'), 'w') as file: 
+				file.write(str(self.class_id_counts) + '\n')
+			with open(os.path.join(self.log_dir, 'class_ids.txt'), 'w') as file: 
+				file.write(str(self.class_ids) + '\n')
 		
 		return tf.convert_to_tensor(induvidual_masks)
 
@@ -287,11 +363,54 @@ class PanopticTask(base_task.Task):
 						
 		features, labels = inputs
 
-		labels["individual_masks"] = self._check_induvidual_masks(labels, self._log_classes(labels))
-		labels["contigious_mask"] = self._check_contigious_mask(labels)
+		features = tf.convert_to_tensor(np.load('/depot/davisjam/data/akshath/exps/resnet/raw/features.npy')) 
+		for val in labels: 
+			labels[val] = tf.convert_to_tensor(np.load(f'/depot/davisjam/data/akshath/exps/resnet/raw/{val}.npy'))
+
+		# np.save('/depot/davisjam/data/akshath/exps/tf/resnet/raw/features.npy', tf.cast(features, np.float32)._numpy())
+		# for lab in labels: 
+			# np.save(f'/depot/davisjam/data/akshath/exps/tf/resnet/raw/{lab}.npy', tf.cast(labels[lab], np.float32)._numpy())
+
+
+		# self.temp += 2
+		# all_unique_ids = labels["unique_ids"]._numpy()
+		# for size in range(all_unique_ids.shape[0]):
+		# 	unique_ids = all_unique_ids[size, :]
+		# 	for class_id in unique_ids: 
+		# 		if class_id in self.class_ids: 
+		# 			self.class_ids[class_id] += 1
+		# 		else: 
+		# 			self.class_ids[class_id] = 1
+
+		# print(self.temp)
+		# with open(os.path.join(self.log_dir, 'class_ids.txt'), 'w') as file: 
+			# file.write(str(self.class_ids) + '\n')
+
+		# self._log_classes(labels)
+		# labels["individual_masks"] = self._check_induvidual_masks(labels, self._log_classes(labels))
+
+		# # for param in model.trainable_variables:
+		# # 	name = param.name.replace('/', '-')
+		# # 	np.save(f"/depot/davisjam/data/akshath/exps/tf/weights_biases/{name}.npy", param.numpy())  
+
+		# # with open('/depot/davisjam/data/akshath/exps/tf/indu_masks/indu_masks.txt', 'w') as file: 
+		# # 	file.write(str(labels) + '\n')
+
+
+		# # raise ValueError('Init') 
+		
+		# # labels["individual_masks"] = self._check_induvidual_masks(labels, self._log_classes(labels))
+		# # labels["contigious_mask"] = self._check_contigious_mask(labels)
 
 		with tf.GradientTape() as tape:
-			outputs = model(features, training=True)
+			outputs, backbone_feature_maps_procesed = model(features, training=True)
+			# print(backbone_feature_maps_procesed.keys())
+			
+			# for val in backbone_feature_maps_procesed: 
+			# 	print(backbone_feature_maps_procesed[val])
+			# 	print(backbone_feature_maps_procesed[val].numpy())
+			# 	np.save(os.path.join('/depot/davisjam/data/akshath/exps/resnet/tf', 'backbone_feature_maps_procesed_' + str(val) + '.npy'), backbone_feature_maps_procesed[val].numpy())
+
 			##########################################################
 			# FIXME : This loop must be used for auxilary outputs
 			loss = 0.0
@@ -314,44 +433,83 @@ class PanopticTask(base_task.Task):
 			
 			##########################################################################
 			
-			# TODO : Add auxiallary losses
 			total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels)
 			scaled_loss = total_loss
 			if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
 				total_loss = optimizer.get_scaled_loss(scaled_loss)
-		tvars = model.trainable_variables	
-		grads = tape.gradient(scaled_loss,tvars)
-
-		if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
-			grads = optimizer.get_unscaled_gradients(grads)
-		optimizer.apply_gradients(list(zip(grads, tvars)))
 		
-		if os.environ.get('PRINT_OUTPUTS') == 'True':
-			probs = tf.keras.activations.softmax(outputs["class_prob_predictions"], axis=-1)
-			pred_labels = tf.argmax(probs, axis=-1)
-			print("Target labels :", labels["unique_ids"])
-			print("Output labels :", pred_labels)
+		print('Total loss : ', total_loss)
+		print('Cls loss : ', cls_loss)
+		print('Focal loss : ', focal_loss)
+		print('Dice loss : ', dice_loss)
+		raise ValueError('Stop1')
+
+		# tvars = model.trainable_variables	
+		# grads = tape.gradient(scaled_loss,tvars)
+
+		# if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
+		# 	grads = optimizer.get_unscaled_gradients(grads)
+		# optimizer.apply_gradients(list(zip(grads, tvars)))
+		
+		# if os.environ.get('PRINT_OUTPUTS') == 'True':
+		# 	probs = tf.keras.activations.softmax(outputs["class_prob_predictions"], axis=-1)
+		# 	pred_labels = tf.argmax(probs, axis=-1)
+		# 	print("Target labels :", labels["unique_ids"])
+		# 	print("Output labels :", pred_labels)
+
+		# temp = {} 
+		# for grad, param in zip(grads, tvars): 
+		# 	temp[param.name] = tf.norm(grad).numpy()
+
+		# for param in temp: 
+		# 	if param not in self.plot_collection: 
+		# 		self.plot_collection[param] = []
+		# 	else: 
+		# 		self.plot_collection[param]	+= [temp[param]]
+		# self.plot_collection_labels[0] += [len(np.unique(pred_labels).tolist())]
+
+		# with open(os.path.join(self.log_dir, 'checking_labels.txt'), 'a') as file:
+		# 	file.write(str(self.temp) + '\n')
+		# 	file.write(str(labels["unique_ids"].numpy()) + '\n')
+		# 	file.write(str(pred_labels.numpy())+ '\n')
+		# 	file.write(f"{total_loss}, {cls_loss}, {focal_loss}, {dice_loss}" + '\n')
+
+		# 	file.write('-----------------------------------' + '\n')
+
+		# if (sum(temp.values()) == 0) or (len(np.unique(pred_labels).tolist()) == 1 and np.unique(pred_labels).tolist()[0] == 0): 
+		# 	with open('/depot/davisjam/data/akshath/exps/tf/editing_layers/numIters.txt', 'a') as file: 
+		# 		file.write(str('numIters : ' + str(self.temp)) + '\n')
+		# 	with open('/depot/davisjam/data/akshath/exps/tf/vishal_plot/dict.txt', 'w') as file: 
+		# 		file.write(str(self.plot_collection))
+		# 	with open('/depot/davisjam/data/akshath/exps/tf/vishal_plot/dict_labels.txt', 'w') as file: 
+		# 			file.write(str(self.plot_collection_labels))
+
+		# 	raise ValueError('Stop2')
 		
 		# # Multiply for logging.
 		# # Since we expect the gradient replica sum to happen in the optimizer,
 		# # the loss is scaled with global num_boxes and weights.
-		# # To have it more interpretable/comparable we scale it back when logging.
-		num_replicas_in_sync = tf.distribute.get_strategy().num_replicas_in_sync
-		total_loss *= num_replicas_in_sync
-		cls_loss *= num_replicas_in_sync
-		focal_loss *= num_replicas_in_sync
-		dice_loss *= num_replicas_in_sync
+		# # # To have it more interpretable/comparable we scale it back when logging.
+		# num_replicas_in_sync = tf.distribute.get_strategy().num_replicas_in_sync
+		# total_loss *= num_replicas_in_sync
+		# cls_loss *= num_replicas_in_sync
+		# focal_loss *= num_replicas_in_sync
+		# dice_loss *= num_replicas_in_sync
 		
+		total_loss = 0
 		logs = {self.loss: total_loss}
 
-		all_losses = {
-			'cls_loss': cls_loss,
-			'focal_loss': focal_loss,
-			'dice_loss': dice_loss,}
+		# total_loss = 0 
+		# focal_loss = 0	
+		# dice_loss = 0
+		# all_losses = {
+		# 	'cls_loss': cls_loss,
+		# 	'focal_loss': focal_loss,
+		# 	'dice_loss': dice_loss,}
 		
-		if metrics:
-			for m in metrics:
-				m.update_state(all_losses[m.name])
+		# if metrics:
+		# 	for m in metrics:
+		# 		m.update_state(all_losses[m.name])
 		return logs
 		
 	def _postprocess_outputs(self, outputs: Dict[str, Any], image_shapes):

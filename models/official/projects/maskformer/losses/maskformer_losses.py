@@ -120,13 +120,13 @@ class Loss:
         tgt_mask_permuted = tf.reshape(tgt_mask_permuted, [tf.shape(tgt_mask_permuted)[0],tf.shape(tgt_mask_permuted)[1], -1]) # [b, 100, h*w]
         
         cost_focal = FocalLossMod().batch(tgt_mask_permuted, out_mask)
-        cost_dice = DiceLoss().batch(tgt_mask_permuted, out_mask)
+        cost_dice =  DiceLoss().batch(tgt_mask_permuted, out_mask)
        
         
         total_cost = (
-                self.cost_focal * cost_focal
-                + self.cost_class * cost_class
-                + self.cost_dice * cost_dice
+                self.cost_focal * cost_focal 
+                + self.cost_class * cost_class 
+                + self.cost_dice * cost_dice 
             )
         
         max_cost = (
@@ -135,14 +135,26 @@ class Loss:
                     self.cost_dice * 0.0
                     )
 
-        
+        # print('cost_focal')
+        # print(cost_focal, cost_class, cost_dice)
+        # print('total_ocst')
+        # print(total_cost)
+        # print('max_cost')
+        # print(max_cost)
+
         # Append highest cost where there are no objects : No object class == 0 (self.ignore_label)
         valid = tf.expand_dims(tf.cast(tf.not_equal(tgt_ids, self.ignore_label), dtype=total_cost.dtype), axis=1)
+        # print('max_cost - ', max_cost)
+        # print('total_cost before - ', total_cost)
+
         total_cost = (1 - valid) * max_cost + valid * total_cost
+        # print('total_cost after - ', total_cost)
+
         total_cost = tf.where(
         tf.logical_or(tf.math.is_nan(total_cost), tf.math.is_inf(total_cost)),
         max_cost * tf.ones_like(total_cost, dtype=total_cost.dtype),
         total_cost)
+ 
        
         _, inds = matchers.hungarian_matching(total_cost)
         indices = tf.stop_gradient(inds)
@@ -168,10 +180,10 @@ class Loss:
         num_masks = tf.reduce_sum(tf.cast(tf.logical_not(background), tf.float32), axis=-1)
         
         xentropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=target_classes, logits=cls_assigned)
-        
+
         cls_loss =  tf.where(background, self.eos_coef * xentropy, xentropy)
-        
         cls_weights = tf.where(background, self.eos_coef * tf.ones_like(cls_loss), tf.ones_like(cls_loss))
+        # print('Weights: ', cls_weights)
         
         num_masks_per_replica = tf.reduce_sum(num_masks)
         
@@ -181,7 +193,10 @@ class Loss:
         num_masks_sum, cls_weights_sum = replica_context.all_reduce(tf.distribute.ReduceOp.SUM,[num_masks_per_replica, cls_weights_per_replica])
         
         # Final losses
+        # print('Losses: ', cls_loss)
+
         cls_loss = tf.math.divide_no_nan(tf.reduce_sum(cls_loss), cls_weights_sum)
+        # print('Final loss given for changing the tvars - ', cls_loss)
         
         out_mask = mask_assigned
         tgt_mask = individual_masks
@@ -206,10 +221,12 @@ class Loss:
         focal_loss = FocalLossMod(alpha=0.25, gamma=2)(tgt_mask, out_mask)
         focal_loss_weighted = tf.where(background, tf.zeros_like(focal_loss), focal_loss)
         focal_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(tf.math.reduce_sum(focal_loss_weighted, axis=-1)), num_masks_sum)
-            
+        # print(focal_loss_weighted)
         dice_loss = DiceLoss()(tgt_mask, out_mask)
         dice_loss_weighted = tf.where(background, tf.zeros_like(dice_loss), dice_loss)
         dice_loss_final = tf.math.divide_no_nan(tf.math.reduce_sum(tf.math.reduce_sum(dice_loss_weighted, axis=-1)), num_masks_sum)
+        # print(dice_loss_weighted)
+        # raise ValueError('2')
         
         return cls_loss, focal_loss_final, dice_loss_final
     
