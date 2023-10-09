@@ -256,6 +256,7 @@ class DetectionTask(base_task.Task):
       A dictionary of logs.
     """
     features, labels = inputs
+    exit()
     with tf.GradientTape() as tape:
       outputs = model(features, training=True)
 
