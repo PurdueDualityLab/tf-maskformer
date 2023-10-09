@@ -73,8 +73,11 @@ class DetrTask(cfg.TaskConfig):
   train_data: cfg.DataConfig = cfg.DataConfig()
   validation_data: cfg.DataConfig = cfg.DataConfig()
   losses: Losses = Losses()
-  init_checkpoint: Optional[str] = None
-  init_checkpoint_modules: Union[str, List[str]] = 'all'  # all, backbone
+#   init_checkpoint: Optional[str] = None
+#   init_checkpoint_modules: Union[str, List[str]] = 'all'  # all, backbone
+  init_checkpoint: Optional[str] = "gs://cam2-models/maskformer_dummy/resnet50_v1/"
+  init_checkpoint_modules: Union[str, List[str]] = 'backbone'  # all, backbone
+
   annotation_file: Optional[str] = None
   per_category_metrics: bool = False
 

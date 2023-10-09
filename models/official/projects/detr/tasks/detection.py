@@ -85,9 +85,12 @@ class DetectionTask(base_task.Task):
       status = ckpt.restore(ckpt_dir_or_file)
       status.expect_partial().assert_existing_objects_matched()
 
+    logger.debug(f"model.checkpoint_items: {model.checkpoint_items}")
+    tf.print("model.checkpoint_items:", model.checkpoint_items)
     logging.info('Finished loading pretrained checkpoint from %s',
                  ckpt_dir_or_file)
-
+    
+    
   def build_inputs(self,
                    params,
                    input_context: Optional[tf.distribute.InputContext] = None):
@@ -278,10 +281,14 @@ class DetectionTask(base_task.Task):
         scaled_loss = optimizer.get_scaled_loss(scaled_loss)
 
     tvars = model.trainable_variables
+    tf.print("Calculating gradients....")
     grads = tape.gradient(scaled_loss, tvars)
     # Scales back gradient when LossScaleOptimizer is used.
     if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
       grads = optimizer.get_unscaled_gradients(grads)
+    tf.print("Applying gradients....")
+    for grad, param in zip(grads, tvars):
+      print("Gradient norm for param {}: {}".format(param.name, tf.norm(grad)))
     optimizer.apply_gradients(list(zip(grads, tvars)))
 
     # Multiply for logging.
