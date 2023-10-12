@@ -24,7 +24,7 @@ task:
   init_checkpoint: ''
   init_checkpoint_modules: backbone
   losses:
-    background_cls_weight: 0.01
+    background_cls_weight: 0.1
     class_offset: 0
     l2_weight_decay: 0.0001
   model:

@@ -54,6 +54,7 @@ class FocalLossMod(focal_loss.FocalLoss):
         loss = tf.einsum("bnc,bmc->bnm",focal_pos,y_true) + tf.einsum(
         "bnc,bmc->bnm", focal_neg,(1 - y_true)
         )
+
         return loss/hw
     
 
@@ -88,7 +89,7 @@ class DiceLoss(tf.keras.losses.Loss):
         return loss
 
 class Loss:
-    def __init__(self, num_classes, matcher, eos_coef, cost_class = 1.0, cost_focal = 20.0, cost_dice = 1.0, ignore_label =0):
+    def __init__(self, num_classes, matcher, eos_coef, cost_class = 1.0, cost_focal = 1.0, cost_dice = 1.0, ignore_label =0):
        
         self.num_classes = num_classes
         self.matcher = matcher

@@ -49,7 +49,7 @@ class PanopticTask(base_task.Task):
 		self.log_dir = os.environ.get('LOG_DIR')
 		self.run_number = os.environ.get('RUN_NUMBER')
 
-		if self.log_dir is None:
+		if self.log_dir:
 			try: 
 				os.mkdir(self.log_dir)
 			except: 
@@ -363,9 +363,9 @@ class PanopticTask(base_task.Task):
 						
 		features, labels = inputs
 
-		features = tf.convert_to_tensor(np.load('/depot/davisjam/data/akshath/exps/resnet/raw/features.npy')) 
-		for val in labels: 
-			labels[val] = tf.convert_to_tensor(np.load(f'/depot/davisjam/data/akshath/exps/resnet/raw/{val}.npy'))
+		# features = tf.convert_to_tensor(np.load('/depot/davisjam/data/akshath/exps/resnet/raw/features.npy')) 
+		# for val in labels: 
+		# 	labels[val] = tf.convert_to_tensor(np.load(f'/depot/davisjam/data/akshath/exps/resnet/raw/{val}.npy'))
 
 		# np.save('/depot/davisjam/data/akshath/exps/tf/resnet/raw/features.npy', tf.cast(features, np.float32)._numpy())
 		# for lab in labels: 
@@ -403,7 +403,7 @@ class PanopticTask(base_task.Task):
 		# # labels["contigious_mask"] = self._check_contigious_mask(labels)
 
 		with tf.GradientTape() as tape:
-			outputs, backbone_feature_maps_procesed = model(features, training=True)
+			outputs = model(features, training=True)
 			# print(backbone_feature_maps_procesed.keys())
 			
 			# for val in backbone_feature_maps_procesed: 
@@ -435,6 +435,7 @@ class PanopticTask(base_task.Task):
 			
 			total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels)
 			scaled_loss = total_loss
+
 			if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
 				total_loss = optimizer.get_scaled_loss(scaled_loss)
 		
@@ -442,20 +443,19 @@ class PanopticTask(base_task.Task):
 		print('Cls loss : ', cls_loss)
 		print('Focal loss : ', focal_loss)
 		print('Dice loss : ', dice_loss)
-		raise ValueError('Stop1')
 
-		# tvars = model.trainable_variables	
-		# grads = tape.gradient(scaled_loss,tvars)
+		tvars = model.trainable_variables	
+		grads = tape.gradient(scaled_loss,tvars)
 
-		# if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
-		# 	grads = optimizer.get_unscaled_gradients(grads)
-		# optimizer.apply_gradients(list(zip(grads, tvars)))
+		if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
+			grads = optimizer.get_unscaled_gradients(grads)
+		optimizer.apply_gradients(list(zip(grads, tvars)))
 		
-		# if os.environ.get('PRINT_OUTPUTS') == 'True':
-		# 	probs = tf.keras.activations.softmax(outputs["class_prob_predictions"], axis=-1)
-		# 	pred_labels = tf.argmax(probs, axis=-1)
-		# 	print("Target labels :", labels["unique_ids"])
-		# 	print("Output labels :", pred_labels)
+		if os.environ.get('PRINT_OUTPUTS') == 'True':
+			probs = tf.keras.activations.softmax(outputs["class_prob_predictions"], axis=-1)
+			pred_labels = tf.argmax(probs, axis=-1)
+			print("Target labels :", labels["unique_ids"])
+			print("Output labels :", pred_labels)
 
 		# temp = {} 
 		# for grad, param in zip(grads, tvars): 
@@ -468,13 +468,13 @@ class PanopticTask(base_task.Task):
 		# 		self.plot_collection[param]	+= [temp[param]]
 		# self.plot_collection_labels[0] += [len(np.unique(pred_labels).tolist())]
 
-		# with open(os.path.join(self.log_dir, 'checking_labels.txt'), 'a') as file:
-		# 	file.write(str(self.temp) + '\n')
-		# 	file.write(str(labels["unique_ids"].numpy()) + '\n')
-		# 	file.write(str(pred_labels.numpy())+ '\n')
-		# 	file.write(f"{total_loss}, {cls_loss}, {focal_loss}, {dice_loss}" + '\n')
-
-		# 	file.write('-----------------------------------' + '\n')
+		self.temp += int(os.environ.get('TRAIN_BATCH_SIZE'))
+		with open(os.path.join(self.log_dir, 'checking_labels.txt'), 'a') as file:
+			file.write(str(self.temp) + '\n')
+			file.write(str(labels["unique_ids"].numpy()) + '\n')
+			file.write(str(pred_labels.numpy())+ '\n')
+			file.write(f"{total_loss}, {cls_loss}, {focal_loss}, {dice_loss}" + '\n')
+			file.write('-----------------------------------' + '\n')
 
 		# if (sum(temp.values()) == 0) or (len(np.unique(pred_labels).tolist()) == 1 and np.unique(pred_labels).tolist()[0] == 0): 
 		# 	with open('/depot/davisjam/data/akshath/exps/tf/editing_layers/numIters.txt', 'a') as file: 
@@ -490,26 +490,22 @@ class PanopticTask(base_task.Task):
 		# # Since we expect the gradient replica sum to happen in the optimizer,
 		# # the loss is scaled with global num_boxes and weights.
 		# # # To have it more interpretable/comparable we scale it back when logging.
-		# num_replicas_in_sync = tf.distribute.get_strategy().num_replicas_in_sync
-		# total_loss *= num_replicas_in_sync
-		# cls_loss *= num_replicas_in_sync
-		# focal_loss *= num_replicas_in_sync
-		# dice_loss *= num_replicas_in_sync
+		num_replicas_in_sync = tf.distribute.get_strategy().num_replicas_in_sync
+		total_loss *= num_replicas_in_sync
+		cls_loss *= num_replicas_in_sync
+		focal_loss *= num_replicas_in_sync
+		dice_loss *= num_replicas_in_sync
 		
-		total_loss = 0
 		logs = {self.loss: total_loss}
 
-		# total_loss = 0 
-		# focal_loss = 0	
-		# dice_loss = 0
-		# all_losses = {
-		# 	'cls_loss': cls_loss,
-		# 	'focal_loss': focal_loss,
-		# 	'dice_loss': dice_loss,}
+		all_losses = {
+			'cls_loss': cls_loss,
+			'focal_loss': focal_loss,
+			'dice_loss': dice_loss,}
 		
-		# if metrics:
-		# 	for m in metrics:
-		# 		m.update_state(all_losses[m.name])
+		if metrics:
+			for m in metrics:
+				m.update_state(all_losses[m.name])
 		return logs
 		
 	def _postprocess_outputs(self, outputs: Dict[str, Any], image_shapes):

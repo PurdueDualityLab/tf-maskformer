@@ -152,7 +152,6 @@ class MaskFormer(tf.keras.Model):
 		backbone_feature_maps = self._backbone(image)
 		backbone_feature_maps_procesed = self.process_feature_maps(backbone_feature_maps)
 
-
 		if self._pixel_decoder == 'fpn':
 			mask_features = self.pixel_decoder(backbone_feature_maps_procesed)
 			transformer_enc_feat = backbone_feature_maps_procesed['5']
@@ -161,4 +160,4 @@ class MaskFormer(tf.keras.Model):
 		transformer_features = self.transformer({"features": transformer_enc_feat})
 		seg_pred = self.head({"per_pixel_embeddings" : mask_features,
 							"per_segment_embeddings": transformer_features})
-		return seg_pred, backbone_feature_maps_procesed
+		return seg_pred

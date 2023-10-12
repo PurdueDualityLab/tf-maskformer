@@ -8,14 +8,14 @@ export TFRECORDS_DIR="/depot/davisjam/data/vishal/datasets/coco/tfrecords"
 export TRAIN_BATCH_SIZE=$train_bsize
 export EVAL_BATCH_SIZE=$eval_bsize
 export BASE_LR=0.0001
-export NO_OBJ_CLS_WEIGHT=0.01
+export NO_OBJ_CLS_WEIGHT=0.1
 export IMG_SIZE=640
 export PRINT_OUTPUTS=True
 # Akshath
 export ON_GPU=True
 export MODE="train"
-export LOG_DIR="/depot/davisjam/data/akshath/exps/tf/resnet"
-export RUN_NUMBER=2
+export LOG_DIR="/depot/davisjam/data/akshath/exps/focal"
+export RUN_NUMBER=1
 export USE_BFLOAT16_DATA=False
 # export STEPS_PER_EPOCH=10
 export NUM_EPOCH=1
