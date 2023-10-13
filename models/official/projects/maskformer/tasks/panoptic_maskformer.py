@@ -291,22 +291,22 @@ class PanopticTask(base_task.Task):
 			print("Target labels :", labels["unique_ids"])
 			print("Output labels :", pred_labels)
 
+
+		# if self.panoptic_quality_metric is not None:
+		# 	pq_metric_labels = {
+		# 	'category_mask': labels['category_mask'], # ignore label is 0 
+		# 	'instance_mask': labels['instance_mask'],
+		# 	}
+		# 	# Output from postprocessing will convert the binary masks to category and instance masks with non-contigious ids
+		# 	output_category_mask, output_instance_mask = self._postprocess_outputs(outputs, [640, 640])
+		# 	pq_metric_outputs = {
+		# 	'category_mask': output_category_mask,
+		# 	'instance_mask': output_instance_mask,
+		# 	}
 			
-		if self.panoptic_quality_metric is not None:
-			pq_metric_labels = {
-			'category_mask': labels['category_mask'], # ignore label is 0 
-			'instance_mask': labels['instance_mask'],
-			}
-			# Output from postprocessing will convert the binary masks to category and instance masks with non-contigious ids
-			output_category_mask, output_instance_mask = self._postprocess_outputs(outputs, [640, 640])
-			pq_metric_outputs = {
-			'category_mask': output_category_mask,
-			'instance_mask': output_instance_mask,
-			}
-			
-			self.panoptic_quality_metric.update_state(
-		  	pq_metric_labels, pq_metric_outputs
-	  		)
+		# 	self.panoptic_quality_metric.update_state(
+		#   	pq_metric_labels, pq_metric_outputs
+	  	# 	)
 		if metrics:
 			for m in metrics:
 				m.update_state(all_losses[m.name])
