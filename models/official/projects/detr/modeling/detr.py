@@ -226,15 +226,13 @@ class DETR(tf.keras.Model):
     batch_size = tf.shape(inputs)[0]
     features = self._backbone(inputs)[self._backbone_endpoint_name]
     shape = tf.shape(features)
-    print(features.shape)
+   
     mask = self._generate_image_mask(inputs, shape[1: 3])
-    print(mask.shape)# (2, 20, 20, 1)
-    print(self._hidden_size) #(2, 400, 128)
+   
     pos_embed = position_embedding_sine(
         mask[:, :, :, 0], num_pos_features=self._hidden_size)
     pos_embed = tf.reshape(pos_embed, [batch_size, -1, self._hidden_size])
-    print(pos_embed.shape)
-    exit()
+    
     features = tf.reshape(
         self._input_proj(features), [batch_size, -1, self._hidden_size])
     mask = tf.reshape(mask, [batch_size, -1])

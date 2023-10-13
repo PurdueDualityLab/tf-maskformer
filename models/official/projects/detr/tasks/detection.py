@@ -71,10 +71,6 @@ class DetectionTask(base_task.Task):
       return
 
     ckpt_dir_or_file = self._task_config.init_checkpoint
-
-    # Restoring checkpoint.
-    # print("Model items :", model.checkpoint_items)
-    # exit()
     if tf.io.gfile.isdir(ckpt_dir_or_file):
       ckpt_dir_or_file = tf.train.latest_checkpoint(ckpt_dir_or_file)
 
