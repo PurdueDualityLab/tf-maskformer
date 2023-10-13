@@ -69,7 +69,8 @@ class DetectionTask(base_task.Task):
     """Loading pretrained checkpoint."""
     if not self._task_config.init_checkpoint:
       return
-    
+    # print model layers
+    print("Model layers : ", model.layers)
     ckpt_dir_or_file = self._task_config.init_checkpoint
     if tf.io.gfile.isdir(ckpt_dir_or_file):
       ckpt_dir_or_file = tf.train.latest_checkpoint(ckpt_dir_or_file)
@@ -79,11 +80,10 @@ class DetectionTask(base_task.Task):
     #   status = ckpt.restore(ckpt_dir_or_file)
     #   status.assert_consumed()
     if self._task_config.init_checkpoint_modules == 'all':
-      print("Loading model from intial checkpoint")
-      exit()
       ckpt = tf.train.Checkpoint(model=model)
       status = ckpt.restore(ckpt_dir_or_file)
-      status.expect_partial().assert_consumed()
+      status.expect_partial().assert_existing_objects_matched()
+      logging.info('Loaded whole model from %s',ckpt_dir_or_file)
     elif self._task_config.init_checkpoint_modules == 'backbone':
       ckpt = tf.train.Checkpoint(backbone=model.backbone)
       status = ckpt.restore(ckpt_dir_or_file)
