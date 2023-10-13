@@ -314,60 +314,60 @@ class PanopticTask(base_task.Task):
 		return logs
 	
 
-	def aggregate_logs(self, state=None, step_outputs=None):
-		is_first_step = not state
-		if state is None:
-			state = self.panoptic_quality_metric
-		state.update_state(
-			step_outputs['ground_truths'],
-			step_outputs['predictions'])
+	# def aggregate_logs(self, state=None, step_outputs=None):
+	# 	is_first_step = not state
+	# 	if state is None:
+	# 		state = self.panoptic_quality_metric
+	# 	state.update_state(
+	# 		step_outputs['ground_truths'],
+	# 		step_outputs['predictions'])
 		
-		return state
+	# 	return state
 	
-	def reduce_aggregated_logs(self, aggregated_logs, global_step=None):
-		if self.panoptic_quality_metric is not None:
-			self._reduce_panoptic_metrics(aggregated_logs)
-			self.panoptic_quality_metric.reset_state()	
-		return aggregated_logs
+	# def reduce_aggregated_logs(self, aggregated_logs, global_step=None):
+	# 	if self.panoptic_quality_metric is not None:
+	# 		self._reduce_panoptic_metrics(aggregated_logs)
+	# 		self.panoptic_quality_metric.reset_state()	
+	# 	return aggregated_logs
 	
-	def _reduce_panoptic_metrics(self, logs: Dict[str, Any]):
-		"""
-		Updates the per class and mean panoptic metrics in the logs.
+	# def _reduce_panoptic_metrics(self, logs: Dict[str, Any]):
+	# 	"""
+	# 	Updates the per class and mean panoptic metrics in the logs.
 		
-		"""
-		result = self.panoptic_quality_metric.result()
-		valid_thing_classes = result['valid_thing_classes']
-		valid_stuff_classes = result['valid_stuff_classes']
-		valid_classes = valid_stuff_classes | valid_thing_classes
-		num_categories = tf.math.count_nonzero(valid_classes, dtype=tf.float32)
-		num_thing_categories = tf.math.count_nonzero(
-			valid_thing_classes, dtype=tf.float32
-		)
-		num_stuff_categories = tf.math.count_nonzero(
-			valid_stuff_classes, dtype=tf.float32
-		)
-		valid_thing_classes = tf.cast(valid_thing_classes, dtype=tf.float32)
-		valid_stuff_classes = tf.cast(valid_stuff_classes, dtype=tf.float32)
+	# 	"""
+	# 	result = self.panoptic_quality_metric.result()
+	# 	valid_thing_classes = result['valid_thing_classes']
+	# 	valid_stuff_classes = result['valid_stuff_classes']
+	# 	valid_classes = valid_stuff_classes | valid_thing_classes
+	# 	num_categories = tf.math.count_nonzero(valid_classes, dtype=tf.float32)
+	# 	num_thing_categories = tf.math.count_nonzero(
+	# 		valid_thing_classes, dtype=tf.float32
+	# 	)
+	# 	num_stuff_categories = tf.math.count_nonzero(
+	# 		valid_stuff_classes, dtype=tf.float32
+	# 	)
+	# 	valid_thing_classes = tf.cast(valid_thing_classes, dtype=tf.float32)
+	# 	valid_stuff_classes = tf.cast(valid_stuff_classes, dtype=tf.float32)
 
-		logs['panoptic_quality/All_num_categories'] = num_categories
-		logs['panoptic_quality/Things_num_categories'] = num_thing_categories
-		logs['panoptic_quality/Stuff_num_categories'] = num_stuff_categories
-		for metric in ['pq', 'sq', 'rq']:
-			metric_per_class = result[f'{metric}_per_class']
-			logs[f'panoptic_quality/All_{metric}'] = tf.math.divide_no_nan(
-				tf.reduce_sum(metric_per_class), num_categories
-			)
-			logs[f'panoptic_quality/Things_{metric}'] = tf.math.divide_no_nan(
-				tf.reduce_sum(metric_per_class * valid_thing_classes),
-				num_thing_categories,
-			)
-			logs[f'panoptic_quality/Stuff_{metric}'] = tf.math.divide_no_nan(
-				tf.reduce_sum(metric_per_class * valid_stuff_classes),
-				num_stuff_categories,
-			)
-			# if self.task_config.panoptic_quality_evaluator.report_per_class_metrics:
-			# 	for i, is_valid in enumerate(valid_classes.numpy()):
-			# 		if is_valid:
-			# 			logs[f'panoptic_quality/{metric}/class_{i}'] = metric_per_class[i]
+	# 	logs['panoptic_quality/All_num_categories'] = num_categories
+	# 	logs['panoptic_quality/Things_num_categories'] = num_thing_categories
+	# 	logs['panoptic_quality/Stuff_num_categories'] = num_stuff_categories
+	# 	for metric in ['pq', 'sq', 'rq']:
+	# 		metric_per_class = result[f'{metric}_per_class']
+	# 		logs[f'panoptic_quality/All_{metric}'] = tf.math.divide_no_nan(
+	# 			tf.reduce_sum(metric_per_class), num_categories
+	# 		)
+	# 		logs[f'panoptic_quality/Things_{metric}'] = tf.math.divide_no_nan(
+	# 			tf.reduce_sum(metric_per_class * valid_thing_classes),
+	# 			num_thing_categories,
+	# 		)
+	# 		logs[f'panoptic_quality/Stuff_{metric}'] = tf.math.divide_no_nan(
+	# 			tf.reduce_sum(metric_per_class * valid_stuff_classes),
+	# 			num_stuff_categories,
+	# 		)
+	# 		# if self.task_config.panoptic_quality_evaluator.report_per_class_metrics:
+	# 		# 	for i, is_valid in enumerate(valid_classes.numpy()):
+	# 		# 		if is_valid:
+	# 		# 			logs[f'panoptic_quality/{metric}/class_{i}'] = metric_per_class[i]
 		
 	
