@@ -21,7 +21,7 @@ task.model.which_pixel_decoder=transformer_fpn,\
 task.init_checkpoint=$RESNET_CKPT"
 python3 models/official/projects/maskformer/train.py \
   --experiment maskformer_coco_panoptic \
-  --mode train_and_eval \
+  --mode train \
   --model_dir $MODEL_DIR \
   --tpu $TPU_NAME \
   --params_override=$OVERRIDES
