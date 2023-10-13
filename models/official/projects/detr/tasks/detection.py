@@ -69,7 +69,8 @@ class DetectionTask(base_task.Task):
     """Loading pretrained checkpoint."""
     if not self._task_config.init_checkpoint:
       return
-
+    print("Print model layers : ", model.layers)
+    exit()
     ckpt_dir_or_file = self._task_config.init_checkpoint
     if tf.io.gfile.isdir(ckpt_dir_or_file):
       ckpt_dir_or_file = tf.train.latest_checkpoint(ckpt_dir_or_file)
