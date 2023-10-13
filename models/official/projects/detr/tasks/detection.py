@@ -81,7 +81,7 @@ class DetectionTask(base_task.Task):
     if self._task_config.init_checkpoint_modules == 'all':
       ckpt = tf.train.Checkpoint(model=model)
       status = ckpt.restore(ckpt_dir_or_file)
-      status.assert_consumed()
+      status.expect_partial().assert_consumed()
     elif self._task_config.init_checkpoint_modules == 'backbone':
       ckpt = tf.train.Checkpoint(backbone=model.backbone)
       status = ckpt.restore(ckpt_dir_or_file)
