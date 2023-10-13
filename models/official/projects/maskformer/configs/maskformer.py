@@ -185,7 +185,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
           checkpoint_interval=steps_per_epoch,
           validation_interval=5*steps_per_epoch, # run validation after every epoch (not efficient, but we want to see the results)sss
           best_checkpoint_export_subdir='best_ckpt',
-          max_keep=1,
+          max_to_keep=1,
           # TODO: Metric not implemented yet
           optimizer_config=optimization.OptimizationConfig({
               'optimizer': {
