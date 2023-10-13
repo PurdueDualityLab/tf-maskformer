@@ -381,7 +381,9 @@ class DetectionTask(base_task.Task):
         'source_id': labels['id'],
         'image_info': labels['image_info']
     }
-
+    probs = tf.keras.activations.softmax(detection_classes, axis=-1)
+    pred_labels = tf.argmax(probs, axis=-1)
+    print("Output labels :", pred_labels)
     ground_truths = {
         'source_id': labels['id'],
         'height': labels['image_info'][:, 0:1, 0],
