@@ -285,7 +285,13 @@ class PanopticTask(base_task.Task):
 				'focal_loss': focal_loss,
 				'dice_loss': dice_loss,
 			}
-		
+		if os.environ.get('PRINT_OUTPUTS') == 'True':
+			probs = tf.keras.activations.softmax(outputs["class_prob_predictions"], axis=-1)
+			pred_labels = tf.argmax(probs, axis=-1)
+			print("Target labels :", labels["unique_ids"])
+			print("Output labels :", pred_labels)
+
+			
 		if self.panoptic_quality_metric is not None:
 			pq_metric_labels = {
 			'category_mask': labels['category_mask'], # ignore label is 0 

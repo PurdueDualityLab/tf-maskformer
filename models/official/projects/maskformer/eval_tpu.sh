@@ -2,8 +2,8 @@
 train_bsize=16
 eval_bsize=16
 export PYTHONPATH=$PYTHONPATH:~/tf-maskformer/models
-export MODEL_DIR="gs://cam2-models/maskformer_vishal_exps/EXP13_v8_eval"
-export MASKFORMER_CKPT="gs://cam2-models/maskformer_vishal_exps/EXP20_v8/ckpt-18480"
+export MODEL_DIR="gs://cam2-models/maskformer_vishal_exps/EXP20_v8_eval"
+export MASKFORMER_CKPT="gs://cam2-models/maskformer_vishal_exps/EXP20_v8/ckpt-1848"
 export RESNET_CKPT="gs://cam2-models/maskformer_vishal_exps/resnet50_pretrained/tfmg/ckpt-62400"
 export TPU_NAME="tf-debug-3"
 export TPU_SOFTWARE="2.11.0"
