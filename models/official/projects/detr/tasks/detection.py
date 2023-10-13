@@ -79,6 +79,8 @@ class DetectionTask(base_task.Task):
     #   status = ckpt.restore(ckpt_dir_or_file)
     #   status.assert_consumed()
     if self._task_config.init_checkpoint_modules == 'all':
+      print("Loading model from intial checkpoint")
+      exit()
       ckpt = tf.train.Checkpoint(model=model)
       status = ckpt.restore(ckpt_dir_or_file)
       status.expect_partial().assert_consumed()
