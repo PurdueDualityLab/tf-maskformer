@@ -323,7 +323,7 @@ class mask_former_parser(parser.Parser):
         return image, labels
     
     def _parse_eval_data(self, data):
-        print("////////////////////////// Inside Eval Function ///////////////////////////")
+        print("////////////////////////// Inside Eval Dataloader ///////////////////////////")
         image = data['image']
         
         # Normalize and prepare image and masks
@@ -350,24 +350,18 @@ class mask_former_parser(parser.Parser):
         short_side = scales[0]
         # Resize image and masks to output size
         image, image_info = preprocess_ops.resize_image(image, self._output_size)
-        # _, image_info = preprocess_ops.resize_image(image, short_side,
-        #                                              max(self._output_size))
+      
         # Resize and crop masks.
         masks = tf.stack([instance_mask,contigious_mask, category_mask], axis=0)
         masks = preprocess_ops.resize_and_crop_masks(masks, image_info[2, :],
                                                 image_info[1, :],
                                                 image_info[3, :])
        
-        # image is padded with zeros
-        # image = tf.image.pad_to_bounding_box(image, 0, 0, self._output_size[0],
-        #                                  self._output_size[1])
         # All masks are padded with zeros
         instance_mask = masks[0]
         contigious_mask = masks[1]
         category_mask = masks[2]
-        # instance_mask = tf.image.pad_to_bounding_box(instance_mask, 0, 0, self._output_size[0], self._output_size[1])
-        # contigious_mask = tf.image.pad_to_bounding_box(contigious_mask, 0, 0, self._output_size[0], self._output_size[1])
-        # category_mask = tf.image.pad_to_bounding_box(category_mask, 0, 0, self._output_size[0], self._output_size[1])
+        
         individual_masks, classes = self._get_individual_masks(
                 class_ids=class_ids,contig_instance_mask=contigious_mask, instance_id = instance_ids, instance_mask=instance_mask)
 
