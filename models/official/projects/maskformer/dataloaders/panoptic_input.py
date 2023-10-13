@@ -400,28 +400,28 @@ class mask_former_parser(parser.Parser):
         counter = 0
         counter_1 = 0
         
-        # for class_id in class_ids:
-        #     mask = tf.equal(contig_instance_mask, class_id)
-        #     mask = tf.logical_and(mask, tf.equal(instance_mask, instance_id[counter]))
-        #     classes_list = classes_list.write(counter_1, tf.cast(class_id, tf.float32))
-        #     individual_mask_list = individual_mask_list.write(counter, tf.cast(mask, tf.float32))
-        #     counter_1 += 1
-        #     counter += 1
-        
         for class_id in class_ids:
             mask = tf.equal(contig_instance_mask, class_id)
             mask = tf.logical_and(mask, tf.equal(instance_mask, instance_id[counter]))
-            if tf.greater(tf.reduce_sum(tf.cast(mask,tf.float32), [0,1,2]),0):
-                classes_list = classes_list.write(counter_1, tf.cast(class_id, tf.float32))
-                individual_mask_list = individual_mask_list.write(counter, tf.cast(mask, tf.float32))
-                counter_1 += 1
-                counter += 1
-            else:
-                classes_list = classes_list.write(counter_1, tf.cast(self._ignore_label, tf.float32))
-                new_mask = tf.zeros(tf.shape(contig_instance_mask))
-                individual_mask_list = individual_mask_list.write(counter, tf.cast(new_mask, tf.float32))
-                counter_1 += 1
-                counter += 1
+            classes_list = classes_list.write(counter_1, tf.cast(class_id, tf.float32))
+            individual_mask_list = individual_mask_list.write(counter, tf.cast(mask, tf.float32))
+            counter_1 += 1
+            counter += 1
+        
+        # for class_id in class_ids:
+        #     mask = tf.equal(contig_instance_mask, class_id)
+        #     mask = tf.logical_and(mask, tf.equal(instance_mask, instance_id[counter]))
+        #     if tf.greater(tf.reduce_sum(tf.cast(mask,tf.float32), [0,1,2]),0):
+        #         classes_list = classes_list.write(counter_1, tf.cast(class_id, tf.float32))
+        #         individual_mask_list = individual_mask_list.write(counter, tf.cast(mask, tf.float32))
+        #         counter_1 += 1
+        #         counter += 1
+        #     else:
+        #         classes_list = classes_list.write(counter_1, tf.cast(self._ignore_label, tf.float32))
+        #         new_mask = tf.zeros(tf.shape(contig_instance_mask))
+        #         individual_mask_list = individual_mask_list.write(counter, tf.cast(new_mask, tf.float32))
+        #         counter_1 += 1
+        #         counter += 1
             
         # for idx in tf.range(self._max_instances-tf.size(class_ids)):
         #     new_mask = tf.zeros(tf.shape(contig_instance_mask))
