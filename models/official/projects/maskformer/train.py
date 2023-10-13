@@ -52,6 +52,7 @@ def main(_):
 
 	if FLAGS.tpu == None:
 		tf.config.run_functions_eagerly(True)
+		
 	# Sets mixed_precision policy. Using 'mixed_float16' or 'mixed_bfloat16'
 	# can have significant impact on model speeds by utilizing float16 in case of
 	# GPUs, and bfloat16 in the case of TPUs. loss_scale takes effect only when

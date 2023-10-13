@@ -55,7 +55,7 @@ class _MaskformerAdamW(nlp_optimization.AdamWeightDecay):
     
     if 'transformer_fpn' not in var.name and 'mask_former_transformer' not in var.name and 'mlp_head' not in var.name:
       lr_t *= 0.1
-    # print("var name: ", var.name, " lr_t: ", lr_t)
+    
     decay = self._decay_weights_op(var, lr_t, apply_state)
     with tf.control_dependencies([decay]):
       var_device, var_dtype = var.device, var.dtype.base_dtype
@@ -66,7 +66,7 @@ class _MaskformerAdamW(nlp_optimization.AdamWeightDecay):
       v = self.get_slot(var, 'v')
       lr = coefficients[
           'lr_t'] * 0.1 if 'transformer_fpn' not in var.name and 'mask_former_transformer' not in var.name and 'mlp_head' not in var.name else coefficients['lr_t']
-
+      
       if not self.amsgrad:
         return tf.raw_ops.ResourceApplyAdam(
             var=var.handle,
@@ -95,7 +95,7 @@ class _MaskformerAdamW(nlp_optimization.AdamWeightDecay):
             epsilon=coefficients['epsilon'],
             grad=grad,
             use_locking=self._use_locking)
-    
+ 
 # Not sure if maskformer uses this
   def _resource_apply_sparse(self, grad, var, indices, apply_state=None):
     lr_t, kwargs = self._get_lr(var.device, var.dtype.base_dtype, apply_state)

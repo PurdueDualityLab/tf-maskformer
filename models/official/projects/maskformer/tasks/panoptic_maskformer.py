@@ -56,9 +56,7 @@ class PanopticTask(base_task.Task):
 							which_pixel_decoder=self._task_config.model.which_pixel_decoder,
 							)
 		logging.info('Maskformer model build successful.')
-		inputs = tf.keras.Input(shape=input_specs.shape[1:])
-		model(inputs)
-		
+	
 		return model
 
 	def initialize(self, model: tf.keras.Model) -> None:
@@ -111,30 +109,6 @@ class PanopticTask(base_task.Task):
 		  parser_fn=parser.parse_fn(params.is_training))
 		
 		dataset = reader.read(input_context=input_context)
-		# print("Saving dataset")
-		class_counts = [0 for i in range(134)]
-		
-		total_images = 0
-		for sample in dataset.take(-1):
-			for each_id in sample[1]['unique_ids']:
-					for ids in each_id.numpy():
-						class_counts[int(ids)] += 1
-					
-			total_images += 1
-		print("Total images :", total_images)
-		print("Class counts :", class_counts)
-		exit()
-		# for sample in dataset.take(1):
-		# 	# print(f"unique idsin dataset take : {sample[1]['unique_ids']}")
-		# 	# print("individual masks :", sample[1]["individual_masks"].shape)
-		# 	np.save("contigious_mask.npy", sample[1]["contigious_mask"].numpy())
-		# 	# print(f"image shape : {sample[0].shape}")
-		# 	np.save("individual_masks.npy", sample[1]["individual_masks"].numpy())
-		# 	np.save("unique_ids.npy", sample[1]["unique_ids"].numpy())
-		# 	np.save("images.npy", sample[0].numpy())
-		# 	np.save("category_mask.npy", sample[1]["category_mask"].numpy())	
-		# 	np.save("instance_mask.npy", sample[1]["instance_mask"].numpy())
-		# 	exit()
 		return dataset
 
 
@@ -160,6 +134,8 @@ class PanopticTask(base_task.Task):
 		weighted_ce = calculated_losses['loss_ce']
 		weighted_dice = calculated_losses['loss_dice']
 		weighted_focal = calculated_losses['loss_focal']
+		
+
 
 		# Not implemented auxilary outputs
 		# if aux_outputs is not None:
@@ -213,6 +189,8 @@ class PanopticTask(base_task.Task):
 		"""
 						
 		features, labels = inputs
+		
+		
 		with tf.GradientTape() as tape:
 			outputs = model(features, training=True)
 			##########################################################
@@ -240,20 +218,20 @@ class PanopticTask(base_task.Task):
 			# TODO : Add auxiallary losses
 			total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels)
 			scaled_loss = total_loss
+			
 			if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
 				total_loss = optimizer.get_scaled_loss(scaled_loss)
 		tvars = model.trainable_variables	
 		grads = tape.gradient(scaled_loss,tvars)
-
+	
 		if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
-			grads = optimizer.get_unscaled_gradients(grads)
+			grads = optimizer.get_unscaled_gradients(grads)		
 		optimizer.apply_gradients(list(zip(grads, tvars)))
-		
+	
 		if os.environ.get('PRINT_OUTPUTS') == 'True':
 			probs = tf.keras.activations.softmax(outputs["class_prob_predictions"], axis=-1)
 			pred_labels = tf.argmax(probs, axis=-1)
-			print("Target labels :", labels["unique_ids"])
-			print("Output labels :", pred_labels)
+			
 		
 		# # Multiply for logging.
 		# # Since we expect the gradient replica sum to happen in the optimizer,
@@ -292,15 +270,10 @@ class PanopticTask(base_task.Task):
 	def validation_step(self, inputs, model, metrics=None):
 		features, labels = inputs
 		outputs = model(features, training=False)
-		if os.environ.get('PRINT_OUTPUTS') == 'True':
-			probs = tf.keras.activations.softmax(outputs["class_prob_predictions"], axis=-1)
-			pred_labels = tf.argmax(probs, axis=-1)
-			print("Probs :", probs)
-			print("Target labels :", labels["unique_ids"])
-			print("Output labels :", pred_labels)
+		# if os.environ.get('PRINT_OUTPUTS') == 'True':
+		# 	probs = tf.keras.activations.softmax(outputs["class_prob_predictions"], axis=-1)
+		# 	pred_labels = tf.argmax(probs, axis=-1)
 		total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels)
-		
-		
 		num_replicas_in_sync = tf.distribute.get_strategy().num_replicas_in_sync
 		total_loss *= num_replicas_in_sync
 		cls_loss *= num_replicas_in_sync

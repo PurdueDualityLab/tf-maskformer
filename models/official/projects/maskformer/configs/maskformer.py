@@ -112,7 +112,7 @@ COCO_INPUT_PATH_BASE = os.environ.get('TFRECORDS_DIR')
 COCO_TRAIN_EXAMPLES = 118287
 COCO_VAL_EXAMPLES = 5000
 SET_MODEL_BFLOAT16 = False
-SET_DATA_BFLOAT16 = True
+SET_DATA_BFLOAT16 = False
 
 @exp_factory.register_config_factory('maskformer_coco_panoptic')
 def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
@@ -191,10 +191,8 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
               'optimizer': {
                   'type': 'maskformer_adamw',
                   'maskformer_adamw': {
-                      'weight_decay_rate': 1e-4,
-                      'global_clipnorm': 0.1,
-                      'gradient_clip_norm': 0.0,
-                      # 'exclude_from_weight_decay': ['LayerNorm', 'layer_norm', 'bias'],
+                      'weight_decay_rate': 0.0001,
+                      'global_clipnorm': 0.01,
                   }
               },
               'learning_rate': {
@@ -204,14 +202,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
                       'values': [float(os.environ.get('BASE_LR')), float(os.environ.get('BASE_LR'))/10]
                   }
               },
-              'warmup': {
-                  'type': 'linear',
-                    'linear': {
-                    'warmup_learning_rate': 0.0,
-                    'warmup_steps': int(os.environ.get('WARMUP_STEPS', 640)),
-                    }
-
-              } 
+              
           })),
       restrictions=[
           'task.train_data.is_training != None',

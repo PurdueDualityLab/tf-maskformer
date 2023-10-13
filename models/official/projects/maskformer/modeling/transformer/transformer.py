@@ -80,6 +80,7 @@ class TransformerEncoder(tf.keras.layers.Layer):
   def build(self, input_shape):
     """Implements build() for the layer."""
     self.encoder_layers = []
+    
     for i in range(self.num_layers):
       self.encoder_layers.append(
           TransformerEncoderBlock(
@@ -92,9 +93,13 @@ class TransformerEncoder(tf.keras.layers.Layer):
               norm_first=self._norm_first,
               norm_epsilon=self._norm_epsilon,
               inner_dropout=self._intermediate_dropout,
+              # FIXME :
               attention_initializer=tf_utils.clone_initializer(
                   models.seq2seq_transformer.attention_initializer(
                       input_shape[2])),
+              # attention_initializer= 'glorot_uniform',
+              kernel_initializer = 'glorot_uniform',
+              bias_initializer='glorot_uniform',
               name=("layer_%d" % i)))
       
     self.output_normalization = tf.keras.layers.LayerNormalization(
@@ -131,8 +136,8 @@ class TransformerEncoder(tf.keras.layers.Layer):
       Output of encoder which is a `float32` tensor with shape
         `(batch_size, input_length, hidden_size)`.
     """
-    
     for layer_idx in range(self.num_layers):
+      
       encoder_inputs = self.encoder_layers[layer_idx](
           [encoder_inputs, attention_mask, pos_embed])
 
@@ -234,6 +239,7 @@ class TransformerEncoderBlock(tf.keras.layers.Layer):
     self._norm_first = norm_first
     self._norm_epsilon = norm_epsilon
     self._inner_dropout = inner_dropout
+    
     if attention_initializer:
       self._attention_initializer = tf.keras.initializers.get(
           attention_initializer)
@@ -375,7 +381,7 @@ class TransformerEncoderBlock(tf.keras.layers.Layer):
     input_tensor, attention_mask, pos_embed = inputs
 
     key_value = None
-
+    
     if self._output_range:
       if self._norm_first:
         source_tensor = input_tensor[:, 0:self._output_range, :]
@@ -392,7 +398,7 @@ class TransformerEncoderBlock(tf.keras.layers.Layer):
         if key_value is not None:
           key_value = self._attention_layer_norm(key_value)
       target_tensor = input_tensor
-
+    
     if key_value is None:
       key_value = input_tensor
     attention_output = self._attention_layer(
@@ -493,13 +499,14 @@ class TransformerDecoder(tf.keras.layers.Layer):
               norm_first=self._norm_first,
               norm_epsilon=self._norm_epsilon,
               intermediate_dropout=self._intermediate_dropout,
-              attention_initializer=tf_utils.clone_initializer(
-                  models.seq2seq_transformer.attention_initializer(
-                      input_shape[2])),
+              # attention_initializer=tf_utils.clone_initializer(
+              #     models.seq2seq_transformer.attention_initializer(
+              #         input_shape[2])),
                #FIXME: changed attention initialization
-              # attention_initializer='glorot_uniform',
+              attention_initializer='glorot_uniform',
               #FIXME: Adding bias initialize
               bias_initializer='glorot_uniform',
+              kernel_initializer= 'glorot_uniform',
               name=("layer_%d" % i)))
     self.output_normalization = tf.keras.layers.LayerNormalization(
         epsilon=self._norm_epsilon, dtype="float32")

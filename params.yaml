@@ -58,6 +58,7 @@ task:
   panoptic_quality_evaluator:
     ignored_label: 0
     is_thing: null
+    max_num_instances: 100
     num_categories: 133
     rescale_predictions: false
   per_category_metrics: false
@@ -74,7 +75,7 @@ task:
       type: simple_decoder
     deterministic: null
     drop_remainder: true
-    dtype: bfloat16
+    dtype: float32
     enable_shared_tf_data_service_between_parallel_trainers: false
     enable_tf_data_service: false
     file_type: tfrecord
@@ -88,7 +89,7 @@ task:
       aug_rand_hflip: true
       aug_scale_max: 1.0
       aug_scale_min: 1.0
-      dtype: bfloat16
+      dtype: float32
       groundtruth_padded_size: [640, 640]
       ignore_label: 0
       max_retry: 50
@@ -132,7 +133,7 @@ task:
     enable_shared_tf_data_service_between_parallel_trainers: false
     enable_tf_data_service: false
     file_type: tfrecord
-    global_batch_size: 1
+    global_batch_size: 2
     input_path: /depot/davisjam/data/vishal/datasets/coco/tfrecords/val*
     is_training: false
     parser:
@@ -157,7 +158,7 @@ task:
       output_size: [640, 640]
       pad_output: true
       resize_eval_groundtruth: true
-      seed: 4096
+      seed: 2045
     prefetch_buffer_size: null
     regenerate_source_id: false
     seed: null
@@ -176,7 +177,7 @@ trainer:
   best_checkpoint_eval_metric: ''
   best_checkpoint_export_subdir: best_ckpt
   best_checkpoint_metric_comp: higher
-  checkpoint_interval: 591430
+  checkpoint_interval: 59143
   continuous_eval_timeout: 3600
   eval_tf_function: true
   eval_tf_while_loop: false
@@ -189,7 +190,7 @@ trainer:
         boundaries: [11828600]
         name: PiecewiseConstantDecay
         offset: 0
-        values: [5.0e-05, 5.0e-06]
+        values: [0.0001, 1.0e-05]
       type: stepwise
     optimizer:
       maskformer_adamw:
@@ -199,27 +200,23 @@ trainer:
         clipnorm: null
         clipvalue: null
         epsilon: 1.0e-07
-        exclude_from_weight_decay: [LayerNorm, layer_norm, bias]
-        global_clipnorm: 0.1
-        gradient_clip_norm: 0.01
+        exclude_from_weight_decay: null
+        global_clipnorm: 0.01
+        gradient_clip_norm: 1.0
         include_in_weight_decay: null
         name: AdamWeightDecay
         weight_decay_rate: 0.0001
       type: maskformer_adamw
     warmup:
-      linear:
-        name: linear
-        warmup_learning_rate: 0.0
-        warmup_steps: 640
-      type: linear
+      type: null
   preemption_on_demand_checkpoint: true
   recovery_begin_steps: 0
   recovery_max_trials: 0
   steps_per_loop: 59143
-  summary_interval: 591430
+  summary_interval: 59143
   train_steps: 17742900
   train_tf_function: true
   train_tf_while_loop: true
   validation_interval: 59143
-  validation_steps: 5000
+  validation_steps: 2500
   validation_summary_subdir: validation

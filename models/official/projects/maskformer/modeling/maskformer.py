@@ -76,29 +76,23 @@ class MaskFormer(tf.keras.Model):
 		
 		
 	def build(self, image_shape = None):
-		if self._pixel_decoder == 'transformer_fpn':
-			self.pixel_decoder = TransformerFPN(batch_size = self._batch_size,
-									fpn_feat_dims=self._fpn_feat_dims,
-									data_format=self._data_format,
-									dilation_rate=self._dilation_rate,
-									groups=self._groups,
-									activation=self._activation,
-									use_bias=self._use_bias,
-									kernel_initializer=self._kernel_initializer,
-									bias_initializer=self._bias_initializer,
-									kernel_regularizer=self._kernel_regularizer,
-									bias_regularizer=self._bias_regularizer,
-									activity_regularizer=self._activity_regularizer,
-									kernel_constraint=self._kernel_constraint,
-									bias_constraint=self._bias_constraint,
-									num_encoder_layers = self._fpn_encoder_layers,
-									bfloat16=self._bfloat16)
 		
-		elif self._pixel_decoder == 'fpn':
-			# FIXME : Add the input arguments to CNNFPN
-			self.pixel_decoder = CNNFPN()
-		else:
-			raise ValueError("Invalid Pixel Decoder: ", self._pixel_decoder)
+		self.pixel_decoder = TransformerFPN(batch_size = self._batch_size,
+								fpn_feat_dims=self._fpn_feat_dims,
+								data_format=self._data_format,
+								dilation_rate=self._dilation_rate,
+								groups=self._groups,
+								activation=self._activation,
+								use_bias=self._use_bias,
+								kernel_initializer=self._kernel_initializer,
+								bias_initializer=self._bias_initializer,
+								kernel_regularizer=self._kernel_regularizer,
+								bias_regularizer=self._bias_regularizer,
+								activity_regularizer=self._activity_regularizer,
+								kernel_constraint=self._kernel_constraint,
+								bias_constraint=self._bias_constraint,
+								num_encoder_layers = self._fpn_encoder_layers,
+								bfloat16=self._bfloat16)
 		
 		self.transformer = MaskFormerTransformer(num_queries=self._num_queries,
 												hidden_size=self._hidden_size,
@@ -115,16 +109,7 @@ class MaskFormer(tf.keras.Model):
 	@property
 	def backbone(self) -> tf.keras.Model:
 		return self._backbone
-	
-	@property
-	def checkpoint_items(self):
-		"""Returns a dictionary of items to be additionally checkpointed."""
-		items = dict(backbone=self._backbone,
-					pixel_decoder=self.pixel_decoder,
-					transformer=self.transformer,
-					head=self.head)
-		return items
-	
+
 	def get_config(self):
 		return {
 			"backbone": self._backbone,
@@ -150,11 +135,7 @@ class MaskFormer(tf.keras.Model):
 	def call(self, image, training = False):
 		backbone_feature_maps = self._backbone(image)
 		backbone_feature_maps_procesed = self.process_feature_maps(backbone_feature_maps)
-		if self._pixel_decoder == 'fpn':
-			mask_features = self.pixel_decoder(backbone_feature_maps_procesed)
-			transformer_enc_feat = backbone_feature_maps_procesed['5']
-		elif self._pixel_decoder == 'transformer_fpn':
-			mask_features, transformer_enc_feat = self.pixel_decoder(backbone_feature_maps_procesed)
+		mask_features, transformer_enc_feat = self.pixel_decoder(backbone_feature_maps_procesed, image)
 		transformer_features = self.transformer({"features": transformer_enc_feat})
 		seg_pred = self.head({"per_pixel_embeddings" : mask_features,
 							"per_segment_embeddings": transformer_features})

@@ -1,8 +1,6 @@
 import math
 import tensorflow as tf
-
-from official.projects.detr.modeling.detr import position_embedding_sine
-from official.projects.detr.modeling import transformer
+from official.projects.maskformer.modeling.transformer import transformer
 from official.modeling import tf_utils
 
 class DETRTransformer(tf.keras.layers.Layer):
@@ -45,38 +43,16 @@ class DETRTransformer(tf.keras.layers.Layer):
     sources = inputs["inputs"]
     targets = inputs["targets"]
     pos_embed = inputs["pos_embed"]
-    mask = inputs["mask"]
-    input_shape = tf_utils.get_shape_list(sources)
-
-    if mask is not None:
-      source_attention_mask = tf.tile(
-          tf.expand_dims(mask, axis=1), [1, input_shape[1], 1])
-    else:
-      source_attention_mask = None
-
-    if self._encoder is not None:
-      memory = self._encoder(
-          sources, attention_mask=source_attention_mask, pos_embed=pos_embed)
-    else:
-      memory = sources
-
+    
+    memory = sources
     target_shape = tf_utils.get_shape_list(targets)
+    cross_attention_mask = None
     target_shape = tf.shape(targets)
-    
-    if mask is not None:
-      
-      cross_attention_mask = tf.tile(
-          tf.expand_dims(mask, axis=1), [1, target_shape[1], 1])
-      self_attention_mask=tf.ones(
-            (target_shape[0], target_shape[1], target_shape[1]))
-    else:
-      cross_attention_mask = None
-      self_attention_mask = None
-    
+    self_attention_mask = tf.ones([target_shape[0], 1, target_shape[1], target_shape[1]],dtype=tf.float32)
     
     decoded = self._decoder(
         tf.zeros_like(targets),
-       memory,
+        memory,
         # TODO(b/199545430): self_attention_mask could be set to None when this
         # bug is resolved. Passing ones for now.
         self_attention_mask=self_attention_mask,

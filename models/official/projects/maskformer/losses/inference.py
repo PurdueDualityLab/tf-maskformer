@@ -42,10 +42,7 @@ class PanopticInference:
             # exit()
             ################################################## Only for testing instance and category mask ##################################################
             keep = tf.math.logical_and(tf.math.not_equal(labels, self.background_class_id), scores > self.object_mask_threshold)
-            print("labels :", labels)
-            tf.print("background class:", self.background_class_id)
-            tf.print("scores > threshold :", scores > self.object_mask_threshold)
-            exit()
+            
             mask_pred_b_sigmoid = tf.transpose(mask_pred_b_sigmoid, (2, 0, 1)) # ( num_predictions, height, width)
             
             # Give batch of predictions to the function
@@ -56,7 +53,7 @@ class PanopticInference:
             
 
             height, width, num_masks = tf.shape(curr_masks)[1], tf.shape(curr_masks)[2], tf.shape(curr_masks)[0]
-            print("Num Masks :", num_masks)
+            
             # Create  category mask and instance mask
             with tf.device(curr_masks.device):
                 category_mask = tf.zeros((height, width), dtype=tf.int32)
@@ -102,8 +99,7 @@ class PanopticInference:
 
         instance_masks_stacked = tf.stack(instance_masks, axis=0)
         category_masks_stacked = tf.stack(category_masks, axis=0)
-        tf.print("Instance Masks Stacked :", instance_masks_stacked)
-        tf.print("Category Masks Stacked :", category_masks_stacked)
+        
         exit()
         return instance_masks_stacked, category_masks_stacked
 

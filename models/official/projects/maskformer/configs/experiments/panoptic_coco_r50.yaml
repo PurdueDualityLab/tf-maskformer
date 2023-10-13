@@ -1,41 +1,24 @@
-# input_size=[1333, 1333, 3]
 runtime:
   distribution_strategy: 'tpu'
-  mixed_precision_dtype: 'float32'
+  mixed_precision_dtype: 'bfloat16'
+
 task:
-  model:
-    input_size: [640, 640, 3]
-    which_pixel_decoder: 'transforemr_fpn'
-  init_checkpoint: 'gs://cam2-models/maskformer_vishal_exps/resnet50_pretrained/tfmg/ckpt-62400'
+  annotation_file: 'coco/instances_val2017.json'
   train_data:
-   global_batch_size: 128
-   input_path: 'gs://cam2-datasets/coco_panoptic/tfrecords/train*'
-   is_training: true
+    global_batch_size: 64
   validation_data:
-    global_batch_size: 128
-    input_path: 'gs://cam2-datasets/coco_panoptic/tfrecords/val*'
-    is_training: false
+    global_batch_size: 8
 
 trainer:
-  train_steps: 277235
-  validation_steps: 39
-  steps_per_loop: 924
-  summary_interval: 924
-  validation_interval: 924
-  checkpoint_interval: 924
+  train_steps: 22500
   optimizer_config:
-    optimizer:
-      type: 'maskformer_adamw'
-      maskformer_admw:
-        weight_decay_rate: 0.0001
-        global_clipnorm: 0.01
-        gradient_clip_norm: 0.0
     learning_rate:
+      type: 'stepwise'
       stepwise:
-      #   boundaries: [15000, 20000]
-        values: [0.0002, 0.00002, 0.000002]
+        boundaries: [15000, 20000]
+        values: [0.12, 0.012, 0.0012]
     warmup:
       type: 'linear'
       linear:
-        warmup_steps: 20
+        warmup_steps: 500
         warmup_learning_rate: 0.0067
