@@ -13,5 +13,5 @@ task:
   init_checkpoint: 'gs://cam2-models/maskformer_vishal_exps/resnet50_pretrained/tfmg/ckpt-62400'
   annotation_file: 'gs://cam2-datasets/annotations/instances_val2017.json'
   init_checkpoint_modules: all
-  init_checkpoint: 'gs://cam2-models/detr_vishal_exps/EXP02_v38/ckpt-1848'
+  init_checkpoint: 'gs://cam2-models/detr_vishal_exps/EXP02_v38/ckpt-3696'
   
