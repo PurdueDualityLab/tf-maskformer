@@ -27,6 +27,7 @@ from official.projects.maskformer.losses.mapper import _get_contigious_to_origin
 
 import numpy as np
 
+DATA_IDX = 0
 @task_factory.register_task_cls(maskformer_cfg.MaskFormerTask)
 class PanopticTask(base_task.Task):
 	"""A single-replica view of training procedure.
@@ -291,6 +292,13 @@ class PanopticTask(base_task.Task):
 			print("Target labels :", labels["unique_ids"])
 			print("Output labels :", pred_labels)
 
+			# Save model inputs and outputs for visualization.
+			np.save("./input_img_"+str(DATA_IDX)+".npy", features)
+			np.save("./output_labels_"+str(DATA_IDX)+".npy", pred_labels)
+			np.save("./target_labels_"+str(DATA_IDX)+".npy", labels["unique_ids"])
+			np.save("./output_masks_"+str(DATA_IDX)+".npy", outputs["mask_prob_predictions"])
+			np.save("./target_masks_"+str(DATA_IDX)+".npy", labels["individual_masks"])
+			DATA_IDX += 1
 
 		# if self.panoptic_quality_metric is not None:
 		# 	pq_metric_labels = {
