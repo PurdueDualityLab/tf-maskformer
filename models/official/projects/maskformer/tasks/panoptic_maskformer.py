@@ -296,7 +296,7 @@ class PanopticTask(base_task.Task):
 			# Save model inputs and outputs for visualization.
 			# convert from bfloat16 to unit8 for image
 			np.save("./input_img_"+str(self.DATA_IDX)+".npy", tf.cast(features, dtype=tf.float32).numpy())
-			np.save("./output_labels_"+str(self.DATA_IDX)+".npy", pred_labels.numpy())	
+			np.save("./output_labels_"+str(self.DATA_IDX)+".npy", outputs["class_prob_predictions"].numpy())	
 			np.save("./target_labels_"+str(self.DATA_IDX)+".npy", labels["unique_ids"].numpy())
 			np.save("./output_masks_"+str(self.DATA_IDX)+".npy", outputs["mask_prob_predictions"].numpy())
 			np.save("./target_masks_"+str(self.DATA_IDX)+".npy", labels["individual_masks"].numpy())
