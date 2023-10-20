@@ -289,9 +289,9 @@ class PanopticTask(base_task.Task):
 		if os.environ.get('PRINT_OUTPUTS') == 'True':
 			probs = tf.keras.activations.softmax(outputs["class_prob_predictions"], axis=-1)
 			pred_labels = tf.argmax(probs, axis=-1)
-			print("Target labels :", labels["unique_ids"])
-			print("Output labels :", pred_labels)
-
+			# print("Target labels :", labels["unique_ids"])
+			# print("Output labels :", pred_labels)
+			print("Saving outputs...........", DATA_IDX)
 			# Save model inputs and outputs for visualization.
 			np.save("./input_img_"+str(DATA_IDX)+".npy", features)
 			np.save("./output_labels_"+str(DATA_IDX)+".npy", pred_labels)
