@@ -293,11 +293,11 @@ class PanopticTask(base_task.Task):
 			# print("Output labels :", pred_labels)
 			print("Saving outputs...........", DATA_IDX)
 			# Save model inputs and outputs for visualization.
-			np.save("./input_img_"+str(DATA_IDX)+".npy", features)
-			np.save("./output_labels_"+str(DATA_IDX)+".npy", pred_labels)
-			np.save("./target_labels_"+str(DATA_IDX)+".npy", labels["unique_ids"])
-			np.save("./output_masks_"+str(DATA_IDX)+".npy", outputs["mask_prob_predictions"])
-			np.save("./target_masks_"+str(DATA_IDX)+".npy", labels["individual_masks"])
+			np.save("./input_img_"+str(DATA_IDX)+".npy", features.numpy())
+			np.save("./output_labels_"+str(DATA_IDX)+".npy", pred_labels.numpy())	
+			np.save("./target_labels_"+str(DATA_IDX)+".npy", labels["unique_ids"].numpy())
+			np.save("./output_masks_"+str(DATA_IDX)+".npy", outputs["mask_prob_predictions"].numpy())
+			np.save("./target_masks_"+str(DATA_IDX)+".npy", labels["individual_masks"].numpy())
 			DATA_IDX += 1
 
 		# if self.panoptic_quality_metric is not None:
