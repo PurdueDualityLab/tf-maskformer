@@ -36,7 +36,7 @@ class PanopticTask(base_task.Task):
 	loading/iterating over Datasets, initializing the model, calculating the loss,
 	post-processing, and customized metrics with reduction.
 	"""
-	DATA_IDX = 0
+	
 	def build_model(self):
 		"""Builds MaskFormer Model."""
 		logging.info('Building MaskFormer model.')
@@ -58,7 +58,7 @@ class PanopticTask(base_task.Task):
 							which_pixel_decoder=self._task_config.model.which_pixel_decoder,
 							)
 		logging.info('Maskformer model build successful.')
-	
+		self.DATA_IDX = 0
 		return model
 
 	def initialize(self, model: tf.keras.Model) -> None:
@@ -292,14 +292,14 @@ class PanopticTask(base_task.Task):
 			pred_labels = tf.argmax(probs, axis=-1)
 			# print("Target labels :", labels["unique_ids"])
 			# print("Output labels :", pred_labels)
-			print("Saving outputs...........", DATA_IDX)
+			print("Saving outputs...........", self.DATA_IDX)
 			# Save model inputs and outputs for visualization.
-			np.save("./input_img_"+str(DATA_IDX)+".npy", features.numpy())
-			np.save("./output_labels_"+str(DATA_IDX)+".npy", pred_labels.numpy())	
-			np.save("./target_labels_"+str(DATA_IDX)+".npy", labels["unique_ids"].numpy())
-			np.save("./output_masks_"+str(DATA_IDX)+".npy", outputs["mask_prob_predictions"].numpy())
-			np.save("./target_masks_"+str(DATA_IDX)+".npy", labels["individual_masks"].numpy())
-			DATA_IDX += 1
+			np.save("./input_img_"+str(self.DATA_IDX)+".npy", features.numpy())
+			np.save("./output_labels_"+str(self.DATA_IDX)+".npy", pred_labels.numpy())	
+			np.save("./target_labels_"+str(self.DATA_IDX)+".npy", labels["unique_ids"].numpy())
+			np.save("./output_masks_"+str(self.DATA_IDX)+".npy", outputs["mask_prob_predictions"].numpy())
+			np.save("./target_masks_"+str(self.DATA_IDX)+".npy", labels["individual_masks"].numpy())
+			self.DATA_IDX += 1
 
 		# if self.panoptic_quality_metric is not None:
 		# 	pq_metric_labels = {
