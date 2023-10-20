@@ -1,0 +1,13 @@
+# Directories
+logs/
+models/
+data/
+
+# Files
+*.pb
+*.ckpt
+*.ckpt.*
+*.pyc
+*.log
+*.txt
+predicted_npy/
