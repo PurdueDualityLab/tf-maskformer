@@ -27,7 +27,7 @@ from official.projects.maskformer.losses.mapper import _get_contigious_to_origin
 
 import numpy as np
 
-DATA_IDX = 0
+
 @task_factory.register_task_cls(maskformer_cfg.MaskFormerTask)
 class PanopticTask(base_task.Task):
 	"""A single-replica view of training procedure.
@@ -36,6 +36,7 @@ class PanopticTask(base_task.Task):
 	loading/iterating over Datasets, initializing the model, calculating the loss,
 	post-processing, and customized metrics with reduction.
 	"""
+	DATA_IDX = 0
 	def build_model(self):
 		"""Builds MaskFormer Model."""
 		logging.info('Building MaskFormer model.')
