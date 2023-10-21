@@ -156,7 +156,7 @@ class Loss:
         cls_outputs = outputs["pred_logits"] # [batchsize, num_queries, num_classes] [1,100,134]
         cls_masks = outputs["pred_masks"]# [batchsize,num_queries, h, w]
         individual_masks = y_true["individual_masks"] # [batchsize, num_gt_objects, h, w,]
-        valid_masks = y_true["valid_mask"] # [batchsize, h, w,]
+        
         
         
         cls_assigned = tf.gather(cls_outputs, target_index, batch_dims=1, axis=1)
