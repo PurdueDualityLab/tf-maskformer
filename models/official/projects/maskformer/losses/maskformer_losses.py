@@ -121,7 +121,9 @@ class Loss:
         
         cost_focal = FocalLossMod().batch(tgt_mask_permuted, out_mask)
         cost_dice = DiceLoss().batch(tgt_mask_permuted, out_mask)
-       
+
+        tf.print("self.cost_focal type", self.cost_focal.dtype)
+        exit()
         
         total_cost = (
                 self.cost_focal * cost_focal
