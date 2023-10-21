@@ -200,9 +200,7 @@ class mask_former_parser(parser.Parser):
     
         # Normalize and prepare image and masks
         image = preprocess_ops.normalize_image(image)
-        # category_mask = tf.cast(
-        #     data['groundtruth_panoptic_category_mask'][:, :, 0],
-        #     dtype=tf.float32)
+       
         instance_mask = tf.cast(
             data['groundtruth_panoptic_instance_mask'][:, :, 0],
             dtype=tf.float32)
