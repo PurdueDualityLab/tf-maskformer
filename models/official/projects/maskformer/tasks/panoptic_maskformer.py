@@ -24,7 +24,7 @@ from official.projects.maskformer.losses.inference import PanopticInference
 from official.vision.modeling import backbones
 
 from official.projects.maskformer.losses.mapper import _get_contigious_to_original, _get_original_to_contigious
-
+from official.core.train_utils import try_count_params
 import numpy as np
 
 
@@ -58,6 +58,13 @@ class PanopticTask(base_task.Task):
 							which_pixel_decoder=self._task_config.model.which_pixel_decoder,
 							)
 		logging.info('Maskformer model build successful.')
+		# intialize the model
+		dummy_input = tf.zeros((1, self._task_config.model.input_size[0], self._task_config.model.input_size[1], 3))
+		model(dummy_input, training=False)
+		logging.info('Number of trainable parameters: %s', try_count_params(model, trainable_only=True))
+		logging.info('Number of parameters: %s', try_count_params(model, trainable_only=False))
+		
+
 		self.DATA_IDX = 0
 		return model
 
