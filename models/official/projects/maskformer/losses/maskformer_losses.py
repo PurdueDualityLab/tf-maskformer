@@ -122,10 +122,8 @@ class Loss:
         cost_focal = FocalLossMod().batch(tgt_mask_permuted, out_mask)
         cost_dice = DiceLoss().batch(tgt_mask_permuted, out_mask)
 
-        # for type bfloat16, we need to cast the cost tensors to float32
-        self.cost_class = tf.cast(self.cost_class, dtype=cost_class.dtype)
-        self.cost_focal = tf.cast(self.cost_focal, dtype=cost_focal.dtype)
-        self.cost_dice = tf.cast(self.cost_dice, dtype=cost_dice.dtype)
+        # FIXME : Need to cast to float32 for tf.math.add to work
+        cost_class = tf.cast(cost_class, dtype=tf.float32)
 
         total_cost = (
                 self.cost_focal * cost_focal
