@@ -236,6 +236,8 @@ class Loss:
         outputs["pred_masks"] = tf.transpose(outputs["pred_masks"], perm=[0,3,1,2])
         cls_loss_final, focal_loss_final, dice_loss_final = self.get_loss(outputs, y_true, indices)
         
+        # cast cls_loss_final to float32 for tf.math.add to work
+        cls_loss_final = tf.cast(cls_loss_final, dtype=tf.float32)
         losses.update({"loss_ce": self.cost_class*cls_loss_final,
                     "loss_focal": self.cost_focal*focal_loss_final,
                     "loss_dice": self.cost_dice*dice_loss_final})
