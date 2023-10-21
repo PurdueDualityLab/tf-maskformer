@@ -1,7 +1,2 @@
-# Directories
-logs/
-models/
-data/
-
 # Files
 predicted_npy/
