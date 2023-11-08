@@ -5,9 +5,8 @@ import tensorflow as tf
 from official.core import base_task
 from official.core import task_factory
 from official.core import train_utils
-from typing import Any, Dict, List, Mapping, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
-from official.projects.maskformer.dataloaders import input_reader
 from official.vision.dataloaders import input_reader_factory
 from official.common import dataset_fn
 
@@ -59,12 +58,10 @@ class PanopticTask(base_task.Task):
 							)
 		logging.info('Maskformer model build successful.')
 		# intialize the model
-		dummy_input = tf.zeros((1, self._task_config.model.input_size[0], self._task_config.model.input_size[1], 3))
-		model(dummy_input, training=False)
-		logging.info('Number of trainable parameters: %s', try_count_params(model, trainable_only=True))
-		logging.info('Number of parameters: %s', try_count_params(model, trainable_only=False))
-		
-
+		# dummy_input = tf.zeros((1, self._task_config.model.input_size[0], self._task_config.model.input_size[1], 3))
+		# model(dummy_input, training=False)
+		# logging.info('Number of trainable parameters: %s', try_count_params(model, trainable_only=True))
+		# logging.info('Number of parameters: %s', try_count_params(model, trainable_only=False))
 		self.DATA_IDX = 0
 		return model
 

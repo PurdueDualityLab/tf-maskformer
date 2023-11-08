@@ -93,11 +93,9 @@ class TransformerEncoder(tf.keras.layers.Layer):
               norm_first=self._norm_first,
               norm_epsilon=self._norm_epsilon,
               inner_dropout=self._intermediate_dropout,
-              # FIXME :
               attention_initializer=tf_utils.clone_initializer(
                   models.seq2seq_transformer.attention_initializer(
                       input_shape[2])),
-              # attention_initializer= 'glorot_uniform',
               kernel_initializer = 'glorot_uniform',
               bias_initializer='glorot_uniform',
               name=("layer_%d" % i)))

@@ -63,7 +63,6 @@ class PanopticInference:
             if tf.equal(num_masks,0):
                 continue
             else:
-                
                 _VOID_INSTANCE_ID = 0
                 instance_id = 0
                 cur_mask_ids = tf.argmax(cur_prob_masks, 0)
@@ -88,7 +87,6 @@ class PanopticInference:
                         binary_mask = tf.cast(binary_mask, tf.bool)
                         category_mask = tf.where(binary_mask, category_id, category_mask)
                         if tf.cast(self.is_thing_dict.lookup(category_id), tf.bool):
-                            
                             instance_mask = tf.where(binary_mask, instance_id, instance_mask)
                             instance_id += 1
                         else:
