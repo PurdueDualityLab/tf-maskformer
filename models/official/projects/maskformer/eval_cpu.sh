@@ -1,9 +1,9 @@
 #!/bin/bash
 train_bsize=1
 eval_bsize=1
-export PYTHONPATH=$PYTHONPATH:~/tf-maskformer/models
-export MODEL_DIR="gs://cam2-models/maskformer_vishal_exps/EXP20_v8_eval"
-export MASKFORMER_CKPT="gs://cam2-models/maskformer_vishal_exps/EXP20_v8/ckpt-18480"
+export PYTHONPATH=$PYTHONPATH:/depot/davisjam/data/akshath/MaskFormer_tf/tf-maskformer/models
+export MODEL_DIR="gs://cam2-models/maskformer_vishal_exps/EXP26_v8_eval"
+export MASKFORMER_CKPT="gs://cam2-models/maskformer_vishal_exps/EXP26_v8/ckpt-482328"
 export RESNET_CKPT="gs://cam2-models/maskformer_vishal_exps/resnet50_pretrained/tfmg/ckpt-62400"
 export TFRECORDS_DIR="gs://cam2-datasets/coco_panoptic/tfrecords"
 export TRAIN_BATCH_SIZE=$train_bsize
@@ -16,7 +16,7 @@ export OVERRIDES="runtime.distribution_strategy=one_device,runtime.mixed_precisi
 task.validation_data.global_batch_size=$EVAL_BATCH_SIZE,task.model.which_pixel_decoder=transformer_fpn,\
 task.init_checkpoint_modules=all,\
 task.init_checkpoint=$MASKFORMER_CKPT"
-python3 models/official/projects/maskformer/train.py \
+python3 train.py \
   --experiment maskformer_coco_panoptic \
   --mode eval \
   --model_dir $MODEL_DIR \

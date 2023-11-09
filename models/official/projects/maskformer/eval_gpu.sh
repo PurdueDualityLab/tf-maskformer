@@ -16,7 +16,7 @@ task.validation_data.global_batch_size=$EVAL_BATCH_SIZE,\
 task.model.which_pixel_decoder=transformer_fpn,\
 task.init_checkpoint_modules=all,\
 task.init_checkpoint=$MASKFORMER_CKPT"
-python3 models/official/projects/maskformer/train.py \
+python3 train.py \
   --experiment maskformer_coco_panoptic \
   --mode eval \
   --model_dir $MODEL_DIR \
