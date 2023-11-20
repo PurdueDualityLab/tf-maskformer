@@ -1,2 +1,3 @@
 # Files
 predicted_npy/
+*.npy

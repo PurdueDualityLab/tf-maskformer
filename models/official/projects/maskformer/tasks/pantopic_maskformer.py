@@ -1,8 +1,7 @@
 import os
 from absl import logging
 import tensorflow as tf
-import json
-import matplotlib.pyplot as plt 
+
 from official.core import base_task
 from official.core import task_factory
 from official.core import train_utils
@@ -99,8 +98,8 @@ class PanopticTask(base_task.Task):
             raise ValueError('Not a valid module to initialize from: {}'.format(
                 self._task_config.init_checkpoint_modules))
 
-    def build_inputs(self, params, input_context: Optional[tf.distribute.InputContext] = None) -> tf.data.Dataset:
-        """ 
+            def build_inputs(self, params, input_context: Optional[tf.distribute.InputContext] = None) -> tf.data.Dataset:
+                """ 
         Build panoptic segmentation dataset.
 
         """
@@ -311,87 +310,57 @@ class PanopticTask(base_task.Task):
             np.save(f"{os.environ.get('FART')}/output_masks_"+str(self.DATA_IDX)+".npy", outputs["mask_prob_predictions"].numpy())
             np.save(f"{os.environ.get('FART')}/target_masks_"+str(self.DATA_IDX)+".npy", tf.cast(labels["individual_masks"], dtype=tf.float32).numpy())
 
-            for object_mask_threshold in [0.7, 0.8]: 
-                for class_score in [0.5, 0.6]: 
-                    for overlap_threshold in [0.3, 0.4]: 
-                        self.panoptic_inference.change(object_mask_threshold, class_score, overlap_threshold)
-                        output_instance_mask, output_category_mask = self._postprocess_outputs(outputs, [640, 640])
-                        output_instance_mask = tf.cast(output_instance_mask, dtype=tf.float32).numpy()
-                        output_category_mask = tf.cast(output_category_mask, dtype=tf.float32).numpy()
-                        #np.save(f"{os.environ.get('FART')}/instance_mask_"+str(self.DATA_IDX)+".npy", output_instance_mask)
-                        #np.save(f"{os.environ.get('FART')}/category_mask_"+str(self.DATA_IDX)+".npy", output_category_mask)
-
-                        category_mask = output_category_mask.astype('int32')[0]
-                        instance_mask = output_instance_mask.astype('int32')[0]
-                        target_masks = tf.cast(labels['individual_masks'], dtype=tf.float32).numpy()[0] 
-
-                        merged = np.zeros((640, 640))
-                        print(object_mask_threshold) 
-                        print(class_score)
-                        print(overlap_threshold)
-                        for i in range(100):
-                            merged[target_masks[i]!=0] = i 
-
-
-                        unique_ids = np.unique(merged)
-                        overlap_analysis = {}
-
-                        for uid in unique_ids:
-                            binary_mask = (merged == uid)
-                            category_ids_in_region = category_mask[binary_mask]
-                            counts = np.bincount(category_ids_in_region)
-                            total_count = np.sum(counts)
-                            percentages = {str(cid): (count / total_count) * 100 for cid, count in enumerate(counts) if (count / total_count) * 100 > 2}
-                            overlap_analysis[str(uid)] = percentages
-        
-                        with open(f"{os.environ.get('FART')}/details_{object_mask_threshold}_{class_score}_{overlap_threshold}_"+str(self.DATA_IDX)+".json", 'w') as f: 
-                            f.write(json.dumps(overlap_analysis))
-                        image_1 = tf.cast(features, dtype=tf.float32).numpy()[0]
-
-                        ins_mask = instance_mask
-                        normalized_mask = (ins_mask - ins_mask.min()) / (ins_mask.max() - ins_mask.min())
-                        colormap = plt.cm.jet
-                        colored_mask = colormap(normalized_mask)
-
-                        alpha = 0.4
-                        overlayed_image = (1 - alpha) * image_1 + alpha * colored_mask[..., :3]  # Assume image is normalized
-
-                        plt.imshow(overlayed_image)
-                        plt.axis('off')
-                        plt.savefig(f"{os.environ.get('FART')}/output_instance_mask_{object_mask_threshold}_{class_score}_{overlap_threshold}_" + str(self.DATA_IDX) + ".png")
-
-                        plt.cla(); plt.clf(); plt.close()
-
-                        plt.imshow(instance_mask) 
-                        plt.axis('off')
-            
-                        plt.savefig(f"{os.environ.get('FART')}/unoverlayed_output_instance_mask_{object_mask_threshold}_{class_score}_{overlap_threshold}_" + str(self.DATA_IDX) + ".png")
-
-    
-                        plt.cla(); plt.clf(); plt.close()
-            
-                        plt.imshow(category_mask) 
-                        plt.axis('off')
-
-                        plt.savefig(f"{os.environ.get('FART')}/unoverlayed_output_category_mask_{object_mask_threshold}_{class_score}_{overlap_threshold}_" + str(self.DATA_IDX) + ".png")
-
-                        plt.cla(); plt.clf(); plt.close()
-            
-                        cat_mask = category_mask
-
-                        normalized_mask = (cat_mask - cat_mask.min()) / (cat_mask.max() - cat_mask.min())
-                        colormap = plt.cm.jet
-                        colored_mask = colormap(normalized_mask)
-
-                        alpha = 0.4
-                        overlayed_image = (1 - alpha) * image_1 + alpha * colored_mask[..., :3]  # Assume image is normalized
-
-                        plt.imshow(overlayed_image)
-                        plt.axis('off')
-                        plt.savefig(f"{os.environ.get('FART')}/output_category_mask_{object_mask_threshold}_{class_score}_{overlap_threshold}_" + str(self.DATA_IDX) + ".png")
+            output_instance_mask, output_category_mask = self._postprocess_outputs(outputs, [640, 640])
+            output_instance_mask = tf.cast(output_instance_mask, dtype=tf.float32).numpy()
+            output_category_mask = tf.cast(output_category_mask, dtype=tf.float32).numpy()
+            np.save(f"{os.environ.get('FART')}/instance_mask_"+str(self.DATA_IDX)+".npy", output_instance_mask)
+            np.save(f"{os.environ.get('FART')}/category_mask_"+str(self.DATA_IDX)+".npy", output_category_mask)
             self.DATA_IDX += 1
-            if self.DATA_IDX > 25: 
-                raise ValueError('ass')
+
+            category_mask = output_category_mask.astype('int64')
+            merged = np.zeros((640, 640))
+            for i in range(100):
+                merged[category_mask[0] == i] = i
+
+            unique_ids = np.unique(merged)
+            overlap_analysis = {}
+
+            for uid in unique_ids:
+                binary_mask = (merged == uid)
+                category_ids_in_region = category_mask[binary_mask]
+                counts = np.bincount(category_ids_in_region)
+                total_count = np.sum(counts)
+                percentages = {cid: (count / total_count) * 100 for cid, count in enumerate(counts) if count / total_count > 2}
+                overlap_analysis[uid] = percentages
+        
+            with open(f"{os.environ.get('FART')}/details_"+str(self.DATA_IDX)+".txt") as f: 
+                f.write(str(overlap_analysis))
+
+            
+            ins_mask = instance_mask[0].numpy()
+            normalized_mask = (ins_mask - ins_mask.min()) / (ins_mask.max() - ins_mask.min())
+            colormap = plt.cm.jet
+            colored_mask = colormap(normalized_mask)
+
+            alpha = 0.4
+            overlayed_image = (1 - alpha) * image_1 + alpha * colored_mask[..., :3]  # Assume image is normalized
+
+            plt.imshow(overlayed_image)
+            plt.axis('off')
+            plt.savefig(f"{os.environ.get('FART')}/output_instance_mask_" + str(self.DATA_IDX) + ".npy")
+
+            cat_mask = category_mask[0].numpy()
+
+            normalized_mask = (cat_mask - cat_mask.min()) / (cat_mask.max() - cat_mask.min())
+            colormap = plt.cm.jet
+            colored_mask = colormap(normalized_mask)
+
+            alpha = 0.4
+            overlayed_image = (1 - alpha) * image_1 + alpha * colored_mask[..., :3]  # Assume image is normalized
+
+            plt.imshow(overlayed_image)
+            plt.axis('off')
+            plt.savefig(f"{os.environ.get('FART')}/output_category_mask_" + str(self.DATA_IDX) + ".npy")
         # if self.panoptic_quality_metric is not None:
         #     pq_metric_labels = {
         #     'category_mask': labels['category_mask'], # ignore label is 0 
