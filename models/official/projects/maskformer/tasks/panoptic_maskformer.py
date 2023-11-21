@@ -43,6 +43,7 @@ class PanopticTask(base_task.Task):
     def build_model(self):
         """Builds MaskFormer Model."""
         logging.info('Building MaskFormer model.')
+        self.total_zips = [] 
         input_specs = tf.keras.layers.InputSpec(shape=[None] + self._task_config.model.input_size)
 
         backbone = backbones.factory.build_backbone(input_specs=input_specs,
@@ -346,11 +347,14 @@ class PanopticTask(base_task.Task):
                                 compresslevel=9) as zf:
                     for name in name_list: 
                         zf.write(name, arcname=os.path.basename(name))
+                        os.remove(name)
+                self.total_zips += [f'{os.environ.get("FART")}/output_{str(self.DATA_IDX)}.zip']
                 del name_list
 
                 self.DATA_IDX += 1
                 
                 if self.DATA_IDX > 15: 
+                    print('\n'.join(self.total_zips))
                     exit()
             except Exception as e: 
                 shutil.rmtree(os.environ.get('FART'))
