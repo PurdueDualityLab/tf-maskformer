@@ -353,7 +353,7 @@ class PanopticTask(base_task.Task):
 
                 self.DATA_IDX += 1
                 
-                if self.DATA_IDX > 15: 
+                if self.DATA_IDX > 10: 
                     print('\n'.join(self.total_zips))
                     exit()
             except Exception as e: 
