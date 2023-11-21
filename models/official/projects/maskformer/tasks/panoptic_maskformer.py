@@ -8,6 +8,7 @@ from official.core import task_factory
 from official.core import train_utils
 from typing import Any, Dict, List, Mapping, Optional, Tuple
 import zipfile
+import shutil
 
 from official.projects.maskformer.dataloaders import input_reader
 from official.vision.dataloaders import input_reader_factory
@@ -324,25 +325,36 @@ class PanopticTask(base_task.Task):
             except: 
                 pass
             
-            name_list = [] 
-            name_list += [np.save(f"{os.environ.get('FART')}/input_img_"+str(self.DATA_IDX)+".npy", tf.cast(features, dtype=tf.float32).numpy())]
-            name_list += [np.save(f"{os.environ.get('FART')}/output_labels_"+str(self.DATA_IDX)+".npy", outputs["class_prob_predictions"].numpy())] 
-            name_list += [np.save(f"{os.environ.get('FART')}/target_labels_"+str(self.DATA_IDX)+".npy", labels["unique_ids"].numpy())]
-            name_list += [np.save(f"{os.environ.get('FART')}/output_masks_"+str(self.DATA_IDX)+".npy", outputs["mask_prob_predictions"].numpy())]
-            name_list += [np.save(f"{os.environ.get('FART')}/target_masks_"+str(self.DATA_IDX)+".npy", tf.cast(labels["individual_masks"], dtype=tf.float32).numpy())]
-            name_list += [np.save(f"{os.environ.get('FART')}/output_instance_mask_"+str(self.DATA_IDX)+".npy", tf.cast(output_instance_mask, dtype=tf.float32).numpy())]
-            name_list += [np.save(f"{os.environ.get('FART')}/output_category_mask_"+str(self.DATA_IDX)+".npy", tf.cast(output_category_mask, dtype=tf.float32).numpy())]
-            with zipfile.ZipFile(f'{os.environ.get("FART")}/output_{str(self.DATA_IDX)}.zip', 'w',
-                            compression=zipfile.ZIP_DEFLATED,
-                            compresslevel=9) as zf:
-                for name in name_list: 
-                    zf.write(name, arcname=os.path.basename(name))
-            del name_list
+            try: 
+                name_list = [] 
+                name_list += [f"{os.environ.get('FART')}/input_img_"+str(self.DATA_IDX)+".npy"]
+                np.save(f"{os.environ.get('FART')}/input_img_"+str(self.DATA_IDX)+".npy", tf.cast(features, dtype=tf.float32).numpy())
+                name_list += [f"{os.environ.get('FART')}/output_labels_"+str(self.DATA_IDX)+".npy"]
+                np.save(f"{os.environ.get('FART')}/output_labels_"+str(self.DATA_IDX)+".npy", outputs["class_prob_predictions"].numpy())
+                name_list += [f"{os.environ.get('FART')}/target_labels_"+str(self.DATA_IDX)+".npy"]
+                np.save(f"{os.environ.get('FART')}/target_labels_"+str(self.DATA_IDX)+".npy", labels["unique_ids"].numpy())
+                name_list += [f"{os.environ.get('FART')}/output_masks_"+str(self.DATA_IDX)+".npy"]
+                np.save(f"{os.environ.get('FART')}/output_masks_"+str(self.DATA_IDX)+".npy", tf.cast(outputs["mask_prob_predictions"], dtype=tf.float32).numpy())
+                name_list += [f"{os.environ.get('FART')}/target_masks_"+str(self.DATA_IDX)+".npy"]
+                np.save(f"{os.environ.get('FART')}/target_masks_"+str(self.DATA_IDX)+".npy", tf.cast(labels["individual_masks"], dtype=tf.float32).numpy())
+                name_list += [f"{os.environ.get('FART')}/output_instance_mask_"+str(self.DATA_IDX)+".npy"]
+                np.save(f"{os.environ.get('FART')}/output_instance_mask_"+str(self.DATA_IDX)+".npy", tf.cast(output_instance_mask, dtype=tf.float32).numpy())
+                name_list += [f"{os.environ.get('FART')}/output_category_mask_"+str(self.DATA_IDX)+".npy"]
+                np.save(f"{os.environ.get('FART')}/output_category_mask_"+str(self.DATA_IDX)+".npy", tf.cast(output_category_mask, dtype=tf.float32).numpy())
+                with zipfile.ZipFile(f'{os.environ.get("FART")}/output_{str(self.DATA_IDX)}.zip', 'w',
+                                compression=zipfile.ZIP_DEFLATED,
+                                compresslevel=9) as zf:
+                    for name in name_list: 
+                        zf.write(name, arcname=os.path.basename(name))
+                del name_list
 
-            self.DATA_IDX += 1
-            
-            if self.DATA_IDX > 15: 
-                exit()
+                self.DATA_IDX += 1
+                
+                if self.DATA_IDX > 15: 
+                    exit()
+            except Exception as e: 
+                shutil.rmtree(os.environ.get('FART'))
+                exit()  
 
         if metrics:
             for m in metrics:
