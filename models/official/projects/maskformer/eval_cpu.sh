@@ -11,11 +11,11 @@ export EVAL_BATCH_SIZE=$eval_bsize
 export BASE_LR=0.0001
 export IMG_SIZE=640
 
-export NO_OBJ_CLS_WEIGHT=0.001
-export MASK_THRESH=0.1
-export CLASS_THRESH=0.1
-export OVERLAP_THRESH=0.2
-export FART=~/tf-maskformer/predicted_npy/exp26_0.1_0.2_0.001
+export NO_OBJ_CLS_WEIGHT=0.01
+export MASK_THRESH=0.4
+export CLASS_THRESH=0.4
+export OVERLAP_THRESH=0.3
+export FART=~/tf-maskformer/predicted_npy/exp26_0.4_0.3_0.01
 
 export PRINT_OUTPUTS=True
 export OVERRIDES="runtime.distribution_strategy=one_device,runtime.mixed_precision_dtype=float32,\
