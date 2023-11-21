@@ -7,6 +7,7 @@ from official.core import base_task
 from official.core import task_factory
 from official.core import train_utils
 from typing import Any, Dict, List, Mapping, Optional, Tuple
+import zipfile
 
 from official.projects.maskformer.dataloaders import input_reader
 from official.vision.dataloaders import input_reader_factory
@@ -293,6 +294,22 @@ class PanopticTask(base_task.Task):
                 'focal_loss': focal_loss,
                 'dice_loss': dice_loss,
                 }
+
+
+        pq_metric_labels = {
+        'category_mask': labels['category_mask'], # ignore label is 0 
+        'instance_mask': labels['instance_mask'],
+        }
+        output_instance_mask, output_category_mask = self._postprocess_outputs(outputs, [640, 640])
+        pq_metric_outputs = {
+        'category_mask': output_category_mask,
+        'instance_mask': output_instance_mask,
+        }
+
+        self.panoptic_quality_metric.update_state(
+            pq_metric_labels, pq_metric_outputs
+            )
+
         if os.environ.get('PRINT_OUTPUTS') == 'True':
             probs = tf.keras.activations.softmax(outputs["class_prob_predictions"], axis=-1)
             pred_labels = tf.argmax(probs, axis=-1)
@@ -301,112 +318,32 @@ class PanopticTask(base_task.Task):
             print("Saving outputs...........", self.DATA_IDX)
             # Save model inputs and outputs for visualization.
             # convert from bfloat16 to unit8 for image
+
             try: 
                 os.mkdir(os.environ.get('FART'))
             except: 
                 pass
-            np.save(f"{os.environ.get('FART')}/input_img_"+str(self.DATA_IDX)+".npy", tf.cast(features, dtype=tf.float32).numpy())
-            np.save(f"{os.environ.get('FART')}/output_labels_"+str(self.DATA_IDX)+".npy", outputs["class_prob_predictions"].numpy())    
-            np.save(f"{os.environ.get('FART')}/target_labels_"+str(self.DATA_IDX)+".npy", labels["unique_ids"].numpy())
-            np.save(f"{os.environ.get('FART')}/output_masks_"+str(self.DATA_IDX)+".npy", outputs["mask_prob_predictions"].numpy())
-            np.save(f"{os.environ.get('FART')}/target_masks_"+str(self.DATA_IDX)+".npy", tf.cast(labels["individual_masks"], dtype=tf.float32).numpy())
-
-            for object_mask_threshold in [0.7, 0.8]: 
-                for class_score in [0.5, 0.6]: 
-                    for overlap_threshold in [0.3, 0.4]: 
-                        self.panoptic_inference.change(object_mask_threshold, class_score, overlap_threshold)
-                        output_instance_mask, output_category_mask = self._postprocess_outputs(outputs, [640, 640])
-                        output_instance_mask = tf.cast(output_instance_mask, dtype=tf.float32).numpy()
-                        output_category_mask = tf.cast(output_category_mask, dtype=tf.float32).numpy()
-                        #np.save(f"{os.environ.get('FART')}/instance_mask_"+str(self.DATA_IDX)+".npy", output_instance_mask)
-                        #np.save(f"{os.environ.get('FART')}/category_mask_"+str(self.DATA_IDX)+".npy", output_category_mask)
-
-                        category_mask = output_category_mask.astype('int32')[0]
-                        instance_mask = output_instance_mask.astype('int32')[0]
-                        target_masks = tf.cast(labels['individual_masks'], dtype=tf.float32).numpy()[0] 
-
-                        merged = np.zeros((640, 640))
-                        print(object_mask_threshold) 
-                        print(class_score)
-                        print(overlap_threshold)
-                        for i in range(100):
-                            merged[target_masks[i]!=0] = i 
-
-
-                        unique_ids = np.unique(merged)
-                        overlap_analysis = {}
-
-                        for uid in unique_ids:
-                            binary_mask = (merged == uid)
-                            category_ids_in_region = category_mask[binary_mask]
-                            counts = np.bincount(category_ids_in_region)
-                            total_count = np.sum(counts)
-                            percentages = {str(cid): (count / total_count) * 100 for cid, count in enumerate(counts) if (count / total_count) * 100 > 2}
-                            overlap_analysis[str(uid)] = percentages
-        
-                        with open(f"{os.environ.get('FART')}/details_{object_mask_threshold}_{class_score}_{overlap_threshold}_"+str(self.DATA_IDX)+".json", 'w') as f: 
-                            f.write(json.dumps(overlap_analysis))
-                        image_1 = tf.cast(features, dtype=tf.float32).numpy()[0]
-
-                        ins_mask = instance_mask
-                        normalized_mask = (ins_mask - ins_mask.min()) / (ins_mask.max() - ins_mask.min())
-                        colormap = plt.cm.jet
-                        colored_mask = colormap(normalized_mask)
-
-                        alpha = 0.4
-                        overlayed_image = (1 - alpha) * image_1 + alpha * colored_mask[..., :3]  # Assume image is normalized
-
-                        plt.imshow(overlayed_image)
-                        plt.axis('off')
-                        plt.savefig(f"{os.environ.get('FART')}/output_instance_mask_{object_mask_threshold}_{class_score}_{overlap_threshold}_" + str(self.DATA_IDX) + ".png")
-
-                        plt.cla(); plt.clf(); plt.close()
-
-                        plt.imshow(instance_mask) 
-                        plt.axis('off')
             
-                        plt.savefig(f"{os.environ.get('FART')}/unoverlayed_output_instance_mask_{object_mask_threshold}_{class_score}_{overlap_threshold}_" + str(self.DATA_IDX) + ".png")
+            name_list = [] 
+            name_list += [np.save(f"{os.environ.get('FART')}/input_img_"+str(self.DATA_IDX)+".npy", tf.cast(features, dtype=tf.float32).numpy())]
+            name_list += [np.save(f"{os.environ.get('FART')}/output_labels_"+str(self.DATA_IDX)+".npy", outputs["class_prob_predictions"].numpy())] 
+            name_list += [np.save(f"{os.environ.get('FART')}/target_labels_"+str(self.DATA_IDX)+".npy", labels["unique_ids"].numpy())]
+            name_list += [np.save(f"{os.environ.get('FART')}/output_masks_"+str(self.DATA_IDX)+".npy", outputs["mask_prob_predictions"].numpy())]
+            name_list += [np.save(f"{os.environ.get('FART')}/target_masks_"+str(self.DATA_IDX)+".npy", tf.cast(labels["individual_masks"], dtype=tf.float32).numpy())]
+            name_list += [np.save(f"{os.environ.get('FART')}/output_instance_mask_"+str(self.DATA_IDX)+".npy", tf.cast(output_instance_mask, dtype=tf.float32).numpy())]
+            name_list += [np.save(f"{os.environ.get('FART')}/output_category_mask_"+str(self.DATA_IDX)+".npy", tf.cast(output_category_mask, dtype=tf.float32).numpy())]
+            with zipfile.ZipFile(f'{os.environ.get("FART")}/output_{str(self.DATA_IDX)}.zip', 'w',
+                            compression=zipfile.ZIP_DEFLATED,
+                            compresslevel=9) as zf:
+                for name in name_list: 
+                    zf.write(name, arcname=os.path.basename(name))
+            del name_list
 
-    
-                        plt.cla(); plt.clf(); plt.close()
-            
-                        plt.imshow(category_mask) 
-                        plt.axis('off')
-
-                        plt.savefig(f"{os.environ.get('FART')}/unoverlayed_output_category_mask_{object_mask_threshold}_{class_score}_{overlap_threshold}_" + str(self.DATA_IDX) + ".png")
-
-                        plt.cla(); plt.clf(); plt.close()
-            
-                        cat_mask = category_mask
-
-                        normalized_mask = (cat_mask - cat_mask.min()) / (cat_mask.max() - cat_mask.min())
-                        colormap = plt.cm.jet
-                        colored_mask = colormap(normalized_mask)
-
-                        alpha = 0.4
-                        overlayed_image = (1 - alpha) * image_1 + alpha * colored_mask[..., :3]  # Assume image is normalized
-
-                        plt.imshow(overlayed_image)
-                        plt.axis('off')
-                        plt.savefig(f"{os.environ.get('FART')}/output_category_mask_{object_mask_threshold}_{class_score}_{overlap_threshold}_" + str(self.DATA_IDX) + ".png")
             self.DATA_IDX += 1
-            if self.DATA_IDX > 25: 
-                raise ValueError('ass')
-        # if self.panoptic_quality_metric is not None:
-        #     pq_metric_labels = {
-        #     'category_mask': labels['category_mask'], # ignore label is 0 
-        #     'instance_mask': labels['instance_mask'],
-        #     }
-        #     # Output from postprocessing will convert the binary masks to category and instance masks with non-contigious ids
-            #       output_instance_mask, output_category_mask = self._postprocess_outputs(outputs, [640, 640])
-        #     pq_metric_outputs = {
-        #     'category_mask': output_category_mask,
-        #     'instance_mask': output_instance_mask,
-        #     }
+            
+            if self.DATA_IDX > 15: 
+                exit()
 
-        #     self.panoptic_quality_metric.update_state(
-        #       pq_metric_labels, pq_metric_outputs
-          #     )
         if metrics:
             for m in metrics:
                 m.update_state(all_losses[m.name])
@@ -433,8 +370,8 @@ class PanopticTask(base_task.Task):
     # def _reduce_panoptic_metrics(self, logs: Dict[str, Any]):
     #     """
     #     Updates the per class and mean panoptic metrics in the logs.
-
     #     """
+
     #     result = self.panoptic_quality_metric.result()
     #     valid_thing_classes = result['valid_thing_classes']
     #     valid_stuff_classes = result['valid_stuff_classes']
