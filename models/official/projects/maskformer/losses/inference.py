@@ -1,11 +1,11 @@
 import tensorflow as tf
 import numpy as np
 from official.projects.maskformer.losses.mapper import _get_contigious_to_original, _get_original_to_contigious
+import os 
 
 class PanopticInference:
     """Panoptic Inference"""
     def __init__(self, num_classes=134, background_class_id=0, object_mask_threshold=os.environ.get('MASK_THRESH'), class_score_threshold=os.environ.get('CLASS_THRESH'), overlap_threshold=os.environ.get('OVERLAP_THRESH')):
-
         self.num_classes = num_classes
         self.background_class_id = background_class_id
         self.object_mask_threshold = object_mask_threshold
@@ -101,7 +101,7 @@ class PanopticInference:
         category_masks_stacked = tf.stack(category_masks, axis=0)
         
         return instance_masks_stacked, category_masks_stacked
-        
+
     def change(): 
 
 
