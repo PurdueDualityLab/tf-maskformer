@@ -4,7 +4,7 @@ from official.projects.maskformer.losses.mapper import _get_contigious_to_origin
 
 class PanopticInference:
     """Panoptic Inference"""
-    def __init__(self, num_classes=134, background_class_id=0, object_mask_threshold=0.1, class_score_threshold=0.25, overlap_threshold=0.2):
+    def __init__(self, num_classes=134, background_class_id=0, object_mask_threshold=os.environ.get('MASK_THRESH'), class_score_threshold=os.environ.get('CLASS_THRESH'), overlap_threshold=os.environ.get('OVERLAP_THRESH')):
 
         self.num_classes = num_classes
         self.background_class_id = background_class_id
@@ -41,7 +41,7 @@ class PanopticInference:
             # print("Labels  after :", labels)
             # exit()
             ################################################## Only for testing instance and category mask ##################################################
-            keep = tf.math.logical_and(tf.math.not_equal(labels, self.background_class_id), scores > self.object_mask_threshold)
+            keep = tf.math.logical_and(tf.math.not_equal(labels, self.background_class_id), scores > self.class_score_threshold)
             
             mask_pred_b_sigmoid = tf.transpose(mask_pred_b_sigmoid, (2, 0, 1)) # ( num_predictions, height, width)
             
@@ -101,6 +101,7 @@ class PanopticInference:
         category_masks_stacked = tf.stack(category_masks, axis=0)
         
         return instance_masks_stacked, category_masks_stacked
+        
     def change(): 
 
 

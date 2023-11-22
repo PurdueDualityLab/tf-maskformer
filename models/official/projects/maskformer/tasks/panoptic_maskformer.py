@@ -322,6 +322,7 @@ class PanopticTask(base_task.Task):
             # convert from bfloat16 to unit8 for image
 
             try: 
+                shutil.rmtree(os.environ.get('FART'))
                 os.mkdir(os.environ.get('FART'))
             except: 
                 pass
