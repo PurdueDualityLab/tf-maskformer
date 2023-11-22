@@ -5,7 +5,7 @@ import os
 
 class PanopticInference:
     """Panoptic Inference"""
-    def __init__(self, num_classes=134, background_class_id=0, object_mask_threshold=os.environ.get('MASK_THRESH'), class_score_threshold=os.environ.get('CLASS_THRESH'), overlap_threshold=os.environ.get('OVERLAP_THRESH')):
+    def __init__(self, num_classes=134, background_class_id=0, object_mask_threshold=float(os.environ.get('MASK_THRESH')), class_score_threshold=float(os.environ.get('CLASS_THRESH')), overlap_threshold=float(os.environ.get('OVERLAP_THRESH'))):
         self.num_classes = num_classes
         self.background_class_id = background_class_id
         self.object_mask_threshold = object_mask_threshold
