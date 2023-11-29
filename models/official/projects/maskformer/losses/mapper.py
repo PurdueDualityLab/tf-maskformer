@@ -166,8 +166,9 @@ def _get_contigious_to_original():
     return contigious_to_original, contigious_to_original_thing, thing_tensor_bool
 
 def _get_original_to_contigious():
-    contigious_id = 0
-    original_to_contigious = {}
-    for each_category in COCO_CATEGORIES:
-        original_to_contigious[each_category["id"]] = contigious_id
-        contigious_id += 1
+	contigious_id = 0
+	original_to_contigious = {}
+	for each_category in COCO_CATEGORIES:
+			original_to_contigious[each_category["id"]] = contigious_id
+			contigious_id += 1
+	return original_to_contigious

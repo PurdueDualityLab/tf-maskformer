@@ -170,12 +170,14 @@ class PanopticTask(base_task.Task):
             _, _, thing_tensor_bool = _get_contigious_to_original()
             self.is_thing_dict_bool = thing_tensor_bool
             pq_config = self._task_config.panoptic_quality_evaluator
+            print(self._task_config)
+            exit()
             if os.environ.get('ON_CPU') == 'True':
                 self.panoptic_quality_metric = panoptic_quality.PanopticQuality(
                     num_categories=pq_config.num_categories,
                     ignored_label=pq_config.ignored_label,
-                    max_instances_per_category=pq_config.max_num_instances,
-                    offset=pq_config.max_num_instances,
+                    max_instances_per_category=100,
+                    offset=133,
                     )
             else: 
                 self.panoptic_quality_metric = panoptic_quality.PanopticQualityV2(
@@ -192,6 +194,9 @@ class PanopticTask(base_task.Task):
             return metrics
 
 
+    def map_values(array, mapping):
+        vectorized_map = np.vectorize(lambda x: mapping.get(x, x))
+        return vectorized_map(array)
 
     def train_step(self, inputs: Tuple[Any, Any],model: tf.keras.Model, optimizer: tf.keras.optimizers.Optimizer, metrics: Optional[List[Any]] = None) -> Dict[str, Any]:
         """
@@ -316,10 +321,11 @@ class PanopticTask(base_task.Task):
         'instance_mask': output_instance_mask
         }
 
+        mapping = _get_original_to_contiguous()
 
         if os.environ.get('ON_CPU') == 'True':
             self.panoptic_quality_metric.compare_and_accumulate(
-                {key:value.numpy() for key, value in pq_metric_labels}, {key:value.numpy() for key, value in pq_metric_outputs}
+                {key:map_values(value.numpy(), mapping) for key, value in pq_metric_labels}, {key:map_values(value.numpy(), mapping) for key, value in pq_metric_outputs}
             )
             results = self.panoptic_quality_metric.result(self.is_thing_dict_bool)
             print(results)
