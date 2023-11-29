@@ -464,17 +464,6 @@ class PanopticQualityV2(tf.keras.metrics.Metric):
     )
     self._update_stuff_classes(category_mask, gt_category_mask)
 
-  def transpose_in_chunks(self, tensor, perm):
-    batch_size = tensor.shape[0]
-    for chunk_size in range(batch_size, 0, -1):
-        if batch_size % chunk_size == 0:
-            break
-    chunks = tf.split(tensor, num_or_size_splits=chunk_size, axis=0)
-    
-    transposed_chunks = [tf.transpose(chunk, perm) for chunk in chunks]
-    
-    return tf.concat(transposed_chunks, axis=0)
-
   def _update_thing_classes(
       self,
       category_mask: tf.Tensor,
@@ -533,8 +522,7 @@ class PanopticQualityV2(tf.keras.metrics.Metric):
         [-1, height * width, self._max_num_instances + 1],
     )
     # (batch_size, num_detections + 1, height * width)
-    flattened_binary_masks = self.transpose_in_chunks(flattened_binary_masks, [0, 2, 1])
-
+    flattened_binary_masks = tf.transpose(flattened_binary_masks, [0, 2, 1])
     # (batch_size, num_detections + 1, num_gts + 1)
     intersection = tf.matmul(
         tf.cast(flattened_binary_masks, tf.float32),

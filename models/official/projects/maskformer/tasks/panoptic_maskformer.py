@@ -170,7 +170,7 @@ class PanopticTask(base_task.Task):
             _, _, thing_tensor_bool = _get_contigious_to_original()
             self.is_thing_dict_bool = thing_tensor_bool
             pq_config = self._task_config.panoptic_quality_evaluator
-            self.panoptic_quality_metric = panoptic_quality.PanopticQualityV2(
+            self.panoptic_quality_metric = panoptic_quality.PanopticQuality(
                     num_categories=pq_config.num_categories,
                     is_thing=self.is_thing_dict_bool,
                     ignored_label=pq_config.ignored_label,
