@@ -308,12 +308,12 @@ class PanopticTask(base_task.Task):
 
         pq_metric_labels = {
         'category_mask': labels['category_mask'], # ignore label is 0 
-        'instance_mask': labels['instance_mask'],
+        'instance_mask': labels['instance_mask']
         }
         output_instance_mask, output_category_mask = self._postprocess_outputs(outputs, [640, 640])
         pq_metric_outputs = {
-        'category_mask': output_category_mask,
-        'instance_mask': output_instance_mask,
+        'category_mask': output_category_mask.numpy(),
+        'instance_mask': output_instance_mask.numpy(),
         }
 
 
@@ -321,7 +321,7 @@ class PanopticTask(base_task.Task):
             self.panoptic_quality_metric.compare_and_accumulate(
                 pq_metric_labels, pq_metric_outputs
             )
-            results = self.panoptic_quality_metric.result()
+            results = self.panoptic_quality_metric.result(self.is_thing_dict_bool)
             print(results)
         else: 
             self.panoptic_quality_metric.update_state(
