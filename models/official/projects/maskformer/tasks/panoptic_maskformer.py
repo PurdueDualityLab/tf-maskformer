@@ -298,19 +298,19 @@ class PanopticTask(base_task.Task):
                 }
 
 
-        # pq_metric_labels = {
-        # 'category_mask': labels['category_mask'], # ignore label is 0 
-        # 'instance_mask': labels['instance_mask'],
-        # }
+        pq_metric_labels = {
+        'category_mask': labels['category_mask'], # ignore label is 0 
+        'instance_mask': labels['instance_mask'],
+        }
         output_instance_mask, output_category_mask = self._postprocess_outputs(outputs, [640, 640])
-        # pq_metric_outputs = {
-        # 'category_mask': output_category_mask,
-        # 'instance_mask': output_instance_mask,
-        # }
+        pq_metric_outputs = {
+        'category_mask': output_category_mask,
+        'instance_mask': output_instance_mask,
+        }
 
-        # self.panoptic_quality_metric.update_state(
-        #     pq_metric_labels, pq_metric_outputs
-        #     )
+        self.panoptic_quality_metric.update_state(
+            pq_metric_labels, pq_metric_outputs
+            )
 
         if os.environ.get('PRINT_OUTPUTS') == 'True':
             probs = tf.keras.activations.softmax(outputs["class_prob_predictions"], axis=-1)
@@ -322,7 +322,6 @@ class PanopticTask(base_task.Task):
             # convert from bfloat16 to unit8 for image
 
             try: 
-                shutil.rmtree(os.environ.get('FART'))
                 os.mkdir(os.environ.get('FART'))
             except: 
                 pass
