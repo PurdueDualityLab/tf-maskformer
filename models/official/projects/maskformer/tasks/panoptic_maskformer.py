@@ -312,14 +312,14 @@ class PanopticTask(base_task.Task):
         }
         output_instance_mask, output_category_mask = self._postprocess_outputs(outputs, [640, 640])
         pq_metric_outputs = {
-        'category_mask': output_category_mask.numpy(),
-        'instance_mask': output_instance_mask.numpy(),
+        'category_mask': output_category_mask,
+        'instance_mask': output_instance_mask
         }
 
 
         if os.environ.get('ON_CPU') == 'True':
             self.panoptic_quality_metric.compare_and_accumulate(
-                pq_metric_labels, pq_metric_outputs
+                {key:value.numpy() for key, value in pq_metric_labels}, {key:value.numpy() for key, value in pq_metric_outputs}
             )
             results = self.panoptic_quality_metric.result(self.is_thing_dict_bool)
             print(results)
