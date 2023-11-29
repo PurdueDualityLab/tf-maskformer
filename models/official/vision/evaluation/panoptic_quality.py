@@ -41,7 +41,6 @@ def realdiv_maybe_zero(x, y):
   return np.where(
       np.less(np.abs(y), _EPSILON), np.zeros_like(x), np.divide(x, y))
 
-
 def _ids_to_counts(id_array):
   """Given a numpy array, a mapping from each unique entry to its count."""
   ids, counts = np.unique(id_array, return_counts=True)

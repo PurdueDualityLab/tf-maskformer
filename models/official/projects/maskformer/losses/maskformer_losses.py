@@ -159,7 +159,7 @@ class Loss:
         cls_masks = outputs["pred_masks"]# [batchsize,num_queries, h, w]
         individual_masks = y_true["individual_masks"] # [batchsize, num_gt_objects, h, w,]
         
-        
+        # valid_masks = y_true["valid_mask"] # [batchsize, h, w,]
         
         cls_assigned = tf.gather(cls_outputs, target_index, batch_dims=1, axis=1)
         mask_assigned = tf.gather(cls_masks, target_index, batch_dims=1, axis=1)
@@ -224,11 +224,16 @@ class Loss:
              y_true: list of dicts, such that len(y_true) == batch_size.
                      The expected keys in each dict depends on the losses applied, see each loss' doc
         """
-        outputs_without_aux = {k: v for k, v in outputs.items() if k != "aux_outputs"}
+        outputs_without_aux = {k: v for k, v in outputs.items() if k != "aux_decoder_outputs"}
         
         # NOTE : Change shape of pred and target masks to [batch_size, num_queries, h, w]
         outputs_without_aux["pred_masks"] = tf.transpose(outputs["pred_masks"], perm=[0,3,1,2])
         y_true["individual_masks"] = tf.squeeze(y_true["individual_masks"], axis=-1)
+        
+        # akshath
+        np.save(f'{os.environ.get("FART")}/unique_ids.npy', y_true['unique_ids'].numpy()) 
+        np.save(f'{os.environ.get("FART")}/individual_masks.npy', tf.cast(y_true['individual_masks'], dtype=tf.float32).numpy()) 
+        
         indices = self.memory_efficient_matcher(outputs_without_aux, y_true) # (batchsize, num_queries, num_queries)
             
         losses = {}
@@ -242,17 +247,27 @@ class Loss:
                     "loss_focal": self.cost_focal*focal_loss_final,
                     "loss_dice": self.cost_dice*dice_loss_final})
         
-        # FIXME : check if we need to add aux_outputs
-        # if "aux_outputs" in outputs and outputs["aux_outputs"] is not None:
-        #     for i, aux_outputs in enumerate(outputs["aux_outputs"]):
-        #         indices = self.memory_efficient_matcher(aux_outputs, y_true)
-        #         # for loss in self.losses:
-        #         cls_loss_, focal_loss_, dice_loss_ = self.get_loss(batch_size, aux_outputs, y_true, indices)
-                
-        #         l_dict = {"loss_ce" + f"_{i}": self.cost_class * cls_loss_,
-        #                    "loss_focal" + f"_{i}": self.cost_focal *focal_loss_,
-        #                    "loss_dice" + f"_{i}": self.cost_dice * dice_loss_}
-        #         losses.update(l_dict)
+        # akshath 
+        print('LOSS BEFORE AUX: ', losses)
         
-        return losses
-    
+        # FIXME : check if we need to add aux_outputs
+        if "aux_decoder_outputs" in outputs and outputs["aux_decoder_outputs"] is not None:
+            for i, aux_output in enumerate(outputs["aux_decoder_outputs"]):
+                aux_output["pred_masks"] = tf.transpose(aux_output["pred_masks"], perm=[0,3,1,2])
+
+                indices = self.memory_efficient_matcher(aux_output, y_true)
+                # for loss in self.losses:
+                cls_loss_, focal_loss_, dice_loss_ = self.get_loss(aux_output, y_true, indices)
+
+                l_dict = {"loss_ce" + f"_{i}": self.cost_class * cls_loss_,
+                        "loss_focal" + f"_{i}": self.cost_focal *focal_loss_,
+                        "loss_dice" + f"_{i}": self.cost_dice * dice_loss_}
+                # akshath
+                np.save(f'{os.environ.get("FART")}/{i}_pred_logits.npy', aux_output['pred_logits']) 
+                np.save(f'{os.environ.get("FART")}/{i}_pred_masks.npy', tf.transpose(aux_output['pred_masks'], perm=[0,3,1,2])) 
+                
+                losses.update(l_dict)
+        # akshath
+        print('LOSS AFTER AUX: ', losses)
+        
+        return losses 

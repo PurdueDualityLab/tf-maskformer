@@ -75,12 +75,15 @@ class MaskFormerTransformer(tf.keras.layers.Layer):
 			   num_encoder_layers=0,
 			   num_decoder_layers=6,
 			   dropout_rate=0.1,
+				 deep_supervision=False,
 			   **kwargs):
 		super().__init__(**kwargs)
 		
 		# Embeddings parameters.
 		self._num_queries = num_queries
 		self._hidden_size = hidden_size
+		self._deep_supervision = deep_supervision
+
 		if hidden_size % 2 != 0:
 			raise ValueError("hidden_size must be a multiple of 2.")
 
@@ -89,14 +92,14 @@ class MaskFormerTransformer(tf.keras.layers.Layer):
 		self._num_encoder_layers = num_encoder_layers
 		self._num_decoder_layers = num_decoder_layers
 		self._dropout_rate = dropout_rate
-  
 
 
 	def build(self, input_shape):
 
 		self._transformer = DETRTransformer(num_encoder_layers=self._num_encoder_layers,
-											num_decoder_layers=self._num_decoder_layers,
-											dropout_rate=self._dropout_rate)
+																						num_decoder_layers=self._num_decoder_layers,
+                                            dropout_rate=self._dropout_rate,
+                                            deep_supervision=self._deep_supervision)
 
 		self._query_embeddings = self.add_weight(
 			"detr/query_embeddings",

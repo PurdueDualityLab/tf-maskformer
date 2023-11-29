@@ -17,6 +17,7 @@ export CLASS_THRESH=0.4
 export OVERLAP_THRESH=0.3
 export FART=~/tf-maskformer/predicted_npy/exp26_0.4_0.3_0.01
 
+export DEEP_SUPERVISION=True
 export ON_CPU=True
 export PRINT_OUTPUTS=True
 export OVERRIDES="runtime.distribution_strategy=one_device,runtime.mixed_precision_dtype=float32,\

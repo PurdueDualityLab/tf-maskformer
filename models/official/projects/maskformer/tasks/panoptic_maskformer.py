@@ -60,7 +60,8 @@ class PanopticTask(base_task.Task):
                 num_classes=self._task_config.model.num_classes,
                 bfloat16=self._task_config.bfloat16, 
                 which_pixel_decoder=self._task_config.model.which_pixel_decoder,
-                )
+				deep_supervision=self._task_config.model.deep_supervision,)
+            
         logging.info('Maskformer model build successful.')
         # intialize the model
         dummy_input = tf.zeros((1, self._task_config.model.input_size[0], self._task_config.model.input_size[1], 3))
@@ -76,7 +77,7 @@ class PanopticTask(base_task.Task):
         """
         Used to initialize the models with checkpoint
         """
-
+        
         logging.info('Initializing model from checkpoint: %s', self._task_config.init_checkpoint)
         if not self._task_config.init_checkpoint:
             return
@@ -125,9 +126,24 @@ class PanopticTask(base_task.Task):
         return dataset
 
 
-    def build_losses(self, output, labels, aux_outputs=None):
-        # TODO : Auxilary outputs
-        outputs = {"pred_logits": output["class_prob_predictions"], "pred_masks": output["mask_prob_predictions"]}
+    def build_losses(self, output, labels,  with_aux_outputs=False):
+        outputs = {"pred_logits": output["class_prob_predictions"],
+				   "pred_masks": output["mask_prob_predictions"]}
+        # akshath
+        # np.save(f'{os.environ.get("FART")}/pred_logits.npy', outputs['pred_logits'].numpy())
+        # np.save(f'{os.environ.get("FART")}/pred_masks.npy', outputs['pred_masks'].numpy())
+        
+        
+        if with_aux_outputs:
+            outputs["pred_masks"] = output["mask_prob_predictions"][-1]
+            outputs["pred_logits"] = output["class_prob_predictions"][-1]
+
+            formatted_aux_output = [
+                    {"pred_logits": a, "pred_masks": b}
+                    for a, b in zip(output["class_prob_predictions"][:-1], output["mask_prob_predictions"][:-1])
+                ]
+            outputs.update({"aux_decoder_outputs": formatted_aux_output}) 
+        
         targets = labels
 
         matcher = hungarian_matching
@@ -138,9 +154,9 @@ class PanopticTask(base_task.Task):
                 cost_class= self._task_config.losses.cost_class,
                 cost_dice= self._task_config.losses.cost_dice,
                 cost_focal= self._task_config.losses.cost_focal, ignore_label=self._task_config.train_data.parser.ignore_label)
-
+        
         calculated_losses = loss(outputs, targets)
-
+        
         # Losses are returned as weighted sum of individual losses
         total_loss = calculated_losses['loss_ce'] + calculated_losses['loss_dice'] + calculated_losses['loss_focal']
 
@@ -148,13 +164,13 @@ class PanopticTask(base_task.Task):
         weighted_dice = calculated_losses['loss_dice']
         weighted_focal = calculated_losses['loss_focal']
 
-        # Not implemented auxilary outputs
-        # if aux_outputs is not None:
-        #       total_aux_loss = 0.0
-        #       for i in range(4): #4 number of auxilary outputs
-        #               total_aux_loss += calculated_losses['loss_ce_'+str(i)] + calculated_losses['loss_dice_'+str(i)] + calculated_losses['loss_focal_'+str(i)]
-        #       total_loss = total_loss + total_aux_loss
+        aux_outputs = output.get('aux_decoder_outputs')
 
+        if aux_outputs is not None:
+            total_aux_loss = 0.0
+            for i in range(len(aux_outputs)): #4 number of auxilary outputs
+                total_aux_loss += calculated_losses['loss_ce_'+str(i)] + calculated_losses['loss_dice_'+str(i)] + calculated_losses['loss_focal_'+str(i)]
+            total_loss = total_loss + total_aux_loss
 
         return total_loss, weighted_ce, weighted_focal, weighted_dice
 
@@ -170,12 +186,13 @@ class PanopticTask(base_task.Task):
             _, _, thing_tensor_bool = _get_contigious_to_original()
             self.is_thing_dict_bool = thing_tensor_bool
             pq_config = self._task_config.panoptic_quality_evaluator
+            # akshath (hardcoded on purpose) 
             if os.environ.get('ON_CPU') == 'True':
                 self.panoptic_quality_metric = panoptic_quality.PanopticQuality(
-                    num_categories=pq_config.num_categories,
-                    ignored_label=pq_config.ignored_label,
-                    max_instances_per_category=100,
-                    offset=133,
+                    num_categories=133,
+                    ignored_label=0,
+                    max_instances_per_category=256,
+                    offset=256*256*256,
                     )
             else: 
                 self.panoptic_quality_metric = panoptic_quality.PanopticQualityV2(
@@ -192,7 +209,8 @@ class PanopticTask(base_task.Task):
             return metrics
 
 
-    def map_values(array, mapping):
+    def map_values(self, array, mapping):
+        array = array.astype(np.int32)
         vectorized_map = np.vectorize(lambda x: mapping.get(x, x))
         return vectorized_map(array)
 
@@ -212,37 +230,19 @@ class PanopticTask(base_task.Task):
 
         features, labels = inputs
 
-
         with tf.GradientTape() as tape:
             outputs = model(features, training=True)
-            ##########################################################
-            # FIXME : This loop must be used for auxilary outputs
             loss = 0.0
             cls_loss = 0.0
             focal_loss = 0.0
             dice_loss = 0.0
 
-            # for output in outputs:
-            #       # Computes per-replica loss.    
-            #       total_loss, cls_loss_, focal_loss_, dice_loss_ = self.build_losses(
-            #               output=output, labels=labels)
-            #       loss += total_loss
-            #       cls_loss += cls_loss_
-            #       focal_loss += focal_loss_
-            #       dice_loss += dice_loss_
-
-            #       scaled_loss = loss
-            #       # For mixed_precision policy, when LossScaleOptimizer is used, loss is
-            #       # scaled for numerical stability.
-
-            ##########################################################################
-
-            # TODO : Add auxiallary losses
-            total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels)
+            total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels, with_aux_outputs=model._deep_supervision)
             scaled_loss = total_loss
 
             if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
                 total_loss = optimizer.get_scaled_loss(scaled_loss)
+
         tvars = model.trainable_variables    
         grads = tape.gradient(scaled_loss,tvars)
 
@@ -254,6 +254,35 @@ class PanopticTask(base_task.Task):
             probs = tf.keras.activations.softmax(outputs["class_prob_predictions"], axis=-1)
             pred_labels = tf.argmax(probs, axis=-1)
 
+        pq_metric_labels = {    
+        'category_mask': labels['category_mask'], # ignore label is 0 
+        'instance_mask': labels['instance_mask']
+        }
+        output_instance_mask, output_category_mask = self._postprocess_outputs(outputs, [640, 640], model._deep_supervision)
+        pq_metric_outputs = {
+        'category_mask': output_category_mask,
+        'instance_mask': output_instance_mask
+        }
+
+        mapping = {0:0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 13: 12, 14: 13, 15: 14, 16: 15, 17: 16, 18: 17, 19: 18, 20: 19, 21: 20, 22: 21, 23: 22, 24: 23, 25: 24, 27: 25, 28: 26, 31: 27, 32: 28, 33: 29, 34: 30, 35: 31, 36: 32, 37: 33, 38: 34, 39: 35, 40: 36, 41: 37, 42: 38, 43: 39, 44: 40, 46: 41, 47: 42, 48: 43, 49: 44, 50: 45, 51: 46, 52: 47, 53: 48, 54: 49, 55: 50, 56: 51, 57: 52, 58: 53, 59: 54, 60: 55, 61: 56, 62: 57, 63: 58, 64: 59, 65: 60, 67: 61, 70: 62, 72: 63, 73: 64, 74: 65, 75: 66, 76: 67, 77: 68, 78: 69, 79: 70, 80: 71, 81: 72, 82: 73, 84: 74, 85: 75, 86: 76, 87: 77, 88: 78, 89: 79, 90: 80, 92: 81, 93: 82, 95: 83, 100: 84, 107: 85, 109: 86, 112: 87, 118: 88, 119: 89, 122: 90, 125: 91, 128: 92, 130: 93, 133: 94, 138: 95, 141: 96, 144: 97, 145: 98, 147: 99, 148: 100, 149: 101, 151: 102, 154: 103, 155: 104, 156: 105, 159: 106, 161: 107, 166: 108, 168: 109, 171: 110, 175: 111, 176: 112, 177: 113, 178: 114, 180: 115, 181: 116, 184: 117, 185: 118, 186: 119, 187: 120, 188: 121, 189: 122, 190: 123, 191: 124, 192: 125, 193: 126, 194: 127, 195: 128, 196: 129, 197: 130, 198: 131, 199: 132, 200: 133}
+        
+        results = []
+        # Calcs the PQ every 100 images. Slow. 
+        if self.DATA_IDX % 100 == 0: 
+            if os.environ.get('ON_CPU') == 'True':
+                self.panoptic_quality_metric.compare_and_accumulate(
+                    {key:self.map_values(value.numpy(), mapping) for key, value in pq_metric_labels.items()}, {key:self.map_values(value.numpy(), mapping) for key, value in pq_metric_outputs.items()}
+                )
+                results = self.panoptic_quality_metric.result(None)
+                results = {result:results[result] for result in results if "All" in result}
+            else: 
+                self.panoptic_quality_metric.update_state(
+                    pq_metric_labels, pq_metric_outputs
+                    )
+                results = self.panoptic_quality_metric.result()
+        # akshath
+        with open(f"{os.environ.get('LOG')}/log.txt", 'a') as f: 
+            f.write(f"{self.DATA_IDX}:\n" + str(results))
 
         # # Multiply for logging.
         # # Since we expect the gradient replica sum to happen in the optimizer,
@@ -275,9 +304,10 @@ class PanopticTask(base_task.Task):
         if metrics:
             for m in metrics:
                 m.update_state(all_losses[m.name])
+
         return logs
 
-    def _postprocess_outputs(self, outputs: Dict[str, Any], image_shapes):
+    def _postprocess_outputs(self, outputs: Dict[str, Any], image_shapes, _deep_supervision=False):
         """ 
         Implements postprocessing using the output binary masks and labels to produce
         1. Output Category Mask
@@ -286,16 +316,17 @@ class PanopticTask(base_task.Task):
         """
         pred_binary_masks = outputs["mask_prob_predictions"]
         pred_labels = outputs["class_prob_predictions"]
+        if _deep_supervision:
+            pred_binary_masks = pred_binary_masks[-1]
+            pred_labels = pred_labels[-1]
         ouput_instance_mask, output_category_mask = self.panoptic_inference(pred_labels,pred_binary_masks, image_shapes)
         return ouput_instance_mask, output_category_mask
 
     def validation_step(self, inputs, model, metrics=None):
         features, labels = inputs
         outputs = model(features, training=False)
-        # if os.environ.get('PRINT_OUTPUTS') == 'True':
-        #     probs = tf.keras.activations.softmax(outputs["class_prob_predictions"], axis=-1)
-        #     pred_labels = tf.argmax(probs, axis=-1)
-        total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels)
+        total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels, with_aux_outputs=model._deep_supervision)
+
         num_replicas_in_sync = tf.distribute.get_strategy().num_replicas_in_sync
         total_loss *= num_replicas_in_sync
         cls_loss *= num_replicas_in_sync
@@ -308,43 +339,46 @@ class PanopticTask(base_task.Task):
                 'dice_loss': dice_loss,
                 }
 
-
         pq_metric_labels = {    
         'category_mask': labels['category_mask'], # ignore label is 0 
         'instance_mask': labels['instance_mask']
         }
-        output_instance_mask, output_category_mask = self._postprocess_outputs(outputs, [640, 640])
+        output_instance_mask, output_category_mask = self._postprocess_outputs(outputs, [640, 640], model._deep_supervision)
         pq_metric_outputs = {
         'category_mask': output_category_mask,
         'instance_mask': output_instance_mask
         }
 
-        mapping =_get_original_to_contigious() 
-
+        mapping = {0:0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 13: 12, 14: 13, 15: 14, 16: 15, 17: 16, 18: 17, 19: 18, 20: 19, 21: 20, 22: 21, 23: 22, 24: 23, 25: 24, 27: 25, 28: 26, 31: 27, 32: 28, 33: 29, 34: 30, 35: 31, 36: 32, 37: 33, 38: 34, 39: 35, 40: 36, 41: 37, 42: 38, 43: 39, 44: 40, 46: 41, 47: 42, 48: 43, 49: 44, 50: 45, 51: 46, 52: 47, 53: 48, 54: 49, 55: 50, 56: 51, 57: 52, 58: 53, 59: 54, 60: 55, 61: 56, 62: 57, 63: 58, 64: 59, 65: 60, 67: 61, 70: 62, 72: 63, 73: 64, 74: 65, 75: 66, 76: 67, 77: 68, 78: 69, 79: 70, 80: 71, 81: 72, 82: 73, 84: 74, 85: 75, 86: 76, 87: 77, 88: 78, 89: 79, 90: 80, 92: 81, 93: 82, 95: 83, 100: 84, 107: 85, 109: 86, 112: 87, 118: 88, 119: 89, 122: 90, 125: 91, 128: 92, 130: 93, 133: 94, 138: 95, 141: 96, 144: 97, 145: 98, 147: 99, 148: 100, 149: 101, 151: 102, 154: 103, 155: 104, 156: 105, 159: 106, 161: 107, 166: 108, 168: 109, 171: 110, 175: 111, 176: 112, 177: 113, 178: 114, 180: 115, 181: 116, 184: 117, 185: 118, 186: 119, 187: 120, 188: 121, 189: 122, 190: 123, 191: 124, 192: 125, 193: 126, 194: 127, 195: 128, 196: 129, 197: 130, 198: 131, 199: 132, 200: 133}
+        
+        results = [] 
         if os.environ.get('ON_CPU') == 'True':
             self.panoptic_quality_metric.compare_and_accumulate(
-                {key:map_values(value.numpy(), mapping) for key, value in pq_metric_labels.items()}, {key:map_values(value.numpy(), mapping) for key, value in pq_metric_outputs.items()}
+                {key:self.map_values(value.numpy(), mapping) for key, value in pq_metric_labels.items()}, {key:self.map_values(value.numpy(), mapping) for key, value in pq_metric_outputs.items()}
             )
-            results = self.panoptic_quality_metric.result(self.is_thing_dict_bool)
-            print(results)
+            results = self.panoptic_quality_metric.result(None)
         else: 
             self.panoptic_quality_metric.update_state(
                 pq_metric_labels, pq_metric_outputs
                 )
+            results = self.panoptic_quality_metric.result()
+
 
         if os.environ.get('PRINT_OUTPUTS') == 'True':
             probs = tf.keras.activations.softmax(outputs["class_prob_predictions"], axis=-1)
             pred_labels = tf.argmax(probs, axis=-1)
-            # print("Target labels :", labels["unique_ids"])
-            # print("Output labels :", pred_labels)
+            
             print("Saving outputs...........", self.DATA_IDX)
-            # Save model inputs and outputs for visualization.
-            # convert from bfloat16 to unit8 for image
 
+            # akshath 
             try: 
                 os.mkdir(os.environ.get('FART'))
             except: 
                 pass
+
+            with open(f'{os.environ.get("FART")}/log.txt', 'a') as f: 
+                f.write(f'{self.DATA_IDX}:\n' + str(results))
+                f.write('\n')
             
             try: 
                 name_list = [] 
@@ -362,6 +396,15 @@ class PanopticTask(base_task.Task):
                 np.save(f"{os.environ.get('FART')}/output_instance_mask_"+str(self.DATA_IDX)+".npy", tf.cast(output_instance_mask, dtype=tf.float32).numpy())
                 name_list += [f"{os.environ.get('FART')}/output_category_mask_"+str(self.DATA_IDX)+".npy"]
                 np.save(f"{os.environ.get('FART')}/output_category_mask_"+str(self.DATA_IDX)+".npy", tf.cast(output_category_mask, dtype=tf.float32).numpy())
+                name_list += [f"{os.environ.get('FART')}/input_instance_mask_"+str(self.DATA_IDX)+".npy"]
+                np.save(f"{os.environ.get('FART')}/input_instance_mask_"+str(self.DATA_IDX)+".npy", tf.cast(labels['instance_mask'], dtype=tf.float32).numpy())
+                name_list += [f"{os.environ.get('FART')}/input_category_mask_"+str(self.DATA_IDX)+".npy"]
+                np.save(f"{os.environ.get('FART')}/input_category_mask_"+str(self.DATA_IDX)+".npy", tf.cast(labels['category_mask'], dtype=tf.float32).numpy())
+                
+                for val in all_losses: 
+                    name_list += [f"{os.environ.get('FART')}/{val}_"+str(self.DATA_IDX)+".npy"]
+                    np.save(f"{os.environ.get('FART')}/{val}_"+str(self.DATA_IDX)+".npy", tf.cast(all_losses[val], dtype=tf.float32).numpy())
+ 
                 with zipfile.ZipFile(f'{os.environ.get("FART")}/output_{str(self.DATA_IDX)}.zip', 'w',
                                 compression=zipfile.ZIP_DEFLATED,
                                 compresslevel=9) as zf:
@@ -373,10 +416,11 @@ class PanopticTask(base_task.Task):
 
                 self.DATA_IDX += 1
                 
-                if self.DATA_IDX > 10: 
+                if self.DATA_IDX > 0: 
                     print('\n'.join(self.total_zips))
                     exit()
-            except Exception as e: 
+            except Exception as e:
+                print(e)
                 shutil.rmtree(os.environ.get('FART'))
                 exit()  
 
