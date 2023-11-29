@@ -306,7 +306,7 @@ class PanopticTask(base_task.Task):
                 }
 
 
-        pq_metric_labels = {
+        pq_metric_labels = {    
         'category_mask': labels['category_mask'], # ignore label is 0 
         'instance_mask': labels['instance_mask']
         }

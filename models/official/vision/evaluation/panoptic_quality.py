@@ -106,10 +106,10 @@ class PanopticQuality:
           category labels.
         - instance_array: A 2D numpy uint16 array of predicted instance labels.
     """
-    groundtruth_category_mask = groundtruths['category_mask']
-    groundtruth_instance_mask = groundtruths['instance_mask']
-    predicted_category_mask = predictions['category_mask']
-    predicted_instance_mask = predictions['instance_mask']
+    groundtruth_category_mask = groundtruths['category_mask'].numpy()
+    groundtruth_instance_mask = groundtruths['instance_mask'].numpy()
+    predicted_category_mask = predictions['category_mask'].numpy()
+    predicted_instance_mask = predictions['instance_mask'].numpy()
 
     # First, combine the category and instance labels so that every unique
     # value for (category, instance) is assigned a unique integer label.
