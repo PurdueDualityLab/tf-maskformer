@@ -316,9 +316,17 @@ class PanopticTask(base_task.Task):
         'instance_mask': output_instance_mask,
         }
 
-        self.panoptic_quality_metric.update_state(
-            pq_metric_labels, pq_metric_outputs
+
+        if os.environ.get('ON_CPU') == 'True':
+            self.panoptic_quality_metric.compare_and_accumulate(
+                pq_metric_labels, pq_metric_outputs
             )
+            results = self.panoptic_quality_metric.result()
+            print(results)
+        else: 
+            self.panoptic_quality_metric.update_state(
+                pq_metric_labels, pq_metric_outputs
+                )
 
         if os.environ.get('PRINT_OUTPUTS') == 'True':
             probs = tf.keras.activations.softmax(outputs["class_prob_predictions"], axis=-1)
