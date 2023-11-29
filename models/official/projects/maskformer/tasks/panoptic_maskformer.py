@@ -170,8 +170,6 @@ class PanopticTask(base_task.Task):
             _, _, thing_tensor_bool = _get_contigious_to_original()
             self.is_thing_dict_bool = thing_tensor_bool
             pq_config = self._task_config.panoptic_quality_evaluator
-            print(self._task_config)
-            exit()
             if os.environ.get('ON_CPU') == 'True':
                 self.panoptic_quality_metric = panoptic_quality.PanopticQuality(
                     num_categories=pq_config.num_categories,
@@ -321,11 +319,11 @@ class PanopticTask(base_task.Task):
         'instance_mask': output_instance_mask
         }
 
-        mapping = _get_original_to_contiguous()
+        mapping =_get_original_to_contigious() 
 
         if os.environ.get('ON_CPU') == 'True':
             self.panoptic_quality_metric.compare_and_accumulate(
-                {key:map_values(value.numpy(), mapping) for key, value in pq_metric_labels}, {key:map_values(value.numpy(), mapping) for key, value in pq_metric_outputs}
+                {key:map_values(value.numpy(), mapping) for key, value in pq_metric_labels.items()}, {key:map_values(value.numpy(), mapping) for key, value in pq_metric_outputs.items()}
             )
             results = self.panoptic_quality_metric.result(self.is_thing_dict_bool)
             print(results)
