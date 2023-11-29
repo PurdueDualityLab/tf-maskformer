@@ -175,6 +175,7 @@ class PanopticTask(base_task.Task):
                     num_categories=pq_config.num_categories,
                     ignored_label=pq_config.ignored_label,
                     max_instances_per_category=pq_config.max_num_instances,
+                    offset=pq_config.max_num_instances,
                     )
             else: 
                 self.panoptic_quality_metric = panoptic_quality.PanopticQualityV2(
