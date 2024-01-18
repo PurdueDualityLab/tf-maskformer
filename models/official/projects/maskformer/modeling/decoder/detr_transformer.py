@@ -7,11 +7,12 @@ class DETRTransformer(tf.keras.layers.Layer):
   """Encoder and Decoder of DETR."""
 
   def __init__(self, num_encoder_layers=6, num_decoder_layers=6,
-               dropout_rate=0.1, **kwargs):
+               dropout_rate=0.1, deep_supervision=False, **kwargs):
     super().__init__(**kwargs)
     self._dropout_rate = dropout_rate
     self._num_encoder_layers = num_encoder_layers
     self._num_decoder_layers = num_decoder_layers
+    self._deep_supervision = deep_supervision
 
   def build(self, input_shape=None):
     if self._num_encoder_layers > 0:
@@ -57,7 +58,7 @@ class DETRTransformer(tf.keras.layers.Layer):
         # bug is resolved. Passing ones for now.
         self_attention_mask=self_attention_mask,
         cross_attention_mask=cross_attention_mask,
-        return_all_decoder_outputs=False,
+        return_all_decoder_outputs=self._deep_supervision,
         input_pos_embed=targets,
         memory_pos_embed=pos_embed,)
     

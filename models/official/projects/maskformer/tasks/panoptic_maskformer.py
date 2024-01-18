@@ -55,6 +55,7 @@ class PanopticTask(base_task.Task):
 							num_classes=self._task_config.model.num_classes,
 							bfloat16=self._task_config.bfloat16, 
 							which_pixel_decoder=self._task_config.model.which_pixel_decoder,
+							deep_supervision=self._task_config.model.deep_supervision,
 							)
 		logging.info('Maskformer model build successful.')
 		# intialize the model
@@ -119,11 +120,27 @@ class PanopticTask(base_task.Task):
 
 
 	def build_losses(self, output, labels, aux_outputs=None):
-		# TODO : Auxilary outputs
-		outputs = {"pred_logits": output["class_prob_predictions"], "pred_masks": output["mask_prob_predictions"]}
+		outputs = {"pred_logits": output["class_prob_predictions"],
+				   "pred_masks": output["mask_prob_predictions"]}
+
+		if with_aux_outputs:
+			outputs["pred_masks"] = output["mask_prob_predictions"][-1]
+			outputs["pred_logits"] = output["class_prob_predictions"][-1]
+
+			formatted_aux_output = [
+					{"pred_logits": a, "pred_masks": b}
+					for a, b in zip(output["class_prob_predictions"][:-1], output["mask_prob_predictions"][:-1])
+				]
+
+
+			outputs.update({"aux_outputs": formatted_aux_output})
+
+		print({(x, outputs[x].shape) for x in outputs})
+
 		targets = labels
 
 		matcher = hungarian_matching
+
 		no_object_weight = self._task_config.losses.background_cls_weight
 		loss = Loss(num_classes = self._task_config.model.num_classes,
 					matcher = matcher,
@@ -140,14 +157,14 @@ class PanopticTask(base_task.Task):
 		weighted_ce = calculated_losses['loss_ce']
 		weighted_dice = calculated_losses['loss_dice']
 		weighted_focal = calculated_losses['loss_focal']
+
+		aux_outputs = output.get('aux_outputs')
 	
-		# Not implemented auxilary outputs
-		# if aux_outputs is not None:
-		#       total_aux_loss = 0.0
-		#       for i in range(4): #4 number of auxilary outputs
-		#               total_aux_loss += calculated_losses['loss_ce_'+str(i)] + calculated_losses['loss_dice_'+str(i)] + calculated_losses['loss_focal_'+str(i)]
-		#       total_loss = total_loss + total_aux_loss
-		
+		if aux_outputs is not None:
+			total_aux_loss = 0.0
+			for i in range(len(aux_outputs)): #4 number of auxilary outputs
+				total_aux_loss += calculated_losses['loss_ce_'+str(i)] + calculated_losses['loss_dice_'+str(i)] + calculated_losses['loss_focal_'+str(i)]
+			total_loss = total_loss + total_aux_loss
 
 		return total_loss, weighted_ce, weighted_focal, weighted_dice
 		
@@ -273,22 +290,24 @@ class PanopticTask(base_task.Task):
 
 	def validation_step(self, inputs, model, metrics=None):
 		features, labels = inputs
+
 		outputs = model(features, training=False)
-		# if os.environ.get('PRINT_OUTPUTS') == 'True':
-		# 	probs = tf.keras.activations.softmax(outputs["class_prob_predictions"], axis=-1)
-		# 	pred_labels = tf.argmax(probs, axis=-1)
-		total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels)
+
+		total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels, aux_outputs=model._deep_supervision)
+
 		num_replicas_in_sync = tf.distribute.get_strategy().num_replicas_in_sync
 		total_loss *= num_replicas_in_sync
 		cls_loss *= num_replicas_in_sync
 		focal_loss *= num_replicas_in_sync
 		dice_loss *= num_replicas_in_sync
 		logs = {self.loss: total_loss}
+
 		all_losses = {
 				'cls_loss': cls_loss,
 				'focal_loss': focal_loss,
 				'dice_loss': dice_loss,
 			}
+
 		if os.environ.get('PRINT_OUTPUTS') == 'True':
 			probs = tf.keras.activations.softmax(outputs["class_prob_predictions"], axis=-1)
 			pred_labels = tf.argmax(probs, axis=-1)
@@ -319,6 +338,7 @@ class PanopticTask(base_task.Task):
 		# 	self.panoptic_quality_metric.update_state(
 		#   	pq_metric_labels, pq_metric_outputs
 	  	# 	)
+
 		if metrics:
 			for m in metrics:
 				m.update_state(all_losses[m.name])

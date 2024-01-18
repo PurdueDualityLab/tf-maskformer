@@ -242,17 +242,16 @@ class Loss:
                     "loss_focal": self.cost_focal*focal_loss_final,
                     "loss_dice": self.cost_dice*dice_loss_final})
         
-        # FIXME : check if we need to add aux_outputs
-        # if "aux_outputs" in outputs and outputs["aux_outputs"] is not None:
-        #     for i, aux_outputs in enumerate(outputs["aux_outputs"]):
-        #         indices = self.memory_efficient_matcher(aux_outputs, y_true)
-        #         # for loss in self.losses:
-        #         cls_loss_, focal_loss_, dice_loss_ = self.get_loss(batch_size, aux_outputs, y_true, indices)
+        if "aux_outputs" in outputs and outputs["aux_outputs"] is not None:
+            for i, aux_outputs in enumerate(outputs["aux_outputs"]):
+                aux_output["pred_masks"] = tf.transpose(aux_output["pred_masks"], perm=[0,3,1,2])
+                indices = self.memory_efficient_matcher(aux_outputs, y_true)
+                # for loss in self.losses:
+                cls_loss_, focal_loss_, dice_loss_ = self.get_loss(aux_outputs, y_true, indices)
                 
-        #         l_dict = {"loss_ce" + f"_{i}": self.cost_class * cls_loss_,
-        #                    "loss_focal" + f"_{i}": self.cost_focal *focal_loss_,
-        #                    "loss_dice" + f"_{i}": self.cost_dice * dice_loss_}
-        #         losses.update(l_dict)
-        
+                l_dict = {"loss_ce" + f"_{i}": self.cost_class * cls_loss_,
+                           "loss_focal" + f"_{i}": self.cost_focal *focal_loss_,
+                           "loss_dice" + f"_{i}": self.cost_dice * dice_loss_}
+                losses.update(l_dict)
         return losses
     

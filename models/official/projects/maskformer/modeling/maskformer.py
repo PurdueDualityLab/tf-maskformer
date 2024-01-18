@@ -36,6 +36,7 @@ class MaskFormer(tf.keras.Model):
 			   batch_size=1,
 			   bfloat16=False,
 			   which_pixel_decoder='fpn',
+				 deep_supervision=True,
 			   
 			   **kwargs):
 		super(MaskFormer, self).__init__(**kwargs)
@@ -70,6 +71,7 @@ class MaskFormer(tf.keras.Model):
 			raise ValueError("hidden_size must be a multiple of 2.")
 		self._bfloat16 = bfloat16
 		self._pixel_decoder = which_pixel_decoder
+		self._deep_supervision = deep_supervision
 		
 		# Backbone feature extractor.
 		self._backbone_endpoint = backbone_endpoint_name
@@ -98,11 +100,13 @@ class MaskFormer(tf.keras.Model):
 												hidden_size=self._hidden_size,
 												num_encoder_layers=self._detr_encoder_layers,
 												num_decoder_layers=self._num_decoder_layers,
-												dropout_rate=self._dropout_rate)
+												dropout_rate=self._dropout_rate, 
+												deep_supervision=self._deep_supervision)
 		
 		self.head = MLPHead(num_classes=self._num_classes, 
 							hidden_dim=self._hidden_size, 
-							mask_dim=self._fpn_feat_dims)
+							mask_dim=self._fpn_feat_dims, 
+							deep_supervision=self._deep_supervision)
 		
 		super(MaskFormer, self).build(image_shape)
  
@@ -120,6 +124,7 @@ class MaskFormer(tf.keras.Model):
 			"num_encoder_layers": self._num_encoder_layers,
 			"num_decoder_layers": self._num_decoder_layers,
 			"dropout_rate": self._dropout_rate,
+			"deep_supervision": self._deep_supervision,
 		}
 	
 	@classmethod
@@ -137,6 +142,8 @@ class MaskFormer(tf.keras.Model):
 		backbone_feature_maps_procesed = self.process_feature_maps(backbone_feature_maps)
 		mask_features, transformer_enc_feat = self.pixel_decoder(backbone_feature_maps_procesed, image)
 		transformer_features = self.transformer({"features": transformer_enc_feat})
+		if self._deep_supervision:
+			transformer_features = tf.convert_to_tensor(transformer_features)
 		seg_pred = self.head({"per_pixel_embeddings" : mask_features,
 							"per_segment_embeddings": transformer_features})
 		return seg_pred

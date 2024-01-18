@@ -81,6 +81,7 @@ class MaskFormer(hyperparams.Config):
   detr_encoder_layers: int = 0
   num_decoder_layers: int = 6
   which_pixel_decoder: str = 'transformer_fpn' 
+  deep_supervision: bool = False
   input_size: List[int] = dataclasses.field(default_factory=list)
   backbone: backbones.Backbone = backbones.Backbone(
       type='resnet', resnet=backbones.ResNet(model_id=50, bn_trainable=False)) 
@@ -121,6 +122,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
   train_batch_size = int(os.environ.get('TRAIN_BATCH_SIZE'))
   eval_batch_size = int(os.environ.get('EVAL_BATCH_SIZE'))
   no_obj_cls_weight = float(os.environ.get('NO_OBJ_CLS_WEIGHT'))
+  deep_supervision = bool(os.environ.get('DEEP_SUPERVISION'))
   ckpt_interval = (COCO_TRAIN_EXAMPLES // train_batch_size) * 10 # Don't write ckpts frequently. Slows down the training
   image_size = int(os.environ.get('IMG_SIZE'))
 
@@ -136,6 +138,7 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
               input_size=[image_size,image_size,3],
               norm_activation=common.NormActivation(),
               which_pixel_decoder='transformer_fpn',
+              deep_supervision=deep_supervision,
               num_classes=133,), # Extra class will be added automatically for background
           losses = Losses(
             background_cls_weight=no_obj_cls_weight,
