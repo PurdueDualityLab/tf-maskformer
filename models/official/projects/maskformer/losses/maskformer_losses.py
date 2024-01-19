@@ -244,7 +244,7 @@ class Loss:
         
         if "aux_outputs" in outputs and outputs["aux_outputs"] is not None:
             for i, aux_outputs in enumerate(outputs["aux_outputs"]):
-                aux_output["pred_masks"] = tf.transpose(aux_output["pred_masks"], perm=[0,3,1,2])
+                aux_outputs["pred_masks"] = tf.transpose(aux_outputs["pred_masks"], perm=[0,3,1,2])
                 indices = self.memory_efficient_matcher(aux_outputs, y_true)
                 # for loss in self.losses:
                 cls_loss_, focal_loss_, dice_loss_ = self.get_loss(aux_outputs, y_true, indices)

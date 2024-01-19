@@ -9,6 +9,7 @@ eval_bsize=1
 export PYTHONPATH=$PYTHONPATH:/depot/davisjam/data/akshath/MaskFormer_vishal/tf-maskformer/models
 export RESNET_CKPT="/depot/davisjam/data/vishal/pretrained_ckpts/tfmg_resnet50/ckpt-62400"
 export TFRECORDS_DIR="/depot/davisjam/data/vishal/datasets/coco/tfrecords"
+export MASKFORMER_CKPT="/depot/davisjam/data/akshath/MaskFormer_vishal/tf-maskformer/models/official/projects/maskformer/pretrained_ckpts/newest/ckpt-482328"
 export MODEL_DIR="./model_dir/"
 export TRAIN_BATCH_SIZE=$train_bsize
 export EVAL_BATCH_SIZE=$eval_bsize
@@ -21,12 +22,12 @@ export DEEP_SUPERVISION=True
 export ON_CPU=True
 export PRINT_OUTPUTS=True
 
-export OVERRIDES="runtime.distribution_strategy=one_device,runtime.num_gpus=1,runtime.mixed_precision_dtype=float32,\
-task.train_data.global_batch_size=$train_bsize,\
-task.model.which_pixel_decoder=transformer_fpn,\
-task.init_checkpoint=$RESNET_CKPT"
+export OVERRIDES="runtime.distribution_strategy=one_device,runtime.mixed_precision_dtype=float32,\
+task.validation_data.global_batch_size=$EVAL_BATCH_SIZE,task.model.which_pixel_decoder=transformer_fpn,\
+task.init_checkpoint_modules=all,\
+task.init_checkpoint=$MASKFORMER_CKPT"
 python3 train.py \
   --experiment maskformer_coco_panoptic \
-  --mode train \
+  --mode eval \
   --model_dir $MODEL_DIR \
   --params_override=$OVERRIDES

@@ -4,7 +4,7 @@ from official.projects.maskformer.losses.mapper import _get_contigious_to_origin
 
 class PanopticInference:
     """Panoptic Inference"""
-    def __init__(self, num_classes=134, background_class_id=0, object_mask_threshold=0.1, class_score_threshold=0.25, overlap_threshold=0.2):
+    def __init__(self, num_classes=134, background_class_id=0, object_mask_threshold=0.4, class_score_threshold=0.4, overlap_threshold=0.3):
 
         self.num_classes = num_classes
         self.background_class_id = background_class_id
@@ -33,7 +33,6 @@ class PanopticInference:
             probs = tf.keras.activations.softmax(pred_logits_b, axis=-1) # (num_predictions, num_classes) (2,100,134)
             scores = tf.reduce_max(probs, axis=-1) 
             labels = tf.argmax(probs, axis=-1)
-            tf.print("Scores :", scores)
             ################################################## Only for testing instance and category mask ##################################################
             # Replace '133' with '0' (background class id) and increment all other classes by 1
             # print("Labels  before :", labels)
@@ -97,7 +96,6 @@ class PanopticInference:
 
         instance_masks_stacked = tf.stack(instance_masks, axis=0)
         category_masks_stacked = tf.stack(category_masks, axis=0)
-        
-        exit()
+
         return instance_masks_stacked, category_masks_stacked
 
