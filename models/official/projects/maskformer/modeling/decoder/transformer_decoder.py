@@ -108,6 +108,7 @@ class MaskFormerTransformer(tf.keras.layers.Layer):
 			dtype=tf.float32)
 		   
 		super(MaskFormerTransformer, self).build(input_shape)
+		
 	def _generate_image_mask(self, inputs: tf.Tensor,target_shape: tf.Tensor) -> tf.Tensor:
 		mask = tf.expand_dims(tf.cast(tf.not_equal(tf.reduce_sum(inputs, axis=-1), 0), inputs.dtype),axis=-1)
 		mask = tf.image.resize(mask, target_shape, method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)

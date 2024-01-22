@@ -6,6 +6,7 @@ from official.projects.maskformer.modeling.decoder.transformer_pixel_decoder imp
 from official.projects.maskformer.modeling.decoder.pixel_decoder import CNNFPN
 from typing import Any, Dict, List, Mapping, Optional, Tuple, Union
 
+import os 
 
 class MaskFormer(tf.keras.Model):
 	"""Maskformer"""
@@ -139,10 +140,22 @@ class MaskFormer(tf.keras.Model):
 	def call(self, image, training = False):
 		backbone_feature_maps = self._backbone(image)
 		backbone_feature_maps_procesed = self.process_feature_maps(backbone_feature_maps)
+		if os.environ.get('PRINT_OUTPUTS') == 'True':
+			print(f"LOGGING STEP: Backbone Feature maps: {type(backbone_feature_maps_procesed)} | {backbone_feature_maps_procesed.keys()}")
 		mask_features, transformer_enc_feat = self.pixel_decoder(backbone_feature_maps_procesed, image)
+		if os.environ.get('PRINT_OUTPUTS') == 'True':
+			print(f"LOGGING STEP: Mask Features: {type(mask_features)}, {mask_features.shape}")
 		transformer_features = self.transformer({"features": transformer_enc_feat})
+		if os.environ.get('PRINT_OUTPUTS') == 'True':
+			print(f"LOGGING STEP: Transformer Features: {type(transformer_features)}, {[x.shape for x in transformer_features]}")
 		if self._deep_supervision:
 			transformer_features = tf.convert_to_tensor(transformer_features)
+			if os.environ.get('PRINT_OUTPUTS') == 'True':
+				print(f"LOGGING STEP: Transformer Features (post deep super_vision): {type(transformer_features)}, {transformer_features.shape}")
+
 		seg_pred = self.head({"per_pixel_embeddings" : mask_features,
 							"per_segment_embeddings": transformer_features})
+
+		if os.environ.get('PRINT_OUTPUTS') == 'True':
+			print(f"LOGGING STEP: Segmentation Predictions: 1. Class_Prob_Preds: {type(seg_pred['class_prob_predictions'])}, {seg_pred['class_prob_predictions'].shape} | 2. Mask_Prob_Preds: {type(seg_pred['mask_prob_predictions'])}, {seg_pred['mask_prob_predictions'].shape}")
 		return seg_pred

@@ -129,10 +129,9 @@ class PanopticTask(base_task.Task):
 			outputs.update({"aux_outputs": formatted_aux_output})
 
 		if os.environ.get('PRINT_OUTPUTS') == 'True':
-			print({(x, outputs[x].shape) for x in outputs if x != "aux_outputs"})
 			if aux_outputs:
 				for i, aux_output in enumerate(outputs["aux_outputs"]):
-					print(f'{i}: {[(x, aux_output[x].shape) for x in aux_output]}')
+					print(f'LOGGING LOSSES: {i}: {[(x, aux_output[x].shape) for x in aux_output]}')
 
 		targets = labels
 
@@ -149,7 +148,7 @@ class PanopticTask(base_task.Task):
 		calculated_losses = loss(outputs, targets)
 		
 		if os.environ.get('PRINT_OUTPUTS') == 'True':
-			print('Losses: ', {(x, calculated_losses[x].numpy()) for x in calculated_losses})
+			print('LOGGING LOSSES: ', {(x, calculated_losses[x].numpy()) for x in calculated_losses})
 		
 		# Losses are returned as weighted sum of individual losses
 		total_loss = calculated_losses['loss_ce'] + calculated_losses['loss_dice'] + calculated_losses['loss_focal']
@@ -200,7 +199,7 @@ class PanopticTask(base_task.Task):
 				)
 
 			self.panoptic_inference = PanopticInference(
-				num_classes=self._task_config.model.num_classes+1, 
+				num_classes=self._task_config.model.num_classes, 
 				background_class_id=pq_config.ignored_label
 			)
 
@@ -227,17 +226,18 @@ class PanopticTask(base_task.Task):
 		with tf.GradientTape() as tape:
 			if os.environ.get('PRINT_OUTPUTS') == 'True':
 				print('------------------------------')
-				print('Starting forward pass')
+				print('LOGGING STEP: Starting forward pass')
 			outputs = model(features, training=True)
 
 			if os.environ.get('PRINT_OUTPUTS') == 'True':
-				print('Starting losses')
-				print(f'DEEP_SUPERVISION: {model._deep_supervision}')
+				print('LOGGING STEP: Starting losses')
+				print(f'LOGGING STEP: DEEP_SUPERVISION: {model._deep_supervision}')
 			total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels,  aux_outputs=model._deep_supervision)
 			scaled_loss = total_loss
 			
 			if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
 				total_loss = optimizer.get_scaled_loss(scaled_loss)
+				
 		tvars = model.trainable_variables	
 		grads = tape.gradient(scaled_loss,tvars)
 	
@@ -251,7 +251,7 @@ class PanopticTask(base_task.Task):
 			unique_elements = []
 			for i in range(pred_labels.shape[0]):
 					unique_elements.append(pred_labels[i, 0, 0].numpy())
-			print('Pred Labels: ', unique_elements)
+			print('LOGGING STEP: Pred Labels: ', unique_elements)
 		
 		# # Multiply for logging.
 		# # Since we expect the gradient replica sum to happen in the optimizer,
@@ -275,8 +275,8 @@ class PanopticTask(base_task.Task):
 				m.update_state(all_losses[m.name])
 
 		if os.environ.get('PRINT_OUTPUTS') == 'True':
-			print('Finished forward pass')
-			print('------------------------------')
+			print('LOGGING STEP: Finished forward pass')
+			print('LOGGING STEP: ------------------------------')
 		
 		return logs
 		
@@ -292,21 +292,25 @@ class PanopticTask(base_task.Task):
 		if deep_supervision:
 			pred_binary_masks = pred_binary_masks[-1]
 			pred_labels = pred_labels[-1]
+
+		if os.environ.get('PRINT_OUTPUTS') == 'True':
+			print(f"LOGGING STEP: Pred_Binary_Masks: {pred_binary_masks.shape} || Pred_Labels: {pred_labels.shape}")
+
 		ouput_instance_mask, output_category_mask = self.panoptic_inference(pred_labels, pred_binary_masks, image_shapes)
 		return ouput_instance_mask, output_category_mask
 
 	def validation_step(self, inputs, model, metrics=None):
 		if os.environ.get('PRINT_OUTPUTS') == 'True':
-			print('------------------------------')
-			print('Starting forward pass')
+			print('LOGGING STEP: ------------------------------')
+			print('LOGGING STEP: Starting forward pass')
 		
 		features, labels = inputs
 
 		outputs = model(features, training=False)
 
 		if os.environ.get('PRINT_OUTPUTS') == 'True':
-			print('Starting losses')
-			print(f'DEEP_SUPERVISION: {model._deep_supervision}')
+			print('LOGGING STEP: Starting losses')
+			print(f'LOGGING STEP: DEEP_SUPERVISION: {model._deep_supervision}')
 
 		total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(output=outputs, labels=labels, aux_outputs=model._deep_supervision)
 
@@ -329,7 +333,7 @@ class PanopticTask(base_task.Task):
 			unique_elements = []
 			for i in range(pred_labels.shape[0]):
 					unique_elements.append(pred_labels[i, 0, 0].numpy())
-			print('Pred Labels: ', unique_elements)
+			print('LOGGING STEP: Pred Labels: ', unique_elements)
 
 		
 		pq_metric_labels = {    
@@ -348,7 +352,7 @@ class PanopticTask(base_task.Task):
 		}
 
 		if os.environ.get('PRINT_OUTPUTS') == 'True':
-			print('Starting PQ Metric Logging')
+			print('LOGGING STEP: Starting PQ Metric Logging')
 
 		results = self._generate_panoptic_metrics(pq_metric_labels, pq_metric_outputs)
 
@@ -360,12 +364,15 @@ class PanopticTask(base_task.Task):
 				m.update_state(all_losses[m.name])
 
 		if os.environ.get('PRINT_OUTPUTS') == 'True':
-			print('Finished forward pass')
-			print('LOGS: ', logs)
-			print('METRICS: ', metrics)
-			print('------------------------------')
+			print('LOGGING STEP: Finished forward pass')
+			print('LOGGING STEP: LOGS: ', logs)
+			print('LOGGING STEP: METRICS: ', metrics)
+			print('LOGGING STEP: ------------------------------')
 
 		self.DATA_IDX += 1
+
+		exit()
+
 		if self.DATA_IDX > 5: 
 			exit() 
 		
@@ -394,7 +401,7 @@ class PanopticTask(base_task.Task):
 			results = self.panoptic_quality_metric.result(_get_original_is_thing())
 
 		if os.environ.get('PRINT_OUTPUTS') == 'True':
-			print('PQ Metrics: ', results)
+			print('LOGGING PQ: PQ Metrics: ', results)
 		
 		return self.reduce_aggregated_results(results)
 
