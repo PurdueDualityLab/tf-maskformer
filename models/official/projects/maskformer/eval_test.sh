@@ -19,7 +19,6 @@ export IMG_SIZE=640
 export NO_OBJ_CLS_WEIGHT=0.01
 
 export DEEP_SUPERVISION=True
-export ON_CPU=True
 export PRINT_OUTPUTS=True
 
 export OVERRIDES="runtime.distribution_strategy=one_device,runtime.mixed_precision_dtype=float32,\

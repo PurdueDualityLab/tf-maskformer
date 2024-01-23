@@ -279,6 +279,10 @@ class PanopticTask(base_task.Task):
 			'cls_loss': cls_loss,
 			'focal_loss': focal_loss,
 			'dice_loss': dice_loss,}
+
+		with open('/depot/davisjam/data/akshath/MaskFormer_vishal/tf-maskformer/models/official/projects/maskformer/pretrained_ckpts/log.txt', 'a') as t: 
+			t.write(str(all_losses))
+			t.write('\n-----------------\n')
 		
 		if metrics:
 			for m in metrics:
@@ -379,13 +383,6 @@ class PanopticTask(base_task.Task):
 			print('LOGGING STEP: LOGS: ', logs)
 			print('LOGGING METRICS: ', {m.result().numpy() for m in metrics})
 			print('LOGGING STEP: ------------------------------')
-
-		self.DATA_IDX += 1
-
-		exit()
-
-		if self.DATA_IDX > 5: 
-			exit() 
 		
 		return logs
 
