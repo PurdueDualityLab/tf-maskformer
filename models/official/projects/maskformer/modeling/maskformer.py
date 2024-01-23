@@ -141,7 +141,7 @@ class MaskFormer(tf.keras.Model):
 		backbone_feature_maps = self._backbone(image)
 		backbone_feature_maps_procesed = self.process_feature_maps(backbone_feature_maps)
 		if os.environ.get('PRINT_OUTPUTS') == 'True':
-			print(f"LOGGING STEP: Backbone Feature maps: {type(backbone_feature_maps_procesed)} | {backbone_feature_maps_procesed.keys()}")
+			print(f"LOGGING STEP: Backbone Feature maps: {type(backbone_feature_maps_procesed)} | {backbone_feature_maps_procesed.keys()}, | {[x.shape for x in backbone_feature_maps_procesed.values()]}")
 		mask_features, transformer_enc_feat = self.pixel_decoder(backbone_feature_maps_procesed, image)
 		if os.environ.get('PRINT_OUTPUTS') == 'True':
 			print(f"LOGGING STEP: Mask Features: {type(mask_features)}, {mask_features.shape}")

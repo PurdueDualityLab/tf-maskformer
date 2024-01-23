@@ -1,6 +1,7 @@
 import os
 from absl import logging
 import tensorflow as tf
+import pickle
 
 from official.core import base_task
 from official.core import task_factory
@@ -135,6 +136,15 @@ class PanopticTask(base_task.Task):
 
 		targets = labels
 
+		
+		# with open('/depot/davisjam/data/akshath/MaskFormer_vishal/tf-maskformer/models/official/projects/maskformer/tasks/outputs.pickle', 'rb') as handle:
+		# 	outputs = pickle.load(handle)
+	
+
+		# with open('/depot/davisjam/data/akshath/MaskFormer_vishal/tf-maskformer/models/official/projects/maskformer/tasks/targets.pickle', 'rb') as handle:
+		# 	targets = pickle.load(handle)
+
+
 		matcher = hungarian_matching
 
 		no_object_weight = self._task_config.losses.background_cls_weight
@@ -237,7 +247,7 @@ class PanopticTask(base_task.Task):
 			
 			if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
 				total_loss = optimizer.get_scaled_loss(scaled_loss)
-				
+
 		tvars = model.trainable_variables	
 		grads = tape.gradient(scaled_loss,tvars)
 	
@@ -276,6 +286,7 @@ class PanopticTask(base_task.Task):
 
 		if os.environ.get('PRINT_OUTPUTS') == 'True':
 			print('LOGGING STEP: Finished forward pass')
+			print('LOGGING METRICs: ', {m.result().numpy() for m in metrics})
 			print('LOGGING STEP: ------------------------------')
 		
 		return logs
@@ -366,7 +377,7 @@ class PanopticTask(base_task.Task):
 		if os.environ.get('PRINT_OUTPUTS') == 'True':
 			print('LOGGING STEP: Finished forward pass')
 			print('LOGGING STEP: LOGS: ', logs)
-			print('LOGGING STEP: METRICS: ', metrics)
+			print('LOGGING METRICS: ', {m.result().numpy() for m in metrics})
 			print('LOGGING STEP: ------------------------------')
 
 		self.DATA_IDX += 1

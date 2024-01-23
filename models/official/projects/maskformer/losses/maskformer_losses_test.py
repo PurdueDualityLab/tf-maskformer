@@ -99,8 +99,8 @@ class LossTest(tf.test.TestCase, parameterized.TestCase):
         target_masks_2_reshaped = tf.transpose(target_masks_2, [2,0,1])
 
         if USE_PAD_FIXED_SIZE:
-            target_masks_1_padded = preprocess_ops.clip_or_pad_to_fixed_size(target_masks_1_reshaped, 100, 0)
-            target_masks_2_padded = preprocess_ops.clip_or_pad_to_fixed_size(target_masks_2_reshaped, 100, 0)
+            target_masks_1_padded = preprocess_ops.clip_or_pad_to_fixed_size(target_masks_1_reshaped, 100, 133)
+            target_masks_2_padded = preprocess_ops.clip_or_pad_to_fixed_size(target_masks_2_reshaped, 100, 133)
         else:
             
             mask_list_1_padded = tf.TensorArray(tf.float32, size=100)

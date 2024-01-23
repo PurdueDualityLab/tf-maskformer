@@ -229,14 +229,13 @@ class Loss:
         if os.environ.get('PRINT_OUTPUTS') == 'True':
             print(F'LOGGING LOSSES: Outputs without aux: {[(k, v.shape) for k, v in outputs_without_aux.items()]}')
 
-        # NOTE : Change shape of pred and target masks to [batch_size, num_queries, h, w]
         outputs_without_aux["pred_masks"] = tf.transpose(outputs["pred_masks"], perm=[0,3,1,2])
         y_true["individual_masks"] = tf.squeeze(y_true["individual_masks"], axis=-1)
         indices = self.memory_efficient_matcher(outputs_without_aux, y_true) # (batchsize, num_queries, num_queries)
 
         if os.environ.get('PRINT_OUTPUTS') == 'True':
             print(F'LOGGING LOSSES: Indices from matcher: {type(indices), indices.shape}')
-            
+
         losses = {}
 
         outputs["pred_masks"] = tf.transpose(outputs["pred_masks"], perm=[0,3,1,2])
@@ -247,25 +246,25 @@ class Loss:
         losses.update({"loss_ce": self.cost_class*cls_loss_final,
                     "loss_focal": self.cost_focal*focal_loss_final,
                     "loss_dice": self.cost_dice*dice_loss_final})
-
         
-
-        print(F'LOGGING LOSSES: Aux Outputs: {[(x["pred_masks"].shape, x["pred_logits"].shape) for x in outputs["aux_outputs"]]}')
-
         if "aux_outputs" in outputs and outputs["aux_outputs"] is not None:
             for i, aux_outputs in enumerate(outputs["aux_outputs"]):
+            
+                # Not needed when testing with PyTorch outputs 
                 aux_outputs["pred_masks"] = tf.transpose(aux_outputs["pred_masks"], perm=[0,3,1,2])
                 indices = self.memory_efficient_matcher(aux_outputs, y_true)
-		        
-                if os.environ.get('PRINT_OUTPUTS') == 'True':
-                    print(F'LOGGING LOSSES: Indices from matcher: {type(indices)}')
 
-                # for loss in self.losses:
+                if os.environ.get('PRINT_OUTPUTS') == 'True':
+                    print(F'LOGGING LOSSES: Indices from matcher: {type(indices), indices.shape}')
+
+                
                 cls_loss_, focal_loss_, dice_loss_ = self.get_loss(aux_outputs, y_true, indices)
                 
                 l_dict = {"loss_ce" + f"_{i}": self.cost_class * cls_loss_,
                            "loss_focal" + f"_{i}": self.cost_focal *focal_loss_,
                            "loss_dice" + f"_{i}": self.cost_dice * dice_loss_}
+
                 losses.update(l_dict)
+        
         return losses
     
