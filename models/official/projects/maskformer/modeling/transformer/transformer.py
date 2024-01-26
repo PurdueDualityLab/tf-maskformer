@@ -574,7 +574,6 @@ class TransformerDecoder(tf.keras.layers.Layer):
       ]
       # Gets the cache for decoding.
      
-      
       if cache is None:
         output_tensor, _ = self.decoder_layers[layer_idx](transformer_inputs)
       else:
@@ -583,8 +582,10 @@ class TransformerDecoder(tf.keras.layers.Layer):
             transformer_inputs,
             cache=cache[cache_layer_idx],
             decode_loop_step=decode_loop_step)
+    
       if return_all_decoder_outputs:
         decoder_outputs.append(self.output_normalization(output_tensor))
+
 
     if return_all_decoder_outputs:
       return decoder_outputs

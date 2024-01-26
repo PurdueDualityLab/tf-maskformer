@@ -259,8 +259,12 @@ class PanopticTask(base_task.Task):
 			probs = tf.keras.activations.softmax(outputs["class_prob_predictions"], axis=-1)
 			pred_labels = tf.argmax(probs, axis=-1)
 			unique_elements = []
-			for i in range(pred_labels.shape[0]):
-					unique_elements.append(pred_labels[i, 0, 0].numpy())
+			if model._deep_supervision:
+				for i in range(pred_labels.shape[0]):
+					unique_elements += [np.unique(pred_labels[i, 0].numpy())]
+			else: 
+				for i in range(pred_labels.shape[0]):
+					unique_elements += [np.unique(pred_labels[i].numpy())]
 			print('LOGGING STEP: Pred Labels: ', unique_elements)
 		
 		# # Multiply for logging.
@@ -280,7 +284,7 @@ class PanopticTask(base_task.Task):
 			'focal_loss': focal_loss,
 			'dice_loss': dice_loss,}
 
-		with open('/depot/davisjam/data/akshath/MaskFormer_vishal/tf-maskformer/models/official/projects/maskformer/pretrained_ckpts/log.txt', 'a') as t: 
+		with open(f'/depot/davisjam/data/akshath/MaskFormer_vishal/tf-maskformer/models/official/projects/maskformer/pretrained_ckpts/log_{str(os.environ.get("DEEP_SUPERVISION"))}_{str(os.environ.get("TRAIN_BATCH_SIZE"))}.txt', 'a') as t: 
 			t.write(str(all_losses))
 			t.write('\n-----------------\n')
 		

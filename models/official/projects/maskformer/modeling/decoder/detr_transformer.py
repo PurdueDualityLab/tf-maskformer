@@ -44,13 +44,13 @@ class DETRTransformer(tf.keras.layers.Layer):
     sources = inputs["inputs"]
     targets = inputs["targets"]
     pos_embed = inputs["pos_embed"]
-    
+
     memory = sources
     target_shape = tf_utils.get_shape_list(targets)
     cross_attention_mask = None
     target_shape = tf.shape(targets)
     self_attention_mask = tf.ones([target_shape[0], 1, target_shape[1], target_shape[1]],dtype=tf.float32)
-    
+
     decoded = self._decoder(
         tf.zeros_like(targets),
         memory,

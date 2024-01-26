@@ -37,7 +37,7 @@ class MaskFormer(tf.keras.Model):
 			   batch_size=1,
 			   bfloat16=False,
 			   which_pixel_decoder='fpn',
-				 deep_supervision=True,
+				 deep_supervision=False,
 			   **kwargs):
 		super(MaskFormer, self).__init__(**kwargs)
 		self._backbone = backbone
@@ -145,9 +145,16 @@ class MaskFormer(tf.keras.Model):
 		mask_features, transformer_enc_feat = self.pixel_decoder(backbone_feature_maps_procesed, image)
 		if os.environ.get('PRINT_OUTPUTS') == 'True':
 			print(f"LOGGING STEP: Mask Features: {type(mask_features)}, {mask_features.shape}")
+			print(f"LOGGING STEP: Mask Features: {type(transformer_enc_feat)}, {transformer_enc_feat.shape}")
+
 		transformer_features = self.transformer({"features": transformer_enc_feat})
+
 		if os.environ.get('PRINT_OUTPUTS') == 'True':
-			print(f"LOGGING STEP: Transformer Features: {type(transformer_features)}, {[x.shape for x in transformer_features]}")
+			if self._deep_supervision:
+				print(f"LOGGING STEP: Transformer Features: {type(transformer_features)}, {[x.shape for x in transformer_features]}")
+			else: 
+				print(f"LOGGING STEP: Transformer Features: {type(transformer_features)}, {transformer_features.shape}")
+		
 		if self._deep_supervision:
 			transformer_features = tf.convert_to_tensor(transformer_features)
 			if os.environ.get('PRINT_OUTPUTS') == 'True':
