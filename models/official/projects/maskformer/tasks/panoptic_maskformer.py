@@ -126,6 +126,12 @@ class PanopticTask(base_task.Task):
 					{"pred_logits": a, "pred_masks": b}
 					for a, b in zip(output["class_prob_predictions"][:-1], output["mask_prob_predictions"][:-1])
 				]
+			
+			# formatted_aux_output = []
+
+			# for i in range(len(output["class_prob_predictions"][:-1])):
+			# 	outputs["pred_logits_"+str(i)] = output["class_prob_predictions"][i]
+			# 	outputs["pred_masks_"+str(i)] = output["mask_prob_predictions"][i]
 
 			outputs.update({"aux_outputs": formatted_aux_output})
 
@@ -284,9 +290,9 @@ class PanopticTask(base_task.Task):
 			'focal_loss': focal_loss,
 			'dice_loss': dice_loss,}
 
-		with open(f'/depot/davisjam/data/akshath/MaskFormer_vishal/tf-maskformer/models/official/projects/maskformer/pretrained_ckpts/log_{str(os.environ.get("DEEP_SUPERVISION"))}_{str(os.environ.get("TRAIN_BATCH_SIZE"))}.txt', 'a') as t: 
-			t.write(str(all_losses))
-			t.write('\n-----------------\n')
+		# with open(f'/depot/davisjam/data/akshath/MaskFormer_vishal/tf-maskformer/models/official/projects/maskformer/pretrained_ckpts/log_{str(os.environ.get("DEEP_SUPERVISION"))}_{str(os.environ.get("TRAIN_BATCH_SIZE"))}.txt', 'a') as t: 
+		# 	t.write(str(all_losses))
+		# 	t.write('\n-----------------\n')
 		
 		if metrics:
 			for m in metrics:
