@@ -263,7 +263,8 @@ class Loss:
                 l_dict = {"loss_ce" + f"_{i}": self.cost_class * cls_loss_,
                            "loss_focal" + f"_{i}": self.cost_focal *focal_loss_,
                            "loss_dice" + f"_{i}": self.cost_dice * dice_loss_}
-
+                        
+                
                 losses.update(l_dict)
         
         return losses

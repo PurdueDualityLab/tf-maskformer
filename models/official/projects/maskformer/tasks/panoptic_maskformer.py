@@ -127,12 +127,6 @@ class PanopticTask(base_task.Task):
 					for a, b in zip(output["class_prob_predictions"][:-1], output["mask_prob_predictions"][:-1])
 				]
 			
-			# formatted_aux_output = []
-
-			# for i in range(len(output["class_prob_predictions"][:-1])):
-			# 	outputs["pred_logits_"+str(i)] = output["class_prob_predictions"][i]
-			# 	outputs["pred_masks_"+str(i)] = output["mask_prob_predictions"][i]
-
 			outputs.update({"aux_outputs": formatted_aux_output})
 
 		if os.environ.get('PRINT_OUTPUTS') == 'True':
@@ -173,15 +167,21 @@ class PanopticTask(base_task.Task):
 		weighted_dice = calculated_losses['loss_dice']
 		weighted_focal = calculated_losses['loss_focal']
 
-		aux_outputs = output.get('aux_outputs')
+		aux_outputs = outputs.get('aux_outputs')
+
+		# with open(f'/depot/davisjam/data/akshath/MaskFormer_vishal/tf-maskformer/models/official/projects/maskformer/pretrained_ckpts/log_aux_{str(os.environ.get("DEEP_SUPERVISION"))}_{str(os.environ.get("TRAIN_BATCH_SIZE"))}.txt', 'a') as t: 
+		# 	t.write(str(calculated_losses))
+		# 	t.write('\n')
 	
 		if aux_outputs is not None:
 			total_aux_loss = 0.0
 			for i in range(len(aux_outputs)): 
 				total_aux_loss += calculated_losses['loss_ce_'+str(i)] + calculated_losses['loss_dice_'+str(i)] + calculated_losses['loss_focal_'+str(i)]
+			print('total_loss: ', total_loss)
 			total_loss = total_loss + total_aux_loss
-
-		return total_loss, weighted_ce, weighted_focal, weighted_dice
+			print('total_loss: ', total_loss)
+			
+		return 	, weighted_ce, weighted_focal, weighted_dice
 		
 	def build_metrics(self, training=True):
 		"""Builds panoptic metrics."""
@@ -290,10 +290,10 @@ class PanopticTask(base_task.Task):
 			'focal_loss': focal_loss,
 			'dice_loss': dice_loss,}
 
-		# with open(f'/depot/davisjam/data/akshath/MaskFormer_vishal/tf-maskformer/models/official/projects/maskformer/pretrained_ckpts/log_{str(os.environ.get("DEEP_SUPERVISION"))}_{str(os.environ.get("TRAIN_BATCH_SIZE"))}.txt', 'a') as t: 
+		# with open(f'/depot/davisjam/data/akshath/MaskFormer_vishal/tf-maskformer/models/official/projects/maskformer/pretrained_ckpts/log_total_{str(os.environ.get("DEEP_SUPERVISION"))}_{str(os.environ.get("TRAIN_BATCH_SIZE"))}.txt', 'a') as t: 
 		# 	t.write(str(all_losses))
-		# 	t.write('\n-----------------\n')
-		
+		# 	t.write('\n')
+
 		if metrics:
 			for m in metrics:
 				m.update_state(all_losses[m.name])
