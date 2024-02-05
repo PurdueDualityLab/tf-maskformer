@@ -122,10 +122,8 @@ class PanopticTask(base_task.Task):
 			outputs["pred_masks"] = output["mask_prob_predictions"][-1]
 			outputs["pred_logits"] = output["class_prob_predictions"][-1]
 
-			formatted_aux_output = [
-					{"pred_logits": a, "pred_masks": b}
-					for a, b in zip(output["class_prob_predictions"][:-1], output["mask_prob_predictions"][:-1])
-				]
+			for i in range(len(output["class_prob_predictions"][:-1])):
+				formatted_aux_output += [{"pred_logits": output["class_prob_predictions"][i], "pred_masks": output["mask_prob_predictions"][i]}]
 			
 			outputs.update({"aux_outputs": formatted_aux_output})
 

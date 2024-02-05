@@ -21,3 +21,5 @@ losses/tensors/*.pickle
 
 model_dir_2/
 model_dir_multi_scale_2/
+
+__pycache__/
