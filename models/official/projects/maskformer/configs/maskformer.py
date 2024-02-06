@@ -1,4 +1,4 @@
-# Copyright 2022 The TensorFlow Authors. All Rights Reserved.
+# Copyright 2024 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,26 +23,27 @@ from official.core import exp_factory
 from official.modeling import hyperparams
 from official.vision.configs import backbones
 from official.vision.configs import common
-from official.projects.maskformer import optimization
+from official.projects.maskformer.utils import optimization
 
 
 @dataclasses.dataclass
 class Parser(hyperparams.Config):
-    """Config definitions for parser"""
-    output_size: List[int] = None
-    min_scale: float = 0.3
-    aspect_ratio_range: List[float] = (0.5, 2.0)
-    min_overlap_params: List[float] = (0.0, 1.4, 0.2, 0.1)
-    max_retry: int = 50
-    pad_output: bool = False
-    resize_eval_groundtruth: bool = True
-    groundtruth_padded_size: List[int] = (1280, 1280)
-    ignore_label: int = 0
-    aug_rand_hflip: bool = True
-    aug_scale_min: float = 1.0
-    aug_scale_max: float = 1.0
-    dtype: str = 'float32'
-    seed: int = None
+  """Config definitions for parser"""
+  output_size: List[int] = None
+  min_scale: float = 0.3
+  aspect_ratio_range: List[float] = (0.5, 2.0)
+  min_overlap_params: List[float] = (0.0, 1.4, 0.2, 0.1)
+  max_retry: int = 50
+  pad_output: bool = False
+  resize_eval_groundtruth: bool = True
+  groundtruth_padded_size: List[int] = (1280, 1280)
+  ignore_label: int = 0
+  aug_rand_hflip: bool = True
+  aug_scale_min: float = 1.0
+  aug_scale_max: float = 1.0
+  dtype: str = 'float32'
+  seed: int = None
+
 
 @dataclasses.dataclass
 class DataConfig(cfg.DataConfig):
@@ -70,33 +71,38 @@ class Losses(hyperparams.Config):
   cost_dice = 1.0
   cost_focal = 20.0
 
+
 @dataclasses.dataclass
 class MaskFormer(hyperparams.Config):
   """MaskFormer model definations."""
   num_queries: int = 100
   hidden_size: int = 256
-  # There are 134 classes (stuff + things + no object/background) for panoptic segmentation.
-  num_classes: int = 133  
+  # There are 134 classes (stuff + things + no object/background) for
+  # panoptic segmentation.
+  num_classes: int = 133
   fpn_encoder_layers: int = 6
   detr_encoder_layers: int = 0
   num_decoder_layers: int = 6
-  which_pixel_decoder: str = 'transformer_fpn' 
+  which_pixel_decoder: str = 'transformer_fpn'
   deep_supervision: bool = False
   on_tpu: bool = False
   input_size: List[int] = dataclasses.field(default_factory=list)
   backbone: backbones.Backbone = backbones.Backbone(
-      type='resnet', resnet=backbones.ResNet(model_id=50, bn_trainable=False)) 
+      type='resnet', resnet=backbones.ResNet(model_id=50, bn_trainable=False))
   norm_activation: common.NormActivation = common.NormActivation()
   backbone_endpoint_name: str = '5'
+
 
 @dataclasses.dataclass
 class PanopticQuality(hyperparams.Config):
   """MaskFormer model pq evaluator config."""
-  num_categories: int = 133 #FIXME
-  is_thing : List[bool] = None #FIXME : Make this a list of bools for each class
+  num_categories: int = 133  # FIXME
+  # FIXME : Make this a list of bools for each class
+  is_thing: List[bool] = None
   ignored_label: int = 0
   rescale_predictions: bool = False
   max_num_instances: int = 100
+
 
 @dataclasses.dataclass
 class MaskFormerTask(cfg.TaskConfig):
@@ -110,78 +116,81 @@ class MaskFormerTask(cfg.TaskConfig):
   bfloat16: bool = False
   panoptic_quality_evaluator: PanopticQuality = PanopticQuality()
 
+
 COCO_INPUT_PATH_BASE = os.environ.get('TFRECORDS_DIR')
 COCO_TRAIN_EXAMPLES = 118287
 COCO_VAL_EXAMPLES = 5000
 SET_MODEL_BFLOAT16 = False
 SET_DATA_BFLOAT16 = True
 
+
 @exp_factory.register_config_factory('maskformer_coco_panoptic')
 def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
   """Config to get results that matches the paper."""
-  
+
   train_batch_size = int(os.environ.get('TRAIN_BATCH_SIZE'))
   eval_batch_size = int(os.environ.get('EVAL_BATCH_SIZE'))
   no_obj_cls_weight = float(os.environ.get('NO_OBJ_CLS_WEIGHT'))
   deep_supervision = bool(int(os.environ.get('DEEP_SUPERVISION')))
   on_tpu = bool(int(os.environ.get('ON_TPU')))
-  ckpt_interval = (COCO_TRAIN_EXAMPLES // train_batch_size) * 10 # Don't write ckpts frequently. Slows down the training
+  # Don't write ckpts frequently. Slows down the training
+  ckpt_interval = (COCO_TRAIN_EXAMPLES // train_batch_size) * 10
   image_size = int(os.environ.get('IMG_SIZE'))
 
   steps_per_epoch = COCO_TRAIN_EXAMPLES // train_batch_size
   train_steps = 300 * steps_per_epoch  # 300 epochs
   decay_at = train_steps - 100 * steps_per_epoch  # 200 epochs
   config = cfg.ExperimentConfig(
-  task = MaskFormerTask(
+      task=MaskFormerTask(
           init_checkpoint="",
           init_checkpoint_modules='backbone',
-          bfloat16 = SET_MODEL_BFLOAT16,
-          model = MaskFormer(
-              input_size=[image_size,image_size,3],
+          bfloat16=SET_MODEL_BFLOAT16,
+          model=MaskFormer(
+              input_size=[image_size, image_size, 3],
               norm_activation=common.NormActivation(),
               which_pixel_decoder='transformer_fpn',
               deep_supervision=deep_supervision,
               on_tpu=on_tpu,
-              num_classes=133,), # Extra class will be added automatically for background
-          losses = Losses(
-            background_cls_weight=no_obj_cls_weight,
+              num_classes=133,),  # Extra class will be added automatically for background
+          losses=Losses(
+              background_cls_weight=no_obj_cls_weight,
           ),
-          train_data = DataConfig(
+          train_data=DataConfig(
               input_path=os.path.join(COCO_INPUT_PATH_BASE, 'train*'),
               is_training=True,
               global_batch_size=train_batch_size,
               shuffle_buffer_size=1000,
-              dtype = 'bfloat16' if SET_DATA_BFLOAT16 else 'float32',
-              parser = Parser(
-                    output_size = [image_size,image_size],
-                    min_scale = 0.3,
-                    aspect_ratio_range = (0.5, 2.0),
-                    min_overlap_params = (0.0, 1.4, 0.2, 0.1),
-                    max_retry = 50,
-                    pad_output = True,
-                    resize_eval_groundtruth = True,
-                    groundtruth_padded_size = [image_size,image_size],
-                    ignore_label = 0,
-                    aug_rand_hflip = True,
-                    aug_scale_min = 1.0,
-                    aug_scale_max = 1.0,
-                    dtype = 'bfloat16' if SET_DATA_BFLOAT16 else 'float32',
-                    seed = 2045,
-                )
+              dtype='bfloat16' if SET_DATA_BFLOAT16 else 'float32',
+              parser=Parser(
+                  output_size=[image_size, image_size],
+                  min_scale=0.3,
+                  aspect_ratio_range=(0.5, 2.0),
+                  min_overlap_params=(0.0, 1.4, 0.2, 0.1),
+                  max_retry=50,
+                  pad_output=True,
+                  resize_eval_groundtruth=True,
+                  groundtruth_padded_size=[image_size, image_size],
+                  ignore_label=0,
+                  aug_rand_hflip=True,
+                  aug_scale_min=1.0,
+                  aug_scale_max=1.0,
+                  dtype='bfloat16' if SET_DATA_BFLOAT16 else 'float32',
+                  seed=2045,
+              )
           ),
-          validation_data = DataConfig(
-              input_path = os.path.join(COCO_INPUT_PATH_BASE, 'val*'),
-              is_training = False,
-              global_batch_size = eval_batch_size,
-              drop_remainder = False,
-              parser = Parser(
-                    output_size = [image_size,image_size],
-                    pad_output = True,
-                    seed = 2045,
-                    ignore_label = 0,
-                    dtype = 'bfloat16' if SET_DATA_BFLOAT16 else 'float32',
-                )
-              
+          validation_data=DataConfig(
+              input_path=os.path.join(COCO_INPUT_PATH_BASE, 'val*'),
+              is_training=False,
+              global_batch_size=eval_batch_size,
+              drop_remainder=False,
+              parser=Parser(
+                  output_size=[image_size, image_size],
+                  pad_output=True,
+                  seed=2045,
+                  ignore_label=0,
+                  dtype='bfloat16' if SET_DATA_BFLOAT16 else 'float32',
+              )
+
           )),
       trainer=cfg.TrainerConfig(
           train_steps=train_steps,
@@ -189,7 +198,9 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
           steps_per_loop=steps_per_epoch,
           summary_interval=ckpt_interval,
           checkpoint_interval=ckpt_interval,
-          validation_interval=5*steps_per_epoch, # run validation after every epoch (not efficient, but we want to see the results)sss
+          validation_interval=5 * steps_per_epoch,
+          # run validation after every epoch (not efficient, but we want to see
+          # the results)sss
           best_checkpoint_export_subdir='best_ckpt',
           max_to_keep=1,
           # TODO: Metric not implemented yet
@@ -206,10 +217,10 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
                   'type': 'stepwise',
                   'stepwise': {
                       'boundaries': [decay_at],
-                      'values': [float(os.environ.get('BASE_LR')), float(os.environ.get('BASE_LR'))/10]
+                      'values': [float(os.environ.get('BASE_LR')), float(os.environ.get('BASE_LR')) / 10] # pylint: disable=line-too-long
                   }
               },
-              
+
           })),
       restrictions=[
           'task.train_data.is_training != None',

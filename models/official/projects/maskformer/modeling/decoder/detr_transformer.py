@@ -1,7 +1,21 @@
-import math
+# Copyright 2024 The TensorFlow Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import tensorflow as tf
 from official.projects.maskformer.modeling.transformer import transformer
 from official.modeling import tf_utils
+
 
 class DETRTransformer(tf.keras.layers.Layer):
   """Encoder and Decoder of DETR."""
@@ -49,7 +63,8 @@ class DETRTransformer(tf.keras.layers.Layer):
     target_shape = tf_utils.get_shape_list(targets)
     cross_attention_mask = None
     target_shape = tf.shape(targets)
-    self_attention_mask = tf.ones([target_shape[0], 1, target_shape[1], target_shape[1]],dtype=tf.float32)
+    self_attention_mask = tf.ones(
+      [target_shape[0], 1, target_shape[1], target_shape[1]], dtype=tf.float32)
 
     decoded = self._decoder(
         tf.zeros_like(targets),
@@ -61,5 +76,5 @@ class DETRTransformer(tf.keras.layers.Layer):
         return_all_decoder_outputs=self._deep_supervision,
         input_pos_embed=targets,
         memory_pos_embed=pos_embed,)
-    
+
     return decoded

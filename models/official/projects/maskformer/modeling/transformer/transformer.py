@@ -1,4 +1,4 @@
-# Copyright 2023 The TensorFlow Authors. All Rights Reserved.
+# Copyright 2024 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ class TransformerEncoder(tf.keras.layers.Layer):
   def build(self, input_shape):
     """Implements build() for the layer."""
     self.encoder_layers = []
-    
+
     for i in range(self.num_layers):
       self.encoder_layers.append(
           TransformerEncoderBlock(
@@ -96,10 +96,10 @@ class TransformerEncoder(tf.keras.layers.Layer):
               attention_initializer=tf_utils.clone_initializer(
                   models.seq2seq_transformer.attention_initializer(
                       input_shape[2])),
-              kernel_initializer = 'glorot_uniform',
+              kernel_initializer='glorot_uniform',
               bias_initializer='glorot_uniform',
               name=("layer_%d" % i)))
-      
+
     self.output_normalization = tf.keras.layers.LayerNormalization(
         epsilon=self._norm_epsilon, dtype="float32")
     super(TransformerEncoder, self).build(input_shape)
@@ -135,7 +135,7 @@ class TransformerEncoder(tf.keras.layers.Layer):
         `(batch_size, input_length, hidden_size)`.
     """
     for layer_idx in range(self.num_layers):
-      
+
       encoder_inputs = self.encoder_layers[layer_idx](
           [encoder_inputs, attention_mask, pos_embed])
 
@@ -230,14 +230,15 @@ class TransformerEncoderBlock(tf.keras.layers.Layer):
     self._bias_initializer = tf.keras.initializers.get(bias_initializer)
     self._kernel_regularizer = tf.keras.regularizers.get(kernel_regularizer)
     self._bias_regularizer = tf.keras.regularizers.get(bias_regularizer)
-    self._activity_regularizer = tf.keras.regularizers.get(activity_regularizer)
+    self._activity_regularizer = tf.keras.regularizers.get(
+        activity_regularizer)
     self._kernel_constraint = tf.keras.constraints.get(kernel_constraint)
     self._bias_constraint = tf.keras.constraints.get(bias_constraint)
     self._use_bias = use_bias
     self._norm_first = norm_first
     self._norm_epsilon = norm_epsilon
     self._inner_dropout = inner_dropout
-    
+
     if attention_initializer:
       self._attention_initializer = tf.keras.initializers.get(
           attention_initializer)
@@ -280,7 +281,8 @@ class TransformerEncoderBlock(tf.keras.layers.Layer):
         attention_axes=self._attention_axes,
         name="self_attention",
         **common_kwargs)
-    self._attention_dropout = tf.keras.layers.Dropout(rate=self._output_dropout)
+    self._attention_dropout = tf.keras.layers.Dropout(
+        rate=self._output_dropout)
     # Use float32 in layernorm for numeric stability.
     # It is probably safe in mixed_float16, but we haven't validated this yet.
     self._attention_layer_norm = (
@@ -291,9 +293,12 @@ class TransformerEncoderBlock(tf.keras.layers.Layer):
             dtype=tf.float32))
     self._intermediate_dense = tf.keras.layers.EinsumDense(
         einsum_equation,
-        output_shape=(None, self._inner_dim),
+        output_shape=(
+            None,
+            self._inner_dim),
         bias_axes="d",
-        kernel_initializer=tf_utils.clone_initializer(self._kernel_initializer),
+        kernel_initializer=tf_utils.clone_initializer(
+            self._kernel_initializer),
         name="intermediate",
         **common_kwargs)
     policy = tf.keras.mixed_precision.global_policy()
@@ -308,10 +313,13 @@ class TransformerEncoderBlock(tf.keras.layers.Layer):
         rate=self._inner_dropout)
     self._output_dense = tf.keras.layers.EinsumDense(
         einsum_equation,
-        output_shape=(None, hidden_size),
+        output_shape=(
+            None,
+            hidden_size),
         bias_axes="d",
         name="output",
-        kernel_initializer=tf_utils.clone_initializer(self._kernel_initializer),
+        kernel_initializer=tf_utils.clone_initializer(
+            self._kernel_initializer),
         **common_kwargs)
     self._output_dropout = tf.keras.layers.Dropout(rate=self._output_dropout)
     # Use float32 in layernorm for numeric stability.
@@ -379,7 +387,7 @@ class TransformerEncoderBlock(tf.keras.layers.Layer):
     input_tensor, attention_mask, pos_embed = inputs
 
     key_value = None
-    
+
     if self._output_range:
       if self._norm_first:
         source_tensor = input_tensor[:, 0:self._output_range, :]
@@ -396,7 +404,7 @@ class TransformerEncoderBlock(tf.keras.layers.Layer):
         if key_value is not None:
           key_value = self._attention_layer_norm(key_value)
       target_tensor = input_tensor
-    
+
     if key_value is None:
       key_value = input_tensor
     attention_output = self._attention_layer(
@@ -413,7 +421,7 @@ class TransformerEncoderBlock(tf.keras.layers.Layer):
     if self._norm_first:
       source_attention_output = attention_output
       attention_output = self._output_layer_norm(attention_output)
-      
+
     inner_output = self._intermediate_dense(attention_output)
     inner_output = self._intermediate_activation_layer(inner_output)
     inner_output = self._inner_dropout_layer(inner_output)
@@ -500,11 +508,11 @@ class TransformerDecoder(tf.keras.layers.Layer):
               # attention_initializer=tf_utils.clone_initializer(
               #     models.seq2seq_transformer.attention_initializer(
               #         input_shape[2])),
-               #FIXME: changed attention initialization
+              # FIXME: changed attention initialization
               attention_initializer='glorot_uniform',
-              #FIXME: Adding bias initialize
+              # FIXME: Adding bias initialize
               bias_initializer='glorot_uniform',
-              kernel_initializer= 'glorot_uniform',
+              kernel_initializer='glorot_uniform',
               name=("layer_%d" % i)))
     self.output_normalization = tf.keras.layers.LayerNormalization(
         epsilon=self._norm_epsilon, dtype="float32")
@@ -573,7 +581,7 @@ class TransformerDecoder(tf.keras.layers.Layer):
           input_pos_embed, memory_pos_embed
       ]
       # Gets the cache for decoding.
-     
+
       if cache is None:
         output_tensor, _ = self.decoder_layers[layer_idx](transformer_inputs)
       else:
@@ -582,10 +590,9 @@ class TransformerDecoder(tf.keras.layers.Layer):
             transformer_inputs,
             cache=cache[cache_layer_idx],
             decode_loop_step=decode_loop_step)
-    
+
       if return_all_decoder_outputs:
         decoder_outputs.append(self.output_normalization(output_tensor))
-
 
     if return_all_decoder_outputs:
       return decoder_outputs
@@ -661,7 +668,8 @@ class TransformerDecoderBlock(tf.keras.layers.Layer):
     self._bias_initializer = tf.keras.initializers.get(bias_initializer)
     self._kernel_regularizer = tf.keras.regularizers.get(kernel_regularizer)
     self._bias_regularizer = tf.keras.regularizers.get(bias_regularizer)
-    self._activity_regularizer = tf.keras.regularizers.get(activity_regularizer)
+    self._activity_regularizer = tf.keras.regularizers.get(
+        activity_regularizer)
     self._kernel_constraint = tf.keras.constraints.get(kernel_constraint)
     self._bias_constraint = tf.keras.constraints.get(bias_constraint)
     self._use_bias = use_bias
@@ -685,7 +693,7 @@ class TransformerDecoderBlock(tf.keras.layers.Layer):
     if hidden_size % self.num_attention_heads != 0:
       raise ValueError(
           "The hidden size (%d) is not a multiple of the number of attention "
-          "heads (%d)" % (hidden_size, self.num_attention_heads))
+          "heads (%d)" % (int(hidden_size), self.num_attention_heads))
     self.attention_head_size = int(hidden_size) // self.num_attention_heads
     common_kwargs = dict(
         bias_initializer=self._bias_initializer,
@@ -705,9 +713,12 @@ class TransformerDecoderBlock(tf.keras.layers.Layer):
         **common_kwargs)
     self.self_attention_output_dense = tf.keras.layers.EinsumDense(
         "abc,cd->abd",
-        output_shape=(None, hidden_size),
+        output_shape=(
+            None,
+            hidden_size),
         bias_axes="d",
-        kernel_initializer=tf_utils.clone_initializer(self._kernel_initializer),
+        kernel_initializer=tf_utils.clone_initializer(
+            self._kernel_initializer),
         name="output",
         **common_kwargs)
     self.self_attention_dropout = tf.keras.layers.Dropout(
@@ -741,9 +752,12 @@ class TransformerDecoderBlock(tf.keras.layers.Layer):
     # Feed-forward projection.
     self.intermediate_dense = tf.keras.layers.EinsumDense(
         "abc,cd->abd",
-        output_shape=(None, self.intermediate_size),
+        output_shape=(
+            None,
+            self.intermediate_size),
         bias_axes="d",
-        kernel_initializer=tf_utils.clone_initializer(self._kernel_initializer),
+        kernel_initializer=tf_utils.clone_initializer(
+            self._kernel_initializer),
         name="intermediate",
         **common_kwargs)
     self.intermediate_activation_layer = tf.keras.layers.Activation(
@@ -752,9 +766,12 @@ class TransformerDecoderBlock(tf.keras.layers.Layer):
         rate=self._intermediate_dropout)
     self.output_dense = tf.keras.layers.EinsumDense(
         "abc,cd->abd",
-        output_shape=(None, hidden_size),
+        output_shape=(
+            None,
+            hidden_size),
         bias_axes="d",
-        kernel_initializer=tf_utils.clone_initializer(self._kernel_initializer),
+        kernel_initializer=tf_utils.clone_initializer(
+            self._kernel_initializer),
         name="output",
         **common_kwargs)
     self.output_dropout = tf.keras.layers.Dropout(rate=self.dropout_rate)
@@ -814,9 +831,9 @@ class TransformerDecoderBlock(tf.keras.layers.Layer):
     ]
 
   def call(self, inputs, cache=None, decode_loop_step=None):
-    
-    input_tensor, memory, attention_mask, self_attention_mask, input_pos_embed, memory_pos_embed = inputs
-    
+
+    input_tensor, memory, attention_mask, self_attention_mask, input_pos_embed, memory_pos_embed = inputs # pylint: disable=line-too-long
+
     source_tensor = input_tensor
     if self._norm_first:
       input_tensor = self.self_attention_layer_norm(input_tensor)
@@ -828,7 +845,7 @@ class TransformerDecoderBlock(tf.keras.layers.Layer):
         attention_mask=self_attention_mask,
         cache=cache,
         decode_loop_step=decode_loop_step)
-    
+
     self_attention_output = self.self_attention_dropout(self_attention_output)
     if self._norm_first:
       self_attention_output = source_tensor + self_attention_output
@@ -839,7 +856,7 @@ class TransformerDecoderBlock(tf.keras.layers.Layer):
       source_self_attention_output = self_attention_output
       self_attention_output = self.encdec_attention_layer_norm(
           self_attention_output)
-   
+
     cross_attn_inputs = dict(
         query=self_attention_output + tf.cast(input_pos_embed, tf.float32),
         key=memory + memory_pos_embed,
@@ -851,7 +868,7 @@ class TransformerDecoderBlock(tf.keras.layers.Layer):
       attention_output = source_self_attention_output + attention_output
     else:
       attention_output = self.encdec_attention_layer_norm(
-        self_attention_output + tf.cast(attention_output, tf.float32))
+          self_attention_output + tf.cast(attention_output, tf.float32))
     if self._norm_first:
       source_attention_output = attention_output
       attention_output = self.output_layer_norm(attention_output)
@@ -865,5 +882,6 @@ class TransformerDecoderBlock(tf.keras.layers.Layer):
     if self._norm_first:
       layer_output = source_attention_output + layer_output
     else:
-        layer_output = self.output_layer_norm(tf.cast(layer_output, tf.float32) + attention_output)
+      layer_output = self.output_layer_norm(
+          tf.cast(layer_output, tf.float32) + attention_output)
     return layer_output, cache

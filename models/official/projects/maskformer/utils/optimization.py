@@ -1,4 +1,4 @@
-# Copyright 2023 The TensorFlow Authors. All Rights Reserved.
+# Copyright 2024 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ class OptimizationConfig(optimization.OptimizationConfig):
   """
   optimizer: OptimizerConfig = OptimizerConfig()
 
+
 class _MaskformerAdamW(nlp_optimization.AdamWeightDecay):
   """Custom AdamW to support different lr scaling for backbone.
 
@@ -52,10 +53,10 @@ class _MaskformerAdamW(nlp_optimization.AdamWeightDecay):
   def _resource_apply_dense(self, grad, var, apply_state=None):
     lr_t, kwargs = self._get_lr(var.device, var.dtype.base_dtype, apply_state)
     apply_state = kwargs['apply_state']
-    
-    if 'transformer_fpn' not in var.name and 'mask_former_transformer' not in var.name and 'mlp_head' not in var.name:
+
+    if 'transformer_fpn' not in var.name and 'mask_former_transformer' not in var.name and 'mlp_head' not in var.name: # pylint: disable=line-too-long
       lr_t *= 0.1
-    
+
     decay = self._decay_weights_op(var, lr_t, apply_state)
     with tf.control_dependencies([decay]):
       var_device, var_dtype = var.device, var.dtype.base_dtype
@@ -65,8 +66,8 @@ class _MaskformerAdamW(nlp_optimization.AdamWeightDecay):
       m = self.get_slot(var, 'm')
       v = self.get_slot(var, 'v')
       lr = coefficients[
-          'lr_t'] * 0.1 if 'transformer_fpn' not in var.name and 'mask_former_transformer' not in var.name and 'mlp_head' not in var.name else coefficients['lr_t']
-      
+          'lr_t'] * 0.1 if 'transformer_fpn' not in var.name and 'mask_former_transformer' not in var.name and 'mlp_head' not in var.name else coefficients['lr_t'] # pylint: disable=line-too-long
+
       if not self.amsgrad:
         return tf.raw_ops.ResourceApplyAdam(
             var=var.handle,
@@ -95,7 +96,7 @@ class _MaskformerAdamW(nlp_optimization.AdamWeightDecay):
             epsilon=coefficients['epsilon'],
             grad=grad,
             use_locking=self._use_locking)
- 
+
 # Not sure if maskformer uses this
   def _resource_apply_sparse(self, grad, var, indices, apply_state=None):
     lr_t, kwargs = self._get_lr(var.device, var.dtype.base_dtype, apply_state)
@@ -140,8 +141,9 @@ class _MaskformerAdamW(nlp_optimization.AdamWeightDecay):
         v_hat_sqrt = tf.sqrt(v_hat_t)
         var_update = tf.compat.v1.assign_sub(
             var,
-            lr* m_t / (v_hat_sqrt + coefficients['epsilon']),
+            lr * m_t / (v_hat_sqrt + coefficients['epsilon']),
             use_locking=self._use_locking)
         return tf.group(*[var_update, m_t, v_t, v_hat_t])
+
 
 optimization.register_optimizer_cls('maskformer_adamw', _MaskformerAdamW)
