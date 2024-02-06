@@ -131,8 +131,8 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
   train_batch_size = int(os.environ.get('TRAIN_BATCH_SIZE'))
   eval_batch_size = int(os.environ.get('EVAL_BATCH_SIZE'))
   no_obj_cls_weight = float(os.environ.get('NO_OBJ_CLS_WEIGHT'))
-  deep_supervision = bool(int(os.environ.get('DEEP_SUPERVISION')))
-  on_tpu = bool(int(os.environ.get('ON_TPU')))
+  deep_supervision = bool(int(os.environ.get('DEEP_SUPERVISION'))) if os.environ.get('DEEP_SUPERVISION') else False
+  on_tpu = bool(int(os.environ.get('ON_TPU'))) if os.environ.get('ON_TPU') else False
   # Don't write ckpts frequently. Slows down the training
   ckpt_interval = (COCO_TRAIN_EXAMPLES // train_batch_size) * 10
   image_size = int(os.environ.get('IMG_SIZE'))

@@ -56,7 +56,9 @@ def main(_):
     # may race against the train job for writing the same file.
     train_utils.serialize_config(params, model_dir)
 
-  if FLAGS.tpu is None:
+  # If eval mode, run eagerly
+  # If on TPU, execute graph 
+  if not FLAGS.tpu or 'eval' in FLAGS.mode:
     tf.config.run_functions_eagerly(True)
 
   # Sets mixed_precision policy. Using 'mixed_float16' or 'mixed_bfloat16'

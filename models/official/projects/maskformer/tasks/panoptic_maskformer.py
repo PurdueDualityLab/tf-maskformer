@@ -176,10 +176,6 @@ class PanopticTask(base_task.Task):
 
     aux_outputs = outputs.get('aux_outputs')
 
-    # with open(f'/depot/davisjam/data/akshath/MaskFormer_vishal/tf-maskformer/models/official/projects/maskformer/pretrained_ckpts/log_aux_{str(os.environ.get("DEEP_SUPERVISION"))}_{str(os.environ.get("TRAIN_BATCH_SIZE"))}.txt', 'a') as t:
-    # 	t.write(str(calculated_losses))
-    # 	t.write('\n')
-
     if aux_outputs is not None:
       total_aux_loss = 0.0
       for i in range(len(aux_outputs)):
@@ -285,14 +281,10 @@ class PanopticTask(base_task.Task):
         'focal_loss': focal_loss,
         'dice_loss': dice_loss, }
 
-    # with open(f'/depot/davisjam/data/akshath/MaskFormer_vishal/tf-maskformer/models/official/projects/maskformer/pretrained_ckpts/log_total_{str(os.environ.get("DEEP_SUPERVISION"))}_{str(os.environ.get("TRAIN_BATCH_SIZE"))}.txt', 'a') as t:
-    # 	t.write(str(all_losses))
-    # 	t.write('\n')
-
     if metrics:
       for m in metrics:
         m.update_state(all_losses[m.name])
-
+	
     return logs
 
   def _postprocess_outputs(
@@ -359,7 +351,7 @@ class PanopticTask(base_task.Task):
     if metrics:
       for m in metrics:
         m.update_state(all_losses[m.name])
-
+		
     return logs
 
   def _generate_panoptic_metrics(self, pq_metric_labels, pq_metric_outputs):
@@ -374,6 +366,9 @@ class PanopticTask(base_task.Task):
         key: self.map_original_to_contigious(
             value.numpy()) for key,
         value in pq_metric_outputs.items()}
+
+		# [bsize, h, w, 1] -> [bsize, h, w]
+    pq_metric_labels = {key: np.squeeze(value, axis=-1) for key, value in pq_metric_labels.items()}
 
     # There are different PQ implementations for TPU and GPU/CPU
     # TPU implementation requires a lot of memory bandwidth
