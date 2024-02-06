@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-r"""Convert raw COCO dataset to TFRecord format.
+"""Convert raw COCO dataset to TFRecord format.
 
 This scripts follows the label map decoder format and supports detection
 boxes, instance masks and captions.
@@ -26,6 +26,7 @@ Example usage:
 			--output_file_prefix="${OUTPUT_DIR/FILE_PREFIX}" \
 			--num_shards=100
 """
+
 import collections
 import json
 import logging

@@ -14,7 +14,7 @@
 
 """Specialized Transformers for DETR.
 
-the position embeddings are added to the query and key for every self- and
+The position embeddings are added to the query and key for every self- and
 cross-attention layer.
 """
 

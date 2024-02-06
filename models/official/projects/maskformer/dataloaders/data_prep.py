@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Data preparation for MaskFormer."""
+
 from official.projects.dataloaders import input_reader
 from official.projects.configs import mode_keys as ModeKeys
 from official.projects.configs import factory_config

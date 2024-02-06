@@ -13,6 +13,7 @@
 # limitations under the License.
 
 """Feature Pyramid Networks used in MaskFormer."""
+
 import tensorflow as tf
 from official.vision.ops.spatial_transform_ops import nearest_upsampling
 

@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Instance and Category segmentation masks generation.""" 
+
 import tensorflow as tf
 from official.projects.maskformer.losses.mapper import _get_contigious_to_original
-
 
 class PanopticInference:
   """Panoptic Inference"""
@@ -58,13 +59,6 @@ class PanopticInference:
       probs = tf.keras.activations.softmax(pred_logits_b, axis=-1)
       scores = tf.reduce_max(probs, axis=-1)
       labels = tf.argmax(probs, axis=-1)
-      # Only for testing insta
-      # Replace '133' with '0' (background class id) and increment all other classes by 1
-      # print("Labels  before :", labels)
-      # labels = tf.where(tf.math.equal(labels, 133), 0, labels+1)
-      # print("Labels  after :", labels)
-      # exit()
-      # Only for testing insta
       keep = tf.math.logical_and(
           tf.math.not_equal(
               labels,
@@ -72,7 +66,7 @@ class PanopticInference:
           scores > self.object_mask_threshold)
 
       mask_pred_b_sigmoid = tf.transpose(
-          mask_pred_b_sigmoid, (2, 0, 1))  # ( num_predictions, height, width)
+          mask_pred_b_sigmoid, (2, 0, 1))  # (num_predictions, height, width)
 
       # Give batch of predictions to the function
       curr_masks = tf.boolean_mask(

@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""MaskFormer Model Definition."""
+
 import tensorflow as tf
 
 from official.projects.maskformer.modeling.decoder.transformer_decoder import MaskFormerTransformer

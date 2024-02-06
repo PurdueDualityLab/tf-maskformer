@@ -14,7 +14,6 @@
 
 """Data parser and processing for Panoptic Deeplab."""
 
-
 import tensorflow as tf
 from official.vision.dataloaders import parser
 from official.vision.dataloaders import tf_example_decoder

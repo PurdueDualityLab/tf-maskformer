@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Maskformer backbone network."""
 
 from official.vision.modeling.backbones import resnet
 

@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Maskformer losses."""
 
 import tensorflow as tf
 from official.vision.losses import focal_loss

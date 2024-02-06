@@ -18,9 +18,11 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from panoptic_input import mask_former_parser
-
+from typing import Any, Dict, Text, Tuple, Union
 
 def parser_generator(params, mode):
+  print('Params: ', type(params))
+  print('Mode: ', type(mode))
   """Generator function for various dataset parser."""
   if params.architecture.parser == 'mask_former_parser':
     anchor_params = params.anchor

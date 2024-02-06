@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Panoptic MaskFormer Task definition."""
+
 import os
 from absl import logging
 import tensorflow as tf

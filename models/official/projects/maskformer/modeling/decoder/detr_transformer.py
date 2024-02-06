@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""DETR Transformer."""
+
 import tensorflow as tf
 from official.projects.maskformer.modeling.transformer import transformer
 from official.modeling import tf_utils
@@ -69,8 +71,6 @@ class DETRTransformer(tf.keras.layers.Layer):
     decoded = self._decoder(
         tf.zeros_like(targets),
         memory,
-        # TODO(b/199545430): self_attention_mask could be set to None when this
-        # bug is resolved. Passing ones for now.
         self_attention_mask=self_attention_mask,
         cross_attention_mask=cross_attention_mask,
         return_all_decoder_outputs=self._deep_supervision,

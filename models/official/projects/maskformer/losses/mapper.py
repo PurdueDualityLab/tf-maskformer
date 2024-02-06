@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-""" This code maps non-contigious class ids in COCO dataset to contigious class ids."""
+"""Non-contigious class ids to contigious class ids mapping."""
 
 import tensorflow as tf
 import numpy as np
