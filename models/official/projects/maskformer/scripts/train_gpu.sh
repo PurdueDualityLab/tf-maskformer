@@ -25,7 +25,7 @@ export OVERRIDES="runtime.distribution_strategy=one_device,runtime.num_gpus=1,ru
 task.train_data.global_batch_size=$train_bsize,\
 task.model.which_pixel_decoder=transformer_fpn,\
 task.init_checkpoint=$RESNET_CKPT"
-python3 ../train.py \
+python3 train.py \
   --experiment maskformer_coco_panoptic \
   --mode train \
   --model_dir $MODEL_DIR \

@@ -373,7 +373,7 @@ class TransformerEncoderBlock(tf.keras.layers.Layer):
     return dict(list(base_config.items()) + list(config.items()))
 
   def call(self, inputs):
-    """Transformer self-attention encoder block call.
+    """Transformer encoder block call.
 
     Args:
       inputs: a single tensor or a list of tensors. `input tensor` as the single
@@ -382,7 +382,8 @@ class TransformerEncoderBlock(tf.keras.layers.Layer):
         embed`] to have an additional position embedding to add.
 
     Returns:
-      An output tensor with the same dimensions as input/query tensor.
+      An output tensor which is a `float32` tensor with shape
+        `(batch_size, input_length, hidden_size)`.
     """
     input_tensor, attention_mask, pos_embed = inputs
 
@@ -831,6 +832,7 @@ class TransformerDecoderBlock(tf.keras.layers.Layer):
     ]
 
   def call(self, inputs, cache=None, decode_loop_step=None):
+    """Transformer self-attention decoder block call."""
 
     input_tensor, memory, attention_mask, self_attention_mask, input_pos_embed, memory_pos_embed = inputs # pylint: disable=line-too-long
 

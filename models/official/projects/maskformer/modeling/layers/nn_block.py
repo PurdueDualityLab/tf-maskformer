@@ -16,6 +16,7 @@
 
 import tensorflow as tf
 import math
+from typing import Any, Dict
 
 class MLPHead(tf.keras.layers.Layer):
   def __init__(self,
@@ -23,6 +24,14 @@ class MLPHead(tf.keras.layers.Layer):
                hidden_dim: int,
                deep_supervision: bool,
                mask_dim: int):
+    """MLPHead initialization function.
+    Args:
+      num_classes: `int`, Number of classes.
+      hidden_dim: `int`, Dimension of hidden layer.
+      deep_supervision: `bool`, Use deep supervision.
+      mask_dim: `int`, Dimension for mask.
+    """
+
     super().__init__()
 
     self._num_classes = num_classes
@@ -45,7 +54,17 @@ class MLPHead(tf.keras.layers.Layer):
 
     super(MLPHead, self).build(input_shape)
 
-  def call(self, inputs):
+  def call(self, inputs: Dict[str, Any]):
+    """ 
+    Passes the per_pixel_embeddings and per_segment_embeddings through the MLPHead.
+
+    Args: 
+      inputs: A dictionary of inputs.
+    
+    Returns:
+      A dictionary of class and mask probability tensors.
+    """
+
     per_pixel_embeddings = inputs['per_pixel_embeddings']  # mask feat
     # transformer feat
     per_segment_embeddings = inputs['per_segment_embeddings']

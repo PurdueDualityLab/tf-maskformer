@@ -18,7 +18,7 @@ import math
 import tensorflow as tf
 from official.modeling import tf_utils
 from official.projects.maskformer.modeling.decoder.detr_transformer import DETRTransformer
-
+from typing import Any, Dict
 
 def position_embedding_sine(attention_mask,
                             num_pos_features=256,
@@ -29,22 +29,22 @@ def position_embedding_sine(attention_mask,
   """Sine-based positional embeddings for 2D images.
 
   Args:
-          attention_mask: a `bool` Tensor specifying the size of the input image to
-          the Transformer and which elements are padded, of size [batch_size,
-          height, width]
-          num_pos_features: a `int` specifying the number of positional features,
-          should be equal to the hidden size of the Transformer network
-          temperature: a `float` specifying the temperature of the positional
-          embedding. Any type that is converted to a `float` can also be accepted.
-          normalize: a `bool` determining whether the positional embeddings should be
-          normalized between [0, scale] before application of the sine and cos
-          functions.
-          scale: a `float` if normalize is True specifying the scale embeddings before
-          application of the embedding function.
+    attention_mask: a `bool` Tensor specifying the size of the input image to
+    the Transformer and which elements are padded, of size [batch_size,
+    height, width]
+    num_pos_features: a `int` specifying the number of positional features,
+    should be equal to the hidden size of the Transformer network
+    temperature: a `float` specifying the temperature of the positional
+    embedding. Any type that is converted to a `float` can also be accepted.
+    normalize: a `bool` determining whether the positional embeddings should be
+    normalized between [0, scale] before application of the sine and cos
+    functions.
+    scale: a `float` if normalize is True specifying the scale embeddings before
+    application of the embedding function.
 
   Returns:
-          embeddings: a `float` tensor of the same shape as input_tensor specifying
-          the positional embeddings based on sine features.
+    embeddings: a `float` tensor of the same shape as input_tensor specifying
+    the positional embeddings based on sine features.
   """
   if num_pos_features % 2 != 0:
     raise ValueError(
@@ -145,7 +145,16 @@ class MaskFormerTransformer(tf.keras.layers.Layer):
         method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
     return mask
 
-  def call(self, inputs):
+  def call(self, inputs: Dict[str, Any]):
+    """ 
+    Passes the input image features through the customized DETR Transformer
+
+    Args:
+      inputs: A dictionary of inputs.
+
+    Returns: 
+      A dictionary of decoded list of features.
+    """
     features = inputs['features']
 
     batch_size = tf.shape(features)[0]

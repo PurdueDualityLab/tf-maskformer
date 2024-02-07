@@ -18,6 +18,7 @@ import tensorflow as tf
 from official.vision.losses import focal_loss
 from official.projects.detr.ops import matchers
 import os
+from typing import Any, Dict
 
 
 class FocalLossMod(focal_loss.FocalLoss):
@@ -84,7 +85,8 @@ class DiceLoss(tf.keras.losses.Loss):
 
   def call(self, y_true, y_pred):
     """
-    y_true: (b size, 100, h, w)
+    y_true: (bsize, 100, h * w)
+    y_pred: (bsize, 100, h * w)
     """
     y_pred = tf.reshape(tf.keras.activations.sigmoid(
         y_pred), (tf.shape(y_pred)[0], tf.shape(y_pred)[1], -1))
@@ -97,6 +99,11 @@ class DiceLoss(tf.keras.losses.Loss):
     return loss
 
   def batch(self, y_true, y_pred):
+    """
+    y_true: (bsize, 100, h, w)
+    y_pred: (bsize, 100, h, w)
+    """
+
     y_pred = tf.sigmoid(y_pred)
     y_pred = tf.reshape(y_pred, [tf.shape(y_pred)[0], tf.shape(y_pred)[1], -1])
     y_pred = tf.cast(y_pred, tf.float32)
@@ -130,7 +137,7 @@ class Loss:
     self.cost_dice = cost_dice
     self.ignore_label = ignore_label
 
-  def memory_efficient_matcher(self, outputs, y_true):
+  def memory_efficient_matcher(self, outputs: Dict[str, Any], y_true: Dict[str, Any]):
     out_mask = outputs["pred_masks"]
     tgt_ids = tf.cast(y_true["unique_ids"], dtype=tf.int64)
 
@@ -159,7 +166,6 @@ class Loss:
     cost_focal = FocalLossMod().batch(tgt_mask_permuted, out_mask)
     cost_dice = DiceLoss().batch(tgt_mask_permuted, out_mask)
 
-    # FIXME : Need to cast to float32 for tf.math.add to work
     cost_class = tf.cast(cost_class, dtype=tf.float32)
 
     total_cost = (
@@ -194,8 +200,7 @@ class Loss:
 
     return indices
 
-  def get_loss(self, outputs, y_true, indices):
-
+  def get_loss(self, outputs: Dict[str, Any], y_true: Dict[str, Any], indices: Dict[str, Any]):
     target_index = tf.math.argmax(indices, axis=1)  # [batchsize, 100]
     target_labels = y_true["unique_ids"]  # [batchsize, num_gt_objects]
     # [batchsize, num_queries, num_classes] [1,100,134]
@@ -252,10 +257,6 @@ class Loss:
 
     # #undo the transpose
     out_mask = tf.transpose(out_mask, perm=[0, 3, 1, 2])
-    # Calculate the focal loss and dice loss only where valid mask is true
-    # FIXME : May be we don't need valid masks
-    # out_mask =  tf.where(tf.expand_dims(tf.squeeze(valid_masks, -1), axis=1), out_mask, tf.zeros_like(out_mask))
-    # tgt_mask =  tf.where(tf.expand_dims(tf.squeeze(valid_masks, -1), axis=1), tgt_mask, tf.zeros_like(tgt_mask))
     out_mask = tf.reshape(
         out_mask, [
             tf.shape(out_mask)[0], tf.shape(out_mask)[1], -1])  # [b, 100, h*w]
@@ -290,10 +291,14 @@ class Loss:
     # pylint: disable=line-too-long
     """
     This performs the loss computation.
-    Parameters:
+
+    Args:
          outputs: dict of tensors, see the output specification of the model for the format
          y_true: list of dicts, such that len(y_true) == batch_size.
                  The expected keys in each dict depends on the losses applied, see each loss' doc
+    
+    Returns:
+        losses: dict of scalar tensors representing losses. The expected keys are defined in the model's call function. Calculates loss for multi-scale/auxillary losses as well. 
     """
     outputs_without_aux = {k: v for k,
                            v in outputs.items() if k != "aux_outputs"}

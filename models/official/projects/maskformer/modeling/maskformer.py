@@ -55,6 +55,37 @@ class MaskFormer(tf.keras.Model):
                which_pixel_decoder='fpn',
                deep_supervision=False,
                **kwargs):
+    """MaskFormer initialization function.
+    Args:
+      backbone: Backbone model for feature extraction.
+      input_specs: Input specifications.
+      fpn_feat_dims: `int`, FPN feature dimensions.
+      data_format: `str`, Data format ('channels_first' or 'channels_last').
+      dilation_rate: `tuple`, Dilation rate for convolution.
+      groups: `int`, Number of groups for convolution.
+      activation: `str`, Activation function.
+      use_bias: `bool`, Whether to use bias.
+      kernel_initializer: `str`, Kernel weights initializer.
+      bias_initializer: `str`, Bias initializer.
+      kernel_regularizer: Regularizer for kernel weights.
+      bias_regularizer: Regularizer for bias.
+      activity_regularizer: Regularizer for layer activity.
+      kernel_constraint: Constraint for kernel weights.
+      bias_constraint: Constraint for bias.
+      num_queries: `int`, Number of query positions.
+      hidden_size: `int`, Size of hidden layers.
+      fpn_encoder_layers: `int`, Number of FPN encoder layers.
+      detr_encoder_layers: `int`, Number of DETR encoder layers.
+      num_decoder_layers: `int`, Number of decoder layers.
+      dropout_rate: `float`, Dropout rate.
+      backbone_endpoint_name: `str`, Endpoint name in backbone.
+      num_classes: `int`, Number of classes.
+      batch_size: `int`, Batch size.
+      bfloat16: `bool`, Whether to use bfloat16.
+      which_pixel_decoder: `str`, Type of pixel decoder.
+      deep_supervision: `bool`, Use deep supervision.
+    """
+
     super(MaskFormer, self).__init__(**kwargs)
     self._backbone = backbone
     self._input_specs = input_specs
@@ -93,7 +124,7 @@ class MaskFormer(tf.keras.Model):
     self._backbone_endpoint = backbone_endpoint_name
 
   def build(self, image_shape=None):
-
+    """Builds the MaskFormer model."""
     self.pixel_decoder = TransformerFPN(
         batch_size=self._batch_size,
         fpn_feat_dims=self._fpn_feat_dims,
@@ -154,7 +185,15 @@ class MaskFormer(tf.keras.Model):
       new_dict[k[0]] = maps[k]
     return new_dict
 
-  def call(self, image, training=False):
+  def call(self, image: tf.Tensor, training=False):
+    """ 
+    Args:
+      image: `tf.Tensor`, Input image.
+      training: `bool`, Training or not.
+
+    Returns:
+      seg_pred: `tf.Tensor`, Segmentation prediction.
+    """
     backbone_feature_maps = self._backbone(image)
     backbone_feature_maps_procesed = self.process_feature_maps(
         backbone_feature_maps)

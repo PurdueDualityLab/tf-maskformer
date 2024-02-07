@@ -37,12 +37,24 @@ class CNNFPN(tf.keras.layers.Layer):
                bias_constraint=None,
                **kwargs):
     """FPN initialization function.
+    
     Args:
-      fpn_feat_dims: `int`, Feature dimension of the fpn.
-
-      TODO: fill in new args
-
+      fpn_feat_dims: `int`, Feature dimension of the FPN.
+      data_format: `str`, Format of the data ('channels_first' or 'channels_last').
+      dilation_rate: `tuple`, Dilation rate for convolution operations.
+      groups: `int`, Number of groups for grouped convolution.
+      activation: `str`, Activation function to use.
+      use_bias: `bool`, Whether to use bias in the convolution layers.
+      kernel_initializer: `str`, Initializer for the kernel weights.
+      bias_initializer: `str`, Initializer for the bias vectors.
+      kernel_regularizer: `regularizer`, Regularizer for the kernel weights.
+      bias_regularizer: `regularizer`, Regularizer for the bias vectors.
+      activity_regularizer: `regularizer`, Regularizer for the output of the layer.
+      kernel_constraint: `constraint`, Constraint for the kernel weights.
+      bias_constraint: `constraint`, Constraint for the bias vectors.
+      **kwargs: Additional keyword arguments.
     """
+
     super(CNNFPN, self).__init__(**kwargs)
 
     # conv2d params
@@ -140,10 +152,12 @@ class CNNFPN(tf.keras.layers.Layer):
 
   def call(self, multilevel_features):
     """Returns the FPN features for a given multilevel features.
+
     Args:
       multilevel_features: a `dict` containing `int` keys for continuous feature
         levels, e.g., [2, 3, 4, 5]. The values are corresponding features with
         shape [batch_size, height_l, width_l, num_filters].
+
     Returns:
       Mask projection
     """

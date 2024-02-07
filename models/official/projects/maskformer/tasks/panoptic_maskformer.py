@@ -40,7 +40,6 @@ from official.vision.modeling import backbones
 from official.projects.maskformer.losses.mapper import _get_contigious_to_original, _get_original_to_contigious, _get_original_is_thing
 import numpy as np
 
-
 @task_factory.register_task_cls(maskformer_cfg.MaskFormerTask)
 class PanopticTask(base_task.Task):
   """A single-replica view of training procedure.
@@ -112,10 +111,16 @@ class PanopticTask(base_task.Task):
           self._task_config.init_checkpoint_modules))
 
   def build_inputs(
-          self, params, input_context: Optional[tf.distribute.InputContext] = None) -> tf.data.Dataset:
+          self, params: Dict[str, Any], input_context: Optional[tf.distribute.InputContext] = None) -> tf.data.Dataset:
     """
     Build panoptic segmentation dataset.
 
+    Args: 
+      params: a dictionary of parameters.
+      input_context: a tf.distribute.InputContext instance.
+
+    Returns: 
+      A tf.data.Dataset instance.
     """
     logging.info('Building panoptic segmentation dataset.')
     if params.decoder.type == 'simple_decoder':
@@ -138,7 +143,19 @@ class PanopticTask(base_task.Task):
     dataset = reader.read(input_context=input_context)
     return dataset
 
-  def build_losses(self, output, labels, aux_outputs=None):
+  def build_losses(self, output: Dict[str, Any], labels: Dict[str, Any], aux_outputs=None):
+    """ 
+    Builds panoptic segmentation losses for batch of images.
+
+    Args: 
+      output: a dictionary of output tensors.
+      labels: a dictionary of input tensors.
+      aux_outputs: a list of auxiliary output tensors.
+    
+    Returns:
+      A tuple of total loss, weighted cross entropy loss, weighted focal loss, and weighted dice loss.
+    """
+
     outputs = {"pred_logits": output["class_prob_predictions"],
                "pred_masks": output["mask_prob_predictions"]}
 
@@ -190,7 +207,16 @@ class PanopticTask(base_task.Task):
     return total_loss, weighted_ce, weighted_focal, weighted_dice
 
   def build_metrics(self, training=True):
-    """Builds panoptic metrics."""
+    """
+    Builds panoptic metrics.
+    
+    Args: 
+      training: a boolean indicating if training is enabled.
+    
+    Returns:
+      A PanopticQuality or PanopticQualityV2 class instance depending on compute platform  
+    """
+    
     metrics = []
     metric_names = ['cls_loss', 'focal_loss', 'dice_loss']
     for name in metric_names:
@@ -238,13 +264,13 @@ class PanopticTask(base_task.Task):
     Does forward and backward.
 
     Args:
-    inputs: a dictionary of input tensors.
-    model: the model, forward pass definition.
-    optimizer: the optimizer for this training step.
-    metrics: a nested structure of metrics objects.
+      inputs: a dictionary of input tensors.
+      model: the model, forward pass definition.
+      optimizer: the optimizer for this training step.
+      metrics: a nested structure of metrics objects.
 
     Returns:
-    A dictionary of logs.
+      A dictionary of logs.
     """
 
     features, labels = inputs
@@ -290,12 +316,19 @@ class PanopticTask(base_task.Task):
     return logs
 
   def _postprocess_outputs(
-          self, outputs: Dict[str, Any], image_shapes, deep_supervision: bool):
+          self, outputs: Dict[str, Any], image_shapes: List[int], deep_supervision: bool):
     """
     Implements postprocessing using the output binary masks and labels to produce
     1. Output Category Mask
     2. Output Instance Mask
 
+    Args:
+      outputs: a dictionary of output tensors.
+      image_shapes: a list of image shapes.
+      deep_supervision: a boolean indicating if deep supervision is enabled.
+    
+    Returns:
+      A tuple of output instance mask and output category mask.
     """
     pred_binary_masks = outputs["mask_prob_predictions"]
     pred_labels = outputs["class_prob_predictions"]
@@ -307,7 +340,19 @@ class PanopticTask(base_task.Task):
         pred_labels, pred_binary_masks, image_shapes)
     return ouput_instance_mask, output_category_mask
 
-  def validation_step(self, inputs, model, metrics=None):
+  def validation_step(self, inputs: Tuple[Dict[str, Any]], model: tf.keras.Model, metrics=None):
+    """
+    Operated in eval mode.
+
+    Args:
+      inputs: a dictionary of input tensors.
+      model: the model, forward pass definition.
+      metrics: a nested structure of metrics objects.
+
+    Returns:
+      A dictionary of logs.
+    """
+
     features, labels = inputs
 
     outputs = model(features, training=False)
@@ -344,7 +389,7 @@ class PanopticTask(base_task.Task):
         'instance_mask': output_instance_mask
     }
 
-    results = self._generate_panoptic_metrics(
+    results = self.generate_panoptic_metrics(
         pq_metric_labels, pq_metric_outputs)
 
     for key, value in results.items():
@@ -356,7 +401,18 @@ class PanopticTask(base_task.Task):
 		
     return logs
 
-  def _generate_panoptic_metrics(self, pq_metric_labels, pq_metric_outputs):
+  def generate_panoptic_metrics(self, pq_metric_labels: Dict[str, Any], pq_metric_outputs: Dict[str, Any]):
+    """
+    Generates panoptic metrics.
+
+    Args:
+      pq_metric_labels: a dictionary of panoptic segmentation labels.
+      pq_metric_outputs: a dictionary of panoptic segmentation outputs.
+    
+    Returns:
+      A dictionary of panoptic metrics.
+    """
+    
     # Mapping labels from original to contigious
     # Processed outputs are converted to original ids in _postprocess_outputs,
     # and here we will convert them back to contigious ids
@@ -389,9 +445,9 @@ class PanopticTask(base_task.Task):
       )
       results = self.panoptic_quality_metric.result(_get_original_is_thing())
 
-    return self.reduce_aggregated_results(results)
+    return self._reduce_aggregated_results(results)
 
-  def reduce_aggregated_results(self, aggregated_results: Dict[str, Any]):
+  def _reduce_aggregated_results(self, aggregated_results: Dict[str, Any]):
     reduced_metrics = self._reduce_metrics(aggregated_results)
 
     if self._task_config.model.on_tpu:
@@ -402,12 +458,27 @@ class PanopticTask(base_task.Task):
     return reduced_metrics
 
   def _reduce_metrics(self, results: Dict[str, Any]):
+    """
+    Routes the results to the appropriate reduction function based on the compute platform (TPU or GPU/CPU).
+    """
+
     if self._task_config.model.on_tpu:
       return self._reduce_panoptic_metrics_v2(results)
     else:
       return self._reduce_panoptic_metrics(results)
 
   def _reduce_panoptic_metrics(self, results: Dict[str, Any]):
+    """
+    Updates the per class and mean panoptic metrics in the reduced_metrics. 
+    CPU/GPU implementation.
+
+    Args: 
+      results: a dictionary of results.
+    
+    Returns:
+      A dictionary of reduced metrics.
+    """
+
     reduced_metrics = {}
 
     categories = ['All', 'Things', 'Stuff']
@@ -436,7 +507,15 @@ class PanopticTask(base_task.Task):
   def _reduce_panoptic_metrics_v2(self, results: Dict[str, Any]):
     """
     Updates the per class and mean panoptic metrics in the reduced_metrics.
+    TPU implementation.
+
+    Args: 
+      results: a dictionary of results.
+    
+    Returns:
+      A dictionary of reduced metrics.
     """
+
     reduced_metrics = {}
 
     valid_thing_classes = results['valid_thing_classes']

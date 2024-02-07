@@ -107,11 +107,24 @@ class TransformerFPN(tf.keras.layers.Layer):
                bfloat16=True,
                **kwargs):
     """FPN initialization function.
-    Args:
-      fpn_feat_dims: `int`, Feature dimension of the fpn.
 
-      TODO: fill in new args
-
+      Args:
+        fpn_feat_dims (int): The number of feature dimensions in the FPN outputs.
+        data_format (str): The data format ('channels_first' or 'channels_last').
+        dilation_rate (tuple): The dilation rate for dilated convolution.
+        groups (int): The number of groups for grouped convolution.
+        activation (str): The activation function to use.
+        use_bias (bool): Whether to use bias in the convolution layers.
+        kernel_initializer (str): Initializer for the kernel weights.
+        bias_initializer (str): Initializer for the bias vectors.
+        kernel_regularizer (regularizer): Regularizer function for the kernel weights.
+        bias_regularizer (regularizer): Regularizer function for the bias vectors.
+        activity_regularizer (regularizer): Regularizer function applied to the output.
+        kernel_constraint (constraint): Constraint function applied to the kernel weights.
+        bias_constraint (constraint): Constraint function applied to the bias vectors.
+        num_encoder_layers (int): The number of encoder layers in the transformer.
+        bfloat16 (bool): Whether to use bfloat16 precision.
+        **kwargs: Additional keyword arguments for layer configuration.
     """
     super(TransformerFPN, self).__init__(**kwargs)
 
@@ -270,13 +283,16 @@ class TransformerFPN(tf.keras.layers.Layer):
 
   def call(self, multilevel_features, image):
     # pylint: disable=line-too-long
-    """Returns the FPN features for a given multilevel features.
+    """
+    Returns the FPN features for a given multilevel features.
+
     Args:
-    multilevel_features: a `dict` containing `int` keys for continuous feature
-            levels, e.g., [2, 3, 4, 5]. The values are corresponding features with
-            shape [batch_size, height_l, width_l, num_filters].
+      multilevel_features: a `dict` containing `int` keys for continuous feature
+              levels, e.g., [2, 3, 4, 5]. The values are corresponding features with
+              shape [batch_size, height_l, width_l, num_filters].
+
     Returns:
-    Mask projection
+      Mask projection
     """
     input_levels = list(multilevel_features.keys())
 

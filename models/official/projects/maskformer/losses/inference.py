@@ -22,13 +22,23 @@ class PanopticInference:
 
   def __init__(
           self,
-          num_classes=133,
-          background_class_id=0,
-          object_mask_threshold=0.4,
-          class_score_threshold=0.4,
-          overlap_threshold=0.3):
+          num_classes: int =133,
+          background_class_id: int = 0,
+          object_mask_threshold: float = 0.4,
+          class_score_threshold: float = 0.4,
+          overlap_threshold: float = 0.3):
+    """Initialize
+    Args:
+      num_classes: `int`, The total number of distinct classes, including background. Default is 133.
+      background_class_id: `int`, The class ID for the background. Default is 0.
+      object_mask_threshold: `float`, Threshold for object mask scores. Default is 0.4.
+      class_score_threshold: `float`, Threshold for classifying detections. Default is 0.4.
+      overlap_threshold: `float`, IoU threshold for segment overlap. Default is 0.3.
+      cat_id_map: `dict`, Maps contiguous category IDs to original dataset IDs.
+      is_thing_dict: `dict`, Indicates if a category ID is 'thing' or 'stuff'.
+    """
 
-    self.num_classes = num_classes
+    self.num_classes = num_classes # pylint: unused-variable
     self.background_class_id = background_class_id
     self.object_mask_threshold = object_mask_threshold
     self.class_score_threshold = class_score_threshold
@@ -40,6 +50,10 @@ class PanopticInference:
     mask_pred: (batch, height, width, num_predictions)
     pred_logits: (batch, num_predictions, num_classes)
     """
+    print("mask_pred", type(mask_pred))
+    print("pred_logits", type(pred_logits))
+    print("image_shape", type(image_shape))
+
 
     # maps from contiguous category id to original category id
 
