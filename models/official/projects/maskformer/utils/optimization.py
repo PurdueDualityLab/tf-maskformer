@@ -54,7 +54,7 @@ class _MaskformerAdamW(nlp_optimization.AdamWeightDecay):
     lr_t, kwargs = self._get_lr(var.device, var.dtype.base_dtype, apply_state)
     apply_state = kwargs['apply_state']
 
-    if 'transformer_fpn' not in var.name and 'mask_former_transformer' not in var.name and 'mlp_head' not in var.name: # pylint: disable=line-too-long
+    if 'transformer_fpn' not in var.name and 'mask_former_transformer' not in var.name and 'mlp_head' not in var.name:  # pylint: disable=line-too-long
       lr_t *= 0.1
 
     decay = self._decay_weights_op(var, lr_t, apply_state)
@@ -66,7 +66,7 @@ class _MaskformerAdamW(nlp_optimization.AdamWeightDecay):
       m = self.get_slot(var, 'm')
       v = self.get_slot(var, 'v')
       lr = coefficients[
-          'lr_t'] * 0.1 if 'transformer_fpn' not in var.name and 'mask_former_transformer' not in var.name and 'mlp_head' not in var.name else coefficients['lr_t'] # pylint: disable=line-too-long
+          'lr_t'] * 0.1 if 'transformer_fpn' not in var.name and 'mask_former_transformer' not in var.name and 'mlp_head' not in var.name else coefficients['lr_t']  # pylint: disable=line-too-long
 
       if not self.amsgrad:
         return tf.raw_ops.ResourceApplyAdam(

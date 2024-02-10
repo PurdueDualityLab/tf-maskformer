@@ -18,7 +18,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from panoptic_input import mask_former_parser
-from typing import Any, Dict, Text, Tuple, Union
 
 def parser_generator(params, mode):
   """Generator function for various dataset parser."""
@@ -44,8 +43,8 @@ def parser_generator(params, mode):
         saturation=color_aug_params.saturation,
         contrast=color_aug_params.contrast,
         aug_type=parser_params.aug_type,
-        sigma=parser_params.sigma, 
-        small_instance_area_threshold=parser_params.small_instance_area_threshold, # pylint: disable=line-too-long
+        sigma=parser_params.sigma,
+        small_instance_area_threshold=parser_params.small_instance_area_threshold,  # pylint: disable=line-too-long
         small_instance_weight=parser_params.small_instance_weight,
         dtype=parser_params.dtype,
         seed=parser_params.seed,

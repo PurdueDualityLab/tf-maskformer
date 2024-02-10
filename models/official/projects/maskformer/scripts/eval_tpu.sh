@@ -19,9 +19,9 @@ export BASE_LR=0.0001
 export IMG_SIZE=640
 export NO_OBJ_CLS_WEIGHT=0.1
 
-export DEEP_SUPERVISION=1
+export DEEP_SUPERVISION=True
 
-export ON_TPU=1 
+export ON_TPU=True 
 export OVERRIDES="runtime.distribution_strategy=tpu,runtime.mixed_precision_dtype=float32,\
 task.validation_data.global_batch_size=$EVAL_BATCH_SIZE,task.model.which_pixel_decoder=transformer_fpn,\
 task.init_checkpoint_modules=all,\

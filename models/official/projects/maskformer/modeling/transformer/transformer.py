@@ -47,7 +47,6 @@ class TransformerEncoder(tf.keras.layers.Layer):
                intermediate_dropout=0.0,
                **kwargs):
     """Initialize a Transformer encoder.
-
     Args:
       num_layers: Number of layers.
       num_attention_heads: Number of attention heads.
@@ -122,14 +121,12 @@ class TransformerEncoder(tf.keras.layers.Layer):
 
   def call(self, encoder_inputs, attention_mask=None, pos_embed=None):
     """Return the output of the encoder.
-
     Args:
       encoder_inputs: A tensor with shape `(batch_size, input_length,
         hidden_size)`.
       attention_mask: A mask for the encoder self-attention layer with shape
         `(batch_size, input_length, input_length)`.
       pos_embed: Position embedding to add to every encoder layer.
-
     Returns:
       Output of encoder which is a `float32` tensor with shape
         `(batch_size, input_length, hidden_size)`.
@@ -182,7 +179,6 @@ class TransformerEncoderBlock(tf.keras.layers.Layer):
                attention_axes=None,
                **kwargs):
     """Initializes `TransformerEncoderBlock`.
-
     Args:
       num_attention_heads: Number of attention heads.
       inner_dim: The output dimension of the first Dense layer in a two-layer
@@ -374,13 +370,11 @@ class TransformerEncoderBlock(tf.keras.layers.Layer):
 
   def call(self, inputs):
     """Transformer encoder block call.
-
     Args:
       inputs: a single tensor or a list of tensors. `input tensor` as the single
         sequence of embeddings. [`input tensor`, `attention mask`] to have the
         additional attention mask. [`input tensor`, `attention mask`, `query
         embed`] to have an additional position embedding to add.
-
     Returns:
       An output tensor which is a `float32` tensor with shape
         `(batch_size, input_length, hidden_size)`.
@@ -462,7 +456,6 @@ class TransformerDecoder(tf.keras.layers.Layer):
                intermediate_dropout=0.0,
                **kwargs):
     """Initialize a Transformer decoder.
-
     Args:
       num_layers: Number of layers.
       num_attention_heads: Number of attention heads.
@@ -546,7 +539,6 @@ class TransformerDecoder(tf.keras.layers.Layer):
            input_pos_embed=None,
            memory_pos_embed=None):
     """Return the output of the decoder layer stacks.
-
     Args:
       target: A tensor with shape `(batch_size, target_length, hidden_size)`.
       memory: A tensor with shape `(batch_size, input_length, hidden_size)`.
@@ -568,7 +560,6 @@ class TransformerDecoder(tf.keras.layers.Layer):
         self-attention layer.
       memory_pos_embed: A tensor that is added to the query and key of the
         cross-attention layer.
-
     Returns:
       Output of decoder.
       float32 tensor with shape `(batch_size, target_length, hidden_size`).
@@ -630,7 +621,6 @@ class TransformerDecoderBlock(tf.keras.layers.Layer):
                attention_initializer=None,
                **kwargs):
     """Initialize a Transformer decoder block.
-
     Args:
       num_attention_heads: Number of attention heads.
       intermediate_size: Size of the intermediate layer.
@@ -834,7 +824,7 @@ class TransformerDecoderBlock(tf.keras.layers.Layer):
   def call(self, inputs, cache=None, decode_loop_step=None):
     """Transformer self-attention decoder block call."""
 
-    input_tensor, memory, attention_mask, self_attention_mask, input_pos_embed, memory_pos_embed = inputs # pylint: disable=line-too-long
+    input_tensor, memory, attention_mask, self_attention_mask, input_pos_embed, memory_pos_embed = inputs  # pylint: disable=line-too-long
 
     source_tensor = input_tensor
     if self._norm_first:

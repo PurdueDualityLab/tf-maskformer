@@ -340,4 +340,4 @@ def _get_original_is_thing():
   """
   Returns a bool tensor of size 200, with True for thing classes.
   """
-  return [bool(x['isthing']) for x in COCO_CATEGORIES]
+  return tf.cast([x['isthing'] for x in COCO_CATEGORIES], dtype=tf.bool)

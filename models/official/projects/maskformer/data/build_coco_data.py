@@ -52,8 +52,8 @@ _NUM_SHARDS = 1000
 
 _SPLITS_TO_SIZES = dataset.COCO_PANOPTIC_INFORMATION.splits_to_sizes
 _IGNORE_LABEL = dataset.COCO_PANOPTIC_INFORMATION.ignore_label
-_CLASS_HAS_INSTANCE_LIST = dataset.COCO_PANOPTIC_INFORMATION.class_has_instances_list # pylint: disable=line-too-long
-_PANOPTIC_LABEL_DIVISOR = dataset.COCO_PANOPTIC_INFORMATION.panoptic_label_divisor # pylint: disable=line-too-long
+_CLASS_HAS_INSTANCE_LIST = dataset.COCO_PANOPTIC_INFORMATION.class_has_instances_list  # pylint: disable=line-too-long
+_PANOPTIC_LABEL_DIVISOR = dataset.COCO_PANOPTIC_INFORMATION.panoptic_label_divisor  # pylint: disable=line-too-long
 _CLASS_MAPPING = coco_constants.get_id_mapping()
 
 # A map from data type to folder name that saves the data.

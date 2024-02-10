@@ -36,8 +36,8 @@ class CNNFPN(tf.keras.layers.Layer):
                kernel_constraint=None,
                bias_constraint=None,
                **kwargs):
+    # pylint: disable=line-too-long
     """FPN initialization function.
-    
     Args:
       fpn_feat_dims: `int`, Feature dimension of the FPN.
       data_format: `str`, Format of the data ('channels_first' or 'channels_last').
@@ -152,12 +152,10 @@ class CNNFPN(tf.keras.layers.Layer):
 
   def call(self, multilevel_features):
     """Returns the FPN features for a given multilevel features.
-
     Args:
       multilevel_features: a `dict` containing `int` keys for continuous feature
         levels, e.g., [2, 3, 4, 5]. The values are corresponding features with
         shape [batch_size, height_l, width_l, num_filters].
-
     Returns:
       Mask projection
     """

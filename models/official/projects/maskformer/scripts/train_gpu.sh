@@ -13,13 +13,13 @@ export MODEL_DIR="./model_dir_2/"
 export TRAIN_BATCH_SIZE=$train_bsize
 export EVAL_BATCH_SIZE=$eval_bsize
 
+export ON_TPU=False
+
 export BASE_LR=0.0001
 export IMG_SIZE=640
 export NO_OBJ_CLS_WEIGHT=0.01
 
-export DEEP_SUPERVISION=0
-export ON_TPU=0
-export PRINT_OUTPUTS=True
+export DEEP_SUPERVISION=True
 
 export OVERRIDES="runtime.distribution_strategy=one_device,runtime.num_gpus=1,runtime.mixed_precision_dtype=float32,\
 task.train_data.global_batch_size=$train_bsize,\

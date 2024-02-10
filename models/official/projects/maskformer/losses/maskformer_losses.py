@@ -17,7 +17,6 @@
 import tensorflow as tf
 from official.vision.losses import focal_loss
 from official.projects.detr.ops import matchers
-import os
 from typing import Any, Dict
 
 
@@ -30,23 +29,21 @@ class FocalLossMod(focal_loss.FocalLoss):
   def __init__(self, alpha=0.25, gamma=2):
     """Initializes `FocalLoss`.
     Args:
-    alpha: The `alpha` weight factor for binary class imbalance.
-    gamma: The `gamma` focusing parameter to re-weight loss.
-    reduction and name?
+        alpha: The `alpha` weight factor for binary class imbalance.
+        gamma: The `gamma` focusing parameter to re-weight loss.
     """
     super().__init__(alpha, gamma, reduction='none')
 
   def call(self, y_true, y_pred):
     """Invokes the `FocalLoss`.
     Args:
-    y_true: A tensor of size [batch, num_anchors, num_classes].
-    Stores the binary classification lavel for each element in y_pred.
-    y_pred: A tensor of size [batch, num_anchors, num_classes].
-    The predictions of each example.
-    num_masks: The number of masks.
-
+        y_true: A tensor of size [batch, num_anchors, num_classes].
+        Stores the binary classification lavel for each element in y_pred.
+        y_pred: A tensor of size [batch, num_anchors, num_classes].
+        The predictions of each example.
+        num_masks: The number of masks.
     Returns:
-    Loss float `Tensor`.
+        Loss float `Tensor`.
     """
     weighted_loss = super().call(y_true, y_pred)  # [b, 100, h*w]
 
@@ -137,15 +134,15 @@ class Loss:
     self.cost_dice = cost_dice
     self.ignore_label = ignore_label
 
-  def memory_efficient_matcher(self, outputs: Dict[str, Any], y_true: Dict[str, Any]):
+  def memory_efficient_matcher(self, outputs: Dict[str, Any], y_true: Dict[str, Any]): # pylint: disable=line-too-long
     out_mask = outputs["pred_masks"]
     tgt_ids = tf.cast(y_true["unique_ids"], dtype=tf.int64)
 
     with tf.device(out_mask.device):
       tgt_mask = y_true["individual_masks"]
 
-    cost_class = tf.gather(-tf.nn.softmax( # pylint: disable=invalid-unary-operand-type
-        outputs["pred_logits"]), tgt_ids, batch_dims=1, axis=-1) 
+    cost_class = tf.gather(-tf.nn.softmax(  # pylint: disable=invalid-unary-operand-type
+        outputs["pred_logits"]), tgt_ids, batch_dims=1, axis=-1)
 
     tgt_mask = tf.cast(tgt_mask, dtype=tf.float32)
     # reorder the tgt mask so that tf.image.resize can be applied
@@ -200,7 +197,7 @@ class Loss:
 
     return indices
 
-  def get_loss(self, outputs: Dict[str, Any], y_true: Dict[str, Any], indices: Dict[str, Any]):
+  def get_loss(self, outputs: Dict[str, Any], y_true: Dict[str, Any], indices: Dict[str, Any]): # pylint: disable=line-too-long
     target_index = tf.math.argmax(indices, axis=1)  # [batchsize, 100]
     target_labels = y_true["unique_ids"]  # [batchsize, num_gt_objects]
     # [batchsize, num_queries, num_classes] [1,100,134]
@@ -289,14 +286,11 @@ class Loss:
 
   def __call__(self, outputs, y_true):
     # pylint: disable=line-too-long
-    """
-    This performs the loss computation.
-
+    """Performs the loss computation.
     Args:
          outputs: dict of tensors, see the output specification of the model for the format
          y_true: list of dicts, such that len(y_true) == batch_size.
                  The expected keys in each dict depends on the losses applied, see each loss' doc
-    
     Returns:
         losses: dict of scalar tensors representing losses. The expected keys are defined in the model's call function. Calculates loss for multi-scale/auxillary losses as well. 
     """
@@ -326,10 +320,10 @@ class Loss:
 
     if "aux_outputs" in outputs and outputs["aux_outputs"] is not None:
       for i, aux_outputs in enumerate(outputs["aux_outputs"]):
-
         # Not needed when testing with PyTorch outputs
         aux_outputs["pred_masks"] = tf.transpose(
             aux_outputs["pred_masks"], perm=[0, 3, 1, 2])
+
         indices = self.memory_efficient_matcher(aux_outputs, y_true)
 
         cls_loss_, focal_loss_, dice_loss_ = self.get_loss(

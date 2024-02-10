@@ -19,13 +19,13 @@ from official.projects.maskformer.modeling.transformer import transformer
 from official.modeling import tf_utils
 from typing import Any, Dict
 
+
 class DETRTransformer(tf.keras.layers.Layer):
   """Encoder and Decoder of DETR."""
 
   def __init__(self, num_encoder_layers=6, num_decoder_layers=6,
                dropout_rate=0.1, deep_supervision=False, **kwargs):
     """DETRTransformer initialization function.
-
     Args:
       num_encoder_layers: `int`, Number of encoder layers.
       num_decoder_layers: `int`, Number of decoder layers.
@@ -66,12 +66,10 @@ class DETRTransformer(tf.keras.layers.Layer):
     }
 
   def call(self, inputs: Dict[str, Any]):
-    """ 
-    Passes the inputs through the DETRTransformer.
-
+    # pylint: disable=line-too-long
+    """ Passes the inputs through the DETRTransformer.
     Args:
       inputs: A dictionary of inputs with position embeddings, inputs and targets
-    
     Returns:
       A dictionary of decoded tensors.
     """
@@ -84,7 +82,7 @@ class DETRTransformer(tf.keras.layers.Layer):
     cross_attention_mask = None
     target_shape = tf.shape(targets)
     self_attention_mask = tf.ones(
-      [target_shape[0], 1, target_shape[1], target_shape[1]], dtype=tf.float32)
+        [target_shape[0], 1, target_shape[1], target_shape[1]], dtype=tf.float32)
 
     decoded = self._decoder(
         tf.zeros_like(targets),

@@ -95,7 +95,6 @@ class mask_former_parser(parser.Parser):
           is_training=False,
   ):
     """Initializes parameters for parsing annotations in the dataset.
-
     Args:
       output_size: `Tensor` or `list` for [height, width] of output image. The
         output_size should be divided by the largest feature stride 2^max_level.
@@ -281,7 +280,7 @@ class mask_former_parser(parser.Parser):
         contigious_mask, 0, 0, self._output_size[0], self._output_size[1])
 
     individual_masks, classes = self._get_individual_masks(
-        class_ids=class_ids, contig_instance_mask=contigious_mask, instance_id=instance_ids, instance_mask=instance_mask) # pylint: disable=line-too-long
+        class_ids=class_ids, contig_instance_mask=contigious_mask, instance_id=instance_ids, instance_mask=instance_mask)  # pylint: disable=line-too-long
 
     # Cast image to dtype and set shapes of output.
     image = tf.cast(image, dtype=self._dtype)
@@ -294,7 +293,7 @@ class mask_former_parser(parser.Parser):
     return image, labels
 
   def _parse_eval_data(self, data):
-    print("////////////////////////// Inside Eval Dataloader ///////////////////////////") # pylint: disable=line-too-long
+    print("////////////////////////// Inside Eval Dataloader ///////////////////////////")  # pylint: disable=line-too-long
 
     image = data['image']
 
@@ -339,7 +338,7 @@ class mask_former_parser(parser.Parser):
     category_mask = masks[2]
 
     individual_masks, classes = self._get_individual_masks(
-        class_ids=class_ids, contig_instance_mask=contigious_mask, instance_id=instance_ids, instance_mask=instance_mask) # pylint: disable=line-too-long
+        class_ids=class_ids, contig_instance_mask=contigious_mask, instance_id=instance_ids, instance_mask=instance_mask)  # pylint: disable=line-too-long
 
     # Cast image to float and set shapes of output.
     image = tf.cast(image, dtype=self._dtype)

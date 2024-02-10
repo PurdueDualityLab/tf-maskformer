@@ -256,22 +256,20 @@ def generate_coco_panoptics_masks(segments_info, mask_path,
                                   is_category_thing):
   # pylint: disable=line-too-long
   """Creates masks for panoptic segmentation task.
-
   Args:
-          segments_info: a list of dicts, where each dict has keys: [u'id',
-                  u'category_id', u'area', u'bbox', u'iscrowd'], detailing information for
-                  each segment in the panoptic mask.
-          mask_path: path to the panoptic mask.
-          include_panoptic_masks: bool, when set to True, category and instance
-                  masks are included in the outputs. Set this to True, when using
-                  the Panoptic Quality evaluator.
-          is_category_thing: a dict with category ids as keys and, 0/1 as values to
-                  represent "stuff" and "things" classes respectively.
-
+    segments_info: a list of dicts, where each dict has keys: [u'id',
+            u'category_id', u'area', u'bbox', u'iscrowd'], detailing information for
+            each segment in the panoptic mask.
+    mask_path: path to the panoptic mask.
+    include_panoptic_masks: bool, when set to True, category and instance
+            masks are included in the outputs. Set this to True, when using
+            the Panoptic Quality evaluator.
+    is_category_thing: a dict with category ids as keys and, 0/1 as values to
+            represent "stuff" and "things" classes respectively.
   Returns:
-          A dict with keys: [u'semantic_segmentation_mask', u'category_mask',
-                  u'instance_mask']. The dict contains 'category_mask' and 'instance_mask'
-                  only if `include_panoptic_eval_masks` is set to True.
+    A dict with keys: [u'semantic_segmentation_mask', u'category_mask',
+            u'instance_mask']. The dict contains 'category_mask' and 'instance_mask'
+            only if `include_panoptic_eval_masks` is set to True.
   """
   rgb_mask = tfrecord_lib.read_image(mask_path)
   r, g, b = np.split(rgb_mask, 3, axis=-1)
@@ -452,39 +450,36 @@ def create_tf_example(image,
                       include_masks=False):
   # pylint: disable=line-too-long
   """Converts image and annotations to a tf.Example proto.
-
   Args:
-          image: dict with keys: [u'license', u'file_name', u'coco_url', u'height',
-                  u'width', u'date_captured', u'flickr_url', u'id']
-          image_dirs: list of directories containing the image files.
-          panoptic_masks_dir: `str` of the panoptic masks directory.
-          bbox_annotations:
-                  list of dicts with keys: [u'segmentation', u'area', u'iscrowd',
-                          u'image_id', u'bbox', u'category_id', u'id'] Notice that bounding box
-                          coordinates in the official COCO dataset are given as [x, y, width,
-                          height] tuples using absolute coordinates where x, y represent the
-                          top-left (0-indexed) corner.  This function converts to the format
-                          expected by the Tensorflow Object Detection API (which is which is
-                          [ymin, xmin, ymax, xmax] with coordinates normalized relative to image
-                          size).
-          id_to_name_map: a dict mapping category IDs to string names.
-          caption_annotations:
-                  list of dict with keys: [u'id', u'image_id', u'str'].
-          panoptic_annotation: dict with keys: [u'image_id', u'file_name',
-                  u'segments_info']. Where the value for segments_info is a list of dicts,
-                  with each dict containing information for a single segment in the mask.
-          is_category_thing: `bool`, whether it is a category thing.
-          include_panoptic_masks: `bool`, whether to include panoptic masks.
-          include_masks: Whether to include instance segmentations masks
-                  (PNG encoded) in the result. default: False.
-
+    image: dict with keys: [u'license', u'file_name', u'coco_url', u'height',
+            u'width', u'date_captured', u'flickr_url', u'id']
+    image_dirs: list of directories containing the image files.
+    panoptic_masks_dir: `str` of the panoptic masks directory.
+    bbox_annotations:
+            list of dicts with keys: [u'segmentation', u'area', u'iscrowd',
+                    u'image_id', u'bbox', u'category_id', u'id'] Notice that bounding box
+                    coordinates in the official COCO dataset are given as [x, y, width,
+                    height] tuples using absolute coordinates where x, y represent the
+                    top-left (0-indexed) corner.  This function converts to the format
+                    expected by the Tensorflow Object Detection API (which is which is
+                    [ymin, xmin, ymax, xmax] with coordinates normalized relative to image
+                    size).
+    id_to_name_map: a dict mapping category IDs to string names.
+    caption_annotations:
+            list of dict with keys: [u'id', u'image_id', u'str'].
+    panoptic_annotation: dict with keys: [u'image_id', u'file_name',
+            u'segments_info']. Where the value for segments_info is a list of dicts,
+            with each dict containing information for a single segment in the mask.
+    is_category_thing: `bool`, whether it is a category thing.
+    include_panoptic_masks: `bool`, whether to include panoptic masks.
+    include_masks: Whether to include instance segmentations masks
+            (PNG encoded) in the result. default: False.
   Returns:
-          example: The converted tf.Example
-          num_annotations_skipped: Number of (invalid) annotations that were ignored.
-
+    example: The converted tf.Example
+    num_annotations_skipped: Number of (invalid) annotations that were ignored.
   Raises:
-          ValueError: if the image pointed to by data['filename'] is not a valid JPEG,
-                  does not exist, or is not unique across image directories.
+    ValueError: if the image pointed to by data['filename'] is not a valid JPEG,
+            does not exist, or is not unique across image directories.
   """
   image_height = image['height']
   image_width = image['width']
@@ -678,25 +673,24 @@ def _create_tf_record_from_coco_annotations(images_info_file,
                                             include_masks=False):
   # pylint: disable=line-too-long
   """Loads COCO annotation json files and converts to tf.Record format.
-
   Args:
-          images_info_file: JSON file containing image info. The number of tf.Examples
-                  in the output tf Record files is exactly equal to the number of image info
-                  entries in this file. This can be any of train/val/test annotation json
-                  files Eg. 'image_info_test-dev2017.json',
-                  'instance_annotations_train2017.json',
-                  'caption_annotations_train2017.json', etc.
-          image_dirs: List of directories containing the image files.
-          output_path: Path to output tf.Record file.
-          num_shards: Number of output files to create.
-          object_annotations_file: JSON file containing bounding box annotations.
-          caption_annotations_file: JSON file containing caption annotations.
-          panoptic_masks_dir: Directory containing panoptic masks.
-          panoptic_annotations_file: JSON file containing panoptic annotations.
-          include_panoptic_masks: Whether to include 'category_mask'
-                  and 'instance_mask', which is required by the panoptic quality evaluator.
-          include_masks: Whether to include instance segmentations masks
-                  (PNG encoded) in the result. default: False.
+    images_info_file: JSON file containing image info. The number of tf.Examples
+            in the output tf Record files is exactly equal to the number of image info
+            entries in this file. This can be any of train/val/test annotation json
+            files Eg. 'image_info_test-dev2017.json',
+            'instance_annotations_train2017.json',
+            'caption_annotations_train2017.json', etc.
+    image_dirs: List of directories containing the image files.
+    output_path: Path to output tf.Record file.
+    num_shards: Number of output files to create.
+    object_annotations_file: JSON file containing bounding box annotations.
+    caption_annotations_file: JSON file containing caption annotations.
+    panoptic_masks_dir: Directory containing panoptic masks.
+    panoptic_annotations_file: JSON file containing panoptic annotations.
+    include_panoptic_masks: Whether to include 'category_mask'
+            and 'instance_mask', which is required by the panoptic quality evaluator.
+    include_masks: Whether to include instance segmentations masks
+            (PNG encoded) in the result. default: False.
   """
 
   logging.info('writing to output path: %s', output_path)

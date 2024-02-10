@@ -62,4 +62,3 @@ if eval_file_pattern:
       num_examples=params.eval.eval_samples)
 
 train_ds = train_input_fn()
-print(train_ds)

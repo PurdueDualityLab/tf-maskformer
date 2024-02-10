@@ -25,3 +25,7 @@ model_dir_multi_scale_2/
 __pycache__/
 
 *.npy
+
+*.pickle
+test/
+losses/test/

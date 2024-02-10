@@ -18,6 +18,7 @@ import tensorflow as tf
 import math
 from typing import Any, Dict
 
+
 class MLPHead(tf.keras.layers.Layer):
   def __init__(self,
                num_classes: int,
@@ -55,12 +56,9 @@ class MLPHead(tf.keras.layers.Layer):
     super(MLPHead, self).build(input_shape)
 
   def call(self, inputs: Dict[str, Any]):
-    """ 
-    Passes the per_pixel_embeddings and per_segment_embeddings through the MLPHead.
-
+    """Passes the per_pixel_embeddings and per_segment_embeddings through the MLPHead.
     Args: 
       inputs: A dictionary of inputs.
-    
     Returns:
       A dictionary of class and mask probability tensors.
     """

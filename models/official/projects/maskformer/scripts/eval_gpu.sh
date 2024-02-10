@@ -14,13 +14,14 @@ export TFRECORDS_DIR="/depot/davisjam/data/vishal/datasets/coco/tfrecords"
 export TRAIN_BATCH_SIZE=$train_bsize
 export EVAL_BATCH_SIZE=$eval_bsize
 
+export ON_TPU=False
+
 export BASE_LR=0.0001
 export IMG_SIZE=640
 export NO_OBJ_CLS_WEIGHT=0.01
 
-export DEEP_SUPERVISION=0
+export DEEP_SUPERVISION=True
 
-export ON_TPU=0
 export OVERRIDES="runtime.distribution_strategy=one_device,runtime.mixed_precision_dtype=float32,\
 task.validation_data.global_batch_size=$EVAL_BATCH_SIZE,task.model.which_pixel_decoder=transformer_fpn,\
 task.init_checkpoint_modules=all,\

@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Pixel Decoder Network for MaskFormer.""" 
+"""Pixel Decoder Network for MaskFormer."""
 
 import tensorflow as tf
 import math
 from official.modeling import tf_utils
 
 from official.projects.maskformer.modeling.transformer.transformer import TransformerEncoder
+
 
 def position_embedding_sine(attention_mask,
                             num_pos_features=256,
@@ -27,24 +28,22 @@ def position_embedding_sine(attention_mask,
                             scale=2 * math.pi):
   # pylint: disable=line-too-long
   """Sine-based positional embeddings for 2D images.
-
   Args:
-          attention_mask: a `bool` Tensor specifying the size of the input image to
-          the Transformer and which elements are padded, of size [batch_size,
-          height, width]
-          num_pos_features: a `int` specifying the number of positional features,
-          should be equal to the hidden size of the Transformer network
-          temperature: a `float` specifying the temperature of the positional
-          embedding. Any type that is converted to a `float` can also be accepted.
-          normalize: a `bool` determining whether the positional embeddings should be
-          normalized between [0, scale] before application of the sine and cos
-          functions.
-          scale: a `float` if normalize is True specifying the scale embeddings before
-          application of the embedding function.
-
+    attention_mask: a `bool` Tensor specifying the size of the input image to
+    the Transformer and which elements are padded, of size [batch_size,
+    height, width]
+    num_pos_features: a `int` specifying the number of positional features,
+    should be equal to the hidden size of the Transformer network
+    temperature: a `float` specifying the temperature of the positional
+    embedding. Any type that is converted to a `float` can also be accepted.
+    normalize: a `bool` determining whether the positional embeddings should be
+    normalized between [0, scale] before application of the sine and cos
+    functions.
+    scale: a `float` if normalize is True specifying the scale embeddings before
+    application of the embedding function.
   Returns:
-          embeddings: a `float` tensor of the same shape as input_tensor specifying
-          the positional embeddings based on sine features.
+    embeddings: a `float` tensor of the same shape as input_tensor specifying
+    the positional embeddings based on sine features.
   """
   if num_pos_features % 2 != 0:
     raise ValueError(
@@ -86,6 +85,7 @@ def position_embedding_sine(attention_mask,
   embeddings = tf.cast(output, tf.float32)
   return embeddings
 
+
 class TransformerFPN(tf.keras.layers.Layer):
   """MaskFormer Feature Pyramid Networks."""
 
@@ -106,25 +106,25 @@ class TransformerFPN(tf.keras.layers.Layer):
                num_encoder_layers=0,
                bfloat16=True,
                **kwargs):
+    # pylint: disable=line-too-long
     """FPN initialization function.
-
-      Args:
-        fpn_feat_dims (int): The number of feature dimensions in the FPN outputs.
-        data_format (str): The data format ('channels_first' or 'channels_last').
-        dilation_rate (tuple): The dilation rate for dilated convolution.
-        groups (int): The number of groups for grouped convolution.
-        activation (str): The activation function to use.
-        use_bias (bool): Whether to use bias in the convolution layers.
-        kernel_initializer (str): Initializer for the kernel weights.
-        bias_initializer (str): Initializer for the bias vectors.
-        kernel_regularizer (regularizer): Regularizer function for the kernel weights.
-        bias_regularizer (regularizer): Regularizer function for the bias vectors.
-        activity_regularizer (regularizer): Regularizer function applied to the output.
-        kernel_constraint (constraint): Constraint function applied to the kernel weights.
-        bias_constraint (constraint): Constraint function applied to the bias vectors.
-        num_encoder_layers (int): The number of encoder layers in the transformer.
-        bfloat16 (bool): Whether to use bfloat16 precision.
-        **kwargs: Additional keyword arguments for layer configuration.
+    Args:
+      fpn_feat_dims (int): The number of feature dimensions in the FPN outputs.
+      data_format (str): The data format ('channels_first' or 'channels_last').
+      dilation_rate (tuple): The dilation rate for dilated convolution.
+      groups (int): The number of groups for grouped convolution.
+      activation (str): The activation function to use.
+      use_bias (bool): Whether to use bias in the convolution layers.
+      kernel_initializer (str): Initializer for the kernel weights.
+      bias_initializer (str): Initializer for the bias vectors.
+      kernel_regularizer (regularizer): Regularizer function for the kernel weights.
+      bias_regularizer (regularizer): Regularizer function for the bias vectors.
+      activity_regularizer (regularizer): Regularizer function applied to the output.
+      kernel_constraint (constraint): Constraint function applied to the kernel weights.
+      bias_constraint (constraint): Constraint function applied to the bias vectors.
+      num_encoder_layers (int): The number of encoder layers in the transformer.
+      bfloat16 (bool): Whether to use bfloat16 precision.
+      **kwargs: Additional keyword arguments for layer configuration.
     """
     super(TransformerFPN, self).__init__(**kwargs)
 
@@ -231,7 +231,7 @@ class TransformerFPN(tf.keras.layers.Layer):
 
     for level in levels[::-1]:
       # pylint: disable=line-too-long
-      down = tf.keras.layers.Conv2D(filters=self._fpn_feat_dims, 
+      down = tf.keras.layers.Conv2D(filters=self._fpn_feat_dims,
                                     strides=(1, 1),
                                     kernel_size=(3, 3),
                                     padding='same',
@@ -283,14 +283,11 @@ class TransformerFPN(tf.keras.layers.Layer):
 
   def call(self, multilevel_features, image):
     # pylint: disable=line-too-long
-    """
-    Returns the FPN features for a given multilevel features.
-
+    """Returns the FPN features for a given multilevel features.
     Args:
       multilevel_features: a `dict` containing `int` keys for continuous feature
               levels, e.g., [2, 3, 4, 5]. The values are corresponding features with
               shape [batch_size, height_l, width_l, num_filters].
-
     Returns:
       Mask projection
     """

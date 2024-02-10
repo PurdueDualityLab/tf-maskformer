@@ -20,9 +20,6 @@ from official.projects.maskformer.modeling.decoder.transformer_decoder import Ma
 from official.projects.maskformer.modeling.layers.nn_block import MLPHead
 from official.projects.maskformer.modeling.decoder.transformer_pixel_decoder import TransformerFPN
 
-import os
-
-
 class MaskFormer(tf.keras.Model):
   """Maskformer"""
 
@@ -186,11 +183,10 @@ class MaskFormer(tf.keras.Model):
     return new_dict
 
   def call(self, image: tf.Tensor, training=False):
-    """ 
+    """Forward pass of the MaskFormer model.
     Args:
       image: `tf.Tensor`, Input image.
       training: `bool`, Training or not.
-
     Returns:
       seg_pred: `tf.Tensor`, Segmentation prediction.
     """

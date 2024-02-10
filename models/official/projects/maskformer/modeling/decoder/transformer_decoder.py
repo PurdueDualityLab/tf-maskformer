@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Transformer Decoder Network in MaskFormer, uses DETRTransformer.""" 
+"""Transformer Decoder Network in MaskFormer, uses DETRTransformer."""
 
 import math
 import tensorflow as tf
 from official.modeling import tf_utils
 from official.projects.maskformer.modeling.decoder.detr_transformer import DETRTransformer
 from typing import Any, Dict
+
 
 def position_embedding_sine(attention_mask,
                             num_pos_features=256,
@@ -27,7 +28,6 @@ def position_embedding_sine(attention_mask,
                             scale=2 * math.pi):
   # pylint: disable=line-too-long
   """Sine-based positional embeddings for 2D images.
-
   Args:
     attention_mask: a `bool` Tensor specifying the size of the input image to
     the Transformer and which elements are padded, of size [batch_size,
@@ -41,7 +41,6 @@ def position_embedding_sine(attention_mask,
     functions.
     scale: a `float` if normalize is True specifying the scale embeddings before
     application of the embedding function.
-
   Returns:
     embeddings: a `float` tensor of the same shape as input_tensor specifying
     the positional embeddings based on sine features.
@@ -146,12 +145,9 @@ class MaskFormerTransformer(tf.keras.layers.Layer):
     return mask
 
   def call(self, inputs: Dict[str, Any]):
-    """ 
-    Passes the input image features through the customized DETR Transformer
-
+    """Passes the input image features through the customized DETR Transformer
     Args:
       inputs: A dictionary of inputs.
-
     Returns: 
       A dictionary of decoded list of features.
     """

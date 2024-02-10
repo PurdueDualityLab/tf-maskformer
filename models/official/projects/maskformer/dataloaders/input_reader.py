@@ -93,7 +93,6 @@ class InputFn(object):
       dataset = dataset.take(self._num_examples)
 
     # Parses the fetched records to input tensors for model function.
-
     dataset = dataset.map(
         self._parser_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
     dataset = dataset.batch(batch_size, drop_remainder=True)

@@ -12,21 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Instance and Category segmentation masks generation.""" 
+"""Panoptic Inference Module."""
 
 import tensorflow as tf
 from official.projects.maskformer.losses.mapper import _get_contigious_to_original
+from typing import List
+
 
 class PanopticInference:
   """Panoptic Inference"""
 
   def __init__(
           self,
-          num_classes: int =133,
+          num_classes: int = 133,
           background_class_id: int = 0,
           object_mask_threshold: float = 0.4,
           class_score_threshold: float = 0.4,
           overlap_threshold: float = 0.3):
+    # pylint: disable=line-too-long  
     """Initialize
     Args:
       num_classes: `int`, The total number of distinct classes, including background. Default is 133.
@@ -38,23 +41,17 @@ class PanopticInference:
       is_thing_dict: `dict`, Indicates if a category ID is 'thing' or 'stuff'.
     """
 
-    self.num_classes = num_classes # pylint: unused-variable
     self.background_class_id = background_class_id
     self.object_mask_threshold = object_mask_threshold
     self.class_score_threshold = class_score_threshold
     self.cat_id_map, self.is_thing_dict, _ = _get_contigious_to_original()
     self.overlap_threshold = overlap_threshold
 
-  def __call__(self, pred_logits, mask_pred, image_shape):
+  def __call__(self, pred_logits, mask_pred, image_shape: List[int]):
     """
     mask_pred: (batch, height, width, num_predictions)
     pred_logits: (batch, num_predictions, num_classes)
     """
-    print("mask_pred", type(mask_pred))
-    print("pred_logits", type(pred_logits))
-    print("image_shape", type(image_shape))
-
-
     # maps from contiguous category id to original category id
 
     instance_masks = []
@@ -107,8 +104,6 @@ class PanopticInference:
 
         for k in range(tf.shape(curr_classes)[0]):
           pred_class = curr_classes[k]
-
-          # isthing = self.is_thing_dict[self.cat_id_map[int(pred_class)]]
 
           binary_mask = tf.math.equal(cur_mask_ids, tf.cast(k, tf.int64))
           binary_mask = tf.cast(binary_mask, tf.int32)
