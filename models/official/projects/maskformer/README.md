@@ -98,6 +98,11 @@ python3 train.py \
 
 * Wenxin Jiang ([@GitHub wenxin-jiang](https://github.com/wenxin-jiang))
 * Vishal Purohit ([@GitHub Vishal-S-P](https://github.com/Vishal-S-P))
+* Ibrahim Saeed ([@GitHub IbrahimSaeedPurdue](https://github.com/IbrahimSaeedPurdue))
+* Ananya Singh ([@GitHub ananya-singhh](https://github.com/ananya-singhh))
+* Alexiy Buynitsky ([@GitHub Abuynits](https://github.com/Abuynits))
+* Isaac In () 
+* Akshath Raghav R ([@GitHub AkshathRaghav](https://github.com/AkshathRaghav))
 
 
 ## Requirements 
