@@ -75,7 +75,9 @@ class PanopticTask(base_task.Task):
         deep_supervision=self._task_config.model.deep_supervision,
     )
     logging.info('Maskformer model build successful.')
-    self.DATA_IDX = 0
+
+    self.ITER_IDX = 1
+
     return model
 
   def initialize(self, model: tf.keras.Model) -> None:
@@ -157,6 +159,8 @@ class PanopticTask(base_task.Task):
     if aux_outputs:
       outputs["pred_masks"] = output["mask_prob_predictions"][-1]
       outputs["pred_logits"] = output["class_prob_predictions"][-1]
+
+      formatted_aux_output = []
 
       for i in range(len(output["class_prob_predictions"][:-1])):
         formatted_aux_output += [{"pred_logits": output["class_prob_predictions"]
@@ -247,15 +251,18 @@ class PanopticTask(base_task.Task):
     Returns:
       A dictionary of logs.
     """
+    print(f"[INFO] Starting Training Step: {self.ITER_IDX}")
 
     features, labels = inputs
 
     with tf.GradientTape() as tape:
       outputs = model(features, training=True)
 
+      print(f"[INFO] Building Losses: {self.ITER_IDX}")
+
       total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(
           output=outputs, labels=labels, aux_outputs=model._deep_supervision)
-      scaled_loss = total_loss
+      scaled_loss = total_loss      
 
       if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
         total_loss = optimizer.get_scaled_loss(scaled_loss)
@@ -277,6 +284,8 @@ class PanopticTask(base_task.Task):
     focal_loss *= num_replicas_in_sync
     dice_loss *= num_replicas_in_sync
 
+    print(f"[INFO] Losses: total_loss({total_loss: .3f}), cls_loss({cls_loss: .3f}), focal_loss({focal_loss: .3f}), dice_loss({dice_loss: .3f}): {self.ITER_IDX}")
+
     logs = {self.loss: total_loss}
 
     all_losses = {
@@ -287,6 +296,10 @@ class PanopticTask(base_task.Task):
     if metrics:
       for m in metrics:
         m.update_state(all_losses[m.name])
+
+    print(f"[INFO] Finished Training Step: {self.ITER_IDX}")
+
+    self.ITER_IDX += 1
 
     return logs
 
@@ -340,19 +353,25 @@ class PanopticTask(base_task.Task):
     Returns:
       A dictionary of logs.
     """
+    print(f"[INFO] Starting Validation Step: {self.ITER_IDX}")
+
     features, labels = inputs
 
     outputs = model(features, training=False)
 
+    print(f"[INFO] Building Losses: {self.ITER_IDX}")
+
     total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(
         output=outputs, labels=labels, aux_outputs=model._deep_supervision)
-
+    
     num_replicas_in_sync = tf.distribute.get_strategy().num_replicas_in_sync
     total_loss *= num_replicas_in_sync
     cls_loss *= num_replicas_in_sync
     focal_loss *= num_replicas_in_sync
     dice_loss *= num_replicas_in_sync
     logs = {self.loss: total_loss}
+
+    print(f"[INFO] Losses: total_loss({total_loss: .3f}), cls_loss({cls_loss: .3f}), focal_loss({focal_loss: .3f}), dice_loss({dice_loss: .3f}): {self.ITER_IDX}")
 
     all_losses = {
         'cls_loss': cls_loss,
@@ -369,5 +388,9 @@ class PanopticTask(base_task.Task):
     if metrics:
       for m in metrics:
         m.update_state(all_losses[m.name])
+    
+    print(f"[INFO] Finished Validation Step: {self.ITER_IDX}")
+
+    self.ITER_IDX += 1
 
     return logs
