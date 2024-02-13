@@ -92,7 +92,13 @@ class MLP(tf.keras.layers.Layer):
                output_dim: int,
                num_layers: int):
     super().__init__()
-
+    """MLP initialization function.
+    Args:
+      input_dim: `int`, Dimension of input layer.
+      hidden_dim: `int`, Dimension of hidden layer.
+      output_dim: `int`, Dimension of output layer.
+      num_layers: `int`, Number of layers.
+    """
     self._input_dim = input_dim
     self._hidden_dim = hidden_dim
     self._output_dim = output_dim
@@ -126,6 +132,9 @@ class MLP(tf.keras.layers.Layer):
                     sqrt_k)))
 
   def call(self, x):
+    """ 
+    Passes the input tensor through the MLP through a series of dense layers.
+    """
     for layer in self._layers:
       x = layer(x)
     return x

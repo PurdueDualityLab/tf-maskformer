@@ -320,7 +320,7 @@ class Loss:
 
     if "aux_outputs" in outputs and outputs["aux_outputs"] is not None:
       for i, aux_outputs in enumerate(outputs["aux_outputs"]):
-        # Not needed when testing with PyTorch outputs
+        # Not needed when testing with PyTorch tensors
         aux_outputs["pred_masks"] = tf.transpose(
             aux_outputs["pred_masks"], perm=[0, 3, 1, 2])
 

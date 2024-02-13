@@ -101,8 +101,8 @@ python3 train.py \
 * Ibrahim Saeed ([@GitHub IbrahimSaeedPurdue](https://github.com/IbrahimSaeedPurdue))
 * Ananya Singh ([@GitHub ananya-singhh](https://github.com/ananya-singhh))
 * Alexiy Buynitsky ([@GitHub Abuynits](https://github.com/Abuynits))
-* Isaac In () 
 * Akshath Raghav R ([@GitHub AkshathRaghav](https://github.com/AkshathRaghav))
+* Isaac In ([@Github InAIBot](https://github.com/InAIBot)) 
 
 
 ## Requirements 

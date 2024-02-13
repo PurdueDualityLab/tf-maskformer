@@ -20,6 +20,7 @@ from official.projects.maskformer.modeling.decoder.transformer_decoder import Ma
 from official.projects.maskformer.modeling.layers.nn_block import MLPHead
 from official.projects.maskformer.modeling.decoder.transformer_pixel_decoder import TransformerFPN
 
+
 class MaskFormer(tf.keras.Model):
   """Maskformer"""
 
@@ -204,5 +205,5 @@ class MaskFormer(tf.keras.Model):
 
     seg_pred = self.head({"per_pixel_embeddings": mask_features,
                           "per_segment_embeddings": transformer_features})
-    
+
     return seg_pred

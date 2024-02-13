@@ -23,7 +23,9 @@ from official.projects.maskformer.modeling.decoder.pixel_decoder import Fpn
 
 
 class FpnTest(parameterized.TestCase, tf.test.TestCase):
-
+  """
+  # This module tests whether the Fpn class works (output shapes, forward pass) as expected.
+  """
   @parameterized.named_parameters(('test1', 256),)
   def test_pass_through(self, dim):
 

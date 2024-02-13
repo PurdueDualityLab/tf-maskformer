@@ -21,7 +21,9 @@ from official.projects.maskformer.modeling.decoder.transformer_decoder import Ma
 
 
 class MaskFormerTransformerTest(tf.test.TestCase, parameterized.TestCase):
-
+  """
+  # This module tests whether the MaskFormerTransformer class works (output shapes, forward pass) as expected.
+  """
   @parameterized.named_parameters(('test1', '5', 8, 100, 256, 10,))
   def test_pass_through(self,
                         backbone_endpoint_name,
