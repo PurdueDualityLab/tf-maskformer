@@ -187,6 +187,8 @@ class mask_former_parser(parser.Parser):
     return mask
 
   def _parse_train_data(self, data):
+    print("////////////////////////// Inside Train Dataloader ///////////////////////////")  # pylint: disable=line-too-long
+    
     image = data['image']
 
     # Normalize and prepare image and masks

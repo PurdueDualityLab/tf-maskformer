@@ -38,6 +38,7 @@ from official.vision.modeling import backbones
 
 from official.projects.maskformer.losses.mapper import _get_contigious_to_original
 
+
 @task_factory.register_task_cls(maskformer_cfg.MaskFormerTask)
 class PanopticTask(base_task.Task):
   # pylint: disable=line-too-long
@@ -51,6 +52,8 @@ class PanopticTask(base_task.Task):
   def build_model(self):
     """Builds MaskFormer Model."""
     logging.info('Building MaskFormer model.')
+    print("[INFO] Building MaskFormer model")
+
     input_specs = tf.keras.layers.InputSpec(
         shape=[None] + self._task_config.model.input_size)
 
@@ -59,6 +62,7 @@ class PanopticTask(base_task.Task):
         backbone_config=self._task_config.model.backbone,
         norm_activation_config=self._task_config.model.norm_activation)
     logging.info('Backbone build successful.')
+    print("[INFO] Backbone build successful")
     model = MaskFormer(
         backbone=backbone,
         input_specs=input_specs,
@@ -74,7 +78,7 @@ class PanopticTask(base_task.Task):
         deep_supervision=self._task_config.model.deep_supervision,
     )
     logging.info('Maskformer model build successful.')
-
+    print("[INFO] Maskformer model build successful")
     self.ITER_IDX = 1
 
     return model
@@ -87,6 +91,8 @@ class PanopticTask(base_task.Task):
     logging.info(
         'Initializing model from checkpoint: %s',
         self._task_config.init_checkpoint)
+    print("[INFO] Initializing model from checkpoint")
+
     if not self._task_config.init_checkpoint:
       return
     ckpt_dir_or_file = self._task_config.init_checkpoint
@@ -100,6 +106,7 @@ class PanopticTask(base_task.Task):
       status = ckpt.restore(ckpt_dir_or_file)
       status.expect_partial().assert_existing_objects_matched()
       logging.info('Loaded whole model from %s', ckpt_dir_or_file)
+      print(f"[INFO] Loaded whole model from {ckpt_dir_or_file}")
 
     elif self._task_config.init_checkpoint_modules == 'backbone':
       ckpt = tf.train.Checkpoint(backbone=model.backbone)
@@ -107,6 +114,8 @@ class PanopticTask(base_task.Task):
       status.expect_partial().assert_existing_objects_matched()
       logging.info('Finished loading backbone checkpoint from %s',
                    ckpt_dir_or_file)
+      print(f"[INFO] Finished loading backbone checkpoint from \
+        {ckpt_dir_or_file}")
     else:
       raise ValueError('Not a valid module to initialize from: {}'.format(
           self._task_config.init_checkpoint_modules))
@@ -121,6 +130,8 @@ class PanopticTask(base_task.Task):
       A tf.data.Dataset instance.
     """
     logging.info('Building panoptic segmentation dataset.')
+    print("[INFO] Building panoptic segmentation dataset")
+
     if params.decoder.type == 'simple_decoder':
       decoder = panoptic_input.TfExampleDecoder(
           regenerate_source_id=params.regenerate_source_id)
@@ -217,7 +228,9 @@ class PanopticTask(base_task.Task):
       metrics.append(tf.keras.metrics.Mean(name, dtype=tf.float32))
 
     if not training:
-      print("[INFO] Building panoptic quality metric ")
+      logging.info('Building Panoptic Inference and Quality.')
+      print("[INFO] Building Panoptic Inference and Quality")
+
       _, _, thing_tensor_bool = _get_contigious_to_original()
       pq_config = self._task_config.panoptic_quality_evaluator
 
@@ -250,6 +263,7 @@ class PanopticTask(base_task.Task):
     Returns:
       A dictionary of logs.
     """
+    logging.info('Starting training step: %s', self.ITER_IDX)
     print(f"[INFO] Starting Training Step: {self.ITER_IDX}")
 
     features, labels = inputs
@@ -257,11 +271,12 @@ class PanopticTask(base_task.Task):
     with tf.GradientTape() as tape:
       outputs = model(features, training=True)
 
+      logging.info('Building Losses: %s', self.ITER_IDX)
       print(f"[INFO] Building Losses: {self.ITER_IDX}")
 
       total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(
           output=outputs, labels=labels, aux_outputs=model._deep_supervision)
-      scaled_loss = total_loss      
+      scaled_loss = total_loss
 
       if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
         total_loss = optimizer.get_scaled_loss(scaled_loss)
@@ -283,7 +298,10 @@ class PanopticTask(base_task.Task):
     focal_loss *= num_replicas_in_sync
     dice_loss *= num_replicas_in_sync
 
-    print(f"[INFO] Losses: total_loss({total_loss:.3f}), cls_loss({cls_loss:.3f}), focal_loss({focal_loss:.3f}), dice_loss({dice_loss:.3f}): {self.ITER_IDX}")
+    logging.info('Losses: total_loss(%s), cls_loss(%s), focal_loss(%s), dice_loss(%s): %s',
+                 total_loss, cls_loss, focal_loss, dice_loss, self.ITER_IDX)
+    print(f"[INFO] Losses: total_loss({total_loss:.3f}), cls_loss({cls_loss:.3f}), \
+      focal_loss({focal_loss:.3f}), dice_loss({dice_loss:.3f}): {self.ITER_IDX}")
 
     logs = {self.loss: total_loss}
 
@@ -296,6 +314,7 @@ class PanopticTask(base_task.Task):
       for m in metrics:
         m.update_state(all_losses[m.name])
 
+    logging.info('Finished training step: %s', self.ITER_IDX)
     print(f"[INFO] Finished Training Step: {self.ITER_IDX}")
 
     self.ITER_IDX += 1
@@ -322,7 +341,7 @@ class PanopticTask(base_task.Task):
       pred_binary_masks = pred_binary_masks[-1]
       pred_labels = pred_labels[-1]
 
-    # Values are in contigious category IDs right now, and 
+    # Values are in contigious category IDs right now, and
     # will be converted to original category IDs within PanopticInference
     output_instance_mask, output_category_mask = self.panoptic_inference(
         pred_labels, pred_binary_masks, image_shapes)
@@ -358,17 +377,19 @@ class PanopticTask(base_task.Task):
     Returns:
       A dictionary of logs.
     """
+    logging.info('Starting validation step: %s', self.ITER_IDX)
     print(f"[INFO] Starting Validation Step: {self.ITER_IDX}")
 
     features, labels = inputs
 
     outputs = model(features, training=False)
 
+    logging.info('Building Losses: %s', self.ITER_IDX)
     print(f"[INFO] Building Losses: {self.ITER_IDX}")
 
     total_loss, cls_loss, focal_loss, dice_loss = self.build_losses(
         output=outputs, labels=labels, aux_outputs=model._deep_supervision)
-    
+
     num_replicas_in_sync = tf.distribute.get_strategy().num_replicas_in_sync
     total_loss *= num_replicas_in_sync
     cls_loss *= num_replicas_in_sync
@@ -376,7 +397,10 @@ class PanopticTask(base_task.Task):
     dice_loss *= num_replicas_in_sync
     logs = {self.loss: total_loss}
 
-    print(f"[INFO] Losses: total_loss({total_loss:.3f}), cls_loss({cls_loss:.3f}), focal_loss({focal_loss:.3f}), dice_loss({dice_loss:.3f}): {self.ITER_IDX}")
+    logging.info('Losses: total_loss(%s), cls_loss(%s), focal_loss(%s), dice_loss(%s): %s',
+                 total_loss, cls_loss, focal_loss, dice_loss, self.ITER_IDX)
+    print(f"[INFO] Losses: total_loss({total_loss:.3f}), cls_loss({cls_loss:.3f}), \
+      focal_loss({focal_loss:.3f}), dice_loss({dice_loss:.3f}): {self.ITER_IDX}")
 
     all_losses = {
         'cls_loss': cls_loss,
@@ -393,7 +417,8 @@ class PanopticTask(base_task.Task):
     if metrics:
       for m in metrics:
         m.update_state(all_losses[m.name])
-    
+
+    logging.info('Finished validation step: %s', self.ITER_IDX)
     print(f"[INFO] Finished Validation Step: {self.ITER_IDX}")
 
     self.ITER_IDX += 1

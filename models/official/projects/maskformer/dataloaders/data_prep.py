@@ -39,8 +39,8 @@ params = params_dict.override_params_dict(
 
 training_file_pattern = params.train.train_file_pattern
 eval_file_pattern = params.eval.eval_file_pattern
-print(f"training file pattern:{training_file_pattern}")
-print(f"eval file pattern:{eval_file_pattern}")
+print(f"Training file pattern:{training_file_pattern}")
+print(f"Eval file pattern:{eval_file_pattern}")
 if not training_file_pattern and not eval_file_pattern:
   raise ValueError('Must provide at least one of training_file_pattern and '
                    'eval_file_pattern.')
