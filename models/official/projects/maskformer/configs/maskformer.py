@@ -15,8 +15,9 @@
 """MaskFormer configurations."""
 
 import dataclasses
+from dataclasses import dataclass, field
 import os
-from typing import List, Optional, Union
+from typing import List, Optional, Union, ClassVar
 
 from official.core import config_definitions as cfg
 from official.core import exp_factory
@@ -24,6 +25,7 @@ from official.modeling import hyperparams
 from official.vision.configs import backbones
 from official.vision.configs import common
 from official.projects.maskformer.utils import optimization
+from official.projects.maskformer.losses.mapper import _get_original_is_thing
 
 
 @dataclasses.dataclass
@@ -96,9 +98,8 @@ class MaskFormer(hyperparams.Config):
 @dataclasses.dataclass
 class PanopticQuality(hyperparams.Config):
   """MaskFormer model pq evaluator config."""
-  num_categories: int = 133  # FIXME
-  # FIXME : Make this a list of bools for each class
-  is_thing: List[bool] = None
+  num_categories: int = 133  
+  is_thing: List[bool] = field(default_factory=_get_original_is_thing)
   ignored_label: int = 0
   rescale_predictions: bool = False
   max_num_instances: int = 100
@@ -115,7 +116,6 @@ class MaskFormerTask(cfg.TaskConfig):
   per_category_metrics: bool = False
   bfloat16: bool = False
   panoptic_quality_evaluator: PanopticQuality = PanopticQuality()
-
 
 COCO_INPUT_PATH_BASE = os.environ.get('TFRECORDS_DIR')
 COCO_TRAIN_EXAMPLES = 118287

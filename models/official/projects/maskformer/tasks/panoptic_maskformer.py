@@ -38,7 +38,6 @@ from official.vision.modeling import backbones
 
 from official.projects.maskformer.losses.mapper import _get_contigious_to_original
 
-
 @task_factory.register_task_cls(maskformer_cfg.MaskFormerTask)
 class PanopticTask(base_task.Task):
   # pylint: disable=line-too-long
@@ -284,7 +283,7 @@ class PanopticTask(base_task.Task):
     focal_loss *= num_replicas_in_sync
     dice_loss *= num_replicas_in_sync
 
-    print(f"[INFO] Losses: total_loss({total_loss: .3f}), cls_loss({cls_loss: .3f}), focal_loss({focal_loss: .3f}), dice_loss({dice_loss: .3f}): {self.ITER_IDX}")
+    print(f"[INFO] Losses: total_loss({total_loss:.3f}), cls_loss({cls_loss:.3f}), focal_loss({focal_loss:.3f}), dice_loss({dice_loss:.3f}): {self.ITER_IDX}")
 
     logs = {self.loss: total_loss}
 
@@ -323,6 +322,8 @@ class PanopticTask(base_task.Task):
       pred_binary_masks = pred_binary_masks[-1]
       pred_labels = pred_labels[-1]
 
+    # Values are in contigious category IDs right now, and 
+    # will be converted to original category IDs within PanopticInference
     output_instance_mask, output_category_mask = self.panoptic_inference(
         pred_labels, pred_binary_masks, image_shapes)
 
@@ -336,8 +337,12 @@ class PanopticTask(base_task.Task):
         'instance_mask': output_instance_mask
     }
 
+    # Values in pq_metric_labels and pq_metric_inputs are in original category IDs
+    # They will be converted to contigious category IDs within PanopticQualityMetric
     if output_instance_mask.shape[0] == 0 or output_category_mask.shape[0] == 0:
-      raise ValueError('Post Processed Predictions are empty.')
+      raise ValueError('Post Processed Predictions are empty. \
+      This can only happen if the model has not been trained. \
+      Please train the model before running eval.')
 
     results = self.panoptic_quality_metric(
         pq_metric_labels, pq_metric_inputs)
@@ -371,7 +376,7 @@ class PanopticTask(base_task.Task):
     dice_loss *= num_replicas_in_sync
     logs = {self.loss: total_loss}
 
-    print(f"[INFO] Losses: total_loss({total_loss: .3f}), cls_loss({cls_loss: .3f}), focal_loss({focal_loss: .3f}), dice_loss({dice_loss: .3f}): {self.ITER_IDX}")
+    print(f"[INFO] Losses: total_loss({total_loss:.3f}), cls_loss({cls_loss:.3f}), focal_loss({focal_loss:.3f}), dice_loss({dice_loss:.3f}): {self.ITER_IDX}")
 
     all_losses = {
         'cls_loss': cls_loss,

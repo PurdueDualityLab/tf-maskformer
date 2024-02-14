@@ -30,20 +30,19 @@ class PanopticQualityMetric:
     Args:
       on_tpu: `bool`, Whether the model is running on TPU.
       pq_config: `maskformer.configs.maskformer.PanopticQuality`, The configuration for the PQ metric.
-      is_thing_dict_bool: `list`, Indicates if a category ID is 'thing' or 'stuff'.
     Returns: 
       None
     """
 
     self.map_original_to_contigious = _get_original_to_contigious()
-    self.is_thing_dict_bool = _get_original_is_thing()
+    self.is_thing_dict_bool = pq_config.is_thing
     self.on_tpu = on_tpu
     self.num_categories = pq_config.num_categories
 
     if self.on_tpu:
       self.metric = panoptic_quality.PanopticQualityV2(
           num_categories=pq_config.num_categories,
-          is_thing=is_thing_dict_bool,
+          is_thing=self.is_thing_dict_bool,
           ignored_label=pq_config.ignored_label,
           max_num_instances=pq_config.max_num_instances,
           rescale_predictions=pq_config.rescale_predictions,
@@ -67,9 +66,7 @@ class PanopticQualityMetric:
       A dictionary of panoptic metrics.
     """
 
-    # Mapping labels from original to contigious
-    # Outputs from panoptic inference are converted to original ids in _postprocess_inputs,
-    # and here we will convert them back to contigious ids
+    # Mapping IDs from original to contigious
     pq_metric_labels = {
         key: self.map_original_to_contigious(
             value.numpy()) for key,

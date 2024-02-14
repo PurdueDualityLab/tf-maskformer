@@ -6,9 +6,11 @@ This repository contains the implementation of [Per-Pixel Classification is Not 
 
 ## Description
 
-Mask2Former, a universal architecture based on MaskFormer meta-architecture that achieves SOTA on panoptic, instance and semantic segmentation across four popular datasets (ADE20K, Cityscapes, COCO, Mapillary Vistas).
+MaskFormer, a universal architecture based on MaskFormer meta-architecture that achieves SOTA on panoptic, instance and semantic segmentation across four popular datasets (ADE20K, Cityscapes, COCO, Mapillary Vistas).
 
 MaskFormer transforms any per-pixel classification model into a mask classification method. It utilizes a Transformer decoder to compute a set of pairs, each comprising a class prediction and a mask embedding vector. The binary mask prediction is obtained via a dot product between the mask embedding vector and per-pixel embedding from a fully-convolutional network. This model addresses both semantic and instance-level segmentation tasks without requiring changes to the model, losses, or training procedure. For both semantic and panoptic segmentation tasks, MaskFormer is supervised using the same per-pixel binary mask loss and a single classification loss per mask. A straightforward inference strategy is designed to convert MaskFormer outputs into a task-dependent prediction format.
+
+![Examples](./assets/examples.png)
 
 # Getting Started! 
 
@@ -21,68 +23,62 @@ pip install -r /models/official/requirements.txt
 pip install tensorflow-text-nightly
 ```
 
-## Training 
-Within the scripts folder you can find the training and evaluation scripts for different compute platforms (CPU/GPU/TPU).  *Remember to load the correct modules as required by each compute platform!*
+## Example Scripts 
+Within the scripts folder you can find the training and evaluation scripts for different compute platforms (CPU/GPU/TPU).  
+*Remember to load the correct modules as required by each compute platform!*
 
-To train the model on a GPU, you can use the provided shell script:
 ```
-bash scripts/train_gpu.sh
+scripts/
+  eval_cpu.sh
+  eval_gpu.sh
+  eval_tpu.sh
+  train_cpu.sh
+  train_gpu.sh
+  train_tpu.sh
 ```
 
-Alternatively, you can manually set the environment variables and start training as follows:
+## TPU Guide!  
+### Environemnt Variables 
+Manually set the environment variables as follows:
 ```
-export PYTHONPATH=$PYTHONPATH:{}
+export PYTHONPATH=$PYTHONPATH:~/models
 export RESNET_CKPT={}
-export TFRECORDS_DIR={}
-export MODEL_DIR={}
+export MODEL_DIR={} # filepath to store logs
 export TRAIN_BATCH_SIZE={}
 export EVAL_BATCH_SIZE={}
 
-export ON_TPU=False
+export TPU_NAME={}
+export TPU_SOFTWARE={}
+export TPU_PROJECT={}
+export TPU_ZONE={}
+export TFRECORDS_DIR={} # .tfrecord datafolder
+
+export ON_TPU=True 
 
 export BASE_LR=0.0001
 export IMG_SIZE=640
-export NO_OBJ_CLS_WEIGHT=0.01
+export NO_OBJ_CLS_WEIGHT=0.001
 
-export DEEP_SUPERVISION=True
+export DEEP_SUPERVISION=False 
+```
 
-export OVERRIDES="runtime.distribution_strategy=one_device,runtime.num_gpus=1,runtime.mixed_precision_dtype=float32,\
-task.train_data.global_batch_size=$train_bsize,\
+### Training 
+```
+export OVERRIDES="runtime.distribution_strategy=tpu,runtime.mixed_precision_dtype=float32,\
+task.train_data.global_batch_size=$TRAIN_BATCH_SIZE,\
 task.model.which_pixel_decoder=transformer_fpn,\
 task.init_checkpoint=$RESNET_CKPT"
-python3 train.py \
+python3 models/official/projects/maskformer/train.py \
   --experiment maskformer_coco_panoptic \
   --mode train \
   --model_dir $MODEL_DIR \
-  --params_override=$OVERRIDES
+  --tpu $TPU_NAME \
+  --params_override $OVERRIDES
 ```
 
-## Evaluation 
-For evaluating the model:
+### Evaluation 
 ```
-bash scripts/eval_gpu.sh
-```
-
-Or you can set the environment variables manually as shown:
-```
-export PYTHONPATH=$PYTHONPATH:{}
-export MODEL_DIR={}
-export MASKFORMER_CKPT={}
-export RESNET_CKPT={}
-export TFRECORDS_DIR={}
-
-export TRAIN_BATCH_SIZE={}
-export EVAL_BATCH_SIZE={}
-
-export ON_TPU=False
-
-export BASE_LR=0.0001
-export IMG_SIZE=640
-export NO_OBJ_CLS_WEIGHT=0.01
-
-export DEEP_SUPERVISION=True
-
-export OVERRIDES="runtime.distribution_strategy=one_device,runtime.mixed_precision_dtype=float32,\
+export OVERRIDES="runtime.distribution_strategy=tpu,runtime.mixed_precision_dtype=float32,\
 task.validation_data.global_batch_size=$EVAL_BATCH_SIZE,task.model.which_pixel_decoder=transformer_fpn,\
 task.init_checkpoint_modules=all,\
 task.init_checkpoint=$MASKFORMER_CKPT"
@@ -90,19 +86,20 @@ python3 train.py \
   --experiment maskformer_coco_panoptic \
   --mode eval \
   --model_dir $MODEL_DIR \
+  --tpu $TPU_NAME \
   --params_override=$OVERRIDES
 ```
 
 
 ## Authors
 
-* Wenxin Jiang ([@GitHub wenxin-jiang](https://github.com/wenxin-jiang))
-* Vishal Purohit ([@GitHub Vishal-S-P](https://github.com/Vishal-S-P))
-* Ibrahim Saeed ([@GitHub IbrahimSaeedPurdue](https://github.com/IbrahimSaeedPurdue))
-* Ananya Singh ([@GitHub ananya-singhh](https://github.com/ananya-singhh))
-* Alexiy Buynitsky ([@GitHub Abuynits](https://github.com/Abuynits))
-* Akshath Raghav R ([@GitHub AkshathRaghav](https://github.com/AkshathRaghav))
-* Isaac In ([@Github InAIBot](https://github.com/InAIBot)) 
+This list is ordered alphabetically by first name. 
+
+- Akshath Raghav R ([@Github AkshathRaghav](https://github.com/AkshathRaghav))
+- Ibrahim Saeed ([@Github IbrahimSaeedPurdue](https://github.com/IbrahimSaeedPurdue))
+- Isaac In ([@Github InAIBot](https://github.com/InAIBot))
+- Vishal Purohit ([@Github Vishal-S-P](https://github.com/Vishal-S-P))
+- Wenxin Jiang ([@Github wenxin-jiang](https://github.com/wenxin-jiang))
 
 
 ## Requirements 

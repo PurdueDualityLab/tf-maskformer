@@ -13,7 +13,7 @@ export ON_TPU=False
 
 export BASE_LR=0.0001
 export IMG_SIZE=640
-export NO_OBJ_CLS_WEIGHT=0.1
+export NO_OBJ_CLS_WEIGHT=0.001
 
 export DEEP_SUPERVISION=True
 
