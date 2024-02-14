@@ -1,15 +1,17 @@
-`myreadme.md
 ckpts/
 */*.npy
 */__pycache__/
+__pycache__/
+__pycache__/*.pyc
+*/__pycache__/*.pyc
 */*.ipynb_checkpoints/
 */*.idea/
 */*.vscode/
 
-losses/tensors/
-losses/tensors/*.npy
-losses/tensor2/
-losses/tensor2/*.npy
+*losses/tensors/
+*losses/tensors/*.npy
+*losses/tensor2/
+*losses/tensor2/*.npy
 *.npy 
 
 
@@ -21,10 +23,6 @@ losses/tensors/*.pickle
 
 model_dir_2/
 model_dir_multi_scale_2/
-
-__pycache__/
-
-*.npy
 
 *.pickle
 test/
