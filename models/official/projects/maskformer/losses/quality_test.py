@@ -18,59 +18,67 @@ import tensorflow as tf
 from absl.testing import parameterized
 from official.projects.maskformer.losses.quality import PanopticQualityMetric
 from official.projects.maskformer.configs.maskformer import PanopticQuality
-import pickle
+
 
 class PanopticQualityMetricTest(tf.test.TestCase, parameterized.TestCase):
-    """
-    This module tests the PanopticQuality class and checks if it properly generates panoptic metrics.
-    """
-    @parameterized.named_parameters(('test1',))
-    def testMetricComputation(self):
-        pq_config = PanopticQuality() 
+  # pylint: disable=line-too-long
+  """
+  This module tests the PanopticQuality class and checks if it properly generates panoptic metrics.
+  """
+  @parameterized.named_parameters(('test1',))
+  def testMetricComputation(self):
+    pq_config = PanopticQuality()
 
-        batch_size, height, width = 2, 640, 640
-        num_categories = pq_config.num_categories
+    batch_size, height, width = 2, 640, 640
+    num_categories = pq_config.num_categories
 
-        # (IDs are converted from contigious (0-133) to original (0-199) within PanopticInference)
-        # (We pass them in as is into PanopticQualityMetric, which will handle the conversion) 
-        # Normally, for category_masks, max_val should be 199.0, but for testing purposes, we set it to 1.0
-        # And normally, for instance_masks, max_val should be 100, but for testing purposes, we set it to 10
-        pq_metric_inputs = {
-            'category_mask': tf.random.uniform(shape=[batch_size, height, width], minval=0.0, maxval=1.0, dtype=tf.float32),
-            'instance_mask': tf.random.uniform(shape=[batch_size, height, width], minval=0, maxval=10, dtype=tf.int32)  
-        }
-        pq_metric_labels = {
-            'category_mask': tf.random.uniform(shape=[batch_size, height, width, 1], minval=0.0, maxval=1.0, dtype=tf.float32),
-            'instance_mask': tf.random.uniform(shape=[batch_size, height, width, 1], minval=0, maxval=10, dtype=tf.int32)  
-        }
+    # (IDs are converted from contigious (0-133) to original (0-199) within PanopticInference)
+    # (We pass them in as is into PanopticQualityMetric, which will handle the conversion)
+    # Normally, for category_masks, max_val should be 199.0, but for testing purposes, we set it to 1.0
+    # And normally, for instance_masks, max_val should be 100, but for testing purposes, we set it to 10
 
-        on_tpu = False
-        pq_metric = PanopticQualityMetric(on_tpu, pq_config)
+    # pylint: disable=line-too-long
+    pq_metric_inputs = {
+        'category_mask': tf.random.uniform(shape=[batch_size, height, width], minval=0.0, maxval=1.0, dtype=tf.float32),
+        'instance_mask': tf.random.uniform(shape=[batch_size, height, width], minval=0, maxval=10, dtype=tf.int32)
+    }
+    # pylint: disable=line-too-long
+    pq_metric_labels = {
+        'category_mask': tf.random.uniform(shape=[batch_size, height, width, 1], minval=0.0, maxval=1.0, dtype=tf.float32),
+        'instance_mask': tf.random.uniform(shape=[batch_size, height, width, 1], minval=0, maxval=10, dtype=tf.int32)
+    }
 
-        for key in pq_metric_inputs:
-            self.assertIsInstance(pq_metric_inputs[key], tf.Tensor)
+    on_tpu = False
+    pq_metric = PanopticQualityMetric(on_tpu, pq_config)
 
-        metrics = pq_metric(pq_metric_labels, pq_metric_inputs)
+    for key in pq_metric_inputs:
+      self.assertIsInstance(pq_metric_inputs[key], tf.Tensor)
 
-        # Since PanopticQualityMetric instantiates PanopticQualityV2 or PanopticQuality, 
-        # we only need to check if the expected keys are present in the metrics dictionary
-        expected_keys = [
-            'panoptic_quality/All_num_categories', 'panoptic_quality/Things_num_categories', 'panoptic_quality/Stuff_num_categories',
-            'panoptic_quality/All_pq', 'panoptic_quality/All_rq', 'panoptic_quality/All_sq',
-            'panoptic_quality/Things_pq', 'panoptic_quality/Things_rq', 'panoptic_quality/Things_sq',
-            'panoptic_quality/Stuff_pq', 'panoptic_quality/Stuff_rq', 'panoptic_quality/Stuff_sq',
-        ]
-        for key in expected_keys:
-            self.assertIn(key, metrics, msg=f"Key {key} not found in metrics.")
+    metrics = pq_metric(pq_metric_labels, pq_metric_inputs)
 
-        metric_formats = [
-            'panoptic_quality/pq/class_{}', 'panoptic_quality/rq/class_{}', 'panoptic_quality/sq/class_{}'
-        ]
-        for category_id in range(1, num_categories + 1):
-            for metric_format in metric_formats:
-                key = metric_format.format(category_id)
-                self.assertIn(
-                    key, metrics, msg=f"Class-specific metric key {key} not found in metrics.")
+    # Since PanopticQualityMetric instantiates PanopticQualityV2 or PanopticQuality,
+    # we only need to check if the expected keys are present in the metrics dictionary
+
+    # pylint: disable=line-too-long
+    expected_keys = [
+        'panoptic_quality/All_num_categories', 'panoptic_quality/Things_num_categories', 'panoptic_quality/Stuff_num_categories',
+        'panoptic_quality/All_pq', 'panoptic_quality/All_rq', 'panoptic_quality/All_sq',
+        'panoptic_quality/Things_pq', 'panoptic_quality/Things_rq', 'panoptic_quality/Things_sq',
+        'panoptic_quality/Stuff_pq', 'panoptic_quality/Stuff_rq', 'panoptic_quality/Stuff_sq',
+    ]
+    for key in expected_keys:
+      self.assertIn(key, metrics, msg=f"Key {key} not found in metrics.")
+
+    # pylint: disable=line-too-long
+    metric_formats = [
+        'panoptic_quality/pq/class_{}', 'panoptic_quality/rq/class_{}', 'panoptic_quality/sq/class_{}'
+    ]
+    for category_id in range(1, num_categories + 1):
+      for metric_format in metric_formats:
+        key = metric_format.format(category_id)
+        self.assertIn(
+            key, metrics, msg=f"Class-specific metric key {key} not found in metrics.")
+
 
 if __name__ == '__main__':
-    tf.test.main()
+  tf.test.main()

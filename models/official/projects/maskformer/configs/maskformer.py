@@ -15,9 +15,8 @@
 """MaskFormer configurations."""
 
 import dataclasses
-from dataclasses import dataclass, field
 import os
-from typing import List, Optional, Union, ClassVar
+from typing import List, Optional, Union
 
 from official.core import config_definitions as cfg
 from official.core import exp_factory
@@ -99,7 +98,7 @@ class MaskFormer(hyperparams.Config):
 class PanopticQuality(hyperparams.Config):
   """MaskFormer model pq evaluator config."""
   num_categories: int = 133  
-  is_thing: List[bool] = field(default_factory=_get_original_is_thing)
+  is_thing: List[bool] = dataclasses.field(default_factory=_get_original_is_thing) # pylint: disable=line-too-long
   ignored_label: int = 0
   rescale_predictions: bool = False
   max_num_instances: int = 100

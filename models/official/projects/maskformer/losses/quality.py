@@ -17,7 +17,7 @@
 import tensorflow as tf
 from typing import Any, Dict
 from official.vision.evaluation import panoptic_quality
-from official.projects.maskformer.losses.mapper import _get_original_to_contigious, _get_original_is_thing
+from official.projects.maskformer.losses.mapper import _get_original_to_contigious
 import numpy as np
 
 

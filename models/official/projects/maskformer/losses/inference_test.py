@@ -16,52 +16,55 @@
 
 import tensorflow as tf
 from absl.testing import parameterized
-import numpy as np
 from official.projects.maskformer.losses.inference import PanopticInference
 
+
 class PanopticInferenceTest(tf.test.TestCase, parameterized.TestCase):
-    """
-    This module tests the PanopticInference class and checks if it properly returns the instance and category masks.
-    """
-    @parameterized.named_parameters(('test1',))
-    def testInferenceShapes(self):
-        image_shape = [2, 640, 640]  
-        num_instances = 100  
-        num_classes = 134  
-        batch_size = image_shape[0]
-        height, width = image_shape[1:]
+  # pylint: disable=line-too-long
+  """
+  This module tests the PanopticInference class and checks if it properly returns the instance and category masks.
+  """
+  @parameterized.named_parameters(('test1',))
+  def testInferenceShapes(self):
+    image_shape = [2, 640, 640]
+    num_instances = 100
+    num_classes = 134
+    batch_size = image_shape[0]
+    height, width = image_shape[1:]
 
-        pred_labels_load = tf.random.uniform(
-            [batch_size, num_instances, num_classes], minval=-20, maxval=20, dtype=tf.float32
-        )
-        pred_masks_load = tf.random.uniform(
-            [batch_size, 160, 160, num_instances], minval=-20, maxval=20, dtype=tf.float32
-        )
+    pred_labels_load = tf.random.uniform(
+        [batch_size, num_instances, num_classes], minval=-20, maxval=20, dtype=tf.float32  # pylint: disable=line-too-long
+    )
+    pred_masks_load = tf.random.uniform(
+        [batch_size, 160, 160, num_instances], minval=-20, maxval=20, dtype=tf.float32  # pylint: disable=line-too-long
+    )
 
-        panoptic_inference = PanopticInference(
-            num_classes=num_classes - 1,  # Assuming num_classes includes background
-            background_class_id=0
-        )
+    panoptic_inference = PanopticInference(
+        num_classes=num_classes - 1,  # Assuming num_classes includes background
+        background_class_id=0
+    )
 
-        instance_masks, category_masks = panoptic_inference(
-            pred_labels_load, pred_masks_load, image_shape[1:]
-        )
+    instance_masks, category_masks = panoptic_inference(
+        pred_labels_load, pred_masks_load, image_shape[1:]
+    )
 
-        # Assertions to ensure outputs have correct shapes
-        self.assertEqual(instance_masks.shape[1:], (height, width),
-                         msg="Instance mask shape does not match expected shape.")
-        self.assertEqual(category_masks.shape[1:], (height, width),
-                         msg="Category mask shape does not match expected shape.")
+    # Assertions to ensure outputs have correct shapes
+    self.assertEqual(instance_masks.shape[1:], (height, width),
+                     msg="Instance mask shape does not match expected shape.")  # pylint: disable=line-too-long
+    self.assertEqual(category_masks.shape[1:], (height, width),
+                     msg="Category mask shape does not match expected shape.")  # pylint: disable=line-too-long
 
-        # Ensure the batch size of the output matches the input logits/masks batch size
-        self.assertEqual(instance_masks.shape[0], pred_labels_load.shape[0],
-                         msg="Instance mask batch size does not match input batch size.")
-        self.assertEqual(category_masks.shape[0], pred_masks_load.shape[0],
-                         msg="Category mask batch size does not match input batch size.")
+    # Ensure the batch size of the output matches the input logits/masks batch size
+    self.assertEqual(instance_masks.shape[0], pred_labels_load.shape[0],
+                     msg="Instance mask batch size does not match input batch size.")  # pylint: disable=line-too-long
+    self.assertEqual(category_masks.shape[0], pred_masks_load.shape[0],
+                     msg="Category mask batch size does not match input batch size.")  # pylint: disable=line-too-long
 
-        # Note: The shapes will not match if the tensors do not cross a threshold within the PanopticInference call.
-        # An error will be raised during time of 'eval' in tasks/panoptic_maskformer.py if this happens. 
-        # This cannot happen unless 'eval' is called with a model that has not been trained.
+    # pylint: disable=line-too-long
+    # Note: The shapes will not match if the tensors do not cross a threshold within the PanopticInference call.
+    # An error will be raised during time of 'eval' in tasks/panoptic_maskformer.py if this happens.
+    # This cannot happen unless 'eval' is called with a model that has not been trained.
+
 
 if __name__ == '__main__':
-    tf.test.main()
+  tf.test.main()
