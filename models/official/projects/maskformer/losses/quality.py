@@ -17,9 +17,7 @@
 import tensorflow as tf
 from typing import Any, Dict
 from official.vision.evaluation import panoptic_quality
-from official.projects.maskformer.losses.mapper import _get_original_to_contigious
-import numpy as np
-
+from official.projects.maskformer.losses.mapper import _get_contiguous_to_original
 
 class PanopticQualityMetric:
   """Panoptic Quality metric class."""
@@ -34,14 +32,14 @@ class PanopticQualityMetric:
       None
     """
 
-    self.map_original_to_contigious = _get_original_to_contigious()
+    self.cat_id_map, _, _ = _get_contiguous_to_original()
     self.is_thing_dict_bool = pq_config.is_thing
     self.on_tpu = on_tpu
     self.num_categories = pq_config.num_categories
 
     if self.on_tpu:
       self.metric = panoptic_quality.PanopticQualityV2(
-          num_categories=pq_config.num_categories,
+          num_categories=pq_config.num_categories + 1,
           is_thing=self.is_thing_dict_bool,
           ignored_label=pq_config.ignored_label,
           max_num_instances=pq_config.max_num_instances,
@@ -49,7 +47,7 @@ class PanopticQualityMetric:
       )
     else:
       self.metric = panoptic_quality.PanopticQuality(
-          num_categories=pq_config.num_categories,
+          num_categories=pq_config.num_categories + 1,
           ignored_label=pq_config.ignored_label,
           max_instances_per_category=pq_config.max_num_instances,
           offset=pq_config.max_num_instances**3,
@@ -58,42 +56,35 @@ class PanopticQualityMetric:
   def __call__(self, pq_metric_labels: Dict[str, Any], pq_metric_inputs: Dict[str, Any]): # pylint: disable=line-too-long
      # pylint: disable=line-too-long
     """Generates panoptic metrics.
+    PanopticQuality and PanopticQualityV2 require category IDs to be contiguous. 
     Args:
-      *Here, the input IDs are original category IDs, but will be converted to contigious category IDs within this function.*
       pq_metric_labels: a dictionary of panoptic segmentation labels.
       pq_metric_inputs: a dictionary of panoptic inference inputs.
     Returns:
       A dictionary of panoptic metrics.
     """
 
-    # Mapping IDs from original to contigious
-    pq_metric_labels = {
-        key: self.map_original_to_contigious(
-            value.numpy()) for key,
-        value in pq_metric_labels.items()}
-    pq_metric_inputs = {
-        key: self.map_original_to_contigious(
-            value.numpy()) for key,
-        value in pq_metric_inputs.items()}
-
     # [bsize, h, w, 1] -> [bsize, h, w]
-    pq_metric_labels = {key: np.squeeze(value, axis=-1)
+    pq_metric_labels = {key: tf.squeeze(value, axis=-1)
                         for key, value in pq_metric_labels.items()}
 
     # There are different PQ implementations for TPU and GPU/CPU
     # TPU implementation requires a lot of memory bandwidth
     if self.on_tpu:
       self.metric.update_state(
-          {key: tf.convert_to_tensor(value)
-           for key, value in pq_metric_labels.items()},
-          {key: tf.convert_to_tensor(value)
-           for key, value in pq_metric_inputs.items()}
+          pq_metric_labels, pq_metric_inputs
       )
       results = self.metric.result()
     else:
       self.metric.compare_and_accumulate(
-          pq_metric_labels,
-          pq_metric_inputs
+        {
+          key: value.numpy() for key,
+          value in pq_metric_labels.items()
+        }, 
+        {
+          key: value.numpy() for key,
+          value in pq_metric_inputs.items()
+        }
       )
       results = self.metric.result(self.is_thing_dict_bool) # pylint: disable=too-many-function-args
 
@@ -150,7 +141,7 @@ class PanopticQualityMetric:
       for i in range(
               1,
               self.num_categories + 1):
-        key = f'panoptic_quality/{metric}/class_{i}'
+        key = f'panoptic_quality/{metric}/class_{self.convert_contiguous_to_original(i)}'
         reduced_metrics[key] = results[f'{metric}_per_class'][i - 1]
 
     return reduced_metrics
@@ -199,6 +190,13 @@ class PanopticQualityMetric:
       if self.task_config.panoptic_quality_evaluator.report_per_class_metrics:
         for i, is_valid in enumerate(valid_classes.numpy()):
           if is_valid:
-            reduced_metrics[f'panoptic_quality/{metric}/class_{i}'] = metric_per_class[i]
+            reduced_metrics[f'panoptic_quality/{metric}/class_{self.convert_contiguous_to_original(i)}'] = metric_per_class[i]
 
     return reduced_metrics
+
+  def convert_contiguous_to_original(self, i: int):
+    # pylint: disable=line-too-long
+    """
+    Converts single ID to corresponding original ID.
+    """
+    return int(self.cat_id_map.lookup(tf.cast(i, tf.int32)))

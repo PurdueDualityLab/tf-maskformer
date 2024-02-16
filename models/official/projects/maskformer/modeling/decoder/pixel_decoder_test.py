@@ -36,7 +36,6 @@ class FpnTest(parameterized.TestCase, tf.test.TestCase):
         "5": tf.ones([1, 20, 20, 2048])
     }
 
-    # TODO(Isaac): Add the additional parameters.
     decoder = Fpn(fpn_feat_dims=dim)
     output_mask = decoder(multilevel_features)
 

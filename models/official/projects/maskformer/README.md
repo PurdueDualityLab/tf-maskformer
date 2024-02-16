@@ -2,9 +2,28 @@
 
 This repository contains the implementation of [Per-Pixel Classification is Not All You Need for Semantic Segmentation](https://arxiv.org/pdf/2107.06278.pdf)
 
-<div style="text-align:center">
+<div align="center">
   <img src="https://drive.google.com/thumbnail?id=1BKevTJimIYq7hG4cD9-8VFWpF2FLfnUA&sz=w1000" alt="maskformer" style="width: 50%;"/>
 </div>
+
+## Table of Contents
+
+1. [Description](#description)
+2. [Getting Started](#getting-started)
+    - [Requirements](#requirements)
+    - [Environment Creation](#environment-creation)
+    - [COCO Dataset to TFRecord Conversion Guide](#coco-dataset-to-tfrecord-conversion-guide)
+        - [Overview](#overview)
+        - [Running the Script](#running-the-script)
+        - [Important Options](#important-options)
+    - [Example Scripts](#example-scripts)
+    - [Working with TPUs](#working-with-tpus)
+        - [Environment Variables](#environment-variables)
+        - [Training](#training)
+        - [Evaluation](#evaluation)
+3. [Authors](#authors)
+4. [Citation](#citation)
+
 
 ## Description
 
@@ -12,13 +31,17 @@ MaskFormer, a universal architecture based on MaskFormer meta-architecture that 
 
 MaskFormer transforms any per-pixel classification model into a mask classification method. It utilizes a Transformer decoder to compute a set of pairs, each comprising a class prediction and a mask embedding vector. The binary mask prediction is obtained via a dot product between the mask embedding vector and per-pixel embedding from a fully-convolutional network. This model addresses both semantic and instance-level segmentation tasks without requiring changes to the model, losses, or training procedure. For both semantic and panoptic segmentation tasks, MaskFormer is supervised using the same per-pixel binary mask loss and a single classification loss per mask. A straightforward inference strategy is designed to convert MaskFormer outputs into a task-dependent prediction format.
 
-<p style="text-align:center">
+<p align="center">
   <img src="https://drive.google.com/thumbnail?id=1NWXhqU1NutsWhQnfFNzk7vgTYG09OaW0&sz=w1000" alt="examples" style="width: 50%;"/>
 </p>
 
-# Getting Started! 
+# Getting Started
 
-### Environment Creation
+## Requirements 
+[![TensorFlow 2.12](https://img.shields.io/badge/TensorFlow-2.11-FF6F00?logo=tensorflow)](https://github.com/tensorflow/tensorflow/releases/tag/v2.11.0)
+[![Python 3.9](https://img.shields.io/badge/Python-3.9-3776AB)](https://www.python.org/downloads/release/python-390/)
+
+## Environment Creation
 Create and activate a new conda environment to isolate the project dependencies:
 ```
 conda create -n tfmaskformer
@@ -27,8 +50,48 @@ pip install -r /models/official/requirements.txt
 pip install tensorflow-text-nightly
 ```
 
+## COCO Dataset to TFRecord Conversion Guide
+
+Below are detailed instructions on how to convert the COCO dataset annotations and images into TensorFlow's TFRecord format using the `create_coco_tf_record.py` script. 
+
+### Overview
+
+The `create_coco_tf_record.py` script processes raw COCO dataset files, including images and their annotations (object annotations, panoptic annotations, and captions), and encodes them into TFRecord files. Each image and its corresponding annotations are encapsulated in a `tf.Example` protobuf message, serialized, and written to a TFRecord file.
+
+To use this script, ensure you have the following COCO dataset files:
+- **Images Directory**: For example, `train2017/`
+- **Annotations Files**: Such as `instances_train2017.json`, `captions_train2017.json`, `panoptic_train2017.json`
+- **Panoptic Masks Directory** (if using panoptic segmentation): Typically named similar to `train2017/`
+
+### Running the Script
+
+Use the following command template to run the conversion script. Make sure to adjust the paths and filenames to match your dataset's location and your specific requirements:
+
+```bash
+python create_coco_tf_record.py \
+    --image_dir="/path/to/coco/images/train2017" \
+    --object_annotations_file="/path/to/coco/annotations/instances_train2017.json" \
+    --caption_annotations_file="/path/to/coco/annotations/captions_train2017.json" \
+    --panoptic_annotations_file="/path/to/coco/annotations/panoptic_train2017.json" \
+    --panoptic_masks_dir="/path/to/coco/panoptic_masks/train2017" \
+    --include_masks=True \
+    --include_panoptic_masks=True \
+    --output_file_prefix="/path/to/output/tfrecords/train" \
+    --num_shards=100
+```
+
+Replace `/path/to/` with the actual paths where your COCO dataset images and annotations are stored. The `output_file_prefix` flag specifies the output directory and filename prefix for the generated TFRecord files, while the `num_shards` flag indicates how many shard files to create for the dataset.
+
+### Important Options
+
+- **Include Masks**: Set `--include_masks=True` to include instance segmentation masks in the TFRecords. 
+- **Include Panoptic Masks**: Use `--include_panoptic_masks=True` for panoptic segmentation tasks, which require both instance and semantic segmentation data.
+- **Sharding**: Splitting the dataset into multiple shards (`--num_shards`) can significantly improve data loading efficiency during model training.
+- **Panoptic Annotations**: For panoptic segmentation, both `--panoptic_annotations_file` and `--panoptic_masks_dir` must be specified.
+
+
 ## Example Scripts 
-Within the scripts folder you can find the training and evaluation scripts for different compute platforms (CPU/GPU/TPU).  
+After completing the above steps, you can get started with training your model! Within the scripts folder you can find the training and evaluation scripts for different compute platforms (CPU/GPU/TPU).  
 *Remember to load the correct modules as required by each compute platform!*
 
 ```
@@ -41,7 +104,8 @@ scripts/
   train_tpu.sh
 ```
 
-## TPU Guide!  
+## (Recommended) Working with TPUs
+
 ### Environemnt Variables 
 Manually set the environment variables as follows:
 ```
@@ -100,15 +164,10 @@ python3 train.py \
 This list is ordered alphabetically by first name. 
 
 - Akshath Raghav R ([@Github AkshathRaghav](https://github.com/AkshathRaghav))
-- Ibrahim Saeed ([@Github IbrahimSaeedPurdue](https://github.com/IbrahimSaeedPurdue))
-- Isaac In ([@Github InAIBot](https://github.com/InAIBot))
 - Vishal Purohit ([@Github Vishal-S-P](https://github.com/Vishal-S-P))
 - Wenxin Jiang ([@Github wenxin-jiang](https://github.com/wenxin-jiang))
 
 
-## Requirements 
-[![TensorFlow 2.12](https://img.shields.io/badge/TensorFlow-2.11-FF6F00?logo=tensorflow)](https://github.com/tensorflow/tensorflow/releases/tag/v2.11.0)
-[![Python 3.9](https://img.shields.io/badge/Python-3.9-3776AB)](https://www.python.org/downloads/release/python-390/)
 
 ## Citation 
 

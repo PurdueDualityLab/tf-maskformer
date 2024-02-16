@@ -24,7 +24,7 @@ from official.modeling import hyperparams
 from official.vision.configs import backbones
 from official.vision.configs import common
 from official.projects.maskformer.utils import optimization
-from official.projects.maskformer.losses.mapper import _get_original_is_thing
+from official.projects.maskformer.losses.mapper import _is_thing
 
 
 @dataclasses.dataclass
@@ -98,7 +98,7 @@ class MaskFormer(hyperparams.Config):
 class PanopticQuality(hyperparams.Config):
   """MaskFormer model pq evaluator config."""
   num_categories: int = 133  
-  is_thing: List[bool] = dataclasses.field(default_factory=_get_original_is_thing) # pylint: disable=line-too-long
+  is_thing: List[bool] = dataclasses.field(default_factory=_is_thing) # pylint: disable=line-too-long
   ignored_label: int = 0
   rescale_predictions: bool = False
   max_num_instances: int = 100
@@ -204,7 +204,6 @@ def maskformer_coco_panoptic() -> cfg.ExperimentConfig:
           # the results)sss
           best_checkpoint_export_subdir='best_ckpt',
           max_to_keep=1,
-          # TODO: Metric not implemented yet
           optimizer_config=optimization.OptimizationConfig({
               'optimizer': {
                   'type': 'maskformer_adamw',

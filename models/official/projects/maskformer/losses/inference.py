@@ -15,7 +15,7 @@
 """Panoptic Inference Module."""
 
 import tensorflow as tf
-from official.projects.maskformer.losses.mapper import _get_contigious_to_original
+from official.projects.maskformer.losses.mapper import _get_contiguous_to_original
 from typing import List
 
 
@@ -29,7 +29,7 @@ class PanopticInference:
           object_mask_threshold: float = 0.4,
           class_score_threshold: float = 0.4,
           overlap_threshold: float = 0.3):
-    # pylint: disable=line-too-long  
+    # pylint: disable=line-too-long
     """Initialize
     Args:
       num_classes: `int`, The total number of distinct classes, including background. Default is 133.
@@ -37,14 +37,13 @@ class PanopticInference:
       object_mask_threshold: `float`, Threshold for object mask scores. Default is 0.4.
       class_score_threshold: `float`, Threshold for classifying detections. Default is 0.4.
       overlap_threshold: `float`, IoU threshold for segment overlap. Default is 0.3.
-      cat_id_map: `dict`, Maps contiguous category IDs to original dataset IDs.
       is_thing_dict: `dict`, Indicates if a category ID is 'thing' or 'stuff'.
     """
 
     self.background_class_id = background_class_id
     self.object_mask_threshold = object_mask_threshold
     self.class_score_threshold = class_score_threshold
-    self.cat_id_map, self.is_thing_dict, _ = _get_contigious_to_original()
+    _, self.is_thing_dict, _ = _get_contiguous_to_original()
     self.overlap_threshold = overlap_threshold
 
   def __call__(self, pred_logits, mask_pred, image_shape: List[int]):
@@ -52,10 +51,9 @@ class PanopticInference:
     mask_pred: (batch, height, width, num_predictions)
     pred_logits: (batch, num_predictions, num_classes)
     """
-    # maps from contiguous category id to original category id
 
     instance_masks = []
-    category_masks = []
+    contiguous_masks = []
 
     for each_batch in tf.range(tf.shape(pred_logits)[0]):
       mask_pred_b = mask_pred[each_batch]
@@ -92,7 +90,7 @@ class PanopticInference:
 
       # Create  category mask and instance mask
       with tf.device(curr_masks.device):
-        category_mask = tf.zeros((height, width), dtype=tf.int32)
+        contiguous_mask = tf.zeros((height, width), dtype=tf.int32)
         instance_mask = tf.zeros((height, width), dtype=tf.int32)
 
       if tf.equal(num_masks, 0):
@@ -117,10 +115,11 @@ class PanopticInference:
           if mask_area > 0 and original_area > 0:
             if mask_area / original_area < self.overlap_threshold:
               continue
-            category_id = self.cat_id_map.lookup(tf.cast(pred_class, tf.int32))
+            contiguous_id = tf.cast(pred_class, tf.int32)
             binary_mask = tf.cast(binary_mask, tf.bool)
-            category_mask = tf.where(binary_mask, category_id, category_mask)
-            if tf.cast(self.is_thing_dict.lookup(category_id), tf.bool):
+            contiguous_mask = tf.where(
+                binary_mask, contiguous_id, contiguous_mask)
+            if tf.cast(self.is_thing_dict.lookup(contiguous_id), tf.bool):
               instance_mask = tf.where(binary_mask, instance_id, instance_mask)
               instance_id += 1
             else:
@@ -128,9 +127,9 @@ class PanopticInference:
                   binary_mask, _VOID_INSTANCE_ID, instance_mask)
 
       instance_masks.append(instance_mask)
-      category_masks.append(category_mask)
+      contiguous_masks.append(contiguous_mask)
 
     instance_masks_stacked = tf.stack(instance_masks, axis=0)
-    category_masks_stacked = tf.stack(category_masks, axis=0)
+    contiguous_masks_stacked = tf.stack(contiguous_masks, axis=0)
 
-    return instance_masks_stacked, category_masks_stacked
+    return instance_masks_stacked, contiguous_masks_stacked

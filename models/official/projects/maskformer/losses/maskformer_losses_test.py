@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for tensorflow_models.official.projects.maskformer.losses.maskformer_losses."""
+"""Tests for Maskformer Losses."""
 
 from official.projects.maskformer.losses.maskformer_losses import Loss
 from official.projects.detr.ops.matchers import hungarian_matching
@@ -21,6 +21,10 @@ import tensorflow as tf
 
 
 class LossTest(tf.test.TestCase, parameterized.TestCase):
+  # pylint: disable=line-too-long
+  """
+  # This module tests whether the Loss calculations output in the correct format and if deep_supervision is working as expected.
+  """
   @parameterized.named_parameters(('test1',))
   def test_pass_through(self):
     matcher = hungarian_matching

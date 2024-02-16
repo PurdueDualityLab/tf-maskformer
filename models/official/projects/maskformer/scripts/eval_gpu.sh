@@ -3,8 +3,8 @@ module load gcc/9.3.0
 module load anaconda/2020.11-py38
 module load cuda/11.7.0 cudnn/cuda-11.7_8.6 gcc/6.3.0
 conda activate tfmaskformer
-train_bsize=2
-eval_bsize=2
+train_bsize=1
+eval_bsize=1
 
 export PYTHONPATH=$PYTHONPATH:/depot/davisjam/data/akshath/MaskFormer_vishal/tf-maskformer/models
 export MODEL_DIR="./model_dir/"

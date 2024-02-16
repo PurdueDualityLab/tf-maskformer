@@ -301,7 +301,6 @@ class TransformerEncoderBlock(tf.keras.layers.Layer):
     if policy.name == "mixed_bfloat16":
       # bfloat16 causes BERT with the LAMB optimizer to not converge
       # as well, so we use float32.
-      # TODO(b/154538392): Investigate this.
       policy = tf.float32
     self._intermediate_activation_layer = tf.keras.layers.Activation(
         self._inner_activation, dtype=policy)
