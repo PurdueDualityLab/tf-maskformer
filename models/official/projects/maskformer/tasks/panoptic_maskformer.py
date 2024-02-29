@@ -36,6 +36,8 @@ from official.projects.maskformer.losses.inference import PanopticInference
 from official.projects.maskformer.losses.quality import PanopticQualityMetric
 from official.vision.modeling import backbones
 
+import time
+
 @task_factory.register_task_cls(maskformer_cfg.MaskFormerTask)
 class PanopticTask(base_task.Task):
   # pylint: disable=line-too-long
@@ -157,7 +159,10 @@ class PanopticTask(base_task.Task):
     outputs = {"pred_logits": output["class_prob_predictions"],
                "pred_masks": output["mask_prob_predictions"]}
 
-    if aux_outputs:
+    if not aux_outputs:
+      logging.info('[INFO] Deep Supervision disabled (FALSE).')
+    else:
+      logging.info('[INFO] Deep Supervision enabled (TRUE).')
       outputs["pred_masks"] = output["mask_prob_predictions"][-1]
       outputs["pred_logits"] = output["class_prob_predictions"][-1]
 
@@ -186,6 +191,7 @@ class PanopticTask(base_task.Task):
     calculated_losses = loss(outputs, targets)
 
     # Losses are returned as weighted sum of individual losses
+    logging.info('[INFO] Weighting losses.')
     total_loss = calculated_losses['loss_ce'] + \
         calculated_losses['loss_dice'] + calculated_losses['loss_focal']
 
@@ -196,6 +202,7 @@ class PanopticTask(base_task.Task):
     aux_outputs = outputs.get('aux_outputs')
 
     if aux_outputs is not None:
+      logging.info('[INFO] Weighting multi-scale losses.')
       total_aux_loss = 0.0
       for i in range(len(aux_outputs)):
         total_aux_loss += calculated_losses['loss_ce_' + str(
@@ -252,6 +259,7 @@ class PanopticTask(base_task.Task):
     Returns:
       A dictionary of logs.
     """
+    start = time.time() 
     logging.info('[INFO] Starting training step: %s', self.ITER_IDX)
 
     features, labels = inputs
@@ -286,7 +294,7 @@ class PanopticTask(base_task.Task):
     dice_loss *= num_replicas_in_sync
 
     logging.info('[INFO] Losses: total_loss(%s), cls_loss(%s), focal_loss(%s), dice_loss(%s): %s',
-                 total_loss, cls_loss, focal_loss, dice_loss, self.ITER_IDX)
+                 float(total_loss), float(cls_loss), float(focal_loss), float(dice_loss), self.ITER_IDX)
 
     logs = {self.loss: total_loss}
 
@@ -300,6 +308,7 @@ class PanopticTask(base_task.Task):
         m.update_state(all_losses[m.name])
 
     logging.info('[INFO] Finished training step: %s', self.ITER_IDX)
+    logging.info('[INFO] Time Taken for step %s: %f', self.ITER_IDX, time.time() - start)
 
     self.ITER_IDX += 1
 
@@ -326,6 +335,10 @@ class PanopticTask(base_task.Task):
     output_instance_mask, output_contiguous_mask = self.panoptic_inference(
         pred_labels, pred_binary_masks, image_shapes)
 
+
+    # PQ Module expects the following format for labels and inputs. 
+    ## We use 'category_mask' = contiguous mask as the PQ module expects the same.
+    
     pq_metric_labels = {
         'category_mask': labels['contiguous_mask'],
         'instance_mask': labels['instance_mask']
@@ -355,6 +368,8 @@ class PanopticTask(base_task.Task):
     Returns:
       A dictionary of logs.
     """
+    start = time.time() 
+
     logging.info('[INFO] Starting validation step: %s', self.ITER_IDX)
 
     features, labels = inputs
@@ -374,7 +389,7 @@ class PanopticTask(base_task.Task):
     logs = {self.loss: total_loss}
 
     logging.info('[INFO] Losses: total_loss(%s), cls_loss(%s), focal_loss(%s), dice_loss(%s): %s',
-                 total_loss, cls_loss, focal_loss, dice_loss, self.ITER_IDX)
+                 float(total_loss), float(cls_loss), float(focal_loss), float(dice_loss), self.ITER_IDX)
 
     all_losses = {
         'cls_loss': cls_loss,
@@ -393,6 +408,7 @@ class PanopticTask(base_task.Task):
         m.update_state(all_losses[m.name])
 
     logging.info('[INFO] Finished validation step: %s', self.ITER_IDX)
+    logging.info('[INFO] Time Taken for step %s: %f', self.ITER_IDX, time.time() - start)
 
     self.ITER_IDX += 1
 
