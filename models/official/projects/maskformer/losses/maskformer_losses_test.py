@@ -151,7 +151,7 @@ class LossTest(tf.test.TestCase, parameterized.TestCase):
         print("Total Loss is :", losses['loss_ce'].numpy() + losses['loss_dice'].numpy() + losses['loss_focal'].numpy())
         
         # for i in range(4):
-        #     print(f"Total aux Loss {i} : losses['loss_ce_'+{str(i)}] + losses['loss_dice_'+{str(i)}] + losses['loss_focal_'+{str(i)}]")
+        #     print(f"Total aux Loss {i} : {losses['loss_ce_'+str(i)]},  {losses['loss_dice_'+str(i)]}, {losses['loss_focal_'+str(i)]}")
         # TODO: Check if this is correct
         # self.assertAllEqual(losses, )
 
