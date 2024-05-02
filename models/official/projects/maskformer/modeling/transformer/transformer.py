@@ -118,7 +118,7 @@ class TransformerEncoder(tf.keras.layers.Layer):
     }
     base_config = super(TransformerEncoder, self).get_config()
     return dict(list(base_config.items()) + list(config.items()))
-
+    
   def call(self, encoder_inputs, attention_mask=None, pos_embed=None):
     """Return the output of the encoder.
     Args:
@@ -498,12 +498,7 @@ class TransformerDecoder(tf.keras.layers.Layer):
               norm_first=self._norm_first,
               norm_epsilon=self._norm_epsilon,
               intermediate_dropout=self._intermediate_dropout,
-              # attention_initializer=tf_utils.clone_initializer(
-              #     models.seq2seq_transformer.attention_initializer(
-              #         input_shape[2])),
-              # FIXME: changed attention initialization
               attention_initializer='glorot_uniform',
-              # FIXME: Adding bias initialize
               bias_initializer='glorot_uniform',
               kernel_initializer='glorot_uniform',
               name=("layer_%d" % i)))

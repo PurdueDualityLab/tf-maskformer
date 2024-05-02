@@ -1,11 +1,8 @@
-# MaskFormer: Per-Pixel Classification is Not All You Need for Semantic Segmentation
+# A Partial Replication of MaskFormer for TPUs
 
-This repository contains the implementation of [Per-Pixel Classification is Not All You Need for Semantic Segmentation](https://arxiv.org/pdf/2107.06278.pdf)
+This repository contains the re-implementation of [Per-Pixel Classification is Not All You Need for Semantic Segmentation](https://arxiv.org/pdf/2107.06278.pdf) for TPUs
 
-<div align="center">
-  <img src="https://drive.google.com/thumbnail?id=1BKevTJimIYq7hG4cD9-8VFWpF2FLfnUA&sz=w1000" alt="maskformer" style="width: 50%;"/>
-</div>
-
+![alt text](imgs/transformer_pixel_decoder.png)
 ## Table of Contents
 
 1. [Description](#description)
@@ -31,9 +28,7 @@ MaskFormer, a universal architecture based on MaskFormer meta-architecture that 
 
 MaskFormer transforms any per-pixel classification model into a mask classification method. It utilizes a Transformer decoder to compute a set of pairs, each comprising a class prediction and a mask embedding vector. The binary mask prediction is obtained via a dot product between the mask embedding vector and per-pixel embedding from a fully-convolutional network. This model addresses both semantic and instance-level segmentation tasks without requiring changes to the model, losses, or training procedure. For both semantic and panoptic segmentation tasks, MaskFormer is supervised using the same per-pixel binary mask loss and a single classification loss per mask. A straightforward inference strategy is designed to convert MaskFormer outputs into a task-dependent prediction format.
 
-<p align="center">
-  <img src="https://drive.google.com/thumbnail?id=1NWXhqU1NutsWhQnfFNzk7vgTYG09OaW0&sz=w1000" alt="examples" style="width: 50%;"/>
-</p>
+![alt text](imgs/val_train_1-2.png)
 
 # Getting Started
 
@@ -170,21 +165,14 @@ This list is ordered alphabetically by first name.
 
 
 ## Citation 
+If you find our implementation useful cite our work.
 
 ```
-@article{DBLP:journals/corr/abs-2107-06278,
-  author       = {Bowen Cheng and
-                  Alexander G. Schwing and
-                  Alexander Kirillov},
-  title        = {Per-Pixel Classification is Not All You Need for Semantic Segmentation},
-  journal      = {CoRR},
-  volume       = {abs/2107.06278},
-  year         = {2021},
-  url          = {https://arxiv.org/abs/2107.06278},
-  eprinttype    = {arXiv},
-  eprint       = {2107.06278},
-  timestamp    = {Wed, 21 Jul 2021 15:55:35 +0200},
-  biburl       = {https://dblp.org/rec/journals/corr/abs-2107-06278.bib},
-  bibsource    = {dblp computer science bibliography, https://dblp.org}
+@misc{purohit2024partial,
+      title={A Partial Replication of MaskFormer in TensorFlow on TPUs for the TensorFlow Model Garden}, 
+      author={Vishal Purohit and Wenxin Jiang and Akshath R. Ravikiran and James C. Davis},
+      year={2024},
+      eprint={2404.18801},
+      archivePrefix={arXiv},
 }
 ```
