@@ -100,14 +100,11 @@ class OrbitExperimentRunner:
     self._model_dir = model_dir
     self._mode = mode
     self._run_post_eval = run_post_eval
-  
     self._trainer = trainer or self._build_trainer(
         task,
         train='train' in mode,
         evaluate=('eval' in mode) or run_post_eval)
     assert self.trainer is not None
-    # print("trainer :", self.trainer)
-    
     self._checkpoint_manager = self._maybe_build_checkpoint_manager()
     self._summary_manager = summary_manager
     self._eval_summary_manager = eval_summary_manager
@@ -167,7 +164,6 @@ class OrbitExperimentRunner:
       
       if self.model_dir is None:
         raise ValueError('model_dir must be specified, but got None')
-
       if (not self.strategy) or self.strategy.extended.should_checkpoint:
         ckpt_path = self.model_dir
         max_to_keep = self.params.trainer.max_to_keep
@@ -179,7 +175,6 @@ class OrbitExperimentRunner:
         # workers.
         ckpt_path = tempfile.mkdtemp()
         max_to_keep = 1
-      
       checkpoint_manager = tf.train.CheckpointManager(
           self.trainer.checkpoint,
           directory=ckpt_path,
@@ -187,11 +182,8 @@ class OrbitExperimentRunner:
           step_counter=self.trainer.global_step,
           checkpoint_interval=self.params.trainer.checkpoint_interval,
           init_fn=self.trainer.initialize)
-      
     else:
-      
       checkpoint_manager = None
-    
     return checkpoint_manager
 
   def _build_controller(self,
@@ -345,7 +337,6 @@ def run_experiment(
       eval_logs: returns eval metrics logs when run_post_eval is set to True,
         otherwise, returns {}.
   """
-  
   runner = OrbitExperimentRunner(
       distribution_strategy=distribution_strategy,
       task=task,
@@ -361,5 +352,4 @@ def run_experiment(
       summary_manager=summary_manager,
       eval_summary_manager=eval_summary_manager,
   )
- 
   return runner.run()

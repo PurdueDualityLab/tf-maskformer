@@ -276,7 +276,6 @@ class InputReader:
             '`tfds_name` is %s, but `tfds_split` is not specified.' %
             params.tfds_name)
     else:
-      
       self._matched_files = self.get_files(params.input_path)
 
     self._global_batch_size = params.global_batch_size

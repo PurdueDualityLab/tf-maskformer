@@ -237,11 +237,9 @@ class Task(tf.Module, metaclass=abc.ABCMeta):
       A dictionary of logs.
     """
     if isinstance(inputs, tuple) and len(inputs) == 2:
-      
       features, labels = inputs
     else:
       features, labels = inputs, inputs
-
     with tf.GradientTape() as tape:
       outputs = model(features, training=True)
       # Computes per-replica loss.
