@@ -2,18 +2,18 @@
 train_bsize=16
 eval_bsize=16
 
-export PYTHONPATH=$PYTHONPATH:/depot/davisjam/data/akshath/MaskFormer_vishal/tf-maskformer/models
-export RESNET_CKPT="/depot/davisjam/data/vishal/pretrained_ckpts/tfmg_resnet50/ckpt-62400"
+export PYTHONPATH=$PYTHONPATH:/path/to/models
+export RESNET_CKPT="/path/to/pretrained/checkpoints/resnet50/ckpt"
 export MODEL_DIR="./model_dir/"
-export MASKFORMER_CKPT="/depot/davisjam/data/akshath/MaskFormer_vishal/tf-maskformer/models/official/projects/maskformer/pretrained_ckpts/newest/ckpt-482328"
+export MASKFORMER_CKPT="/path/to/maskformer/pretrained/ckpt"
 export TRAIN_BATCH_SIZE=$train_bsize
 export EVAL_BATCH_SIZE=$eval_bsize
 
-export TPU_NAME="tf-debug-3"
-export TPU_SOFTWARE="2.11.0"
-export TPU_PROJECT="red-atlas-305317"
-export TPU_ZONE="us-central1-a"
-export TFRECORDS_DIR="gs://cam2-datasets/coco_panoptic/tfrecords"
+export TPU_NAME="your-tpu-name"
+export TPU_SOFTWARE="tpu-version"
+export TPU_PROJECT="gcp-project-id"
+export TPU_ZONE="tpu-zone"
+export TFRECORDS_DIR="/path/to/tfrecords"
 
 export ON_TPU=True 
 

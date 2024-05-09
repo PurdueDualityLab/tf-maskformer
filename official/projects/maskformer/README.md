@@ -41,7 +41,7 @@ Create and activate a new conda environment to isolate the project dependencies:
 ```
 conda create -n tfmaskformer
 conda activate tfmaskformer
-pip install -r /models/official/requirements.txt
+pip install -r /official/requirements.txt
 pip install tensorflow-text-nightly
 ```
 
@@ -91,10 +91,8 @@ After completing the above steps, you can get started with training your model! 
 
 ```
 scripts/
-  eval_cpu.sh
   eval_gpu.sh
   eval_tpu.sh
-  train_cpu.sh
   train_gpu.sh
   train_tpu.sh
 ```

@@ -1,16 +1,12 @@
 #!/bin/bash
-module load gcc/9.3.0 
-module load anaconda/2020.11-py38
-module load cuda/11.7.0 cudnn/cuda-11.7_8.6 gcc/6.3.0
-conda activate tfmaskformer
 train_bsize=1
 eval_bsize=1
 
-export PYTHONPATH=$PYTHONPATH:/depot/davisjam/data/akshath/MaskFormer_vishal/tf-maskformer/models
+export PYTHONPATH=$PYTHONPATH:/path/to/models
 export MODEL_DIR="./model_dir/"
-export MASKFORMER_CKPT="/depot/davisjam/data/akshath/MaskFormer_vishal/tf-maskformer/models/official/projects/maskformer/pretrained_ckpts/newest/ckpt-482328"
-export RESNET_CKPT="/depot/davisjam/data/vishal/pretrained_ckpts/tfmg_resnet50/ckpt-62400"
-export TFRECORDS_DIR="/depot/davisjam/data/vishal/datasets/coco/tfrecords"
+export MASKFORMER_CKPT="/path/to/maskformer/pretrained/ckpt"
+export RESNET_CKPT="/path/to/resnet50/pretrained/ckpt"
+export TFRECORDS_DIR="/path/to/datasets/tfrecords"
 export TRAIN_BATCH_SIZE=$train_bsize
 export EVAL_BATCH_SIZE=$eval_bsize
 
